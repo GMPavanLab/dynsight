@@ -7,11 +7,9 @@
 .. toctree::
   :hidden:
   :maxdepth: 2
-  :caption: Contents:
+  :caption: Modules:
 
   Modules <modules>
-
-
 
 ============
 Introduction
@@ -60,7 +58,7 @@ Overview
 To be written.
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
