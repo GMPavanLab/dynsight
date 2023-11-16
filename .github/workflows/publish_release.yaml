@@ -17,4 +17,7 @@ jobs:
       - run: pip install -e '.[dev]'
       - run: python -m build
       - run:
-          twine upload -u __token__ -p ${{ secrets.PYPI_API_TOKEN }} dist/*
+          twine upload
+          -u __token__
+          -p ${{ secrets.PYPI_API_TOKEN }}
+          dist/*
