@@ -6,4 +6,4 @@ Modules
   :template: module.rst
   :recursive:
 
-  millie
+  dynsight

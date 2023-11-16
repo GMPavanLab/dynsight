@@ -5,10 +5,11 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+from __future__ import annotations
 
-project = "millie"
-project_copyright = "2023, Lukas Turcani"
-author = "Lukas Turcani"
+project = "dynsight"
+project_copyright = "2023, Andrew Tarzia"
+author = "Andrew Tarzia"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -1,4 +1,4 @@
-def foo(a: int) -> str:
+def foo3(a: int) -> str:
     """Do stuff.
 
     Parameters:

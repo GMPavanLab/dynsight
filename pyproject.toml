@@ -3,16 +3,16 @@ requires = ["setuptools", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "millie"
+name = "dynsight"
 maintainers = [
-  { name = "Lukas Turcani", email = "lukasturcani93@gmail.com" },
+  { name = "Andrew Tarzia", email = "andrew.tarzia@gmail.com" },
 ]
 
 dependencies = []
-requires-python = ">=3.11"
+requires-python = ">=3.7"
 dynamic = ["version"]
 readme = "README.rst"
-description = "Does things for you."
+description = "Simplifies analysis of Molecular Dynamics simulations."
 
 [project.optional-dependencies]
 dev = [
@@ -28,8 +28,8 @@ dev = [
 ]
 
 [project.urls]
-github = "https://github.com/lukasturcani/millie"
-documentation = "https://millie.readthedocs.io"
+github = "https://github.com/GMPavanLab/dynsight"
+documentation = "https://dynsight.readthedocs.io/en/latest/"
 
 [tool.setuptools_scm]
 
