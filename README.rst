@@ -30,4 +30,4 @@ Acknowledgements
 Developed in GMP
 ERC
 NextGenEU
-Danielle Rappeti
+Daniele Rapetti
