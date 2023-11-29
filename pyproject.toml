@@ -8,8 +8,12 @@ maintainers = [
   { name = "Andrew Tarzia", email = "andrew.tarzia@gmail.com" },
 ]
 
-dependencies = []
-requires-python = ">=3.7"
+dependencies = [
+  "cpctools",
+  "dscribe >1.2.0, <=1.2.2",
+]
+# Set by cpctools.
+requires-python = "<3.11,>=3.8"
 dynamic = ["version"]
 readme = "README.rst"
 description = "Simplifies analysis of Molecular Dynamics simulations."
@@ -25,6 +29,7 @@ dev = [
   "build",
   "twine",
   "furo",
+  "numba",
 ]
 
 [project.urls]
@@ -36,7 +41,16 @@ documentation = "https://dynsight.readthedocs.io/en/latest/"
 [tool.ruff]
 line-length = 79
 select = ["ALL"]
-ignore = ["ANN101", "ANN401", "COM812", "ISC001"]
+ignore = [
+  "ANN101",
+  "ANN401",
+  "COM812",
+  "ISC001",
+  "FBT001",
+  "FBT002",
+  "PLR0913",
+  "G004",
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -53,6 +67,25 @@ convention = "google"
   "D107",
   "S101",
   "INP001",
+  "ANN001",
+  "ANN201",
+]
+"examples/*" = [
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "D105",
+  "D106",
+  "D107",
+  "S101",
+  "INP001",
+  "C901",
+  "N803",
+  "ANN001",
+  "PLR0912",
+  "PLR0915",
 ]
 "docs/source/conf.py" = ["D100", "INP001"]
 
@@ -69,5 +102,10 @@ warn_unreachable = true
 disallow_any_generics = true
 
 [[tool.mypy.overrides]]
-module = []
+module = [
+  'MDAnalysis.*',
+  'h5py.*',
+  'SOAPify.*',
+  'numba.*',
+]
 ignore_missing_imports = true
