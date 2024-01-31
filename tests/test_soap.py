@@ -44,6 +44,7 @@ def test_soap_vectors() -> None:
                 dooverride=True,
                 verbose=False,
             )
+
             # control and test SOAP calculation to numpy array
             check_soap = np.array(work_file[f"SOAP_{i}"][traj_name])
             test_soap = np.array(
@@ -51,10 +52,11 @@ def test_soap_vectors() -> None:
             )
 
             # check if control and test array are equal
-            #assert np.array_equal(check_soap, test_soap), (
-            #    f"SOAP analyses provided different values "
-            #    f"compared to the control system "
-            #    f"for r_cut: {soap_r_cuts[i]} (results: {output_file})."
-            #)
+            assert np.array_equal(check_soap, test_soap), (
+                f"SOAP analyses provided different values "
+                f"compared to the control system "
+                f"for r_cut: {soap_r_cuts[i]} (results: {output_file})."
+            )
+
         # if test passed remove test_soap array from test folder
         Path(output_file).unlink()
