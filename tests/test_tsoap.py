@@ -5,12 +5,12 @@ import h5py
 import numpy as np
 
 """
-Test description:tests if a tSOAP calculation yields the same
+Test description: tests if tSOAP yields the same
                     values as a control calculation at different r_cut.
 
 Control file path: tests/systems/octahedron.hdf5
 
-Dynsyght function tested: dynsight.time_soap.timesoap()
+Dynsight function tested: dynsight.time_soap.timesoap()
 SOAP calculation parameters
                             --> soaplmax = 8
                             --> soapnmax = 8

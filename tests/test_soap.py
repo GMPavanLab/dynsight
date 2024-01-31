@@ -5,12 +5,12 @@ import h5py
 import numpy as np
 
 """
-Test description:tests if a SOAP calculation yields the same
-                    values as a control calculation at different r_cut.
+Test description: tests if SOAP yields the same
+                    values as a control calculation at different r_cuts.
 
 Control file path: tests/systems/octahedron.hdf5
 
-Dynsyght function tested: dynsight.soapify.saponify_trajectory()
+Dynsight function tested: dynsight.soapify.saponify_trajectory()
                             --> soaplmax = 8
                             --> soapnmax = 8
 

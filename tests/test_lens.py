@@ -5,13 +5,13 @@ import h5py
 import numpy as np
 
 """
-Test description:tests if a LENS calculation yields the same
+Test description: tests if LENS yields the same
                     values (of LENS and nn) as a control calculation
-                    at different r_cut.
+                    at different r_cuts.
 
 Control file path: tests/systems/2_particles.hdf5
 
-Dynsyght function tested: dynsight.lens.list_neighbours_along_trajectory()
+Dynsight functions tested: dynsight.lens.list_neighbours_along_trajectory()
                           dynsight.lens.neighbour_change_in_time()
 
 r_cuts checked: 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5
@@ -25,6 +25,7 @@ def test_lens_signals() -> None:
 
     # trajectory name
     traj_name = "2_particles"
+    # trajectory slice
     trajectory = slice(0, 20)
 
     # r_cuts
