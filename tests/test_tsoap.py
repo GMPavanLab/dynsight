@@ -53,5 +53,7 @@ def test_time_soap_vectors() -> None:
             assert np.allclose(
                 delta_time_soap, check_delta_time_soap, atol=1e-10000
             )
+            assert np.array_equal(timed_soap, check_timed_soap)
+            assert np.array_equal(delta_time_soap, check_delta_time_soap)
     # if test passed remove test_soap array from test folder
     Path(output_file).unlink()
