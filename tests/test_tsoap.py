@@ -49,9 +49,7 @@ def test_time_soap_vectors() -> None:
             )
 
             # check if control and test array are equal
-            assert len(timed_soap) == len(check_timed_soap)
-            assert len(delta_time_soap) == len(check_delta_time_soap)
-            # assert np.array_equal(timed_soap, check_timed_soap)
-            # assert np.array_equal(delta_time_soap, check_delta_time_soap)
+            assert np.allclose(timed_soap, check_timed_soap, atol=1e-3)
+            assert np.allclose(delta_time_soap, check_delta_time_soap, atol=1e-3)
     # if test passed remove test_soap array from test folder
     Path(output_file).unlink()
