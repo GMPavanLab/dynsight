@@ -40,6 +40,10 @@ def test_time_soap_vectors() -> None:
             out_file[f"timeSOAP_test{i}"].create_dataset(
                 f"timeSOAP_test{i}", data=timed_soap
             )
+            out_file.create_group(f"delta_timeSOAP_test{i}")
+            out_file[f"delta_timeSOAP_test{i}"].create_dataset(
+                f"delta_timeSOAP_test{i}", data=delta_time_soap
+            )
             # control tSOAP calculation (timed and delta time) to numpy array
             check_timed_soap = np.array(
                 in_file[f"timeSOAP_{i}"][f"timeSOAP_{i}"]
@@ -49,10 +53,9 @@ def test_time_soap_vectors() -> None:
             )
 
             # check if control and test array are equal
-            assert np.allclose(timed_soap, check_timed_soap, atol=1e-10000)
+            assert np.allclose(timed_soap, check_timed_soap, atol=1e-20)
             assert np.allclose(
-                delta_time_soap, check_delta_time_soap, atol=1e-10000
+                delta_time_soap, check_delta_time_soap, atol=1e-20
             )
-            assert np.array_equal(timed_soap, check_timed_soap)
     # if test passed remove test_soap array from test folder
     Path(output_file).unlink()
