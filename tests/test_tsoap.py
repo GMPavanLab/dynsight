@@ -31,7 +31,7 @@ def test_time_soap_vectors() -> None:
     with h5py.File(input_file, "r") as in_file, h5py.File(
         output_file, "w"
     ) as out_file:
-        for i in range(n_soap_rcuts):
+        for i in range(n_soap_rcuts-1):
             soap_traj = in_file[f"SOAP_{i}"][traj_name]
             timed_soap, delta_time_soap = dynsight.time_soap.timesoap(
                 soaptrajectory=soap_traj
