@@ -54,10 +54,10 @@ def test_time_soap_vectors() -> None:
 
             # check if control and test array are equal
             assert np.allclose(
-                timed_soap, check_timed_soap, atol=1e-9, rtol=1e-9
+                timed_soap, check_timed_soap, atol=1e-10, rtol=1e-10
             )
             assert np.allclose(
-                delta_time_soap, check_delta_time_soap, atol=1e-9, rtol=1e-9
+                delta_time_soap, check_delta_time_soap, atol=1e-10, rtol=1e-10
             )
     # if test passed remove test_soap array from test folder
     Path(output_file).unlink()
