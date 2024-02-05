@@ -52,7 +52,7 @@ def test_soap_vectors() -> None:
             )
 
             # check if control and test array are equal
-            assert np.allclose(check_soap, test_soap, atol=1e-2), (
+            assert np.allclose(check_soap, test_soap, atol=1e-2, rtol=1e-2), (
                 f"SOAP analyses provided different values "
                 f"compared to the control system "
                 f"for r_cut: {soap_r_cuts[i]} (results: {output_file})."

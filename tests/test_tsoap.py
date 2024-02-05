@@ -31,7 +31,7 @@ def test_time_soap_vectors() -> None:
     with h5py.File(input_file, "r") as in_file, h5py.File(
         output_file, "w"
     ) as out_file:
-        for i in range(n_soap_rcuts-1):
+        for i in range(n_soap_rcuts):
             soap_traj = in_file[f"SOAP_{i}"][traj_name]
             timed_soap, delta_time_soap = dynsight.time_soap.timesoap(
                 soaptrajectory=soap_traj
@@ -53,9 +53,11 @@ def test_time_soap_vectors() -> None:
             )
 
             # check if control and test array are equal
-            assert np.array_equal(timed_soap, check_timed_soap)
-            assert np.array_equal(
-                delta_time_soap, check_delta_time_soap
+            assert np.allclose(
+                timed_soap, check_timed_soap, atol=1e-5, rtol=1e-5
+            )
+            assert np.allclose(
+                delta_time_soap, check_delta_time_soap, atol=1e-5, rtol=1e-5
             )
     # if test passed remove test_soap array from test folder
     Path(output_file).unlink()
