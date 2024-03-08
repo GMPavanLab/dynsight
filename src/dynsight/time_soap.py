@@ -1,4 +1,5 @@
 """time SOAP package."""
+
 from dynsight._internal.timesoap.timesoap import (
     gettimesoapsimple,
     timesoap,

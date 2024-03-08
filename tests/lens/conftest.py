@@ -96,7 +96,7 @@ def giveuniverse(
 
 
 def giveuniverse_changingbox(
-    angles: tuple[float, float, float] = (90.0, 90.0, 90.0)
+    angles: tuple[float, float, float] = (90.0, 90.0, 90.0),
 ) -> MDAnalysis.Universe:
     traj = np.array(
         [
@@ -160,7 +160,7 @@ def giveuniverse_changingbox(
 
 
 def giveuniverse_longchangingbox(
-    angles: tuple[float, float, float] = (90.0, 90.0, 90.0)
+    angles: tuple[float, float, float] = (90.0, 90.0, 90.0),
 ) -> MDAnalysis.Universe:
     trajlen = 300
     traj = np.array(
