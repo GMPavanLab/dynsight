@@ -1,4 +1,5 @@
 """data processing package."""
+
 from dynsight._internal.data_processing.classify import (
     applyclassification,
     createreferencesfromtrajectory,

@@ -30,6 +30,7 @@ dev = [
   "twine",
   "furo",
   "numba",
+  "onion-clustering",
 ]
 
 [project.urls]
@@ -40,6 +41,8 @@ documentation = "https://dynsight.readthedocs.io/en/latest/"
 
 [tool.ruff]
 line-length = 79
+
+[tool.ruff.lint]
 select = ["ALL"]
 ignore = [
   "ANN101",
@@ -107,5 +110,7 @@ module = [
   'h5py.*',
   'SOAPify.*',
   'numba.*',
+  'onion_clustering.*',
+  'py.*'
 ]
 ignore_missing_imports = true
