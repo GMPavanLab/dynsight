@@ -11,6 +11,7 @@
    SOAPify <soapify>
    timeSOAP <time_soap>
    LENS <lens>
+   onion clustering <onion>
    data processing <data_processing>
    HDF5er <hdf5er>
 
