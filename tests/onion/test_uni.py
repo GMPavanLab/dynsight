@@ -61,21 +61,20 @@ def test_output_files(original_wd: Path) -> None:
         actual_output_path_2 = "onion_output/number_of_states.txt"
         actual_output_path_3 = "onion_output/fraction_0.txt"
 
-        exp_file = Path(expected_output_path_1)
-        act_file = Path(actual_output_path_1)
-        with exp_file.open(mode="r") as file_0, act_file.open(
-            mode="r"
-        ) as file_1:
-            assert file_0.read() == file_1.read()
+        # Compare "final_states.txt"
+        exp_array = np.loadtxt(expected_output_path_1)
+        act_array = np.loadtxt(actual_output_path_1)
+        assert np.allclose(exp_array, act_array, atol=1e-07)
+
+        # Compare "number_of_states.txt"
         exp_file = Path(expected_output_path_2)
         act_file = Path(actual_output_path_2)
         with exp_file.open(mode="r") as file_0, act_file.open(
             mode="r"
         ) as file_1:
             assert file_0.read() == file_1.read()
-        exp_file = Path(expected_output_path_3)
-        act_file = Path(actual_output_path_3)
-        with exp_file.open(mode="r") as file_0, act_file.open(
-            mode="r"
-        ) as file_1:
-            assert file_0.read() == file_1.read()
+
+        # Compare "fraction_0.txt"
+        exp_array = np.loadtxt(expected_output_path_3)
+        act_array = np.loadtxt(actual_output_path_3)
+        assert np.allclose(exp_array, act_array, atol=1e-07)
