@@ -49,7 +49,9 @@ def test_time_soap_vectors() -> None:
             )
 
             # check if control and test array are equal
-            assert np.allclose(timed_soap, check_timed_soap, atol=1e-12, rtol=1e-12)
+            assert np.allclose(
+                timed_soap, check_timed_soap, atol=1e-12, rtol=1e-12
+            )
             assert np.allclose(
                 delta_time_soap, check_delta_time_soap, atol=1e-12
             )
