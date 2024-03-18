@@ -16,6 +16,11 @@ SOAP calculation parameters
                             --> soapnmax = 8
 
 r_cuts checked: 1.75, 2.0, 2.15, 2.3, 2.45, 2.60, 2.75 (7)
+
+The calculation of SOAP is influenced by the architecture
+of the machine it's run on.
+As a result, the values of the SOAP components might exhibit minor variations.
+To disregard these differences, the function np.allclose() is employed.
 """
 
 
