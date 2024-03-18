@@ -19,7 +19,7 @@ r_cuts checked: 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5
 
 
 def test_lens_signals() -> None:
-    # i/o files
+    # input and output files
     input_file = "tests/systems/2_particles.hdf5"
     output_file = "tests/systems/2_particles_test.hdf5"
 

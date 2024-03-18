@@ -19,7 +19,7 @@ r_cuts checked: 1.75, 2.0, 2.15, 2.3, 2.45, 2.60, 2.75
 
 
 def test_soap_vectors() -> None:
-    # i/o files
+    # input and output files
     input_file = "tests/systems/octahedron.hdf5"
     output_file = "tests/systems/octahedron_test.hdf5"
 
