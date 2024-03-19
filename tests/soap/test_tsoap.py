@@ -4,35 +4,38 @@ import dynsight
 import h5py
 import numpy as np
 
-"""
-Test description:tests if a tSOAP calculation yields the same
-                    values as a control calculation at different r_cut.
-
-Control file path: tests/systems/octahedron.hdf5
-
-Dynsyght function tested: dynsight.time_soap.timesoap()
-SOAP calculation parameters
-                            --> soaplmax = 8
-                            --> soapnmax = 8
-
-r_cuts checked: 1.75, 2.0, 2.15, 2.3, 2.45, 2.60, 2.75 (7)
-
-The calculation of SOAP is influenced by the architecture
-of the machine it's run on.
-As a result, the values of the SOAP components might exhibit minor variations.
-To disregard these differences, the function np.allclose() is employed.
-"""
-
 
 def test_time_soap_vectors() -> None:
-    # input and output files
-    input_file = "tests/systems/octahedron.hdf5"
-    output_file = "tests/systems/octahedron_test_tsoap.hdf5"
-    # number of SOAP calulation made in octahedron test
+    """Test the consistency of tSOAP calculations with a control calculation.
+
+    This test verifies that the tSOAP calculation yields similar
+    values as a control calculation at different r_cut. The calculation of SOAP
+    (and consequently tSOAP) is influenced by the architecture of the machine
+    it's run on. As a result, the values of the SOAP components might exhibit
+    minor variations.
+    To disregard these differences, the function np.allclose() is employed.
+
+    Control file path:
+        - tests/systems/octahedron.hdf5
+
+    Dynsyght function tested:
+        - dynsight.soapify.saponify_trajectory()
+            - soaplmax = 8
+            - soapnmax = 8
+
+    r_cuts checked:
+        - [1.75, 2.0, 2.15, 2.3, 2.45, 2.60, 2.75]
+    """
+    # Define input and output files
+    original_dir = Path.cwd()
+    input_file = original_dir / "tests/systems/octahedron.hdf5"
+    output_file = original_dir / "tests/octahedron_test_tsoap.hdf5"
+
+    # Define the number of SOAP calulation made in the octahedron test
     n_soap_rcuts = 7
     traj_name = "Octahedron"
 
-    # tSOAP calculation for different r_cuts
+    # Run tSOAP calculation for different r_cuts
     with h5py.File(input_file, "r") as in_file, h5py.File(
         output_file, "w"
     ) as out_file:
@@ -45,7 +48,7 @@ def test_time_soap_vectors() -> None:
             out_file[f"timeSOAP_test{i}"].create_dataset(
                 f"timeSOAP_test{i}", data=timed_soap
             )
-            # control tSOAP calculation (timed and delta time) to numpy array
+            # Define control and test tSOAP calculations as numpy array
             check_timed_soap = np.array(
                 in_file[f"timeSOAP_{i}"][f"timeSOAP_{i}"]
             )
@@ -53,12 +56,12 @@ def test_time_soap_vectors() -> None:
                 in_file[f"delta_timeSOAP_{i}"][f"delta_timeSOAP_{i}"]
             )
 
-            # check if control and test array are equal
+            # Check if control and test array are similar
             assert np.allclose(
                 timed_soap, check_timed_soap, atol=1e-11, rtol=1e-11
             )
             assert np.allclose(
                 delta_time_soap, check_delta_time_soap, atol=1e-11, rtol=1e-11
             )
-    # if test passed remove test_soap array from test folder
-    Path(output_file).unlink()
+    # If test passed remove test_soap array from test folder
+    output_file.unlink()
