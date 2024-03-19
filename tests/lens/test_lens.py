@@ -22,7 +22,7 @@ def test_lens_signals() -> None:
         - [2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5]
     """
     # Define input and output files
-    original_dir = Path.cwd()
+    original_dir = Path(__file__).absolute()
     input_file = original_dir / "tests/systems/2_particles.hdf5"
     output_file = original_dir / "tests/2_particles_test.hdf5"
 
