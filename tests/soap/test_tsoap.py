@@ -27,9 +27,9 @@ def test_time_soap_vectors() -> None:
         - [1.75, 2.0, 2.15, 2.3, 2.45, 2.60, 2.75]
     """
     # Define input and output files
-    original_dir = Path(__file__).absolute()
-    input_file = original_dir / "tests/systems/octahedron.hdf5"
-    output_file = original_dir / "tests/octahedron_test_tsoap.hdf5"
+    original_dir = Path(__file__).absolute().parent
+    input_file = original_dir / "../systems/octahedron.hdf5"
+    output_file = original_dir / "../octahedron_test_tsoap.hdf5"
 
     # Define the number of SOAP calulation made in the octahedron test
     n_soap_rcuts = 7
