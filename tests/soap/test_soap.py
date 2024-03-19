@@ -5,8 +5,6 @@ import h5py
 import numpy as np
 
 
-
-
 def test_soap_vectors() -> None:
     """Test the consistency of SOAP calculations with a control calculation.
 
@@ -42,7 +40,7 @@ def test_soap_vectors() -> None:
         output_file, "a"
     ) as out_file:
         for i in range(len(soap_r_cuts)):
-            dynsight.soapify.saponify_trajectoro y(
+            dynsight.soapify.saponify_trajectory(
                 trajcontainer=work_file["Trajectories"][traj_name],
                 soapoutcontainer=out_file.require_group(
                     f"SOAP_test_{soap_r_cuts[i]}"
@@ -59,7 +57,7 @@ def test_soap_vectors() -> None:
                 out_file[f"SOAP_test_{soap_r_cuts[i]}"][traj_name]
             )
 
-            # Check if control and test array are similar 
+            # Check if control and test array are similar
             assert np.allclose(check_soap, test_soap, atol=1e-2, rtol=1e-2), (
                 f"SOAP analyses provided different values "
                 f"compared to the control system "

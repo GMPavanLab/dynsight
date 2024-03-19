@@ -43,25 +43,9 @@ def test_lens_signals() -> None:
     # Run LENS (and nn) calculation for different r_cuts
     for i in range(len(lens_cutoffs)):
         neig_counts = dynsight.lens.list_neighbours_along_trajectory(
-            universe, cutoff=lens_cutoffs[i"""Test the consistency of SOAP calculations with a control calculation.
-
-This test verifies that the SOAP calculation yields the same
-values as a control calculation at different r_cut. The calculation of SOAP
-is influenced by the architecture of the machine it's run on. As a result,
-the values of the SOAP components might exhibit minor variations.
-To disregard these differences, the function np.allclose() is employed.
-
-Control file path:
-    - tests/systems/octahedron.hdf5
-
-Dynsyght function tested:
-    - dynsight.soapify.saponify_trajectory()
-        - soaplmax = 8
-        - soapnmax = 8
-
-r_cuts checked:
-    - [1.75, 2.0, 2.15, 2.3, 2.45, 2.60, 2.75]
-"""our_change_in_time(neig_counts)
+            universe, cutoff=lens_cutoffs[i]
+        )
+        lens, nn, *_ = dynsight.lens.neighbour_change_in_time(neig_counts)
 
         # Define test array
         test_lens_nn = np.array([lens, nn])
