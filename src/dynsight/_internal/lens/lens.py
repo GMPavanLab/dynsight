@@ -34,19 +34,22 @@ def list_neighbours_along_trajectory(
     if trajslice is None:
         trajslice = slice(None)
     neigh_list_per_frame = []
-    
+
     for _ in input_universe.universe.trajectory[trajslice]:
         atom_pos = input_universe.atoms.positions
         box_dim = input_universe.dimensions
         gridsearch = FastNS(cutoff, atom_pos, box=box_dim, pbc=True)
+        max_cutoff = gridsearch._prepare_box(box=box_dim, pbc=True)
+        if cutoff > max_cutoff:
+            cutoff = max_cutoff
         fastns_results = gridsearch.self_search()
         pairs = fastns_results.get_pairs()
         neigh_list_per_atom = [[] for _ in range(len(input_universe.atoms))]
-        for (x,y) in pairs:
+        for x, y in pairs:
             neigh_list_per_atom[x].append(y)
             neigh_list_per_atom[y].append(x)
-        neigh_list_per_frame.append(results)
-        
+        neigh_list_per_frame.append(neigh_list_per_atom)
+
     return neigh_list_per_frame
 
 
@@ -73,19 +76,33 @@ def neighbour_change_in_time(
     """
     nat = np.asarray(neigh_list_per_frame, dtype=object).shape[1]
     nframes = np.asarray(neigh_list_per_frame, dtype=object).shape[0]
+    # this is the number of common NN between frames
     lensarray = np.zeros((nat, nframes))
+    # this is the number of NN at that frame
     numberofneighs = np.zeros((nat, nframes))
+    # this is the numerator of LENS
     lensnumerators = np.zeros((nat, nframes))
+    # this is the denominator of lens
     lensdenominators = np.zeros((nat, nframes))
+    # each nnlist contains also the atom that generates them,
+    # so 0 nn is a 1 element list
     for atom_id in range(nat):
-        #no need to subtract 1 as FastNS does not count the atom itself
-        numberofneighs[atom_id, 0] = len(neigh_list_per_frame[0][atom_id])
+        numberofneighs[atom_id, 0] = (
+            neigh_list_per_frame[0][atom_id].shape[0] - 1
+        )
+        # let's calculate the numerators and the denominators
         for frame in range(1, nframes):
-            numberofneighs[atom_id, frame] = len(neigh_list_per_frame[frame][atom_id])
-            lensdenominators[atom_id, frame] = len(neigh_list_per_frame[frame][atom_id]) + len(neigh_list_per_frame[frame-1][atom_id])
+            numberofneighs[atom_id, frame] = (
+                neigh_list_per_frame[frame][atom_id].shape[0] - 1
+            )
+            lensdenominators[atom_id, frame] = (
+                neigh_list_per_frame[frame][atom_id].shape[0]
+                + neigh_list_per_frame[frame - 1][atom_id].shape[0]
+                - 2
+            )
             lensnumerators[atom_id, frame] = np.setxor1d(
-                np.array(neigh_list_per_frame[frame][atom_id]),
-                np.array(neigh_list_per_frame[frame - 1][atom_id]),
+                neigh_list_per_frame[frame][atom_id],
+                neigh_list_per_frame[frame - 1][atom_id],
             ).shape[0]
 
     den_not_0 = lensdenominators != 0
