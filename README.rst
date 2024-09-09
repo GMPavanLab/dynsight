@@ -13,7 +13,7 @@ To get ``dynsight``, you can install it with pip::
 
 
 Developer Setup
-============
+===============
 
 If you want to setup a development version of ``dynsight`` you can follow this simple steps:
     1. Fork the ``dynsight`` repository on your github account by clicking the ``Fork`` button in the github page.
