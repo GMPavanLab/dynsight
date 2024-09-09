@@ -103,6 +103,6 @@ Example: clustering of multivariate time-series
 
   OnionMulti <_autosummary/dynsight.onion.OnionMulti.rst>
 
-The code for performing clustering on multi time-series can be found in ``examples/onion_multi.py``. The only differences that the input file has to be an .npy or .npz containing a numpy.ndarray with shape (D, N, T), where D is the number of variables (2 or 3). Is is then called with
+The code for performing clustering on multi time-series can be found in ``examples/onion_multi.py``. The only differences that the input file has to be an .npy or .npz containing a numpy.ndarray with shape (D, N, T), where D is the number of variables (2 or 3). It is then called with
 
 ``python3 onion_multi.py path/to/input/file.npy``
