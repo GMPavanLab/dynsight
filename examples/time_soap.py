@@ -4,10 +4,11 @@ import logging
 import pathlib
 import sys
 
-import dynsight
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
+
+import dynsight
 
 logging.basicConfig(
     level=logging.INFO,

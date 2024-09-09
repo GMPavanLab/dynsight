@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import pathlib  # noqa: TCH003
 
-import dynsight
 import MDAnalysis
 import numpy as np
 import pytest
+
+import dynsight
 
 
 def fewframeuniverse(

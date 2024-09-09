@@ -1,7 +1,8 @@
-import dynsight
 import MDAnalysis
 import numpy as np
 from numpy.testing import assert_array_equal
+
+import dynsight
 
 
 def test_special_lens(lensfixtures: MDAnalysis.Universe) -> None:

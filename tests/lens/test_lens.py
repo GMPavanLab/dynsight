@@ -1,8 +1,9 @@
 from pathlib import Path
 
-import dynsight
 import h5py
 import numpy as np
+
+import dynsight
 
 
 def test_lens_signals() -> None:
