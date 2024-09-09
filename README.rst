@@ -1,6 +1,6 @@
 :maintainers:
-    `andrewtarzia <https://github.com/andrewtarzia/>`_
-    `matteobecchi <https://github.com/matteobecchi/>`_
+    `andrewtarzia <https://github.com/andrewtarzia/>`_ \n
+    `matteobecchi <https://github.com/matteobecchi/>`_ \n
     `simonemartino <https://github.com/SimoneMartino98/>`_
 :documentation: https://dynsight.readthedocs.io
 
