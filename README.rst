@@ -24,7 +24,7 @@ Developer Setup
         
         $ just check
 
-`just`: (https://github.com/casey/just)
+`just`: https://github.com/casey/just
 
 Examples
 ========
