@@ -1,5 +1,7 @@
 :maintainers:
     `andrewtarzia <https://github.com/andrewtarzia/>`_
+    `matteobecchi <https://github.com/matteobecchi/>`_
+    `simonemartino <https://github.com/SimoneMartino98/>`_
 :documentation: https://dynsight.readthedocs.io
 
 Installation
@@ -14,11 +16,11 @@ DEV installation
 ============
 
 If you want to setup a develpment version of ``dynsight`` you can follow this simple steps::
-    1. Fork the ``dynsight`` repository on your github account by clicking on the ``Fork`` button in the github page.
-    2. Clone your forked repository by using ``git clone $YOUR_LINK`` (fill properly).
+    1. Fork the ``dynsight`` repository on your github account by clicking the ``Fork`` button in the github page.
+    2. Clone your forked repository by using ``git clone <YOUR_LINK>`` (fill properly).
     3. Create a new virual environment or ``conda`` or ``mamba`` (reccomended) using Python 3.10 version.
     4. Install ``just`` (https://github.com/casey/just).
-    5. Activate the virtual environment created and run ``just dev`` within the cloned repo.
+    5. Activate the virtual environment created and run ``just dev`` within the cloned repository.
 
 Other important ``just`` commands are:
     * ``just check``: tests the installation and the code (for formatting and pytests).
