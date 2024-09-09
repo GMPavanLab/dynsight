@@ -15,14 +15,14 @@ To get ``dynsight``, you can install it with pip::
 Developer Setup
 ===============
 
-    1. Install ``just``.
-    2. In a new virtual environment run using Python 3.10::
+1. Install ``just``.
+2. In a new virtual environment run using Python 3.10::
 
-        $ just dev
+    $ just dev
 
-    3. Run code checks::
-        
-        $ just check
+3. Run code checks::
+    
+    $ just check
 
 `just`: https://github.com/casey/just
 
