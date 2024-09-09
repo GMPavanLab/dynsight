@@ -12,7 +12,7 @@ To get ``dynsight``, you can install it with pip::
     $ pip install dynsight
 
 
-DEV installation
+Developer Setup
 ============
 
 If you want to setup a development version of ``dynsight`` you can follow this simple steps:
