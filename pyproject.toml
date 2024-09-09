@@ -6,11 +6,14 @@ build-backend = "setuptools.build_meta"
 name = "dynsight"
 maintainers = [
   { name = "Andrew Tarzia", email = "andrew.tarzia@gmail.com" },
+  { name = "Matteo Becchi", email = "bechmath@gmail.com"},
+  { name = "Simone Martino", email = "s.martino0898@gmail.com"},
 ]
 
 dependencies = [
   "cpctools",
   "dscribe >1.2.0, <=1.2.2",
+  "onion-clustering",
 ]
 # Set by cpctools.
 requires-python = "<3.11,>=3.8"
@@ -30,7 +33,6 @@ dev = [
   "twine",
   "furo",
   "numba",
-  "onion-clustering",
 ]
 
 [project.urls]
