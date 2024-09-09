@@ -10,6 +10,19 @@ To get ``dynsight``, you can install it with pip::
     $ pip install dynsight
 
 
+DEV installation
+============
+If you want to setup a develpment version of ``dynsight`` you can follow this simple steps::
+    1. Fork this repo on your github account by click on the ``Fork`` button in the github page.
+    2. Clone your forked repo by using ``git clone $YOUR_LINK`` (fill properly).
+    3. Create a new virual environment or ``conda`` or ``mamba`` (reccomended) using Python 3.10 version.
+    4. Install ``just`` (https://github.com/casey/just).
+    5. Activate the virtual environment created and run ``just dev`` within the cloned repo.
+
+Other important ``just`` commands are:
+    * ``just check``: tests the installation and the code (for formatting and pytests).
+    * ``just docs``: generates the documantation locally for testing and modifying.
+    
 Examples
 ========
 
