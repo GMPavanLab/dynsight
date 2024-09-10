@@ -1,5 +1,7 @@
 :maintainers:
-    `andrewtarzia <https://github.com/andrewtarzia/>`_
+    `andrewtarzia <https://github.com/andrewtarzia/>`_;
+    `matteobecchi <https://github.com/matteobecchi/>`_;
+    `simonemartino <https://github.com/SimoneMartino98/>`_
 :documentation: https://dynsight.readthedocs.io
 
 Installation
@@ -9,6 +11,20 @@ To get ``dynsight``, you can install it with pip::
 
     $ pip install dynsight
 
+
+Developer Setup
+===============
+
+1. Install `just`_.
+2. In a new virtual environment run using Python 3.10::
+
+    $ just dev
+
+3. Run code checks::
+    
+    $ just check
+
+.. _`just`: https://github.com/casey/just
 
 Examples
 ========

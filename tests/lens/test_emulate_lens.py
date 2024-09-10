@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import dynsight
 import numpy as np
 from numpy.testing import assert_array_almost_equal
+
+import dynsight
 
 if TYPE_CHECKING:
     import pathlib

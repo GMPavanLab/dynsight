@@ -2,9 +2,10 @@ import logging
 import pathlib
 import sys
 
-import dynsight
 import h5py
 from MDAnalysis import Universe
+
+import dynsight
 
 logging.basicConfig(
     level=logging.INFO,

@@ -1,8 +1,9 @@
 from pathlib import Path
 
-import dynsight
 import h5py
 import numpy as np
+
+import dynsight
 
 
 def test_time_soap_vectors() -> None:
