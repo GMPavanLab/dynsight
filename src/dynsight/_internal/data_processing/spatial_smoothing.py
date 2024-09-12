@@ -12,22 +12,26 @@ import numpy as np
 from MDAnalysis.analysis.distances import distance_array
 
 array: np.ndarray[float, Any]
-def init_worker(shared_array: np.ndarray[float, Any],
-                 shape: int,
-                 dtype: tuple[float, Any]) -> None:
-    global array # noqa: PLW0603
+
+
+def init_worker(
+    shared_array: np.ndarray[float, Any], shape: int, dtype: tuple[float, Any]
+) -> None:
+    global array  # noqa: PLW0603
     array = np.frombuffer(shared_array, dtype=dtype).reshape(shape)
+
 
 def process_frame(args: Any) -> tuple[int, np.ndarray[float, Any]]:
     universe, selection, cutoff, frame, vector = args
     universe.trajectory[frame]  # Load the frame explicitly
-    distances = distance_array(selection.positions, selection.positions,
-                               box=universe.dimensions)
+    distances = distance_array(
+        selection.positions, selection.positions, box=universe.dimensions
+    )
     atom_id = np.argsort(distances, axis=1)
     nn = np.sum(distances < cutoff, axis=1)
 
     rows = np.arange(distances.shape[0])
-    sp_dict = {row: atom_id[row, :nn[row]] for row in rows}
+    sp_dict = {row: atom_id[row, : nn[row]] for row in rows}
 
     if vector:
         sp_array_frame = np.zeros((array.shape[0], array.shape[2]))
@@ -44,14 +48,15 @@ def process_frame(args: Any) -> tuple[int, np.ndarray[float, Any]]:
 
     return frame, sp_array_frame
 
-def spatial_smoothing(
-        universe: MDAnalysis.Universe,
-        array_path: str,
-        selection: str,
-        cutoff: float,
-        traj_cut: int = 0,
-        num_processes: int = 4) -> np.ndarray[float, Any]:
 
+def spatial_smoothing(
+    universe: MDAnalysis.Universe,
+    array_path: str,
+    selection: str,
+    cutoff: float,
+    traj_cut: int = 0,
+    num_processes: int = 4,
+) -> np.ndarray[float, Any]:
     selection = universe.select_atoms(selection)
     array = np.load(array_path)
 
@@ -75,10 +80,15 @@ def spatial_smoothing(
         raise ValueError(error_string)
 
     num_frames = len(universe.trajectory) - traj_cut
-    pool = Pool(processes=num_processes, initializer=init_worker,
-                initargs=(shared_array, shape, dtype))
-    args = [(universe, selection, cutoff, frame, vector
-             ) for frame in range(num_frames)]
+    pool = Pool(
+        processes=num_processes,
+        initializer=init_worker,
+        initargs=(shared_array, shape, dtype),
+    )
+    args = [
+        (universe, selection, cutoff, frame, vector)
+        for frame in range(num_frames)
+    ]
     results = pool.map(process_frame, args)
     pool.close()
     pool.join()
