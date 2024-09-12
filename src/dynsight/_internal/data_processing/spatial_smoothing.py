@@ -17,13 +17,15 @@ array: np.ndarray[float, Any]
 def init_worker(
     shared_array: np.ndarray[float, Any], shape: int, dtype: tuple[float, Any]
 ) -> None:
+    # the use of global statement is necessary for the correct functioning
+    # of the code ruff error PLW0603 is therefore ignored.
     global array  # noqa: PLW0603
     array = np.frombuffer(shared_array, dtype=dtype).reshape(shape)
 
 
 def process_frame(args: Any) -> tuple[int, np.ndarray[float, Any]]:
     universe, selection, cutoff, frame, vector = args
-    universe.trajectory[frame]  # Load the frame explicitly
+    universe.trajectory[frame]
     distances = distance_array(
         selection.positions, selection.positions, box=universe.dimensions
     )
@@ -37,13 +39,13 @@ def process_frame(args: Any) -> tuple[int, np.ndarray[float, Any]]:
         sp_array_frame = np.zeros((array.shape[0], array.shape[2]))
         for key, value in sp_dict.items():
             if len(value) == 0:
-                continue  # Skip if there are no neighbors within cutoff
+                continue
             sp_array_frame[key, :] = np.mean(array[value, frame, :], axis=0)
     else:
         sp_array_frame = np.zeros(array.shape[0])
         for key, value in sp_dict.items():
             if len(value) == 0:
-                continue  # Skip if there are no neighbors within cutoff
+                continue
             sp_array_frame[key] = np.mean(array[value, frame])
 
     return frame, sp_array_frame
@@ -62,9 +64,9 @@ def spatial_smoothing(
 
     shape = array.shape
     dtype = array.dtype
-
     shared_array = Array(ctypes.c_double, array.size, lock=False)
-    shared_array_np = np.frombuffer(shared_array, dtype=dtype).reshape(shape)
+    # mypy error [call-overload] is ignored as it is considered not significant
+    shared_array_np = np.frombuffer(shared_array, dtype=dtype).reshape(shape)  # type: ignore[call-overload]
 
     np.copyto(shared_array_np, array)
     two_dim = 2
