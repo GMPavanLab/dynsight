@@ -17,8 +17,8 @@ array: np.ndarray[float, Any]
 def init_worker(
     shared_array: np.ndarray[float, Any], shape: int, dtype: tuple[float, Any]
 ) -> None:
-    # the use of global statement is necessary for the correct functioning
-    # of the code ruff error PLW0603 is therefore ignored.
+    # The use of global statement is necessary for the correct functioning
+    # of the code. Ruff error PLW0603 is therefore ignored.
     global array  # noqa: PLW0603
     array = np.frombuffer(shared_array, dtype=dtype).reshape(shape)
 
@@ -65,7 +65,8 @@ def spatial_smoothing(
     shape = array.shape
     dtype = array.dtype
     shared_array = Array(ctypes.c_double, array.size, lock=False)
-    # mypy error [call-overload] is ignored as it is considered not significant
+    # The mypy error [call-overload] is ignored as it is considered.
+    # not significant.
     shared_array_np = np.frombuffer(shared_array, dtype=dtype).reshape(shape)  # type: ignore[call-overload]
 
     np.copyto(shared_array_np, array)
