@@ -65,7 +65,7 @@ def spatial_smoothing(
     shape = array.shape
     dtype = array.dtype
     shared_array = Array(ctypes.c_double, array.size, lock=False)
-    # np.frombuffer type is 'buffer-like', which contains 'Array'
+    # np.frombuffer type is 'buffer-like', which contains 'Array'.
     # The mypy error [call-overload] is ignored as it is considered
     # not significant.
     shared_array_np = np.frombuffer(shared_array, dtype=dtype).reshape(shape)  # type: ignore[call-overload]
