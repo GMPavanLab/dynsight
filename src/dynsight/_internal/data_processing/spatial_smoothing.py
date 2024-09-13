@@ -7,6 +7,7 @@ if TYPE_CHECKING:
 
 import ctypes
 from multiprocessing import Array, Pool
+from pathlib import Path
 
 import numpy as np
 from MDAnalysis.analysis.distances import distance_array
@@ -53,14 +54,14 @@ def process_frame(args: Any) -> tuple[int, np.ndarray[float, Any]]:
 
 def spatial_smoothing(
     universe: MDAnalysis.Universe,
-    array_path: str,
+    array_path: Path,
     selection: str,
     cutoff: float,
     traj_cut: int = 0,
     num_processes: int = 4,
 ) -> np.ndarray[float, Any]:
     selection = universe.select_atoms(selection)
-    array = np.load(array_path)
+    array = np.load(Path(array_path))
 
     shape = array.shape
     dtype = array.dtype
