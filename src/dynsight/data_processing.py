@@ -1,9 +1,5 @@
 """data processing package."""
 
-from software.git_repos.myrepos.dynsight.src.dynsight._internal.data_processing.spatial_average import (
-    spatialaverage,
-)
-
 from dynsight._internal.data_processing.classify import (
     applyclassification,
     createreferencesfromtrajectory,
@@ -20,6 +16,9 @@ from dynsight._internal.data_processing.distances import (
     simplesoapdistance,
     soapdistance,
     soapdistancenormalized,
+)
+from dynsight._internal.data_processing.spatial_average import (
+    spatialaverage,
 )
 
 __all__ = [
