@@ -29,3 +29,11 @@ Classification
   savereferences <_autosummary/dynsight.data_processing.savereferences>
   getreferencesfromdataset <_autosummary/dynsight.data_processing.getreferencesfromdataset>
   applyclassification <_autosummary/dynsight.data_processing.applyclassification>
+
+Pre-analysis tools
+------------------
+
+.. toctree::
+  :maxdepth: 1
+
+  spatialaverage <_autosummary/dynsight.data_processing.spatialaverage>

@@ -52,7 +52,7 @@ def processframe(args: Any) -> tuple[int, np.ndarray[float, Any]]:
     return frame, sp_array_frame
 
 
-def spatialsmoothing(
+def spatialaverage(
     universe: MDAnalysis.Universe,
     array_path: Path,
     selection: str,
