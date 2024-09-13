@@ -15,7 +15,7 @@ from MDAnalysis.analysis.distances import distance_array
 array: np.ndarray[float, Any]
 
 
-def init_worker(
+def initworker(
     shared_array: np.ndarray[float, Any], shape: int, dtype: tuple[float, Any]
 ) -> None:
     # The use of global statement is necessary for the correct functioning
@@ -24,7 +24,7 @@ def init_worker(
     array = np.frombuffer(shared_array, dtype=dtype).reshape(shape)
 
 
-def process_frame(args: Any) -> tuple[int, np.ndarray[float, Any]]:
+def processframe(args: Any) -> tuple[int, np.ndarray[float, Any]]:
     universe, selection, cutoff, frame, vector = args
     universe.trajectory[frame]
     distances = distance_array(
@@ -52,7 +52,7 @@ def process_frame(args: Any) -> tuple[int, np.ndarray[float, Any]]:
     return frame, sp_array_frame
 
 
-def spatial_smoothing(
+def spatialsmoothing(
     universe: MDAnalysis.Universe,
     array_path: Path,
     selection: str,
@@ -60,6 +60,12 @@ def spatial_smoothing(
     traj_cut: int = 0,
     num_processes: int = 4,
 ) -> np.ndarray[float, Any]:
+    """Perform bla bla bla.
+
+    Parameters:
+        universe (MDAnalysis.Universe):
+            ciao come stai?
+    """
     selection = universe.select_atoms(selection)
     array = np.load(Path(array_path))
 
@@ -87,14 +93,14 @@ def spatial_smoothing(
     num_frames = len(universe.trajectory) - traj_cut
     pool = Pool(
         processes=num_processes,
-        initializer=init_worker,
+        initializer=initworker,
         initargs=(shared_array, shape, dtype),
     )
     args = [
         (universe, selection, cutoff, frame, vector)
         for frame in range(num_frames)
     ]
-    results = pool.map(process_frame, args)
+    results = pool.map(processframe, args)
     pool.close()
     pool.join()
     for frame, sp_array_frame in results:

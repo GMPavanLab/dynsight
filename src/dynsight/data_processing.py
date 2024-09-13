@@ -18,7 +18,7 @@ from dynsight._internal.data_processing.distances import (
     soapdistancenormalized,
 )
 from dynsight._internal.data_processing.spatial_smoothing import (
-    spatial_smoothing,
+    spatialsmoothing,
 )
 
 __all__ = [
@@ -35,5 +35,5 @@ __all__ = [
     "savereferences",
     "getreferencesfromdataset",
     "applyclassification",
-    "spatial_smoothing",
+    "spatialsmoothing",
 ]
