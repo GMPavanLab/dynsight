@@ -60,11 +60,75 @@ def spatialaverage(
     traj_cut: int = 0,
     num_processes: int = 4,
 ) -> np.ndarray[float, Any]:
-    """Perform bla bla bla.
+    """Compute spatially averaged descriptor values over neighboring particles.
+
+    This function takes a molecular dynamics (MD) simulation stored in a
+    `MDAnalysis.Universe` object and a NumPy array of descriptor values (such
+    as a physical property for each particle in each frame of the simulation).
+    For each particle in the system, the function calculates the average of
+    its descriptor values with the descriptor values of its neighboring
+    particles within a specified cutoff radius. The calculation is parallelized
+    across multiple processes for efficiency.
+
+    **Key Features**:
+        - Supports both scalar descriptors (2D) and vector descriptors (3D).
+        - Utilizes multiprocessing to speed up the computation.
 
     Parameters:
         universe (MDAnalysis.Universe):
-            ciao come stai?
+            The MDAnalysis `Universe` object containing the molecular dynamics
+            simulation data, including atom positions and trajectory.
+        array_path (Path | None):
+            Path to the file containing the NumPy array of descriptor values.
+            The array should have dimensions corresponding
+            to either (n_atoms, n_frames) for scalar descriptors,
+            or (n_atoms, n_frames, n_features) for vector descriptors.
+        selection (str):
+            An atom selection string compatible with MDAnalysis. This defines
+            the subset of atoms for which the spatial averaging
+            will be computed.
+        cutoff (float):
+            The distance cutoff (in the same units as the trajectory) that
+            defines the neighborhood radius within which particles are
+            considered as neighbors.
+        traj_cut (int, optional, default=0):
+            Number of frames to exclude from the end of the trajectory.
+        num_processes (int, optional, default=4):
+            The number of processes to use for parallel computation.
+            **Warning** adjust this based on the available cores.
+
+    Returns:
+        np.ndarray[float, Any]
+            A NumPy array of the same shape as the input descriptor array,
+            containing the spatially averaged descriptor values. If the input
+            array is 2D (n_atoms, n_frames), the output will be a 2D array of
+            the same shape with spatially averaged values.
+            Otherwise, if the input is 3D (n_atoms, n_frames, n_features),
+            the output will also be a 3D array of the same shape with averaged
+            vector values.
+
+    Raises:
+        ValueError
+            If the input descriptor array does not have 2 or 3 dimensions,
+            an error is raised.
+
+    Example:
+
+        .. code-block:: python
+
+            u = MDAnalysis.Universe('topology.gro', 'trajectory.xtc')
+            averaged_values = spatialaverage(
+                                universe = u,
+                                array_path = Path('descriptor_values.npy'),
+                                selection='name CA',
+                                cutoff = 5.0,
+                                num_processes = 8)
+
+        This example computes the spatial averages of the descriptor values
+        for atomsselected as `CA` atoms, within a cutoff of 5.0 units, using 8
+        processes in parallel. The result is stored in `averaged_values` NumPy
+        array. All the supported input file format by MDAnalysis can be used
+        to setup the Universe.
     """
     selection = universe.select_atoms(selection)
     array = np.load(Path(array_path))
