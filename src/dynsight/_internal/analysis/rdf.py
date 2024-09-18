@@ -28,27 +28,30 @@ class RDF:
     def read_from_xyz(self, input_file: Path, columns: tuple[str]) -> None:
         """Read trajectory from xyz file."""
         # Set up the OVITO pipeline
-        self.pipeline = import_file(input_file, columns=columns)
+        self.pipeline = import_file(Path(input_file), columns=columns)
 
-    def read_from_gromacs(self, topo_file: Path, traj_file:Path) -> None:
+    def read_from_gromacs(self, topo_file: Path, traj_file: Path) -> None:
         """Read trajectory from GROMACS .gro and .xtc files."""
         # Set up the OVITO pipeline
-        self.pipeline = import_file(topo_file)
+        self.pipeline = import_file(Path(topo_file))
         trajectory = LoadTrajectoryModifier()
-        trajectory.source.load(traj_file)
+        trajectory.source.load(Path(traj_file))
         self.pipeline.modifiers.append(trajectory)
 
     def compute_rdf(
-        self, cutoff: float, bins: int, selection: str
+        self, cutoff: float, bins: int, selection: str | None
     ) -> np.ndarray:
         """RDF computation."""
         if self.pipeline is None:
             raise_message = "Unloaded trajectory."
             raise ValueError(raise_message)
 
-        selection_modifier = ExpressionSelectionModifier(expression=selection)
-        self.pipeline.modifiers.append(selection_modifier)
-        self.pipeline.modifiers.append(DeleteSelectedModifier())
+        if selection is not None:
+            selection_modifier = ExpressionSelectionModifier(
+                expression=selection
+            )
+            self.pipeline.modifiers.append(selection_modifier)
+            self.pipeline.modifiers.append(DeleteSelectedModifier())
 
         # Add coordination analysis modifier
         coord_modifier = CoordinationAnalysisModifier(
