@@ -40,7 +40,7 @@ class RDF:
         self,
         cutoff: float,
         bins: int,
-        selection: str | None = None,
+        remove_atoms: str | None = None,
         step: int = 1,
     ) -> np.ndarray:
         """RDF computation."""
@@ -48,9 +48,9 @@ class RDF:
             raise_message = "Unloaded trajectory."
             raise ValueError(raise_message)
 
-        if selection is not None:
+        if remove_atoms is not None:
             selection_modifier = ExpressionSelectionModifier(
-                expression=selection
+                expression=remove_atoms
             )
             self.pipeline.modifiers.append(selection_modifier)
             self.pipeline.modifiers.append(DeleteSelectedModifier())
