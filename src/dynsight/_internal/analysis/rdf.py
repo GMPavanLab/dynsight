@@ -20,8 +20,8 @@ class RDF:
 
     def __init__(self, topo_file: Path, traj_file: Path) -> None:
         """Initialization funciton for RDF object."""
-        self.topo_file = topo_file
-        self.traj_file = traj_file
+        self.topo_file = Path(topo_file)
+        self.traj_file = Path(traj_file)
         self.pipeline = None
         self.min_points = None
         self.rdf_bins = None
