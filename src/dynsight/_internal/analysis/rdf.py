@@ -95,7 +95,8 @@ class RDF:
                 label="Minimum points",
             )
         plt.title("Radial Distribution Function")
-        plt.xlabel("Radius")
+        plt.xlabel("Pair separation distance")
         plt.ylabel("g(r)")
         plt.legend()
+        plt.tight_layout()
         plt.show()
