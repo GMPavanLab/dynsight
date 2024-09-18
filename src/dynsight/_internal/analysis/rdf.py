@@ -37,7 +37,11 @@ class RDF:
         self.pipeline.modifiers.append(trajectory)
 
     def compute_rdf(
-        self, cutoff: float, bins: int, selection: str | None
+        self,
+        cutoff: float,
+        bins: int,
+        selection: str | None = None,
+        step: int = 1,
     ) -> np.ndarray:
         """RDF computation."""
         if self.pipeline is None:
@@ -57,7 +61,8 @@ class RDF:
         self.pipeline.modifiers.append(coord_modifier)
 
         averaging_modifier = TimeAveragingModifier(
-            operate_on="table:coordination-rdf"
+            operate_on="table:coordination-rdf",
+            sampling_frequency=step,
         )
         self.pipeline.modifiers.append(averaging_modifier)
 
