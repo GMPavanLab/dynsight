@@ -8,6 +8,7 @@ from dynsight import (
     soapify,
     time_soap,
     utilities,
+    analysis,
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "time_soap",
     "onion",
     "data_processing",
+    "analysis",
 ]
