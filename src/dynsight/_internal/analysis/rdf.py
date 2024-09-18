@@ -18,24 +18,33 @@ from scipy.signal import argrelextrema
 class RDF:
     """Radial Distribution Function."""
 
-    def __init__(self, topo_file: Path, traj_file: Path) -> None:
+    def __init__(self) -> None:
         """Initialization funciton for RDF object."""
-        self.topo_file = Path(topo_file)
-        self.traj_file = Path(traj_file)
         self.pipeline = None
         self.min_points = None
         self.rdf_bins = None
         self.rdf = None
 
+    def read_from_xyz(self, input_file: Path, columns: tuple[str]) -> None:
+        """Read trajectory from xyz file."""
+        # Set up the OVITO pipeline
+        self.pipeline = import_file(input_file, columns=columns)
+
+    def read_from_gromacs(self, topo_file: Path, traj_file:Path) -> None:
+        """Read trajectory from GROMACS .gro and .xtc files."""
+        # Set up the OVITO pipeline
+        self.pipeline = import_file(topo_file)
+        trajectory = LoadTrajectoryModifier()
+        trajectory.source.load(traj_file)
+        self.pipeline.modifiers.append(trajectory)
+
     def compute_rdf(
         self, cutoff: float, bins: int, selection: str
     ) -> np.ndarray:
         """RDF computation."""
-        # Set up the OVITO pipeline
-        self.pipeline = import_file(self.topo_file)
-        trajectory = LoadTrajectoryModifier()
-        trajectory.source.load(self.traj_file)
-        self.pipeline.modifiers.append(trajectory)
+        if self.pipeline is None:
+            raise_message = "Unloaded trajectory."
+            raise ValueError(raise_message)
 
         selection_modifier = ExpressionSelectionModifier(expression=selection)
         self.pipeline.modifiers.append(selection_modifier)
