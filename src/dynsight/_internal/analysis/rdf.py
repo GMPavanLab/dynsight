@@ -27,12 +27,10 @@ class RDF:
 
     def read_from_xyz(self, input_file: Path, columns: tuple[str]) -> None:
         """Read trajectory from xyz file."""
-        # Set up the OVITO pipeline
         self.pipeline = import_file(Path(input_file), columns=columns)
 
     def read_from_gromacs(self, topo_file: Path, traj_file: Path) -> None:
         """Read trajectory from GROMACS .gro and .xtc files."""
-        # Set up the OVITO pipeline
         self.pipeline = import_file(Path(topo_file))
         trajectory = LoadTrajectoryModifier()
         trajectory.source.load(Path(traj_file))
@@ -53,19 +51,16 @@ class RDF:
             self.pipeline.modifiers.append(selection_modifier)
             self.pipeline.modifiers.append(DeleteSelectedModifier())
 
-        # Add coordination analysis modifier
         coord_modifier = CoordinationAnalysisModifier(
             cutoff=cutoff, number_of_bins=bins
         )
         self.pipeline.modifiers.append(coord_modifier)
 
-        # Time averaging
         averaging_modifier = TimeAveragingModifier(
             operate_on="table:coordination-rdf"
         )
         self.pipeline.modifiers.append(averaging_modifier)
 
-        # Compute the RDF
         data = self.pipeline.compute()
         total_rdf = data.tables["coordination-rdf[average]"].xy()
         self.rdf_bins = total_rdf[:, 0]
