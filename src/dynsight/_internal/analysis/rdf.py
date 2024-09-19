@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import numpy as np
 from ovito.io import import_file
 from ovito.modifiers import (
     CoordinationAnalysisModifier,
@@ -12,7 +11,7 @@ from ovito.modifiers import (
     LoadTrajectoryModifier,
     TimeAveragingModifier,
 )
-from scipy.signal import argrelextrema
+from scipy.signal import find_peaks
 
 
 class RDF:
@@ -22,53 +21,26 @@ class RDF:
     varies as a function of the distance from a reference particle.
     """
 
-    def __init__(self) -> None:
-        """Initialization function for RDF object.
+    def __init__(
+        self,
+        trajectory_file: Path,
+        topology_file: Path | None = None,
+        xyz_cols: list[str] | None = None,
+    ) -> None:
+        # Check number of args and setup the trajectory files
+        if topology_file is None:
+            self.trajectory = [Path(trajectory_file)]
+        else:
+            self.trajectory = [Path(topology_file), Path(trajectory_file)]
 
-        Attributes:
-            pipeline (ovito.pipeline.Pipeline | None): OVITO pipeline object
-            that handles data import and processing.
-            min_points (np.ndarray | None): Array storing the indices of
-            the local minima in the RDF data.
-            rdf_bins (np.ndarray | None): Array of bin centers corresponding
-            to the RDF data.
-            rdf (np.ndarray | None): Computed RDF values.
-        """
-        self.pipeline = None
-        self.min_points = None
-        self.rdf_bins = None
-        self.rdf = None
-
-    def read_from_xyz(self, input_file: Path, columns: tuple[str]) -> None:
-        """Read trajectory data from an XYZ file.
-
-        Args:
-            input_file (Path): Path to the input XYZ file containing
-            atomic positions.
-            columns (tuple[str]): Column names for XYZ data to map to the
-            correct attributes.
-
-        Raises:
-            FileNotFoundError: If the specified file does not exist.
-        """
-        self.pipeline = import_file(Path(input_file), columns=columns)
-
-    def read_from_gromacs(self, topo_file: Path, traj_file: Path) -> None:
-        """Read trajectory from GROMACS .gro and .xtc files.
-
-        Args:
-            topo_file (Path): Path to the topology file (.gro) used for
-            GROMACS simulations.
-            traj_file (Path): Path to the trajectory file (.xtc) used for
-            GROMACS simulations.
-
-        Raises:
-            FileNotFoundError: If the specified files do not exist.
-        """
-        self.pipeline = import_file(Path(topo_file))
-        trajectory = LoadTrajectoryModifier()
-        trajectory.source.load(Path(traj_file))
-        self.pipeline.modifiers.append(trajectory)
+        # Setup the pipeline
+        if topology_file is None:
+            self.pipeline = import_file(self.trajectory, columns=xyz_cols)
+        else:
+            self.pipeline = import_file(self.trajectory[0])
+            timeframes = LoadTrajectoryModifier()
+            timeframes.source.load(str(self.trajectory[1]))
+            self.pipeline.modifiers.append(timeframes)
 
     def compute_rdf(
         self,
@@ -76,26 +48,8 @@ class RDF:
         bins: int,
         remove_atoms: str | None = None,
         step: int = 1,
-    ) -> np.ndarray:
-        """Compute the RDF using the loaded trajectory.
-
-        Args:
-            cutoff (float): The maximum distance (cutoff) for calculating the
-            RDF.
-            bins (int): Number of bins to divide the radial distances into.
-            remove_atoms (str | None, optional): A selection
-            string (OVITO expression language) to define which atoms should
-            be removed before RDF calculation.
-            step (int, optional): Sampling frequency (in timesteps) for
-            time-averaging the RDF. Default is 1.
-
-        Raises:
-            ValueError: If no trajectory is loaded in the pipeline.
-        """
-        if self.pipeline is None:
-            raise_message = "Unloaded trajectory."
-            raise ValueError(raise_message)
-
+    ) -> None:
+        # Delete selected atoms (OVITO commands)
         if remove_atoms is not None:
             selection_modifier = ExpressionSelectionModifier(
                 expression=remove_atoms
@@ -103,35 +57,28 @@ class RDF:
             self.pipeline.modifiers.append(selection_modifier)
             self.pipeline.modifiers.append(DeleteSelectedModifier())
 
+        # Compute RDF
         coord_modifier = CoordinationAnalysisModifier(
             cutoff=cutoff, number_of_bins=bins
         )
         self.pipeline.modifiers.append(coord_modifier)
 
+        # Time averaging
         averaging_modifier = TimeAveragingModifier(
-            operate_on="table:coordination-rdf",
-            sampling_frequency=step,
+            operate_on="table:coordination-rdf", sampling_frequency=step
         )
         self.pipeline.modifiers.append(averaging_modifier)
 
+        # Compile the pipeline
         data = self.pipeline.compute()
         total_rdf = data.tables["coordination-rdf[average]"].xy()
-        self.rdf_bins = total_rdf[:, 0]
+        self.pair_distances = total_rdf[:, 0]
         self.rdf = total_rdf[:, 1]
 
-    def find_minpoints(self) -> np.ndarray:
-        """Find local minima points in the RDF data.
-
-        This method uses scipy's `argrelextrema` function to find the
-        indices of local minima in the RDF.
-
-        Raises:
-            ValueError: If the RDF has not been computed yet.
-        """
-        if self.rdf is None:
-            raise_message = "RDF has not been computed yet."
-            raise ValueError(raise_message)
-        self.min_points = argrelextrema(self.rdf, np.less)
+    def find_minima_points(self, prominence: float) -> None:
+        inverted_rdf = -self.rdf
+        peaks, properties = find_peaks(inverted_rdf, prominence=prominence)
+        self.minima_points = [self.pair_distances[peaks], self.rdf[peaks]]
 
     def rdf_plot(self, minpoints: bool) -> None:
         """Plot the RDF curve with optional marking of the minimum points.
@@ -144,17 +91,11 @@ class RDF:
             ValueError: If RDF has not been computed yet or if minimum points
             have not been computed when requested.
         """
-        if self.rdf is None:
-            raise_message = "RDF has not been computed yet."
-            raise ValueError(raise_message)
-        if minpoints and (self.min_points is None):
-            raise_message = "Minumum points have not been computed yet."
-            raise ValueError(raise_message)
-        plt.plot(self.rdf_bins, self.rdf, label="RDF", color="black")
+        plt.plot(self.pair_distances, self.rdf, label="RDF", color="black")
         if minpoints:
             plt.scatter(
-                self.rdf_bins[self.min_points[0]],
-                self.rdf[self.min_points],
+                self.minima_points[0],
+                self.minima_points[1],
                 color="red",
                 label="Minimum points",
             )

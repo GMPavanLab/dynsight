@@ -1,4 +1,5 @@
 """analysis package."""
+
 from dynsight._internal.analysis.rdf import (
     RDF,
 )
