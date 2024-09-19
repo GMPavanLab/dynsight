@@ -7,4 +7,4 @@ Radial Distribution Function
 .. toctree::
   :maxdepth: 1
 
-  RDF <_autosummary/dynsight.analysis.rdf.RDF>
+  RDF <_autosummary/dynsight.analysis.rdf>
