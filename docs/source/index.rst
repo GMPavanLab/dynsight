@@ -14,6 +14,7 @@
    onion clustering <onion>
    data processing <data_processing>
    HDF5er <hdf5er>
+   Analysis <analysis>
 
 .. toctree::
   :hidden:

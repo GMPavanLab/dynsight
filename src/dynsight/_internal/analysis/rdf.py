@@ -20,16 +20,22 @@ class RDF:
     The Radial Distribution Function (RDF) describes how particle density
     varies as a function of the distance.
 
-    Attributes:
-        trajectory (list[Path]): List of file paths including trajectory
-        and optional topology file.
-        pipeline (Pipeline): OVITO pipeline used for importing and modifying
-        the trajectory data.
-        pair_distances (np.ndarray): Array of distances between particle pairs.
-        rdf (np.ndarray): Array of RDF values corresponding to
-        the pair distances.
-        minima_points (tuple): Tuple containing arrays of minima point
-        distances and RDF values.
+    Parameters:
+        trajectory (list[Path]):
+            List of file paths including trajectory and optional topology file.
+
+        pipeline (Pipeline):
+            OVITO pipeline used for importing and modifying the
+            trajectory data.
+
+        pair_distances (np.ndarray):
+            Array of distances between particle pairs.
+
+        rdf (np.ndarray):
+            Array of RDF values corresponding to the pair distances.
+
+        minima_points (tuple):
+            Tuple containing arrays of minima point distances and RDF values.
     """
 
     def __init__(
@@ -41,12 +47,15 @@ class RDF:
         """Initialize the RDF object and import the trajectory data.
 
         Args:
-            trajectory_file (Path): Path to the trajectory
-            file (e.g. `.xyz` or `.xtc`).
-            topology_file (Path | None, optional): Path to the topology file
-            if required (e.g. `.gro`).
-            xyz_cols (list[str] | None, optional): List of column names for
-            XYZ format files (e.g., `["Particle Type", "X", "Y", "Z"]`).
+            trajectory_file (Path):
+                Path to the trajectory file (e.g. `.xyz` or `.xtc`).
+
+            topology_file (Path | None, optional):
+                Path to the topology file if required (e.g. `.gro`).
+
+            xyz_cols (list[str] | None, optional):
+                List of column names for XYZ format
+                files (e.g., `["Particle Type", "X", "Y", "Z"]`).
         """
         # Check number of args and setup the trajectory files
         if topology_file is None:
@@ -73,12 +82,19 @@ class RDF:
         """Compute the Radial Distribution Function (RDF).
 
         Args:
-            cutoff (float): Maximum distance for calculating the RDF.
-            bins (int): Number of bins for the RDF calculation, Default is 200.
-            remove_atoms (str | None, optional): Selection OVITO expression
-            for atoms to be removed (e.g., 'ParticleType == 1').
-            step (int, optional): Frequency of time sampling for averaging
-            the RDF. Default is 1.
+            cutoff (float):
+                Maximum distance for calculating the RDF.
+
+            bins (int):
+                Number of bins for the RDF calculation, Default is 200.
+
+            remove_atoms (str | None, optional):
+                Selection OVITO expression for atoms
+                to be removed (e.g., 'ParticleType == 1').
+
+            step (int, optional):
+                Frequency of time sampling for averaging
+                the RDF. Default is 1.
 
         Important:
             If you're using the `remove_atoms` argument to remove certain
@@ -87,10 +103,13 @@ class RDF:
 
             Example expressions:
                 - `"ParticleType == 1"`: Selects all particles of type 1.
+
                 - `"Position.X > 0"`: Selects particles with an x-coordinate
-                greater than zero.
+                    greater than zero.
+
                 - `"ParticleIdentifier % 2 == 0"`: Selects particles with even
-                particle identifiers.
+                    particle identifiers.
+
             Be sure to have this type of information stored in your
             simulation file before using this command.
 
@@ -127,9 +146,10 @@ class RDF:
         """Find local minima in the RDF.
 
         Args:
-            prominence (float): Minimum prominence of peaks in the RDF
-            for identifying minima points. Tune this parameter to obtain
-            better performance.
+            prominence (float):
+                Minimum prominence of peaks in the RDF
+                for identifying minima points. Tune this parameter to obtain
+                better performance.
         """
         inverted_rdf = -self.rdf
         peaks, properties = find_peaks(inverted_rdf, prominence=prominence)
@@ -139,8 +159,9 @@ class RDF:
         """Plot the RDF curve with optional marking of the minimum points.
 
         Args:
-            minpoints (bool, optional): If `True`, the local minimum points
-            are highlighted on the RDF plot. Default is `False`.
+            minpoints (bool, optional):
+                If `True`, the local minimum points
+                are highlighted on the RDF plot. Default is `False`.
         """
         plt.plot(self.pair_distances, self.rdf, label="RDF", color="black")
         if minpoints:
