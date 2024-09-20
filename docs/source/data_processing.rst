@@ -1,6 +1,13 @@
 Data processing
 ===============
 
+Pre-analysis tools
+------------------
+
+.. toctree::
+  :maxdepth: 1
+
+  spatialaverage <_autosummary/dynsight.data_processing.spatialaverage>
 
 SOAP distances
 --------------
@@ -30,10 +37,3 @@ Classification
   getreferencesfromdataset <_autosummary/dynsight.data_processing.getreferencesfromdataset>
   applyclassification <_autosummary/dynsight.data_processing.applyclassification>
 
-Pre-analysis tools
-------------------
-
-.. toctree::
-  :maxdepth: 1
-
-  spatialaverage <_autosummary/dynsight.data_processing.spatialaverage>
