@@ -125,7 +125,7 @@ def spatialaverage(
             u=MDAnalysis.Universe('topology.gro', 'trajectory.xtc')
             averaged_values=spatialaverage(
                                 universe=u,
-                                array_path=Path('descriptor_values.npy'),
+                                array_path='descriptor_values.npy',
                                 selection='name CA',
                                 cutoff=5.0,
                                 num_processes=8)
