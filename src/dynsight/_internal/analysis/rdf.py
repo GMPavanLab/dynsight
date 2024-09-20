@@ -1,6 +1,11 @@
 from __future__ import annotations
 
 import warnings
+
+warnings.filterwarnings("ignore", message=".*OVITO.*PyPI")
+
+import ovito._extensions.pyscript  # noqa: E402, F401, I001
+
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -14,9 +19,7 @@ from ovito.modifiers import (
 )
 from scipy.signal import find_peaks
 
-warnings.filterwarnings("ignore", message=".*OVITO.*PyPI")
 
-import ovito._extensions.pyscript  # noqa: E402, F401, I001
 class RDF:
     """Object for computing and analyzing the Radial Distribution Function.
 
