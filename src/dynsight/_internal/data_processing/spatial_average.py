@@ -30,9 +30,9 @@ def processframe(
     universe, selection, cutoff, frame, is_vector = args
     universe.trajectory[frame]
     distances = distance_array(
-        reference=selection.positions,
-        configuration=selection.positions,
-        box=universe.dimensions,
+        reference = selection.positions,
+        configuration = selection.positions,
+        box = universe.dimensions,
     )
     atom_id = np.argsort(distances, axis=1)
     nn = np.sum(distances < cutoff, axis=1)
@@ -122,13 +122,13 @@ def spatialaverage(
 
             from dynsight.data_processing import spatialaverage
 
-            u = MDAnalysis.Universe('topology.gro', 'trajectory.xtc')
-            averaged_values = spatialaverage(
-                                universe = u,
-                                array_path = Path('descriptor_values.npy'),
+            u=MDAnalysis.Universe('topology.gro', 'trajectory.xtc')
+            averaged_values=spatialaverage(
+                                universe=u,
+                                array_path=Path('descriptor_values.npy'),
                                 selection='name CA',
-                                cutoff = 5.0,
-                                num_processes = 8)
+                                cutoff=5.0,
+                                num_processes=8)
 
         This example computes the spatial averages of the descriptor values
         for atomsselected as `CA` atoms, within a cutoff of 5.0 units, using 8
