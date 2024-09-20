@@ -79,30 +79,30 @@ def spatialaverage(
         - Utilizes multiprocessing to speed up the computation.
 
     Parameters:
-        universe (MDAnalysis.Universe):
+        universe:
             The MDAnalysis `Universe` object containing the molecular dynamics
             simulation data, including atom positions and trajectory.
-        array_path (Path | None):
+        array_path:
             Path to the file containing the NumPy array of descriptor values.
             The array should have dimensions corresponding
             to either (n_atoms, n_frames) for scalar descriptors,
             or (n_atoms, n_frames, n_features) for vector descriptors.
-        selection (str):
+        selection:
             An atom selection string compatible with MDAnalysis. This defines
             the subset of atoms for which the spatial averaging
             will be computed.
-        cutoff (float):
+        cutoff:
             The distance cutoff (in the same units as the trajectory) that
             defines the neighborhood radius within which particles are
             considered as neighbors.
-        traj_cut (int, optional, default=0):
+        traj_cut:
             Number of frames to exclude from the end of the trajectory.
-        num_processes (int, optional, default=4):
+        num_processes:
             The number of processes to use for parallel computation.
             **Warning** adjust this based on the available cores.
 
     Returns:
-        np.ndarray[float, Any]
+        np.ndarray
             A NumPy array of the same shape as the input descriptor array,
             containing the spatially averaged descriptor values. If the input
             array is 2D (n_atoms, n_frames), the output will be a 2D array of
