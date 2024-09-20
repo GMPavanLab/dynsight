@@ -30,9 +30,9 @@ def processframe(
     universe, selection, cutoff, frame, is_vector = args
     universe.trajectory[frame]
     distances = distance_array(
-        reference = selection.positions,
-        configuration = selection.positions,
-        box = universe.dimensions,
+        reference=selection.positions,
+        configuration=selection.positions,
+        box=universe.dimensions,
     )
     atom_id = np.argsort(distances, axis=1)
     nn = np.sum(distances < cutoff, axis=1)
