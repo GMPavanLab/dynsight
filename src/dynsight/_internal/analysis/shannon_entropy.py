@@ -22,15 +22,15 @@ def compute_data_entropy(
             the dataset of which the entropy has to be computed.
 
         data_range:
-            A tuple (min, max) specifying the range over which the data
-            histogram must be cmoputed.
+            a tuple (min, max) specifying the range over which the data
+            histogram must be computed.
 
         n_bins:
-            The number of bins with which the data histogram must be computed.
+            the number of bins with which the data histogram must be computed.
 
     Returns:
         entropy:
-            The value of the normalized Shannon entropy of the dataset.
+            the value of the normalized Shannon entropy of the dataset.
     """
     counts, _ = np.histogram(
         data,
