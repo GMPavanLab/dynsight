@@ -24,13 +24,15 @@ def initworker(
     array = np.frombuffer(shared_array, dtype=dtype).reshape(shape)
 
 
-def processframe(args: Any) -> tuple[int, np.ndarray[float, Any]]:
+def processframe(
+    args: tuple[MDAnalysis.Universe, MDAnalysis.AtomGroup, float, int, bool],
+) -> tuple[int, np.ndarray[float, Any]]:
     universe, selection, cutoff, frame, vector = args
     universe.trajectory[frame]
     distances = distance_array(
-        reference = selection.positions,
-        configuration = selection.positions,
-        box = universe.dimensions
+        reference=selection.positions,
+        configuration=selection.positions,
+        box=universe.dimensions,
     )
     atom_id = np.argsort(distances, axis=1)
     nn = np.sum(distances < cutoff, axis=1)
@@ -160,9 +162,9 @@ def spatialaverage(
 
     num_frames = len(universe.trajectory) - traj_cut
     pool = Pool(
-        processes = num_processes,
-        initializer = initworker,
-        initargs = (shared_array, shape, dtype),
+        processes=num_processes,
+        initializer=initworker,
+        initargs=(shared_array, shape, dtype),
     )
     args = [
         (universe, selection, cutoff, frame, vector)
