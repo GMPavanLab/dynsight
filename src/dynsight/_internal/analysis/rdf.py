@@ -1,11 +1,5 @@
 from __future__ import annotations
 
-import warnings
-
-warnings.filterwarnings("ignore", message=".*OVITO.*PyPI")
-
-import ovito._extensions.pyscript  # noqa: E402, F401, I001
-
 from pathlib import Path
 
 import matplotlib.pyplot as plt
