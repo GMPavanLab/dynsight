@@ -27,7 +27,7 @@ def initworker(
 def processframe(
     args: tuple[MDAnalysis.Universe, MDAnalysis.AtomGroup, float, int, bool],
 ) -> tuple[int, np.ndarray[float, Any]]:
-    universe, selection, cutoff, frame, vector = args
+    universe, selection, cutoff, frame, is_vector = args
     universe.trajectory[frame]
     distances = distance_array(
         reference=selection.positions,
@@ -40,7 +40,7 @@ def processframe(
     rows = np.arange(distances.shape[0])
     sp_dict = {row: atom_id[row, : nn[row]] for row in rows}
 
-    if vector:
+    if is_vector:
         sp_array_frame = np.zeros((array.shape[0], array.shape[2]))
         for key, value in sp_dict.items():
             if len(value) == 0:
@@ -152,10 +152,10 @@ def spatialaverage(
     three_dim = 3
     if array.ndim == two_dim:
         sp_array = np.zeros((array.shape[0], array.shape[1]))
-        vector = False
+        is_vector = False
     elif array.ndim == three_dim:
         sp_array = np.zeros((array.shape[0], array.shape[1], array.shape[2]))
-        vector = True
+        is_vector = True
     else:
         error_string = "INVALID ARRAY SHAPE"
         raise ValueError(error_string)
@@ -167,14 +167,14 @@ def spatialaverage(
         initargs=(shared_array, shape, dtype),
     )
     args = [
-        (universe, selection, cutoff, frame, vector)
+        (universe, selection, cutoff, frame, is_vector)
         for frame in range(num_frames)
     ]
     results = pool.map(processframe, args)
     pool.close()
     pool.join()
     for frame, sp_array_frame in results:
-        if vector:
+        if is_vector:
             sp_array[:, frame, :] = sp_array_frame
         else:
             sp_array[:, frame] = sp_array_frame
