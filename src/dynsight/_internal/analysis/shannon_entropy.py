@@ -18,17 +18,18 @@ def compute_data_entropy(
     * Original author: Matteo Becchi
 
     Parameters:
-        data : the dataset of which the entropy has to be computed.
+        data:
+            the dataset of which the entropy has to be computed.
 
-        data_range : tuple
+        data_range:
             A tuple (min, max) specifying the range over which the data
             histogram must be cmoputed.
 
-        n_bins : int
+        n_bins:
             The number of bins with which the data histogram must be computed.
 
     Returns:
-        entropy : float
+        entropy:
             The value of the normalized Shannon entropy of the dataset.
     """
     counts, _ = np.histogram(
@@ -52,12 +53,14 @@ def compute_entropy_gain(
     * Original author: Matteo Becchi
 
     Parameters:
-        data : the dataset over which the clustering is performed.
+        data:
+            the dataset over which the clustering is performed.
 
-        labels : the clustering labels. Has the same shape as "data".
+        labels:
+            the clustering labels. Has the same shape as "data".
 
-        n_bins (int, default = 20) : the number of bins with which the data
-            histogram must be computed.
+        n_bins (default = 20):
+            the number of bins with which the data histogram must be computed.
 
     Returns:
         a float which is the difference between the entropy of the raw and
