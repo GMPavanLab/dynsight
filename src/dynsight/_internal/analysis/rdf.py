@@ -14,7 +14,7 @@ from ovito.modifiers import (
 from scipy.signal import find_peaks
 
 
-class RDF:
+class RadialDistributionFunction:
     """Object for computing and analyzing the Radial Distribution Function.
 
     The Radial Distribution Function (RDF) describes how particle density
@@ -46,7 +46,7 @@ class RDF:
     ) -> None:
         """Initialize the RDF object and import the trajectory data.
 
-        Args:
+        Parameters:
             trajectory_file (Path):
                 Path to the trajectory file (e.g. `.xyz` or `.xtc`).
 
@@ -72,7 +72,7 @@ class RDF:
             timeframes.source.load(str(self.trajectory[1]))
             self.pipeline.modifiers.append(timeframes)
 
-    def compute_rdf(
+    def compute(
         self,
         cutoff: float,
         bins: int = 200,
@@ -81,7 +81,7 @@ class RDF:
     ) -> None:
         """Compute the Radial Distribution Function (RDF).
 
-        Args:
+        Parameters:
             cutoff (float):
                 Maximum distance for calculating the RDF.
 
@@ -145,7 +145,7 @@ class RDF:
     def find_minima_points(self, prominence: float) -> None:
         """Find local minima in the RDF.
 
-        Args:
+        Parameters:
             prominence (float):
                 Minimum prominence of peaks in the RDF
                 for identifying minima points. Tune this parameter to obtain
@@ -155,10 +155,10 @@ class RDF:
         peaks, properties = find_peaks(inverted_rdf, prominence=prominence)
         self.minima_points = [self.pair_distances[peaks], self.rdf[peaks]]
 
-    def rdf_plot(self, minpoints: bool = False) -> None:
+    def plot_rdf(self, minpoints: bool = False) -> None:
         """Plot the RDF curve with optional marking of the minimum points.
 
-        Args:
+        Parameters:
             minpoints (bool, optional):
                 If `True`, the local minimum points
                 are highlighted on the RDF plot. Default is `False`.
