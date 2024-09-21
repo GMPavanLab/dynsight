@@ -102,14 +102,13 @@ def spatialaverage(
             **Warning** adjust this based on the available cores.
 
     Returns:
-        np.ndarray
-            A NumPy array of the same shape as the input descriptor array,
-            containing the spatially averaged descriptor values. If the input
-            array is 2D (n_atoms, n_frames), the output will be a 2D array of
-            the same shape with spatially averaged values.
-            Otherwise, if the input is 3D (n_atoms, n_frames, n_features),
-            the output will also be a 3D array of the same shape with averaged
-            vector values.
+        A NumPy array of the same shape as the input descriptor array,
+        containing the spatially averaged descriptor values. If the input
+        array is 2D (n_atoms, n_frames), the output will be a 2D array of
+        the same shape with spatially averaged values.
+        Otherwise, if the input is 3D (n_atoms, n_frames, n_features),
+        the output will also be a 3D array of the same shape with averaged
+        vector values.
 
     Raises:
         ValueError
