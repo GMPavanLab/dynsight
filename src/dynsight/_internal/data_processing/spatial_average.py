@@ -16,7 +16,9 @@ array: np.ndarray[float, Any]
 
 
 def initworker(
-    shared_array: np.ndarray[float, Any], shape: int, dtype: tuple[float, Any]
+    shared_array: np.ndarray[float, Any],
+    shape: int,
+    dtype: tuple[float, Any],
 ) -> None:
     # The use of global statement is necessary for the correct functioning
     # of the code. Ruff error PLW0603 is therefore ignored.
