@@ -14,6 +14,7 @@ jobs:
         with:
           python-version: "3.10"
           cache: "pip"
+      - run: sudo apt-get update && sudo apt-get install -y libegl1 libgl1-mesa-dev libxrender1 libxkbcommon-x11-0
       - run: pip install -e '.[dev]'
       - run: ruff check .
   mypy:
