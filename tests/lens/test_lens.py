@@ -15,7 +15,7 @@ def test_lens_signals() -> None:
     Control file path:
         - tests/systems/2_particles.hdf5
 
-    Dynsyght function tested:
+    Dynsight function tested:
         - dynsight.lens.list_neighbours_along_trajectory()
         - dynsight.lens.neighbour_change_in_time()
 

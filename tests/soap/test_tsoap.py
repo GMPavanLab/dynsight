@@ -19,7 +19,7 @@ def test_time_soap_vectors() -> None:
     Control file path:
         - tests/systems/octahedron.hdf5
 
-    Dynsyght function tested:
+    Dynsight function tested:
         - dynsight.soapify.saponify_trajectory()
             - soaplmax = 8
             - soapnmax = 8
