@@ -13,7 +13,7 @@ from ovito.modifiers import (
 )
 from scipy.signal import find_peaks
 
-OVITO_GUI_MODE = 0
+
 class RadialDistributionFunction:
     """Object for computing and analyzing the Radial Distribution Function.
 
