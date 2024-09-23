@@ -84,7 +84,7 @@ def spatialaverage(
             The MDAnalysis `Universe` object containing the molecular dynamics
             simulation data, including atom positions and trajectory.
         descriptor_array:
-            Path to the file containing the NumPy array of descriptor values.
+            NumPy array containing the descriptor values.
             The array should have dimensions corresponding
             to either (n_atoms, n_frames) for scalar descriptors,
             or (n_atoms, n_frames, n_features) for vector descriptors.
