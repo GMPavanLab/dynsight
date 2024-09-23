@@ -34,7 +34,7 @@ def test_spatialaverage() -> None:
     # Load the temporary file and run spatialaverage
     test_arr = spatialaverage(
         universe=u,
-        array_path=temp_file_path,
+        descriptor_array=descriptor,
         selection="type O",
         cutoff=5.0,
         num_processes=1,

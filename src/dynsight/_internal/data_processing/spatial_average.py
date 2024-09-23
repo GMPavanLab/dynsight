@@ -7,7 +7,6 @@ if TYPE_CHECKING:
 
 import ctypes
 from multiprocessing import Array, Pool
-from pathlib import Path
 
 import numpy as np
 from MDAnalysis.analysis.distances import distance_array
@@ -60,7 +59,7 @@ def processframe(
 
 def spatialaverage(
     universe: MDAnalysis.Universe,
-    array_path: Path,
+    descriptor_array: np.ndarray[float, Any],
     selection: str,
     cutoff: float,
     traj_cut: int = 0,
@@ -84,7 +83,7 @@ def spatialaverage(
         universe:
             The MDAnalysis `Universe` object containing the molecular dynamics
             simulation data, including atom positions and trajectory.
-        array_path:
+        descriptor_array:
             Path to the file containing the NumPy array of descriptor values.
             The array should have dimensions corresponding
             to either (n_atoms, n_frames) for scalar descriptors,
@@ -122,11 +121,14 @@ def spatialaverage(
         .. code-block:: python
 
             from dynsight.data_processing import spatialaverage
+            import numpy as np
 
             u = MDAnalysis.Universe('topology.gro', 'trajectory.xtc')
+            descriptor = np.load('descriptor_array.npy)
+
             averaged_values=spatialaverage(
                                 universe=u,
-                                array_path='descriptor_values.npy',
+                                descriptor_array=descriptor,
                                 selection='name CA',
                                 cutoff=5.0,
                                 num_processes=8)
@@ -138,24 +140,31 @@ def spatialaverage(
         to setup the Universe.
     """
     selection = universe.select_atoms(selection)
-    array = np.load(Path(array_path))
 
-    shape = array.shape
-    dtype = array.dtype
-    shared_array = Array(ctypes.c_double, array.size, lock=False)
+    shape = descriptor_array.shape
+    dtype = descriptor_array.dtype
+    shared_array = Array(ctypes.c_double, descriptor_array.size, lock=False)
     # np.frombuffer type is 'buffer-like', which contains 'Array'.
     # The mypy error [call-overload] is ignored as it is considered
     # not significant.
     shared_array_np = np.frombuffer(shared_array, dtype=dtype).reshape(shape)  # type: ignore[call-overload]
 
-    np.copyto(shared_array_np, array)
+    np.copyto(shared_array_np, descriptor_array)
     two_dim = 2
     three_dim = 3
-    if array.ndim == two_dim:
-        sp_array = np.zeros((array.shape[0], array.shape[1]))
+    if descriptor_array.ndim == two_dim:
+        sp_array = np.zeros(
+            (descriptor_array.shape[0], descriptor_array.shape[1])
+        )
         is_vector = False
-    elif array.ndim == three_dim:
-        sp_array = np.zeros((array.shape[0], array.shape[1], array.shape[2]))
+    elif descriptor_array.ndim == three_dim:
+        sp_array = np.zeros(
+            (
+                descriptor_array.shape[0],
+                descriptor_array.shape[1],
+                descriptor_array.shape[2],
+            )
+        )
         is_vector = True
     else:
         error_string = "INVALID ARRAY SHAPE"
