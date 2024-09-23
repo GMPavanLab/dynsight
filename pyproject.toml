@@ -14,7 +14,7 @@ dependencies = [
   "cpctools",
   "dscribe >1.2.0, <=1.2.2",
   "onion-clustering",
-  "ovito==3.7.10",
+  "ovito",
 ]
 # Set by cpctools.
 requires-python = "<3.11,>=3.8"
