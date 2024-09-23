@@ -1,6 +1,6 @@
 """analysis package."""
 
-from dynsight._internal.analysis.rdf import (
+from dynsight._internal.analysis.RadialDistributionFunction import (
     RDF,
 )
 
