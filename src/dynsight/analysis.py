@@ -1,9 +1,9 @@
 """analysis package."""
 
-from dynsight._internal.analysis.RadialDistributionFunction import (
-    RDF,
+from dynsight._internal.analysis.rdf import (
+    RadialDistributionFunction,
 )
 
 __all__ = [
-    "RDF",
+    "RadialDistributionFunction",
 ]
