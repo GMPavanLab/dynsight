@@ -1,6 +1,7 @@
 """dynsight package."""
 
 from dynsight import (
+    analysis,
     data_processing,
     hdf5er,
     lens,
@@ -18,4 +19,5 @@ __all__ = [
     "time_soap",
     "onion",
     "data_processing",
+    "analysis",
 ]
