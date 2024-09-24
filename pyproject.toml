@@ -23,7 +23,7 @@ description = "Simplifies analysis of Molecular Dynamics simulations."
 
 
 [matplotlib]
-backend = "Agg"
+backend = "qtagg"
 
 
 [project.optional-dependencies]
