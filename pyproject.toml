@@ -21,6 +21,11 @@ dynamic = ["version"]
 readme = "README.rst"
 description = "Simplifies analysis of Molecular Dynamics simulations."
 
+
+[matplotlib]
+backend = "Agg"
+
+
 [project.optional-dependencies]
 dev = [
   "ruff",
@@ -116,6 +121,5 @@ module = [
   'py.*',
   'scipy.*'
 ]
-[matplotlib]
-backend = "Agg"
+
 ignore_missing_imports = true
