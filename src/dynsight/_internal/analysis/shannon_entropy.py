@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import numpy as np
 import numpy.typing as npt
 
@@ -67,9 +65,11 @@ def compute_entropy_gain(
         clustered data, relative to the entropy of the raw data.
     """
     if data.shape != labels.shape:
-        file_path = Path("_errors.log")
-        file_path.write_text("data and labels must have the same shape.")
-        return None
+        msg = (
+            f"data ({data.shape}) and labels ({labels.shape}) "
+            "must have same shape"
+        )
+        raise RuntimeError(msg)
 
     data_range = (float(np.min(data)), float(np.max(data)))
 

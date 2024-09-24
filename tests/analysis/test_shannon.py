@@ -36,12 +36,14 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
         os.chdir(temp_dir)
 
         # Test the case where labels have the wrong shape
-        _ = dynsight.analysis.compute_entropy_gain(
-            random_data,
-            wrong_labels,
-            n_bins=20,
-        )
+        with pytest.raises(RuntimeError):
+            _ = dynsight.analysis.compute_entropy_gain(
+                random_data,
+                wrong_labels,
+                n_bins=20,
+            )
 
+        # Test the case where it works
         clustering_gain = dynsight.analysis.compute_entropy_gain(
             random_data,
             random_labels,
