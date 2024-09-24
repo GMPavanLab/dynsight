@@ -116,5 +116,6 @@ module = [
   'py.*',
   'scipy.*'
 ]
-
+[matplotlib]
+backend = "Agg"
 ignore_missing_imports = true
