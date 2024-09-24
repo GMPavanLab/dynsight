@@ -116,4 +116,12 @@ module = [
   'py.*',
   'scipy.*'
 ]
+
+[tool.pytest.ini_options]
+env = [
+    "QT_QPA_PLATFORM=offscreen",
+    "OVITO_GUI_MODE=0",
+    "MPLBACKEND=Agg"
+]
+
 ignore_missing_imports = true
