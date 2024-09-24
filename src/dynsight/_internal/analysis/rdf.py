@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
+os.environ["QT_QPA_PLATFORM"] = "offscreen"
 import matplotlib.pyplot as plt
 from ovito.io import import_file
 from ovito.modifiers import (
