@@ -1,8 +1,10 @@
-from __future__ import annotations
+from __future__ import annotations  # noqa: I001
 
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import os
+os.environ['OVITO_GUI_MODE'] = '0' # noqa: Q000
 from ovito.io import import_file
 from ovito.modifiers import (
     CoordinationAnalysisModifier,
