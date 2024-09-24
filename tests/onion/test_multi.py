@@ -4,6 +4,7 @@ import os
 import tempfile
 from pathlib import Path
 from typing import Generator
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -22,6 +23,7 @@ def original_wd() -> Generator[Path, None, None]:
 
 
 # Define the actual test
+@patch("matplotlib.pyplot.figure")
 def test_output_files(original_wd: Path) -> None:
     ### Create the input data ###
     rng = np.random.default_rng(12345)

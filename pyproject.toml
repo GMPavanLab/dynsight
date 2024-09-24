@@ -106,11 +106,6 @@ disallow_untyped_decorators = true
 warn_unreachable = true
 disallow_any_generics = true
 
-[tool.pytest.ini_options]
-env = [
-  "MPLBACKEND=Agg",
-]
-
 [[tool.mypy.overrides]]
 module = [
   'MDAnalysis.*',
