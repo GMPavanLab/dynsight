@@ -51,7 +51,6 @@ jobs:
           python-version: "3.10"
           cache: "pip"
       - run: pip install -e '.[dev]'
-      - run: sudo apt-get install -y python3-pyqt5 python3-pyqt5.qtwebkit
       - run: sudo apt install -y libegl1 libegl1-mesa libegl-mesa0 libgl1-mesa-glx libopengl0
       - run: pip install ovito
       - run: pytest --cov=src --cov-report term-missing
