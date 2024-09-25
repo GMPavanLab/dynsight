@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import warnings
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -13,8 +12,6 @@ from ovito.modifiers import (
     TimeAveragingModifier,
 )
 from scipy.signal import find_peaks
-
-warnings.filterwarnings("ignore", message=".*OVITO.*PyPI")
 
 
 class RadialDistributionFunction:
