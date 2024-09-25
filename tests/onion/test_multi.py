@@ -54,7 +54,7 @@ def test_output_files(original_wd: Path) -> None:
             max_tau_w=10,
             max_t_smooth=1,
         )
-
+        print(matplotlib.get_backend())
         onion_cl.run()
 
         # Define the paths to the expected and actual output files
