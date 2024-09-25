@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 from ovito.io import import_file
 from ovito.modifiers import (
     CoordinationAnalysisModifier,
@@ -154,26 +153,3 @@ class RadialDistributionFunction:
         inverted_rdf = -self.rdf
         peaks, properties = find_peaks(inverted_rdf, prominence=prominence)
         self.minima_points = [self.pair_distances[peaks], self.rdf[peaks]]
-
-    def plot_rdf(self, minpoints: bool = False) -> None:
-        """Plot the RDF curve with optional marking of the minimum points.
-
-        Parameters:
-            minpoints:
-                If `True`, the local minimum points
-                are highlighted on the RDF plot. Default is `False`.
-        """
-        plt.plot(self.pair_distances, self.rdf, label="RDF", color="black")
-        if minpoints:
-            plt.scatter(
-                self.minima_points[0],
-                self.minima_points[1],
-                color="red",
-                label="Minimum points",
-            )
-        plt.title("Radial Distribution Function")
-        plt.xlabel("Pair separation distance")
-        plt.ylabel("g(r)")
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
