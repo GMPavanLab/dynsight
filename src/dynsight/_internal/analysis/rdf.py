@@ -21,20 +21,20 @@ class RadialDistributionFunction:
     varies as a function of the distance.
 
     Parameters:
-        trajectory (list[Path]):
+        trajectory:
             List of file paths including trajectory and optional topology file.
 
-        pipeline (Pipeline):
+        pipeline:
             OVITO pipeline used for importing and modifying the
             trajectory data.
 
-        pair_distances (np.ndarray):
+        pair_distances:
             Array of distances between particle pairs.
 
-        rdf (np.ndarray):
+        rdf:
             Array of RDF values corresponding to the pair distances.
 
-        minima_points (tuple):
+        minima_points:
             Tuple containing arrays of minima point distances and RDF values.
     """
 
@@ -47,13 +47,13 @@ class RadialDistributionFunction:
         """Initialize the RDF object and import the trajectory data.
 
         Parameters:
-            trajectory_file (Path):
+            trajectory_file:
                 Path to the trajectory file (e.g. `.xyz` or `.xtc`).
 
-            topology_file (Path | None, optional):
+            topology_file:
                 Path to the topology file if required (e.g. `.gro`).
 
-            xyz_cols (list[str] | None, optional):
+            xyz_cols:
                 List of column names for XYZ format
                 files (e.g., `["Particle Type", "X", "Y", "Z"]`).
         """
@@ -82,17 +82,17 @@ class RadialDistributionFunction:
         """Compute the Radial Distribution Function (RDF).
 
         Parameters:
-            cutoff (float):
+            cutoff:
                 Maximum distance for calculating the RDF.
 
-            bins (int):
+            bins:
                 Number of bins for the RDF calculation, Default is 200.
 
-            remove_atoms (str | None, optional):
+            remove_atoms:
                 Selection OVITO expression for atoms
                 to be removed (e.g., 'ParticleType == 1').
 
-            step (int, optional):
+            step:
                 Frequency of time sampling for averaging
                 the RDF. Default is 1.
 
@@ -146,7 +146,7 @@ class RadialDistributionFunction:
         """Find local minima in the RDF.
 
         Parameters:
-            prominence (float):
+            prominence:
                 Minimum prominence of peaks in the RDF
                 for identifying minima points. Tune this parameter to obtain
                 better performance.
@@ -159,7 +159,7 @@ class RadialDistributionFunction:
         """Plot the RDF curve with optional marking of the minimum points.
 
         Parameters:
-            minpoints (bool, optional):
+            minpoints:
                 If `True`, the local minimum points
                 are highlighted on the RDF plot. Default is `False`.
         """
