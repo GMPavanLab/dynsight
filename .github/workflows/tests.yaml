@@ -15,6 +15,7 @@ jobs:
           python-version: "3.10"
           cache: "pip"
       - run: pip install -e '.[dev]'
+      - run: sudo apt install -y libegl1 libegl1-mesa libegl-mesa0 libgl1-mesa-glx libopengl0
       - run: ruff check .
   mypy:
     runs-on: ubuntu-22.04
@@ -25,6 +26,7 @@ jobs:
           python-version: "3.10"
           cache: "pip"
       - run: pip install -e '.[dev]'
+      - run: sudo apt install -y libegl1 libegl1-mesa libegl-mesa0 libgl1-mesa-glx libopengl0
       - run: mypy .
   ruff-format:
     runs-on: ubuntu-22.04
@@ -35,6 +37,7 @@ jobs:
           python-version: "3.10"
           cache: "pip"
       - run: pip install -e '.[dev]'
+      - run: sudo apt install -y libegl1 libegl1-mesa libegl-mesa0 libgl1-mesa-glx libopengl0
       - run: ruff format --check .
   pytest:
     runs-on: ubuntu-22.04
@@ -45,6 +48,8 @@ jobs:
           python-version: "3.10"
           cache: "pip"
       - run: pip install -e '.[dev]'
+      - run: sudo apt install -y libegl1 libegl1-mesa libegl-mesa0 libgl1-mesa-glx libopengl0
+      - run: pip install ovito
       - run: pytest --cov=src --cov-report term-missing
   doctest:
     runs-on: ubuntu-22.04
@@ -55,4 +60,6 @@ jobs:
           python-version: "3.10"
           cache: "pip"
       - run: pip install -e '.[dev]'
+      - run: sudo apt install -y libegl1 libegl1-mesa libegl-mesa0 libgl1-mesa-glx libopengl0
+      - run: pip install ovito
       - run: make -C docs doctest
