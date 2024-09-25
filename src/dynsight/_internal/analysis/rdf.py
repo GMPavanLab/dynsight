@@ -1,10 +1,8 @@
-from __future__ import annotations  # noqa: I001
+from __future__ import annotations
 
 from pathlib import Path
-import matplotlib as mpl
-mpl.rcParams["backend"] = "qtagg"
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
 from ovito.io import import_file
 from ovito.modifiers import (
     CoordinationAnalysisModifier,
