@@ -5,10 +5,13 @@ import tempfile
 from pathlib import Path
 from typing import Generator
 
+import matplotlib as mpl
 import numpy as np
 import pytest
 
 import dynsight
+
+mpl.use("Agg")
 
 
 @pytest.fixture
