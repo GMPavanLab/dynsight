@@ -13,6 +13,7 @@ import dynsight
 
 mpl.use("Agg")
 
+
 @pytest.fixture
 def original_wd() -> Generator[Path, None, None]:
     original_dir = Path.cwd()
