@@ -39,8 +39,8 @@ class RadialDistributionFunction:
 
     def __init__(
         self,
-        trajectory_file: Path,
-        topology_file: Path | None = None,
+        trajectory_file: str,
+        topology_file: str | None = None,
         xyz_cols: list[str] | None = None,
     ) -> None:
         """Initialize the RDF object and import the trajectory data.
