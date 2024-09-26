@@ -10,7 +10,6 @@ from ovito.modifiers import (
     LoadTrajectoryModifier,
     TimeAveragingModifier,
 )
-from scipy.signal import find_peaks
 
 
 class RadialDistributionFunction:
