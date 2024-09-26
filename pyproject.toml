@@ -15,15 +15,12 @@ dependencies = [
   "dscribe >1.2.0, <=1.2.2",
   "onion-clustering",
   "ovito",
-  "ipykernel",
 ]
 # Set by cpctools.
 requires-python = "<3.11,>=3.8"
 dynamic = ["version"]
 readme = "README.rst"
 description = "Simplifies analysis of Molecular Dynamics simulations."
-
-
 
 [project.optional-dependencies]
 dev = [
@@ -119,5 +116,4 @@ module = [
   'onion_clustering.*',
   'scipy.*'
 ]
-
 ignore_missing_imports = true
