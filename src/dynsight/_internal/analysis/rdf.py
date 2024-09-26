@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    import numpy as np
 
 from ovito.io import import_file
 from ovito.modifiers import (
@@ -15,86 +19,63 @@ from ovito.modifiers import (
 class RadialDistributionFunction:
     """Object for computing and analyzing the Radial Distribution Function.
 
-    The Radial Distribution Function (RDF) describes how particle density
-    varies as a function of the distance.
+    The Radial Distribution Function measures the probability of finding a
+    particle at a certain distance provided. The RDF is normalized by
+    the average number density of particles.
+
+    To compute the Radial Distribution Function OVITO API has been used,
+    more information about the theory adopted can be
+    found `here <https://www.ovito.org/manual/reference/pipelines/modifiers/coordination_analysis.html>`_.
 
     Parameters:
-        trajectory:
-            List of file paths including trajectory and optional topology file.
-
-        pipeline:
-            OVITO pipeline used for importing and modifying the
-            trajectory data.
-
-        pair_distances:
-            Array of distances between particle pairs.
-
-        rdf:
-            Array of RDF values corresponding to the pair distances.
+        cutoff:
+            Maximum distance for calculating the function.
+        bins:
+            Number of bins that will be used for the RDF calculation.
+        frequency:
+            Frequency at which frames are taken to compute the RDF. If not
+            specified, all frames will be used and their RDFs will
+            be avereged.
     """
 
     def __init__(
-        self,
-        trajectory_file: str,
-        topology_file: str | None = None,
-        xyz_cols: list[str] | None = None,
+        self, cutoff: float, bins: int = 200, frequency: int = 1
     ) -> None:
-        """Initialize the RDF object and import the trajectory data.
+        """Initialize the RDF object and sets the calculation parameter."""
+        self._cutoff = cutoff
+        self._bins = bins
+        self._frequency = frequency
+
+    def compute(
+        self,
+        trajectory_file: Path | str,
+        topology_file: Path | str | None = None,
+        xyz_cols: list[str] | None = None,
+        remove_atoms: str | None = None,
+    ) -> np.ndarray[float, Any]:
+        """Computes the Radial Distribution Function.
 
         Parameters:
             trajectory_file:
                 Path to the trajectory file (e.g. `.xyz` or `.xtc`).
-
             topology_file:
                 Path to the topology file if required (e.g. `.gro`).
-
+            remove_atoms:
+                Selection OVITO expression for atoms
+                to be removed.
             xyz_cols:
                 List of column names for XYZ format
                 files (e.g., `["Particle Type", "X", "Y", "Z"]`).
-        """
-        # Check number of args and setup the trajectory files
-        if topology_file is None:
-            self.trajectory = [Path(trajectory_file)]
-        else:
-            self.trajectory = [Path(topology_file), Path(trajectory_file)]
 
-        # Setup the pipeline
-        if topology_file is None:
-            self.pipeline = import_file(self.trajectory, columns=xyz_cols)
-        else:
-            self.pipeline = import_file(self.trajectory[0])
-            timeframes = LoadTrajectoryModifier()
-            timeframes.source.load(str(self.trajectory[1]))
-            self.pipeline.modifiers.append(timeframes)
-
-    def compute(
-        self,
-        cutoff: float,
-        bins: int = 200,
-        remove_atoms: str | None = None,
-        step: int = 1,
-    ) -> None:
-        """Compute the Radial Distribution Function (RDF).
-
-        Parameters:
-            cutoff:
-                Maximum distance for calculating the RDF.
-
-            bins:
-                Number of bins for the RDF calculation, Default is 200.
-
-            remove_atoms:
-                Selection OVITO expression for atoms
-                to be removed (e.g., 'ParticleType == 1').
-
-            step:
-                Frequency of time sampling for averaging
-                the RDF. Default is 1.
+        Returns:
+            A NumPy array of shape (`bins`, 2) containing pair distances
+            in the first column and their respective RDF value in the
+            second column.
 
         Important:
-            If you're using the `remove_atoms` argument to remove certain
+            If you're using `remove_atoms` to exclude certain
             particles from the RDF calculation, you need to use the
-            OVITO's expression syntax for selecting particles.
+            `OVITO's expression syntax <https://www.ovito.org/manual/reference/pipelines/modifiers/expression_select.html>`_.
 
             Example expressions:
                 - `"ParticleType == 1"`: Selects all particles of type 1.
@@ -102,37 +83,35 @@ class RadialDistributionFunction:
                 - `"Position.X > 0"`: Selects particles with an x-coordinate
                     greater than zero.
 
-                - `"ParticleIdentifier % 2 == 0"`: Selects particles with even
-                    particle identifiers.
-
-            Be sure to have this type of information stored in your
+            Be sure to have this type of data stored in your
             simulation file before using this command.
-
-            More information on OVITO's expression syntax can be found here:
-            https://www.ovito.org/manual/reference/pipelines/modifiers/expression_select.html
         """
-        # Delete selected atoms (OVITO commands)
+        if topology_file is None:
+            trajectory = [Path(trajectory_file)]
+        else:
+            trajectory = [Path(topology_file), Path(trajectory_file)]
+
+        if topology_file is None:
+            pipeline = import_file(trajectory, columns=xyz_cols)
+        else:
+            pipeline = import_file(trajectory[0])
+            timeframes = LoadTrajectoryModifier()
+            timeframes.source.load(trajectory[1])
+            pipeline.modifiers.append(timeframes)
         if remove_atoms is not None:
             selection_modifier = ExpressionSelectionModifier(
                 expression=remove_atoms
             )
-            self.pipeline.modifiers.append(selection_modifier)
-            self.pipeline.modifiers.append(DeleteSelectedModifier())
-
-        # Compute RDF
+            pipeline.modifiers.append(selection_modifier)
+            pipeline.modifiers.append(DeleteSelectedModifier())
         coord_modifier = CoordinationAnalysisModifier(
-            cutoff=cutoff, number_of_bins=bins
+            cutoff=self._cutoff, number_of_bins=self._bins
         )
-        self.pipeline.modifiers.append(coord_modifier)
-
-        # Time averaging
+        pipeline.modifiers.append(coord_modifier)
         averaging_modifier = TimeAveragingModifier(
-            operate_on="table:coordination-rdf", sampling_frequency=step
+            operate_on="table:coordination-rdf",
+            sampling_frequency=self._frequency,
         )
-        self.pipeline.modifiers.append(averaging_modifier)
-
-        # Compile the pipeline
-        data = self.pipeline.compute()
-        total_rdf = data.tables["coordination-rdf[average]"].xy()
-        self.pair_distances = total_rdf[:, 0]
-        self.rdf = total_rdf[:, 1]
+        pipeline.modifiers.append(averaging_modifier)
+        workflow_res = pipeline.compute()
+        return workflow_res.tables["coordination-rdf[average]"].xy()
