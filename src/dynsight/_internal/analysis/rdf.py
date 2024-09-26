@@ -96,7 +96,7 @@ class RadialDistributionFunction:
         else:
             pipeline = import_file(trajectory[0])
             timeframes = LoadTrajectoryModifier()
-            timeframes.source.load(trajectory[1])
+            timeframes.source.load(str(trajectory[1]))
             pipeline.modifiers.append(timeframes)
         if remove_atoms is not None:
             selection_modifier = ExpressionSelectionModifier(
