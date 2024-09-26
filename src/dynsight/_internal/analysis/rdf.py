@@ -17,10 +17,10 @@ from ovito.modifiers import (
 
 
 class RadialDistributionFunction:
-    """Object for computing and analyzing the Radial Distribution Function.
+    """Object for computing the Radial Distribution Function.
 
-    The Radial Distribution Function measures the probability of finding a
-    particle at a certain distance provided. The RDF is normalized by
+    The Radial Distribution Function (RDF) measures the probability of finding
+    a particle at a certain distance provided. The RDF is normalized by
     the average number density of particles.
 
     To compute the Radial Distribution Function OVITO API has been used,
@@ -57,11 +57,11 @@ class RadialDistributionFunction:
 
         Parameters:
             trajectory_file:
-                Path to the trajectory file (e.g. `.xyz` or `.xtc`).
+                Trajectory file path (e.g. `.xyz` or `.xtc`).
             topology_file:
-                Path to the topology file if required (e.g. `.gro`).
+                Topology file path if required (e.g. `.gro`).
             remove_atoms:
-                Selection OVITO expression for atoms
+                OVITO expression selection for atoms
                 to be removed.
             xyz_cols:
                 List of column names for XYZ format
