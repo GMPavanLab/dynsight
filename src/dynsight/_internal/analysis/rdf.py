@@ -32,9 +32,6 @@ class RadialDistributionFunction:
 
         rdf:
             Array of RDF values corresponding to the pair distances.
-
-        minima_points:
-            Tuple containing arrays of minima point distances and RDF values.
     """
 
     def __init__(
@@ -140,16 +137,3 @@ class RadialDistributionFunction:
         total_rdf = data.tables["coordination-rdf[average]"].xy()
         self.pair_distances = total_rdf[:, 0]
         self.rdf = total_rdf[:, 1]
-
-    def find_minima_points(self, prominence: float) -> None:
-        """Find local minima in the RDF.
-
-        Parameters:
-            prominence:
-                Minimum prominence of peaks in the RDF
-                for identifying minima points. Tune this parameter to obtain
-                better performance.
-        """
-        inverted_rdf = -self.rdf
-        peaks, properties = find_peaks(inverted_rdf, prominence=prominence)
-        self.minima_points = [self.pair_distances[peaks], self.rdf[peaks]]
