@@ -39,7 +39,10 @@ class RadialDistributionFunction:
     """
 
     def __init__(
-        self, cutoff: float, bins: int = 200, frequency: int = 1
+        self,
+        cutoff: float,
+        bins: int = 200,
+        frequency: int = 1
     ) -> None:
         """Initialize the RDF object and sets the calculation parameter."""
         self._cutoff = cutoff
