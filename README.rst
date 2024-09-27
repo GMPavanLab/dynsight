@@ -11,17 +11,6 @@ To get ``dynsight``, you can install it with pip::
 
     $ pip install dynsight
 
-.. warning::
-    If you want to use ``dynsight`` with interactive coding platforms
-    that require `ipykernel` (Jupyter Notebook or Visual Studio Code interactive cells), 
-    be sure to install it using pip instead of conda. If you are Conda user code editor, such 
-    as VSCode, could use the conda installer by default. Anticipate this by installing the package 
-    manually before using the editor::
-
-        $ pip install ipykernel
-
-    We are on this issues and we hope to solve this as soon as possible.
-
 Developer Setup
 ===============
 
@@ -35,6 +24,17 @@ Developer Setup
     $ just check
 
 .. _`just`: https://github.com/casey/just
+
+[!WARNING]
+If you want to use testing features in ``dynsight`` with interactive coding platforms
+that require `ipykernel` (Jupyter Notebook or Visual Studio Code interactive cells), 
+be sure to install it using pip instead of conda. If you are a Conda user code editors, such 
+as VSCode, could use this package manager by default. Anticipate this by adding the package 
+manually before using the editor::
+
+    $ pip install ipykernel
+
+We are on this issue and we hope to solve it as soon as possible.
 
 Examples
 ========
