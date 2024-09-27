@@ -4,7 +4,13 @@ build:
     os: ubuntu-22.04
     tools:
       python: "3.10"
-
+    apt_packages:
+      - libegl1
+      - libegl1-mesa
+      - libegl-mesa0
+      - libgl1-mesa-glx
+      - libopengl0
+      
 sphinx:
     configuration: docs/source/conf.py
 
