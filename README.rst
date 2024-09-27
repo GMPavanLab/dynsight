@@ -26,6 +26,7 @@ Developer Setup
 .. _`just`: https://github.com/casey/just
 
 **Warning**
+
 If you want to use testing features in ``dynsight`` with interactive coding platforms
 that require `ipykernel` (Jupyter Notebook or Visual Studio Code interactive cells), 
 be sure to install it using pip instead of conda. If you are a Conda user code editors, such 
