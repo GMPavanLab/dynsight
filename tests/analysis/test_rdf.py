@@ -1,4 +1,5 @@
 """Pytest for dynsight.analysis.compute_rdf."""
+
 from pathlib import Path
 
 import MDAnalysis
