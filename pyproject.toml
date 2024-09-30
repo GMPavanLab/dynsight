@@ -13,7 +13,7 @@ maintainers = [
 dependencies = [
   "cpctools",
   "dscribe >1.2.0, <=1.2.2",
-  "onion-clustering",
+  "tropea-clustering",
 ]
 # Set by cpctools.
 requires-python = "<3.11,>=3.8"
@@ -112,7 +112,7 @@ module = [
   'h5py.*',
   'SOAPify.*',
   'numba.*',
-  'onion_clustering.*',
+  'tropea_clustering.*',
   'py.*'
 ]
 ignore_missing_imports = true

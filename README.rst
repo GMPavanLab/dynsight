@@ -46,6 +46,7 @@ If you use ``dynsight`` please cite
 Publications
 ============
 
+* onion-clustering: https://doi.org/10.1073/pnas.2403771121
 * people need to add PRs to mention these.
 
 

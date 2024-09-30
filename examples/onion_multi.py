@@ -1,61 +1,92 @@
-"""Example of how to use dynsight.onion."""
+"""
+Example script for running dynsight.onion.onion_multi.
+"""
 
-import sys
-from pathlib import Path
+import matplotlib.pyplot as plt
+import numpy as np
+from onion_plots import (
+    plot_medoids_multi,
+    plot_one_trj_multi,
+    plot_output_multi,
+    plot_pop_fractions,
+    plot_sankey,
+    plot_state_populations,
+    plot_time_res_analysis,
+)
 
-import dynsight
+from dynsight.onion import onion_multi
 
 
 def main() -> None:
     """Run the example.
 
-    If you want to run the code with the example dataset, clone the github
-    repo at https://github.com/matteobecchi/onion_example_files and then
-    run this script giving as argument
-
-    path/to/folder/onion_example_files/data/multivariate_time-series_0.npy
-    path/to/folder/onion_example_files/data/multivariate_time-series_1.npy
-
-    If you are instead using your own data, run this script giving as argument
-    the paths to your data.
+    Use git clone git@github.com:matteobecchi/onion_example_files.git
+    to download example datasets.
     """
-    first_line = "Usage: python3 onion_uni.py path/to/input/file"
-    if len(sys.argv) < 2:  # noqa: PLR2004
-        error_log = Path("error_log.txt")
-        with error_log.open(mode="w") as file:
-            print(f"{first_line}", file=file)
-        sys.exit()
-    else:
-        input_data = sys.argv[1]
+    PATH_TO_INPUT_DATA = "onion_example_files/data/multivariate_time-series.npy"
 
-    ### Clustering of univariate time-series ###
-    onion_2 = dynsight.onion.OnionMulti(
-        path_to_input=input_data,
-        output_path=Path("./onion_output"),
-        tau_w=10,
-        t_conv=200,
-        t_units="ms",
-        example_id=0,
-        max_t_smooth=2,
-    )
+    ### Load the input data - it's an array of shape
+    ### (n_dims, n_particles, n_frames)
+    input_data = np.load(PATH_TO_INPUT_DATA)
+    n_dims = input_data.shape[0]
+    n_particles = input_data.shape[1]
+    n_frames = input_data.shape[2]
 
-    onion_2.run()
+    ### CLUSTERING WITH A SINGLE TIME RESOLUTION ###
+    ### Chose the time resolution --> the length of the windows in which the
+    ### time-series will be divided
+    TAU_WINDOW = 10
+    BINS = 25  # For mutlivariate clustering, setting BINS is often important
+    n_windows = int(n_frames / TAU_WINDOW)  # Number of windows
 
-    ### Number of states and fraction of ENV0 for the different
-    ### values of tau_window and t_smooth
-    ### Each row is a different tau_window, first element is tau_window
-    ### then each column is a different t_smooth.
-    _ = onion_2.get_number_of_states()
-    _ = onion_2.get_fraction_0()
+    ### The input array has to be (n_parrticles * n_windows, TAU_WINDOW * n_dims)
+    ### because each window is trerated as a single data-point
+    reshaped_data = np.reshape(input_data, (n_particles * n_windows, -1))
 
-    ### Returns a StateMulti object, with three attributes:
-    ### mean [np.adarray], standard deviation [np.adarray],
-    ### and percentage of data points [float].
-    _ = onion_2.get_state_list()
+    ### onion_multi() returns the list of states and the label for each
+    ### signal window
+    state_list, labels = onion_multi(reshaped_data, bins=BINS)
 
-    ### An array of shape (N, T) with the labels for
-    ### all the data points
-    _ = onion_2.get_clustering()
+    ### These functions are examples of how to visualize the results
+    plot_output_multi("Fig1.png", input_data, state_list, labels, TAU_WINDOW)
+    plot_one_trj_multi("Fig2.png", 0, TAU_WINDOW, input_data, labels)
+    plot_medoids_multi("Fig3.png", TAU_WINDOW, input_data, labels)
+    plot_state_populations("Fig4.png", n_windows, labels)
+    plot_sankey("Fig5.png", labels, n_windows, [100, 200, 300, 400])
+
+    ### CLUSTERING THE WHOLE RANGE OF TIME RESOLUTIONS ###
+    TAU_WINDOWS_LIST = np.geomspace(3, 10000, 20, dtype=int)
+
+    tra = np.zeros((len(TAU_WINDOWS_LIST), 3))  # List of number of states and
+    # ENV0 population for each tau_window
+    pop_list = []  # List of the states' population for each tau_window
+
+    for i, tau_window in enumerate(TAU_WINDOWS_LIST):
+        n_windows = int(n_frames / tau_window)
+        excess_frames = n_frames - n_windows * tau_window
+
+        if excess_frames > 0:
+            reshaped_data = np.reshape(
+                input_data[:, :, :-excess_frames], (n_particles * n_windows, -1)
+            )
+        else:
+            reshaped_data = np.reshape(input_data, (n_particles * n_windows, -1))
+
+        state_list, labels = onion_multi(reshaped_data, bins=BINS)
+
+        list_pop = [state.perc for state in state_list]
+        list_pop.insert(0, 1 - np.sum(np.array(list_pop)))
+
+        tra[i][0] = tau_window
+        tra[i][1] = len(state_list)
+        tra[i][2] = list_pop[0]
+        pop_list.append(list_pop)
+
+    ### These functions are examples of how to visualize the results
+    plot_time_res_analysis("Fig6.png", tra)
+    plot_pop_fractions("Fig7.png", pop_list)
+
+    plt.show()
 
 
 if __name__ == "__main__":
