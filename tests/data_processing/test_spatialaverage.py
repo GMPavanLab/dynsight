@@ -10,10 +10,10 @@ from dynsight.data_processing import spatialaverage
 def test_spatialaverage() -> None:
     original_dir = Path.cwd()
     topology_file = (
-        original_dir / "tests/data_processing/trajectory/test_spavg.gro"
+        original_dir / "tests/systems/coex/test_coex.gro"
     )
     trajectory_file = (
-        original_dir / "tests/data_processing/trajectory/test_spavg.xtc"
+        original_dir / "tests/data_processing/trajectory/test_coex.xtc"
     )
     expected_results = (
         original_dir / "tests/data_processing/spavg/test_spavg.npy"
