@@ -20,7 +20,10 @@ def test_compute_rdf() -> None:
     selection = "type O"
 
     test_bins, test_rdf = compute_rdf(
-        universe=u, s1=selection, s2=selection, distances_range=[0.0, 5.0]
+        universe=u,
+        s1=selection,
+        s2=selection,
+        distances_range=[0.0, 5.0],
     )
     exp_bins = np.load(expected_bins)
     exp_rdf = np.load(expected_rdf)

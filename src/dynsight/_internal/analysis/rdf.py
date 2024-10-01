@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import MDAnalysis
     import numpy as np
+    import numpy.typing as npt
 
 from MDAnalysis.analysis.rdf import InterRDF
 
@@ -19,7 +20,7 @@ def compute_rdf(
     start: int | None = None,
     stop: int | None = None,
     step: int = 1,
-) -> tuple[np.ndarray[int, Any], np.ndarray[float, Any]]:
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     r"""Radial Distribution Function between two types of particles.
 
     The RDF between two types of particles `a` and `b` is defined as:

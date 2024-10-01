@@ -1,6 +1,7 @@
-from typing import Any
+from typing import Literal
 
 import numpy as np
+import numpy.typing as npt
 from scipy.signal import find_peaks
 
 
@@ -22,11 +23,11 @@ def normalize_array(x: np.ndarray) -> np.ndarray:  # type: ignore[type-arg]
 
 
 def find_extrema_points(
-    x_axis: np.ndarray[float, Any],
-    y_axis: np.ndarray[float, Any],
-    extrema_type: str,
+    x_axis: npt.NDArray[np.float64],
+    y_axis: npt.NDArray[np.float64],
+    extrema_type: Literal["min", "max"],
     prominence: float,
-) -> np.ndarray[float, Any]:
+) -> npt.NDArray[np.float64]:
     """Find the extrema points of a mathematical function (minima or maxima).
 
     Parameters:
@@ -35,7 +36,7 @@ def find_extrema_points(
         y_axis:
             y values of the function.
         extrema_type:
-            It can be "min" or "max" depending on what the user's choice.
+            It can be "min" or "max".
         prominence:
             Required prominence of peaks. Higher values will provides only
             well defined and sharp peaks excluding the softer ones.
@@ -47,14 +48,9 @@ def find_extrema_points(
     if extrema_type not in {"min", "max"}:
         type_msg = "extrema_type must be 'min' or 'max'"
         raise ValueError(type_msg)
-    if extrema_type == "min":
-        inverted_function = -y_axis
-        # Find peaks in the inverted RDF
-        peaks, properties = find_peaks(
-            x=inverted_function, prominence=prominence
-        )
-    elif extrema_type == "max":
-        peaks, properties = find_peaks(x=y_axis, prominence=prominence)
+
+    function = -y_axis if extrema_type == "min" else y_axis
+    peaks, _ = find_peaks(x=function, prominence=prominence)
     minima_xcoord = x_axis[peaks]
     minima_ycoord = y_axis[peaks]
     return np.column_stack((minima_xcoord, minima_ycoord))
