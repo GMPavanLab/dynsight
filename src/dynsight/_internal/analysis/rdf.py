@@ -30,7 +30,9 @@ def compute_rdf(
 
     The radial distribution function is calculated by histogramming distances
     between two groups of atom `s1` and `s2`. Periodic boundary conditions are
-    taken into account via the minimum-image convention.
+    taken into account via the minimum-image convention. More information
+    concerning this function can be found
+    `here <https://docs.mdanalysis.org/1.1.1/documentation_pages/analysis/rdf.html>`_.
 
     Parameters:
         universe:
