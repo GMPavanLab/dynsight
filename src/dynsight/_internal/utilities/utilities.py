@@ -35,15 +35,14 @@ def find_extrema_points(
         y_axis:
             y values of the function.
         extrema_type:
-            It can be "min" or "max" depending on what the user wants to
-            compute.
+            It can be "min" or "max" depending on what the user's choice.
         prominence:
             Required prominence of peaks. Higher values will provides only
             well defined and sharp peaks excluding the softer ones.
 
     Returns:
-        A NumPy array of (n_peaks, 2) dimensions with the x and y
-        coordinates for each peak.
+        A NumPy array with dimensions (n_peaks, 2), containing
+        the x and y coordinates for each peak.
     """
     if extrema_type not in {"min", "max"}:
         type_msg = "extrema_type must be 'min' or 'max'"

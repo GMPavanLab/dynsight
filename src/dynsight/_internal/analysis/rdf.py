@@ -22,7 +22,7 @@ def compute_rdf(
 ) -> tuple[np.ndarray[int, Any], np.ndarray[float, Any]]:
     r"""Radial Distribution Function between two types of particles.
 
-    The RDF between two types of particles `a` and `b` is:
+    The RDF between two types of particles `a` and `b` is defined as:
 
     .. math::
         g_{ab}(r) = (N_a N_b)^{-1} \sum_{i=1}^{N_a}\sum_{j=1}^{N_b}
