@@ -112,7 +112,7 @@ module = [
   'h5py.*',
   'SOAPify.*',
   'numba.*',
-  'tropea_clustering.*',
+  'dynsight.onion.plot.*',
   'py.*'
 ]
 ignore_missing_imports = true

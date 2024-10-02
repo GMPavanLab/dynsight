@@ -24,32 +24,32 @@ def original_wd() -> Generator[Path, None, None]:
 # Define the actual test
 def test_output_files(original_wd: Path) -> None:
     ### Set all the analysis parameters ###
-    N_PARTICLES = 5
-    N_STEPS = 1000
-    TAU_WINDOW = 10
+    n_particles = 5
+    n_steps = 1000
+    tau_window = 10
 
     ### Create the input data ###
     rng = np.random.default_rng(12345)
     random_walk = []
-    for _ in range(N_PARTICLES):
+    for _ in range(n_particles):
         tmp = [0.0]
-        for _ in range(N_STEPS - 1):
+        for _ in range(n_steps - 1):
             d_x = rng.normal()
             x_new = tmp[-1] + d_x
             tmp.append(x_new)
         random_walk.append(tmp)
 
-    n_windows = int(N_STEPS / TAU_WINDOW)
+    n_windows = int(n_steps / tau_window)
     reshaped_input_data = np.reshape(
-        np.array(random_walk), (N_PARTICLES * n_windows, -1)
+        np.array(random_walk), (n_particles * n_windows, -1)
     )
 
     with tempfile.TemporaryDirectory() as _:
         ### Test the clustering class ###
-        tmp = dynsight.onion.OnionUni()
-        tmp.fit_predict(reshaped_input_data)
-        _ = tmp.get_params()
-        tmp.set_params()
+        tmp_clusterer = dynsight.onion.OnionUni()
+        tmp_clusterer.fit_predict(reshaped_input_data)
+        _ = tmp_clusterer.get_params()
+        tmp_clusterer.set_params()
 
         ### Test the clustering function ###
         state_list, labels = dynsight.onion.onion_uni(reshaped_input_data)
@@ -58,9 +58,7 @@ def test_output_files(original_wd: Path) -> None:
 
         ### Define the paths to the expected output ###
         results_dir = original_wd / "tests/onion/"
-        expected_output_path = original_dir + "output_uni/labels.npy"
-
-        # np.save(expected_output_path, labels)
+        expected_output_path = results_dir / "output_uni/labels.npy"
 
         ### Compare the contents of the expected and actual output ###
         expected_output = np.load(expected_output_path)

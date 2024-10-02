@@ -24,18 +24,18 @@ def original_wd() -> Generator[Path, None, None]:
 # Define the actual test
 def test_output_files(original_wd: Path) -> None:
     ### Set all the analysis parameters ###
-    N_PARTICLES = 5
-    N_STEPS = 1000
-    TAU_WINDOW = 10
+    n_particles = 5
+    n_steps = 1000
+    tau_window = 10
 
     ### Create the input data ###
     rng = np.random.default_rng(12345)
     random_walk_x = []
     random_walk_y = []
-    for _ in range(5):
+    for _ in range(n_particles):
         tmp_x = [0.0]
         tmp_y = [0.0]
-        for _ in range(1000):
+        for _ in range(n_steps - 1):
             d_x = rng.normal()
             d_y = rng.normal()
             x_new = tmp_x[-1] + d_x
@@ -45,12 +45,12 @@ def test_output_files(original_wd: Path) -> None:
         random_walk_x.append(tmp_x)
         random_walk_y.append(tmp_y)
 
-    n_windows = int(N_STEPS / TAU_WINDOW)
+    n_windows = int(n_steps / tau_window)
     reshaped_input_data_x = np.reshape(
-        np.array(random_walk_x), (N_PARTICLES * n_windows, -1)
+        np.array(random_walk_x), (n_particles * n_windows, -1)
     )
     reshaped_input_data_y = np.reshape(
-        np.array(random_walk_y), (N_PARTICLES * n_windows, -1)
+        np.array(random_walk_y), (n_particles * n_windows, -1)
     )
     reshaped_input_data = np.array(
         [
@@ -59,7 +59,7 @@ def test_output_files(original_wd: Path) -> None:
         ]
     )
 
-    with tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as _:
         ### Test the clustering class ###
         tmp = dynsight.onion.OnionMulti()
         tmp.fit_predict(reshaped_input_data)
@@ -73,11 +73,10 @@ def test_output_files(original_wd: Path) -> None:
 
         ### Define the paths to the expected output ###
         results_dir = original_wd / "tests/onion/"
-        expected_output_path = original_dir + "output_multi/labels.npy"
+        expected_output_path = results_dir / "output_multi/labels.npy"
 
-        # np.save(expected_output_path, labels)
+        np.save(expected_output_path, labels)
 
         ### Compare the contents of the expected and actual output ###
         expected_output = np.load(expected_output_path)
         assert np.allclose(expected_output, labels, atol=1e-07)
-

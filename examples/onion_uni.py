@@ -1,10 +1,10 @@
-"""
-Example script for running dynsight.onion.onion_uni.
-"""
+"""Example script for running dynsight.onion.onion_uni."""
 
 import matplotlib.pyplot as plt
 import numpy as np
-from onion_plots import (
+
+from dynsight.onion import onion_uni
+from dynsight.onion.plot import (
     plot_medoids_uni,
     plot_one_trj_uni,
     plot_output_uni,
@@ -14,8 +14,6 @@ from onion_plots import (
     plot_time_res_analysis,
 )
 
-from dynsight.onion import onion_uni
-
 
 def main() -> None:
     """Run the example.
@@ -23,24 +21,25 @@ def main() -> None:
     Use git clone git@github.com:matteobecchi/onion_example_files.git
     to download example datasets.
     """
-    PATH_TO_INPUT_DATA = "onion_example_files/data/univariate_time-series.npy"
+    path_to_input_data = "onion_example_files/data/univariate_time-series.npy"
 
     ### Load the input data - it's an array of shape (n_particles, n_frames)
-    input_data = np.load(PATH_TO_INPUT_DATA)[:, 1:]
+    input_data = np.load(path_to_input_data)[:, 1:]
     n_particles = input_data.shape[0]
     n_frames = input_data.shape[1]
 
     ### CLUSTERING WITH A SINGLE TIME RESOLUTION ###
     ### Chose the time resolution --> the length of the windows in which the
     ### time-series will be divided
-    TAU_WINDOW = 5
-    n_windows = int(n_frames / TAU_WINDOW)  # Number of windows
-    frames_in_excess = n_frames - n_windows * TAU_WINDOW
+    tau_window = 5
+    n_windows = int(n_frames / tau_window)  # Number of windows
+    frames_in_excess = n_frames - n_windows * tau_window
 
-    ### The input array needs to be (n_parrticles * n_windows, TAU_WINDOW) because
-    ### each window is trerated as a single data-point
+    ### The input array needs to be (n_parrticles * n_windows, tau_window)
+    ### because each window is trerated as a single data-point
     reshaped_data = np.reshape(
-        input_data[:, :-frames_in_excess], (n_particles * n_windows, TAU_WINDOW)
+        input_data[:, :-frames_in_excess],
+        (n_particles * n_windows, tau_window),
     )
 
     ### onion_uni() returns the list of states and the label for each
@@ -55,14 +54,14 @@ def main() -> None:
     plot_sankey("Fig5.png", labels, n_windows, [10, 20, 30, 40])
 
     ### CLUSTERING THE WHOLE RANGE OF TIME RESOLUTIONS ###
-    TMP_LIST = np.geomspace(2, 499, num=20, dtype=int)
-    TAU_WINDOWS = [x for i, x in enumerate(TMP_LIST) if x not in TMP_LIST[:i]]
+    tmp_list = np.geomspace(2, 499, num=20, dtype=int)
+    tau_windows = [x for i, x in enumerate(tmp_list) if x not in tmp_list[:i]]
 
-    tra = np.zeros((len(TAU_WINDOWS), 3))  # List of number of states and
+    tra = np.zeros((len(tau_windows), 3))  # List of number of states and
     # ENV0 population for each tau_window
     list_of_pop = []  # List of the states' population for each tau_window
 
-    for i, tau_window in enumerate(TAU_WINDOWS):
+    for i, tau_window in enumerate(tau_windows):
         n_windows = int(n_frames / tau_window)
         frames_in_excess = n_frames - n_windows * tau_window
         if frames_in_excess > 0:

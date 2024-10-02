@@ -2,9 +2,10 @@
 
 from dynsight._internal.onion import (
     OnionMulti,
-    onion_multi,
     OnionUni,
+    onion_multi,
     onion_uni,
+    plot,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "OnionMulti",
     "onion_uni",
     "onion_multi",
+    "plot",
 ]
