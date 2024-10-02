@@ -5,7 +5,7 @@ import numpy.typing as npt
 from scipy.signal import find_peaks
 
 
-def normalize_array(x: np.ndarray) -> np.ndarray:  # type: ignore[type-arg]
+def normalize_array(x: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Normalizes the futher axis of the given array.
 
     (eg. in an array of shape (100,50,3) normalizes all the  5000 3D vectors)
