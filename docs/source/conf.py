@@ -21,7 +21,6 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     "sphinx_copybutton",
-    "sphinx.ext.mathjax",
 ]
 
 autosummary_imported_members = True
