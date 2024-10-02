@@ -113,6 +113,6 @@ module = [
   'SOAPify.*',
   'numba.*',
   'onion_clustering.*',
-  'py.*'
+  'scipy.*'
 ]
 ignore_missing_imports = true
