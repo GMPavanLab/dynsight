@@ -21,6 +21,7 @@ def normalize_array(x: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     norm[norm == 0] = 1
     return x / norm
 
+
 def find_extrema_points(
     x_axis: npt.NDArray[np.float64],
     y_axis: npt.NDArray[np.float64],
@@ -28,6 +29,7 @@ def find_extrema_points(
     prominence: float,
 ) -> npt.NDArray[np.float64]:
     """Find the extrema points of a mathematical function (minima or maxima).
+
     Parameters:
         x_axis:
             x values of the function.
@@ -38,13 +40,14 @@ def find_extrema_points(
         prominence:
             Required prominence of peaks. Higher values will provides only
             well defined and sharp peaks excluding the softer ones.
+
     Returns:
         A NumPy array with dimensions (n_peaks, 2), containing
         the x and y coordinates for each peak.
     """
     if extrema_type not in {"min", "max"}:
-         type_msg = "extrema_type must be 'min' or 'max'"
-         raise ValueError(type_msg)
+        type_msg = "extrema_type must be 'min' or 'max'"
+        raise ValueError(type_msg)
 
     function = -y_axis if extrema_type == "min" else y_axis
     peaks, _ = find_peaks(x=function, prominence=prominence)
