@@ -9,11 +9,11 @@ from dynsight.analysis import compute_rdf
 
 
 def test_compute_rdf() -> None:
-    original_dir = Path.cwd()
-    topology_file = original_dir / "tests/systems/coex/test_coex.gro"
-    trajectory_file = original_dir / "tests/systems/coex/test_coex.xtc"
-    expected_bins = original_dir / "tests/analysis/test_rdf/test_bins.npy"
-    expected_rdf = original_dir / "tests/analysis/test_rdf/test_rdf.npy"
+    original_dir = Path(__file__).resolve().parent
+    topology_file = original_dir / "../systems/coex/test_coex.gro"
+    trajectory_file = original_dir / "../systems/coex/test_coex.xtc"
+    expected_bins = original_dir / "test_rdf/test_bins.npy"
+    expected_rdf = original_dir / "test_rdf/test_rdf.npy"
 
     u = MDAnalysis.Universe(topology_file, trajectory_file)
 

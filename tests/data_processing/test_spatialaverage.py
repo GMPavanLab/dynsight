@@ -8,12 +8,10 @@ from dynsight.data_processing import spatialaverage
 
 
 def test_spatialaverage() -> None:
-    original_dir = Path.cwd()
-    topology_file = original_dir / "tests/systems/coex/test_coex.gro"
-    trajectory_file = original_dir / "tests/systems/coex/test_coex.xtc"
-    expected_results = (
-        original_dir / "tests/data_processing/spavg/test_spavg.npy"
-    )
+    original_dir = Path(__file__).resolve().parent
+    topology_file = original_dir / "../systems/coex/test_coex.gro"
+    trajectory_file = original_dir / "../systems/coex/test_coex.xtc"
+    expected_results = original_dir / "spavg/test_spavg.npy"
 
     u = MDAnalysis.Universe(topology_file, trajectory_file)
     atoms = u.select_atoms("type O")
