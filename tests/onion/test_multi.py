@@ -1,4 +1,4 @@
-"""Pytest for dynsight.onion.main_2d."""
+"""Pytest for dynsight.onion.onion_multi."""
 
 import os
 import tempfile
@@ -23,14 +23,19 @@ def original_wd() -> Generator[Path, None, None]:
 
 # Define the actual test
 def test_output_files(original_wd: Path) -> None:
+    ### Set all the analysis parameters ###
+    n_particles = 5
+    n_steps = 1000
+    tau_window = 10
+
     ### Create the input data ###
     rng = np.random.default_rng(12345)
     random_walk_x = []
     random_walk_y = []
-    for _ in range(5):
+    for _ in range(n_particles):
         tmp_x = [0.0]
         tmp_y = [0.0]
-        for _ in range(1000):
+        for _ in range(n_steps - 1):
             d_x = rng.normal()
             d_y = rng.normal()
             x_new = tmp_x[-1] + d_x
@@ -39,66 +44,39 @@ def test_output_files(original_wd: Path) -> None:
             tmp_y.append(y_new)
         random_walk_x.append(tmp_x)
         random_walk_y.append(tmp_y)
-    random_walk_arr = np.array([random_walk_x, random_walk_y])
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-        data_directory = "input_data.npy"
-        np.save(data_directory, random_walk_arr)
+    n_windows = int(n_steps / tau_window)
+    reshaped_input_data_x = np.reshape(
+        np.array(random_walk_x), (n_particles * n_windows, -1)
+    )
+    reshaped_input_data_y = np.reshape(
+        np.array(random_walk_y), (n_particles * n_windows, -1)
+    )
+    reshaped_input_data = np.array(
+        [
+            np.concatenate((tmp, reshaped_input_data_y[i]))
+            for i, tmp in enumerate(reshaped_input_data_x)
+        ]
+    )
 
-        onion_cl = dynsight.onion.OnionMulti(
-            path_to_input="../input_data.npy",
-            tau_w=10,
-            num_tau_w=1,
-            min_tau_w=10,
-            max_tau_w=10,
-            max_t_smooth=1,
-        )
+    with tempfile.TemporaryDirectory() as _:
+        ### Test the clustering class ###
+        tmp = dynsight.onion.OnionMulti()
+        tmp.fit_predict(reshaped_input_data)
+        _ = tmp.get_params()
+        tmp.set_params()
 
-        onion_cl.run()
+        ### Test the clustering function ###
+        state_list, labels = dynsight.onion.onion_multi(reshaped_input_data)
 
-        # Define the paths to the expected and actual output files
+        _ = state_list[0].get_attributes()
+
+        ### Define the paths to the expected output ###
         results_dir = original_wd / "tests/onion/"
-        expected_output_path_1 = results_dir / "output_multi/final_states.txt"
-        expected_output_path_2 = (
-            results_dir / "output_multi/number_of_states.txt"
-        )
-        expected_output_path_3 = results_dir / "output_multi/fraction_0.txt"
-        actual_output_path_1 = "onion_output/final_states.txt"
-        actual_output_path_2 = "onion_output/number_of_states.txt"
-        actual_output_path_3 = "onion_output/fraction_0.txt"
+        expected_output_path = results_dir / "output_multi/labels.npy"
 
-        # Compare "final_states.txt"
-        exp_file = Path(expected_output_path_1)
-        act_file = Path(actual_output_path_1)
+        np.save(expected_output_path, labels)
 
-        with exp_file.open(mode="r") as file:
-            lines = file.readlines()
-        tmp_data_1 = []
-        for line in lines[1:]:
-            line1 = line.replace("[", "").replace("]", "").replace(",", "")
-            elements = [float(x) for x in line1.split()]
-            tmp_data_1.append(elements)
-
-        with act_file.open(mode="r") as file:
-            lines = file.readlines()
-        tmp_data_2 = []
-        for line in lines[1:]:
-            line1 = line.replace("[", "").replace("]", "").replace(",", "")
-            elements = [float(x) for x in line1.split()]
-            tmp_data_2.append(elements)
-
-        assert np.allclose(tmp_data_1, tmp_data_2, atol=1e-07)
-
-        # Compare "number_of_states.txt"
-        exp_file = Path(expected_output_path_2)
-        act_file = Path(actual_output_path_2)
-        with exp_file.open(mode="r") as file_0, act_file.open(
-            mode="r"
-        ) as file_1:
-            assert file_0.read() == file_1.read()
-
-        # Compare "fraction_0.txt"
-        exp_array = np.loadtxt(expected_output_path_3)
-        act_array = np.loadtxt(actual_output_path_3)
-        assert np.allclose(exp_array, act_array, atol=1e-07)
+        ### Compare the contents of the expected and actual output ###
+        expected_output = np.load(expected_output_path)
+        assert np.allclose(expected_output, labels, atol=1e-07)
