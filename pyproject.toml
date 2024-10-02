@@ -113,6 +113,7 @@ module = [
   'SOAPify.*',
   'numba.*',
   'dynsight.onion.plot.*',
-  'scipy.*'
+  'scipy.*',
+  'tropea_clustering.*',
 ]
 ignore_missing_imports = true
