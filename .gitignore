@@ -1,6 +1,7 @@
 __pycache__
 *.egg-info
 /.coverage
+/.coverage.MacBook-Pro-di-Matteo.local.*
 /dist
 /build
 docs/build
