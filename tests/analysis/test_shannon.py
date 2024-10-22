@@ -35,6 +35,18 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
 
+        # Test the use of the function computing entropy
+        data_entropy = dynsight.analysis.compute_data_entropy(
+            random_data,
+            data_range=(np.min(random_data), np.max(random_data)),
+            n_bins=20,
+        )
+
+        expected_entropy = 0.9995963122117133004
+
+        if isinstance(data_entropy, float):
+            assert data_entropy - expected_entropy < THRESHOLD
+
         # Test the case where labels have the wrong shape
         with pytest.raises(RuntimeError):
             _ = dynsight.analysis.compute_entropy_gain(
