@@ -29,7 +29,7 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
 
     data_shape = (100, 100)
     random_data = rng.random(data_shape)
-    random_labels = rng.integers(0, 5, data_shape)
+    random_labels = rng.integers(0, 5, (100,))
     wrong_labels = rng.integers(0, 5, (200, 50))
 
     with tempfile.TemporaryDirectory() as temp_dir:

@@ -64,10 +64,10 @@ def compute_entropy_gain(
         a float which is the difference between the entropy of the raw and
         clustered data, relative to the entropy of the raw data.
     """
-    if data.shape != labels.shape:
+    if data.shape[0] != labels.shape[0]:
         msg = (
             f"data ({data.shape}) and labels ({labels.shape}) "
-            "must have same shape"
+            "must have same shape[0]"
         )
         raise RuntimeError(msg)
 
