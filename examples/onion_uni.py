@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from dynsight import onion
+from dynsight.utilities import find_extrema_points
 
 
 def main() -> None:
@@ -26,7 +27,28 @@ def main() -> None:
     input_data = np.load(path_to_input_data)[:, 1:]
     n_frames = input_data.shape[1]
 
-    """ CLUSTERING WITH A SINGLE TIME RESOLUTION
+    """ STEP 0: STATIC CLUSTERING
+    Before using Onion Clustering, a simple patter recognition analysis can be
+    performed with dynsight, identifying the maxima of the data distribution.
+    This analysis ignores the time correlations withing the data.
+    The value of 'prominance' tunes the sensibility to the data histogram
+    roughness. Plot the histogram to set the best value.
+
+    The results is an array which lists the (x, y) value of each peak.
+    """
+    counts, bins = np.histogram(
+        input_data.flatten(),
+        bins=50,
+        density=True,
+    )
+    _ = find_extrema_points(
+        x_axis=bins[1:],
+        y_axis=counts,
+        extrema_type="max",
+        prominence=0.2,
+    )
+
+    """ STEP 1: CLUSTERING WITH A SINGLE TIME RESOLUTION
     Chose the time resolution --> the length of the windows in which the
     time-series will be divided. This is the minimum lifetime required for
     a state to be considered stable."""
@@ -52,7 +74,7 @@ def main() -> None:
     onion.plot.plot_state_populations("Fig4.png", n_windows, labels)
     onion.plot.plot_sankey("Fig5.png", labels, n_windows, [10, 20, 30, 40])
 
-    """ CLUSTERING THE WHOLE RANGE OF TIME RESOLUTIONS
+    """ STEP 2: CLUSTERING THE WHOLE RANGE OF TIME RESOLUTIONS
     This allows to select the optimal time resolution for the analysis,
     avoiding an a priori choice."""
     tau_windows = np.unique(np.geomspace(2, 499, num=20, dtype=int))
