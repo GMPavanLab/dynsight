@@ -26,7 +26,7 @@ def main() -> None:
     input_data = np.load(path_to_input_data)
     n_frames = input_data.shape[2]
 
-    """ CLUSTERING WITH A SINGLE TIME RESOLUTION
+    """ STEP 1: CLUSTERING WITH A SINGLE TIME RESOLUTION
     Chose the time resolution --> the length of the windows in which the
     time-series will be divided. This is the minimum lifetime required for
     a state to be considered stable."""
@@ -37,9 +37,7 @@ def main() -> None:
     ### The input array has to be (n_parrticles * n_windows,
     ### tau_window * n_dims)
     ### because each window is trerated as a single data-point
-    reshaped_data = onion.helpers.reshape_from_dnt(
-        input_data, tau_window
-    )
+    reshaped_data = onion.helpers.reshape_from_dnt(input_data, tau_window)
 
     ### onion_multi() returns the list of states and the label for each
     ### signal window
@@ -52,15 +50,11 @@ def main() -> None:
     onion.plot.plot_one_trj_multi(
         "Fig2.png", 0, tau_window, input_data, labels
     )
-    onion.plot.plot_medoids_multi(
-        "Fig3.png", tau_window, input_data, labels
-    )
+    onion.plot.plot_medoids_multi("Fig3.png", tau_window, input_data, labels)
     onion.plot.plot_state_populations("Fig4.png", n_windows, labels)
-    onion.plot.plot_sankey(
-        "Fig5.png", labels, n_windows, [100, 200, 300, 400]
-    )
+    onion.plot.plot_sankey("Fig5.png", labels, n_windows, [100, 200, 300, 400])
 
-    """ CLUSTERING THE WHOLE RANGE OF TIME RESOLUTIONS
+    """ STEP 2: CLUSTERING THE WHOLE RANGE OF TIME RESOLUTIONS
     This allows to select the optimal time resolution for the analysis,
     avoiding an a priori choice."""
     tau_window_list = np.geomspace(3, 10000, 20, dtype=int)
@@ -70,13 +64,9 @@ def main() -> None:
     pop_list = []  # List of the states' population for each tau_window
 
     for i, tau_window in enumerate(tau_window_list):
-        reshaped_data = onion.helpers.reshape_from_dnt(
-            input_data, tau_window
-        )
+        reshaped_data = onion.helpers.reshape_from_dnt(input_data, tau_window)
 
-        state_list, labels = onion.onion_multi(
-            reshaped_data, bins=bins
-        )
+        state_list, labels = onion.onion_multi(reshaped_data, bins=bins)
 
         list_pop = [state.perc for state in state_list]
         list_pop.insert(0, 1 - np.sum(np.array(list_pop)))  # Add ENV0 fraction
