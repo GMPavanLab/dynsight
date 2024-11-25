@@ -6,6 +6,6 @@ from dynsight._internal.utilities.utilities import (
 )
 
 __all__ = [
-    "normalize_array",
     "find_extrema_points",
+    "normalize_array",
 ]

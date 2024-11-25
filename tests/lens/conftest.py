@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import pathlib  # noqa: TCH003
+import pathlib  # noqa: TC003
 
 import MDAnalysis
 import numpy as np

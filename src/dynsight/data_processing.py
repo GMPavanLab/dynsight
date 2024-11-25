@@ -22,18 +22,18 @@ from dynsight._internal.data_processing.spatial_average import (
 )
 
 __all__ = [
-    "simplekernelsoap",
-    "simplesoapdistance",
-    "soapdistance",
-    "kernelsoap",
-    "soapdistancenormalized",
+    "applyclassification",
     "createreferencesfromtrajectory",
     "getdistancebetween",
     "getdistancesfromref",
     "getdistancesfromrefnormalized",
+    "getreferencesfromdataset",
+    "kernelsoap",
     "mergereferences",
     "savereferences",
-    "getreferencesfromdataset",
-    "applyclassification",
+    "simplekernelsoap",
+    "simplesoapdistance",
+    "soapdistance",
+    "soapdistancenormalized",
     "spatialaverage",
 ]

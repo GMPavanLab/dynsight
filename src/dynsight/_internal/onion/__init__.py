@@ -10,10 +10,10 @@ from tropea_clustering import (
 )
 
 __all__ = [
-    "OnionUni",
     "OnionMulti",
-    "onion_uni",
-    "onion_multi",
+    "OnionUni",
     "helpers",
+    "onion_multi",
+    "onion_uni",
     "plot",
 ]
