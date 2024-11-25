@@ -7,7 +7,7 @@ from dynsight._internal.timesoap.timesoap import (
 )
 
 __all__ = [
-    "timesoapsimple",
-    "timesoap",
     "gettimesoapsimple",
+    "timesoap",
+    "timesoapsimple",
 ]

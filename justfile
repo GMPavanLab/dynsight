@@ -39,7 +39,7 @@ check:
 # Auto-fix code issues.
 fix:
   ruff format .
-  ruff check .
+  ruff check --fix .
 
 # Build a release.
 build:
