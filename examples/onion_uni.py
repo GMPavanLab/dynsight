@@ -28,11 +28,11 @@ def main() -> None:
     n_frames = input_data.shape[1]
 
     """ STEP 0: STATIC CLUSTERING
-    Before using Onion Clustering, a simple patter recognition analysis can be
-    performed with dynsight, identifying the maxima of the data distribution.
-    This analysis ignores the time correlations withing the data.
-    The value of 'prominance' tunes the sensibility to the data histogram
-    roughness. Plot the histogram to set the best value.
+    Before using Onion Clustering, a simple pattern recognition analysis can
+    be performed with dynsight, identifying the maxima of the data
+    distribution. This analysis ignores the time correlations withing the
+    data. The value of 'prominance' tunes the sensibility to the data
+    histogram roughness. Plot the histogram to set the best value.
 
     The results is an array which lists the (x, y) value of each peak.
     """
