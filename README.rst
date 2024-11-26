@@ -46,8 +46,9 @@ If you use ``dynsight`` please cite
 Publications
 ============
 
+* time-soap: https://doi.org/10.1063/5.0147025
+* lens: https://doi.org/10.1073/pnas.2300565120
 * onion-clustering: https://doi.org/10.1073/pnas.2403771121
-* people need to add PRs to mention these.
 
 
 Acknowledgements
