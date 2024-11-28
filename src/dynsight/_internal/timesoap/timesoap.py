@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:
     import h5py
@@ -9,17 +9,17 @@ import SOAPify
 
 
 def timesoap(
-    soaptrajectory: np.ndarray,  # type: ignore[type-arg]
+    soaptrajectory: np.ndarray[float, Any],
     window: int = 1,
     stride: int | None = None,
     backward: bool = False,
     returndiff: bool = True,
     distancefunction: Callable = SOAPify.simpleSOAPdistance,  # type: ignore[type-arg]
-) -> tuple[np.ndarray, np.ndarray]:  # type: ignore[type-arg]
+) -> tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
     """Performs the 'timeSOAP' analysis on the given SOAP trajectory.
 
     * Original author: Cristina Caruso
-    * Mantainer: Daniele Rapetti
+    * Mantainer: Cristina Caruso
 
     Parameters:
         soaptrajectory:
@@ -58,38 +58,38 @@ def timesoap(
 
 
 def timesoapsimple(
-    soaptrajectory: np.ndarray,  # type: ignore[type-arg]
+    soaptrajectory: np.ndarray[float, Any],
     window: int = 1,
     stride: int | None = None,
     backward: bool = False,
     returndiff: bool = True,
-) -> tuple[np.ndarray, np.ndarray]:  # type: ignore[type-arg]
+) -> tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
     r"""Performs 'timeSOAP' analysis on **normalized** SOAP trajectory.
 
-    this is optimized to use :func:`SOAPify.distances.simpleSOAPdistance`,
+    * Original author: Cristina Caruso
+    * Mantainer: Matteo Becchi
+
+    This is optimized to use :func:`SOAPify.distances.simpleSOAPdistance`,
     without calling it.
 
     .. warning:: this function works **only** with normalized numpy.float64
         soap vectors!
 
-        The SOAP distance is calculated with
+    The SOAP distance is calculated with
 
-        .. math::
-            d(\vec{a},\vec{b})=\\sqrt{2-2\frac{\vec{a}\\cdot\vec{b}}{\\left\\|\vec{a}\right\\|\\left\\|\vec{b}\right\\|}}
+    .. math::
+        d(\vec{a},\vec{b}) =
+        \sqrt{2-2\frac{\vec{a}\cdot\vec{b}}{||\vec{a}||\cdot||\vec{b}||}}
 
-        That is equivalent to
+    That is equivalent to
 
-        .. math::
-            d(\vec{a},\vec{b})=\\sqrt{2-2\\hat{a}\\cdot\\hat{b}} =
-            \\sqrt{\\hat{a}\\cdot\\hat{a}+\\hat{b}\\cdot
-            \\hat{b}-2\\hat{a}\\cdot\\hat{b}} =
+    .. math::
+        d(\vec{a},\vec{b})=\sqrt{2-2\hat{a}\cdot\hat{b}} =
+        \sqrt{\hat{a}\cdot\hat{a}+\hat{b}\cdot\hat{b}-2\hat{a}\cdot\hat{b}} =
+        \sqrt{(\hat{a}-\hat{b})\cdot(\hat{a}-\hat{b})} =
+        ||\hat{a}-\hat{b}||
 
-            \\sqrt{(\\hat{a}-\\hat{b})\\cdot(\\hat{a}-\\hat{b})}
-
-        That is the euclidean distance between the versors
-
-    * Original author: Cristina Caruso
-    * Mantainer: Daniele Rapetti
+    That is the euclidean distance between the versors.
 
     Parameters:
         soaptrajectory:
@@ -104,7 +104,7 @@ def timesoapsimple(
             Defaults to None.
         backward:
             If true the soap distance is referred to the previous frame.
-             **NOT IN USE**. Defaulst to True.
+             **NOT IN USE**. Defaults to True.
         returndiff:
             If true returns also the first derivative of timeSOAP.
             Defaults to True.
@@ -128,8 +128,11 @@ def gettimesoapsimple(
     window: int = 1,
     stride: int | None = None,
     backward: bool = False,
-) -> tuple[np.ndarray, np.ndarray]:  # type: ignore[type-arg]
+) -> tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
     """Shortcut to extract the timeSOAP from large datasets.
+
+    * Original author: Cristina Caruso
+    * Mantainer: Cristina Caruso
 
     This function is the equivalent to (old cpctools version below):
 
