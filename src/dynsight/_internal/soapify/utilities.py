@@ -13,7 +13,7 @@ def fill_soap_vector_from_dscribe(
     lmax: int,
     nmax: int,
     atomtypes: list[str] | None = None,
-    atomicslices: dict | None = None,  # type: ignore[type-arg]
+    atomicslices: dict[str, Any] | None = None,
 ) -> np.ndarray[float, Any]:
     """Returns the SOAP power spectrum from dscribe results.
 
