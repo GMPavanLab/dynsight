@@ -17,7 +17,7 @@ def list_neighbours_along_trajectory(
     """Produce a per frame list of the neighbours, atom per atom.
 
     * Original author: Martina Crippa
-    * Mantainer: Daniele Rapetti
+    * Mantainer: Matteo Becchi
 
     Parameters:
         input_universe (Universe):
@@ -52,7 +52,7 @@ def neighbour_change_in_time(
     """return, listed per each atoms the parameters used in the LENS analysis.
 
     * Original author: Martina Crippa
-    * Mantainer: Daniele Rapetti
+    * Mantainer: Matteo Becchi
 
     Parameters:
         neigh_list_per_frame:
