@@ -10,6 +10,8 @@ import SOAPify
 def simplekernelsoap(x: np.ndarray, y: np.ndarray) -> float:  # type: ignore[type-arg]
     """A simpler SOAP Kernel than :func:`KernelSoap`, power is always 1.
 
+    * Original author: Daniele Rapetti
+
     Parameters:
         x:
             a SOAP fingerprint.
@@ -24,6 +26,8 @@ def simplekernelsoap(x: np.ndarray, y: np.ndarray) -> float:  # type: ignore[typ
 
 def simplesoapdistance(x: np.ndarray, y: np.ndarray) -> float:  # type: ignore[type-arg]
     """A simpler SOAP distance than :func:`SOAPdistance`, power is always 1.
+
+    * Original author: Daniele Rapetti
 
     Parameters:
         x:
@@ -40,6 +44,8 @@ def simplesoapdistance(x: np.ndarray, y: np.ndarray) -> float:  # type: ignore[t
 
 def kernelsoap(x: np.ndarray, y: np.ndarray, n: int) -> float:  # type: ignore[type-arg]
     """The SOAP Kernel with a variable power.
+
+    * Original author: Daniele Rapetti
 
     Parameters:
         x:
@@ -58,6 +64,8 @@ def kernelsoap(x: np.ndarray, y: np.ndarray, n: int) -> float:  # type: ignore[t
 def soapdistance(x: np.ndarray, y: np.ndarray, n: int = 1) -> float:  # type: ignore[type-arg]
     """The SOAP distance between two SOAP fingerprints.
 
+    * Original author: Daniele Rapetti
+
     Parameters:
         x:
             a SOAP fingerprint.
@@ -75,6 +83,8 @@ def soapdistance(x: np.ndarray, y: np.ndarray, n: int = 1) -> float:  # type: ig
 
 def soapdistancenormalized(x: np.ndarray, y: np.ndarray) -> float:  # type: ignore[type-arg]
     """The SOAP distance between two normalized SOAP fingerprints.
+
+    * Original author: Daniele Rapetti
 
     The pre-normalized vectors should net some performace over the classic
     kernel.

@@ -22,6 +22,8 @@ def createreferencesfromtrajectory(
     by storing the data found from h5SOAPDataSet.
     The atoms are selected trough the addresses dictionary.
 
+    * Original author: Daniele Rapetti
+
     Parameters:
         h5soapdataset:
             the dataset with the SOAP fingerprints
@@ -63,6 +65,8 @@ def getdistancebetween(
 ) -> np.ndarray:  # type: ignore[type-arg]
     """Generate an array with the distances between the the data and `spectra`.
 
+    * Original author: Daniele Rapetti
+
     Parameters:
         data:
             the array of the data
@@ -91,6 +95,8 @@ def getdistancesfromref(
 ) -> np.ndarray:  # type: ignore[type-arg]
     """Generates distances between a SOAP-hdf5 trajectory and references.
 
+    * Original author: Daniele Rapetti
+
     Parameters:
         soaptrajdata:
             the dataset containing the SOAP trajectory
@@ -118,6 +124,8 @@ def getdistancesfromrefnormalized(
     references: SOAPify.SOAPReferences,
 ) -> np.ndarray:  # type: ignore[type-arg]
     """Shortcut for :func:`.getDistancesFromRef` with normalization.
+
+    * Original author: Daniele Rapetti
 
     see :func:`SOAPify.SOAPClassify.getDistancesFromRef`,
     the distance calculator is :func:`SOAPdistanceNormalized` and
