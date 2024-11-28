@@ -26,6 +26,9 @@ def saponify_trajectory(
 ) -> None:
     """Calculate the SOAP fingerprints for each atom in a hdf5 trajectory.
 
+    * Original author: Daniele Rapetti
+    * Mantainer: Matteo Becchi
+
     Works exaclty as :func:`saponifyMultipleTrajectories` except for that it
     calculates the fingerprints only for the passed trajectory group
     (see :func:`SOAPify.HDF5er.HDF5erUtils.isTrajectoryGroup`).
@@ -116,6 +119,9 @@ def saponify_multiple_trajectories(
     usetype: str = "float64",
 ) -> None:
     """Calculate and store SOAP descriptor for all trajectories in group/file.
+
+    * Original author: Daniele Rapetti
+    * Mantainer: Matteo Becchi
 
     `saponifyMultipleTrajectories` checks if any of the group contained in
     `trajContainers` is a "trajectory group"
