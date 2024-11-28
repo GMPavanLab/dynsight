@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from collections import abc
-
     import h5py
 import SOAPify
 
@@ -18,9 +16,9 @@ def saponify_trajectory(
     soapoutputchunkdim: int = 100,
     soapnjobs: int = 1,
     soapatommask: str | None = None,
-    centersmask: abc.Iterable | None = None,  # type: ignore[type-arg]
+    centersmask: list[int] | None = None,
     soap_respectpbc: bool = True,
-    soapkwargs: dict | None = None,  # type: ignore[type-arg]
+    soapkwargs: dict[Any, Any] | None = None,
     usesoapfrom: SOAPify.engine.KNOWNSOAPENGINES = "dscribe",
     dooverride: bool = False,
     verbose: bool = True,
@@ -37,48 +35,48 @@ def saponify_trajectory(
 
     Parameters:
         trajcontainer:
-            the name of the hdf5 file that contains the input trajectory.
-        soapoutcontainer (str):
-            the name of the hdf5 file that will contain the ouput of the SOAP
-            analysis.
-        soaprcut (float, optional):
+            The file/group that contains the trajectory.
+        soapoutcontainer:
+            The file/group that will store the SOAP results.
+        soaprcut:
             The cutoff for local region in angstroms. Should be bigger than 1
             angstrom (option passed to the desired SOAP engine).
             Defaults to 8.0.
-        soapnmax (int, optional):
+        soapnmax:
             The number of radial basis functions (option passed to the desired
             SOAP engine). Defaults to 8.
-        soaplmax (int, optional):
+        soaplmax:
             The maximum degree of spherical harmonics (option passed to the
             desired SOAP engine). Defaults to 8.
-        soapoutputchunkdim (int, optional):
+        soapoutputchunkdim:
             The dimension of the chunck of data in the SOAP results dataset.
             Defaults to 100.
-        soapnjobs (int, optional):
+        soapnjobs:
             the number of concurrent SOAP calculations (option passed to the
             desired SOAP engine). Defaults to 1.
-        soapatommask (str, optional):
+        soapatommask:
             the symbols of the atoms whose SOAP fingerprint will be calculated
             (option passed to the desired SOAP engine). Defaults to None.
         centersmask:
-            Mask.
-        soap_respectpbc (bool, optional):
+            the indexes of the atoms whose SOAP fingerprint will be calculated
+            (option passed to the desired SOAP engine). Defaults to None.
+        soap_respectpbc:
             Determines whether the system is considered to be periodic
             (option passed to the desired SOAP engine). Defaults to True.
         soapkwargs (dict, optional):
             additional keyword arguments to be passed to the SOAP engine.
             Defaults to {}.
-        usesoapfrom (KNOWNSOAPENGINES, optional):
+        usesoapfrom:
             This string determines the selected SOAP engine for the
             calculations.
             Defaults to "dscribe".
-        dooverride (bool, optional):
+        dooverride:
             if False will raise and exception if the user ask to override an
             already existing DataSet. Defaults to False.
-        verbose (bool, optional):
+        verbose:
             regulates the verbosity of the step by step operations.
             Defaults to True.
-        usetype (str,optional):
+        usetype:
             The precision used to store the data. Defaults to "float64".
     """
     SOAPify.saponifyTrajectory(
@@ -109,9 +107,9 @@ def saponify_multiple_trajectories(
     soapoutputchunkdim: int = 100,
     soapnjobs: int = 1,
     soapatommask: list[str] | None = None,
-    centersmask: abc.Iterable | None = None,  # type: ignore[type-arg]
+    centersmask: list[int] | None = None,
     soap_respectpbc: bool = True,
-    soapkwargs: dict | None = None,  # type: ignore[type-arg]
+    soapkwargs: dict[Any, Any] | None = None,
     usesoapfrom: SOAPify.engine.KNOWNSOAPENGINES = "dscribe",
     dooverride: bool = False,
     verbose: bool = True,
@@ -129,50 +127,50 @@ def saponify_multiple_trajectories(
     :func:`SOAPify.engine.getSoapEngine`)
 
     Parameters:
-        trajcontainers (h5py.Group|h5py.File):
-            The file/group that contains the trajectories
-        soapoutcontainers (h5py.Group|h5py.File):
-            The file/group that will store the SOAP results
-        soaprcut (float):
+        trajcontainers:
+            The file/group that contains the trajectories.
+        soapoutcontainers:
+            The file/group that will store the SOAP results.
+        soaprcut:
             The cutoff for local region in angstroms. Should be bigger than 1
             angstrom (option passed to the desired SOAP engine).
             Defaults to 8.0.
-        soapnmax (int):
+        soapnmax:
             The number of radial basis functions (option passed to the desired
             SOAP engine). Defaults to 8.
-        soaplmax (int):
+        soaplmax:
             The maximum degree of spherical harmonics (option passed to the
             desired SOAP engine). Defaults to 8.
-        soapoutputchunkdim (int, optional):
+        soapoutputchunkdim:
             The dimension of the chunck of data in the SOAP results dataset.
             Defaults to 100.
-        soapnjobs (int, optional):
+        soapnjobs:
             the number of concurrent SOAP calculations (option passed to the
             desired SOAP engine). Defaults to 1.
-        soapatommask (list[str], optional):
+        soapatommask:
             the symbols of the atoms whose SOAP fingerprint will be calculated
             (option passed to getSoapEngine). Defaults to None.
-        centersmask (Iterable, optional):
+        centersmask:
             the indexes of the atoms whose SOAP fingerprint will be calculated
             (option passed getSoapEngine). Defaults to None.
-        soap_respectpbc (bool, optional):
+        soap_respectpbc:
             Determines whether the system is considered to be periodic (option
             passed to the desired SOAP engine). Defaults to True.
-        soapkwargs (dict, optional):
+        soapkwargs:
             additional keyword arguments to be passed to the selected SOAP
             engine.
             Defaults to {}.
-        usesoapfrom (KNOWNSOAPENGINES, optional):
+        usesoapfrom:
             This string determines the selected SOAP engine for the
             calculations.
             Defaults to "dscribe".
-        dooverride (bool, optional):
+        dooverride:
             if False will raise and exception if the user ask to override an
             already existing DataSet. Defaults to False.
-        verbose (bool, optional):
+        verbose:
             regulates the verbosity of the step by step operations.
             Defaults to True.
-        usetype (str,optional):
+        usetype:
             The precision used to store the data. Defaults to "float64".
 
     """

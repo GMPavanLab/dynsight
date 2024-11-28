@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import h5py
@@ -9,18 +9,18 @@ import SOAPify
 
 
 def fill_soap_vector_from_dscribe(
-    soapfromdscribe: np.ndarray,  # type: ignore[type-arg]
+    soapfromdscribe: np.ndarray[float, Any],
     lmax: int,
     nmax: int,
-    atomtypes: list | None = None,  # type: ignore[type-arg]
+    atomtypes: list[str] | None = None,
     atomicslices: dict | None = None,  # type: ignore[type-arg]
-) -> np.ndarray:  # type: ignore[type-arg]
-    """Returns the SOAP power spectrum from dsribe results.
+) -> np.ndarray[float, Any]:
+    """Returns the SOAP power spectrum from dscribe results.
 
     With also the symmetric part explicitly stored, see the note in
     https://singroup.github.io/dscribe/1.2.x/tutorials/descriptors/soap.html
 
-    No controls are implemented on the shape of the soapFromdscribe vector.
+    No controls are implemented on the shape of the soapfromdscribe vector.
 
     Parameters:
         soapfromdscribe:
@@ -30,13 +30,14 @@ def fill_soap_vector_from_dscribe(
         nmax:
             the n_max specified in the calculation.
         atomtypes:
-            Needs docs.
+            the list of atomic species. Defaults to None.
         atomicslices:
-            Needs docs.
+            the slices of the SOAP vector relative to the atomic species
+            combinations. Defaults to None.
 
     Returns:
         numpy.ndarray:
-            The full soap spectrum, with the symmetric part sored explicitly
+            The full soap spectrum, with the symmetric part sorted explicitly.
     """
     return SOAPify.fillSOAPVectorFromdscribe(
         soapFromdscribe=soapfromdscribe,
@@ -47,10 +48,10 @@ def fill_soap_vector_from_dscribe(
     )
 
 
-def get_soap_settings(fitsetdata: h5py.Dataset) -> dict:  # type: ignore[type-arg]
+def get_soap_settings(fitsetdata: h5py.Dataset) -> dict[str, Any]:
     """Gets the settings of the SOAP calculation.
 
-    you can feed directly this output to :func:`fillSOAPVectorFromdscribe`
+    You can feed directly this output to :func:`fillSOAPVectorFromdscribe`
 
     Parameters:
         fitsetdata:
