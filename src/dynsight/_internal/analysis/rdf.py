@@ -30,7 +30,7 @@ def compute_rdf(
         \langle \sigma(|\mathbf{r_i}\mathbf{r_j}| - r)\rangle
 
     The radial distribution function is calculated by histogramming distances
-    between two groups of atom `s1` and `s2`. Periodic boundary conditions are
+    between two groups of atoms `s1` and `s2`. Periodic boundary conditions are
     taken into account via the minimum-image convention. More information
     concerning this function can be found
     `here <https://docs.mdanalysis.org/1.1.1/documentation_pages/analysis/rdf.html>`_.
@@ -43,25 +43,25 @@ def compute_rdf(
         s2:
             Second atom group.
         distances_range:
-            Initial and final distance within which compute the RDF.
+            Initial and final distances within which to compute the RDF.
         exclusion_block:
             A tuple specifying the size of blocks
             (e.g., molecules) to exclude distances between atoms within the
             same block. If `s1` and `s2` are equal, it prevents
             self-interactions by default with (1, 1).
         nbins:
-            The number of bins used to divide the distance range for histogram
-            the RDF.
+            The number of bins used to divide the distance range for
+            histogramming the RDF.
         start:
             Initial molecular dynamics step.
         stop:
             Final molecular dynamics step.
         step:
-            Frequency at which the dynamic is sampled.
+            Frequency at which the dynamics is sampled.
 
     Returns:
-        Two arrays where the pair separation distance and the RDF values
-        are stored respectively.
+        Two arrays where the pair separation distances and the RDF values
+        are stored, respectively.
     """
     selection_1 = universe.select_atoms(s1)
     selection_2 = universe.select_atoms(s2)

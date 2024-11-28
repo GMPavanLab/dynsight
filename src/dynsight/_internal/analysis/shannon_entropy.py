@@ -17,18 +17,18 @@ def compute_data_entropy(
 
     Parameters:
         data:
-            the dataset of which the entropy has to be computed.
+            The dataset for which the entropy is to be computed.
 
         data_range:
-            a tuple (min, max) specifying the range over which the data
+            A tuple (min, max) specifying the range over which the data
             histogram must be computed.
 
         n_bins:
-            the number of bins with which the data histogram must be computed.
+            The number of bins with which the data histogram must be computed.
 
     Returns:
         entropy:
-            the value of the normalized Shannon entropy of the dataset.
+            The value of the normalized Shannon entropy of the dataset.
     """
     counts, _ = np.histogram(
         data,
@@ -52,16 +52,16 @@ def compute_entropy_gain(
 
     Parameters:
         data:
-            the dataset over which the clustering is performed.
+            The dataset over which the clustering is performed.
 
         labels:
-            the clustering labels. Has the same shape as "data".
+            The clustering labels. Has the same shape as "data".
 
         n_bins (default = 20):
-            the number of bins with which the data histogram must be computed.
+            The number of bins with which the data histogram must be computed.
 
     Returns:
-        a float which is the difference between the entropy of the raw and
+        A float which is the difference between the entropy of the raw and
         clustered data, relative to the entropy of the raw data.
     """
     if data.shape[0] != labels.shape[0]:

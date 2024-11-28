@@ -16,6 +16,9 @@ logging.basicConfig(
 def main() -> None:
     """Run the example.
 
+    * Original author: Martina Crippa
+    * Mantainer: Matteo Becchi
+
     Example available for cpctools here:
     https://github.com/GMPavanLab/cpctools/blob/main/Examples/LENS.ipynb
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:
     import h5py
@@ -9,43 +9,46 @@ import SOAPify
 
 
 def timesoap(
-    soaptrajectory: np.ndarray,  # type: ignore[type-arg]
+    soaptrajectory: np.ndarray[float, Any],
     window: int = 1,
     stride: int | None = None,
     backward: bool = False,
     returndiff: bool = True,
-    distancefunction: Callable = SOAPify.simpleSOAPdistance,  # type: ignore[type-arg]
-) -> tuple[np.ndarray, np.ndarray]:  # type: ignore[type-arg]
+    distancefunction: Callable[
+        [np.ndarray[float, Any], np.ndarray[float, Any], int], float
+    ] = SOAPify.simpleSOAPdistance,
+) -> tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
     """Performs the 'timeSOAP' analysis on the given SOAP trajectory.
 
     * Original author: Cristina Caruso
-    * Mantainer: Daniele Rapetti
+    * Maintainer: Matteo Becchi
 
     Parameters:
         soaptrajectory:
-            a trajectory of SOAP fingerprints, should have shape
-            (nFrames,nAtoms,SOAPlenght)
+            A trajectory of SOAP fingerprints. Should have shape
+            (nFrames, nAtoms, SOAPlength).
         window:
-            the dimension of the windows between each state confrontations.
+            The dimension of the windows between each state confrontation.
             Defaults to 1.
         stride:
-            the stride in frames between each state confrontation.
-            **NOT IN USE**.
-            Defaults to None.
+            The stride in frames between each state confrontation.
+            **NOT IN USE**. Defaults to None.
         backward:
-            If true the soap distance is referred to the previous frame.
-             **NOT IN USE**. Defaulst to True.
+            If True, the SOAP distance is referred to the previous frame.
+            **NOT IN USE**. Defaults to True.
         returndiff:
-            If true returns also the first derivative of timeSOAP.
+            If True, returns the first derivative of timeSOAP.
             Defaults to True.
         distancefunction:
-            the function that define the distance. Defaults to
+            The function that defines the distance. Defaults to
             :func:`SOAPify.distances.simpleSOAPdistance`.
 
     Returns:
-        - **timedSOAP** the timeSOAP values, shape(frames-1,natoms)
-        - **deltaTimedSOAP** the derivatives of timeSOAP,
-             shape(natoms, frames-2)
+        tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
+            A tuple of elements:
+                - **timedSOAP**: The timeSOAP values, shape (frames-1, nAtoms).
+                - **deltaTimedSOAP**: The derivatives of timeSOAP,
+                  shape (nAtoms, frames-2).
     """
     return SOAPify.timeSOAP(
         SOAPTrajectory=soaptrajectory,
@@ -58,61 +61,62 @@ def timesoap(
 
 
 def timesoapsimple(
-    soaptrajectory: np.ndarray,  # type: ignore[type-arg]
+    soaptrajectory: np.ndarray[float, Any],
     window: int = 1,
     stride: int | None = None,
     backward: bool = False,
     returndiff: bool = True,
-) -> tuple[np.ndarray, np.ndarray]:  # type: ignore[type-arg]
+) -> tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
     r"""Performs 'timeSOAP' analysis on **normalized** SOAP trajectory.
 
-    this is optimized to use :func:`SOAPify.distances.simpleSOAPdistance`,
-    without calling it.
-
-    .. warning:: this function works **only** with normalized numpy.float64
-        soap vectors!
-
-        The SOAP distance is calculated with
-
-        .. math::
-            d(\vec{a},\vec{b})=\\sqrt{2-2\frac{\vec{a}\\cdot\vec{b}}{\\left\\|\vec{a}\right\\|\\left\\|\vec{b}\right\\|}}
-
-        That is equivalent to
-
-        .. math::
-            d(\vec{a},\vec{b})=\\sqrt{2-2\\hat{a}\\cdot\\hat{b}} =
-            \\sqrt{\\hat{a}\\cdot\\hat{a}+\\hat{b}\\cdot
-            \\hat{b}-2\\hat{a}\\cdot\\hat{b}} =
-
-            \\sqrt{(\\hat{a}-\\hat{b})\\cdot(\\hat{a}-\\hat{b})}
-
-        That is the euclidean distance between the versors
-
     * Original author: Cristina Caruso
-    * Mantainer: Daniele Rapetti
+    * Maintainer: Matteo Becchi
+
+    This function is optimized to use
+    :func:`SOAPify.distances.simpleSOAPdistance`,
+    without directly calling it.
+
+    .. warning:: This function works **only** with normalized numpy.float64
+        SOAP vectors!
+
+    The SOAP distance is calculated with:
+
+    .. math::
+        d(\vec{a},\vec{b}) =
+        \sqrt{2-2\frac{\vec{a}\cdot\vec{b}}{||\vec{a}||\cdot||\vec{b}||}}
+
+    This is equivalent to:
+
+    .. math::
+        d(\vec{a},\vec{b})=\sqrt{2-2\hat{a}\cdot\hat{b}} =
+        \sqrt{\hat{a}\cdot\hat{a}+\hat{b}\cdot\hat{b}-2\hat{a}\cdot\hat{b}} =
+        \sqrt{(\hat{a}-\hat{b})\cdot(\hat{a}-\hat{b})} =
+        ||\hat{a}-\hat{b}||
+
+    This represents the Euclidean distance between the versors.
 
     Parameters:
         soaptrajectory:
-            a **normalized** trajectory of SOAP fingerprints, should have shape
-            (nFrames,nAtoms,SOAPlenght)
+            A **normalized** trajectory of SOAP fingerprints. Should have shape
+            (nFrames, nAtoms, SOAPlength).
         window:
-            the dimension of the windows between each state confrontations.
+            The dimension of the window between each state confrontation.
             Defaults to 1.
         stride:
-            the stride in frames between each state confrontation.
-            **NOT IN USE**.
-            Defaults to None.
+            The stride in frames between each state confrontation.
+            **NOT IN USE**. Defaults to None.
         backward:
-            If true the soap distance is referred to the previous frame.
-             **NOT IN USE**. Defaulst to True.
+            If True, the SOAP distance is referred to the previous frame.
+            **NOT IN USE**. Defaults to True.
         returndiff:
-            If true returns also the first derivative of timeSOAP.
+            If True, returns the first derivative of timeSOAP.
             Defaults to True.
 
     Returns:
-        - **timedSOAP** the timeSOAP values, shape(frames-1,natoms)
-        - **deltaTimedSOAP** the derivatives of timeSOAP, shape(natoms,
-            frames-2)
+        tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
+            - **timedSOAP**: The timeSOAP values, shape (frames-1, nAtoms).
+            - **deltaTimedSOAP**: The derivatives of timeSOAP,
+                shape (nAtoms, frames-2).
     """
     return SOAPify.timeSOAPsimple(
         SOAPTrajectory=soaptrajectory,
@@ -128,37 +132,41 @@ def gettimesoapsimple(
     window: int = 1,
     stride: int | None = None,
     backward: bool = False,
-) -> tuple[np.ndarray, np.ndarray]:  # type: ignore[type-arg]
+) -> tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
     """Shortcut to extract the timeSOAP from large datasets.
 
-    This function is the equivalent to (old cpctools version below):
+    * Original author: Cristina Caruso
+    * Maintainer: Cristina Caruso
 
-    - loading a chunk of the trajectory from a h5py.Dataset with a SOAP
-      fingerprints trajectory
-    - filling the vector with :func:`SOAPify.utils.fillSOAPVectorFromdscribe`
-    - normalizing it with :func:`SOAPify.utils.normalizeArray`
-    - calculating the timeSOAP with  :func:`timeSOAPsimple`
-      and then returning timeSOAP and the derivative
+    This function is equivalent to the following (old cpctools version):
+
+    - Loading a chunk of the trajectory from an h5py.Dataset containing SOAP
+      fingerprints.
+    - Filling the vector with :func:`SOAPify.utils.fillSOAPVectorFromdscribe`.
+    - Normalizing it with :func:`SOAPify.utils.normalizeArray`.
+    - Calculating the timeSOAP with :func:`timeSOAPsimple`, and then returning
+      timeSOAP and its derivative.
 
     Parameters:
         soapdataset:
-            the dataset with the SOAP fingerprints
+            The dataset containing the SOAP fingerprints.
         window:
-            the dimension of the windows between each state confrontations.
-            See :func:`timeSOAPsimple`
+            The dimension of the window between each state confrontation.
+            See :func:`timeSOAPsimple`.
             Defaults to 1.
         stride:
-            the stride in frames between each state confrontation.
-            See :func:`timeSOAPsimple`
+            The stride in frames between each state confrontation.
+            See :func:`timeSOAPsimple`.
             Defaults to None.
         backward:
-            If true the soap distance is referred to the previous frame.
-            See :func:`timeSOAPsimple` . Defaulst to True.
+            If True, the SOAP distance is referred to the previous frame.
+            See :func:`timeSOAPsimple`. Defaults to True.
 
     Returns:
-        - **timedSOAP** the timeSOAP values, shape(frames-1,natoms)
-        - **deltaTimedSOAP** the derivatives of timeSOAP,
-              shape(natoms, frames-2)
+        tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
+            - **timedSOAP**: The timeSOAP values, shape (frames-1, nAtoms).
+            - **deltaTimedSOAP**: The derivatives of timeSOAP, shape
+                (nAtoms, frames-2).
     """
     return SOAPify.getTimeSOAPSimple(
         soapDataset=soapdataset,

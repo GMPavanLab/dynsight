@@ -19,6 +19,8 @@ def test_emulate_lens(
 ) -> None:
     """Test :class:`.` SOMETHING.
 
+    * Original author: Martina Crippa
+
     Parameters:
 
         hdf5_file:
@@ -28,6 +30,8 @@ def test_emulate_lens(
             Something.
 
     """
+    # this is the original version by Martina Crippa
+
     inputuniverse = hdf5_file[1]
     wantedslice = slice(0, len(inputuniverse.trajectory) // input1_2, 1)
     coff = 4.0
@@ -36,7 +40,6 @@ def test_emulate_lens(
         cutoff=coff,
         trajslice=wantedslice,
     )
-    # this is the original version by Martina Crippa
     # def local_dynamics(list_sum):
     particle = list(range(np.shape(nnlistperframe)[1]))
     ncont_tot = []

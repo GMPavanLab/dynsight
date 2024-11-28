@@ -24,23 +24,26 @@ def saponify_trajectory(
     verbose: bool = True,
     usetype: str = "float64",
 ) -> None:
-    """Calculate the SOAP fingerprints for each atom in a hdf5 trajectory.
+    """Calculate the SOAP fingerprints for each atom in an HDF5 trajectory.
 
-    Works exaclty as :func:`saponifyMultipleTrajectories` except for that it
+    * Original author: Daniele Rapetti
+    * Maintainer: Matteo Becchi
+
+    Works exactly like :func:`saponifyMultipleTrajectories`, except that it
     calculates the fingerprints only for the passed trajectory group
     (see :func:`SOAPify.HDF5er.HDF5erUtils.isTrajectoryGroup`).
 
     `SOAPatomMask` and `centersMask` are mutually exclusive (see
-    :func:`SOAPify.engine.getSoapEngine`)
+    :func:`SOAPify.engine.getSoapEngine`).
 
     Parameters:
         trajcontainer:
-            The file/group that contains the trajectory.
+            The file or group that contains the trajectory.
         soapoutcontainer:
-            The file/group that will store the SOAP results.
+            The file or group that will store the SOAP results.
         soaprcut:
-            The cutoff for local region in angstroms. Should be bigger than 1
-            angstrom (option passed to the desired SOAP engine).
+            The cutoff for the local region in angstroms. Should be greater
+            than 1 angstrom (option passed to the desired SOAP engine).
             Defaults to 8.0.
         soapnmax:
             The number of radial basis functions (option passed to the desired
@@ -49,32 +52,31 @@ def saponify_trajectory(
             The maximum degree of spherical harmonics (option passed to the
             desired SOAP engine). Defaults to 8.
         soapoutputchunkdim:
-            The dimension of the chunck of data in the SOAP results dataset.
+            The dimension of the chunk of data in the SOAP results dataset.
             Defaults to 100.
         soapnjobs:
-            the number of concurrent SOAP calculations (option passed to the
+            The number of concurrent SOAP calculations (option passed to the
             desired SOAP engine). Defaults to 1.
         soapatommask:
-            the symbols of the atoms whose SOAP fingerprint will be calculated
+            The symbols of the atoms whose SOAP fingerprint will be calculated
             (option passed to the desired SOAP engine). Defaults to None.
         centersmask:
-            the indexes of the atoms whose SOAP fingerprint will be calculated
+            The indexes of the atoms whose SOAP fingerprint will be calculated
             (option passed to the desired SOAP engine). Defaults to None.
         soap_respectpbc:
             Determines whether the system is considered to be periodic
             (option passed to the desired SOAP engine). Defaults to True.
         soapkwargs (dict, optional):
-            additional keyword arguments to be passed to the SOAP engine.
+            Additional keyword arguments to be passed to the SOAP engine.
             Defaults to {}.
         usesoapfrom:
             This string determines the selected SOAP engine for the
-            calculations.
-            Defaults to "dscribe".
+            calculations. Defaults to "dscribe".
         dooverride:
-            if False will raise and exception if the user ask to override an
+            If False, raises an exception if the user tries to override an
             already existing DataSet. Defaults to False.
         verbose:
-            regulates the verbosity of the step by step operations.
+            Regulates the verbosity of the step-by-step operations.
             Defaults to True.
         usetype:
             The precision used to store the data. Defaults to "float64".
@@ -115,25 +117,28 @@ def saponify_multiple_trajectories(
     verbose: bool = True,
     usetype: str = "float64",
 ) -> None:
-    """Calculate and store SOAP descriptor for all trajectories in group/file.
+    """Calculate and store SOAP for all trajectories in a group or file.
 
-    `saponifyMultipleTrajectories` checks if any of the group contained in
+    * Original author: Daniele Rapetti
+    * Maintainer: Matteo Becchi
+
+    `saponifyMultipleTrajectories` checks if any of the groups contained in
     `trajContainers` is a "trajectory group"
     (see :func:`SOAPify.HDF5er.HDF5erUtils.isTrajectoryGroup`) and then
-    calculates the soap fingerprints for that trajectory and saves the result
-    in a dataset within the `SOAPoutContainers` group or file
+    calculates the SOAP fingerprints for that trajectory and saves the result
+    in a dataset within the `SOAPoutContainers` group or file.
 
     `SOAPatomMask` and `centersMask` are mutually exclusive (see
-    :func:`SOAPify.engine.getSoapEngine`)
+    :func:`SOAPify.engine.getSoapEngine`).
 
     Parameters:
         trajcontainers:
-            The file/group that contains the trajectories.
+            The file or group that contains the trajectories.
         soapoutcontainers:
-            The file/group that will store the SOAP results.
+            The file or group that will store the SOAP results.
         soaprcut:
-            The cutoff for local region in angstroms. Should be bigger than 1
-            angstrom (option passed to the desired SOAP engine).
+            The cutoff for the local region in angstroms. Should be greater
+            than 1 angstrom (option passed to the desired SOAP engine).
             Defaults to 8.0.
         soapnmax:
             The number of radial basis functions (option passed to the desired
@@ -142,37 +147,34 @@ def saponify_multiple_trajectories(
             The maximum degree of spherical harmonics (option passed to the
             desired SOAP engine). Defaults to 8.
         soapoutputchunkdim:
-            The dimension of the chunck of data in the SOAP results dataset.
+            The dimension of the chunk of data in the SOAP results dataset.
             Defaults to 100.
         soapnjobs:
-            the number of concurrent SOAP calculations (option passed to the
+            The number of concurrent SOAP calculations (option passed to the
             desired SOAP engine). Defaults to 1.
         soapatommask:
-            the symbols of the atoms whose SOAP fingerprint will be calculated
-            (option passed to getSoapEngine). Defaults to None.
+            The symbols of the atoms whose SOAP fingerprint will be calculated
+            (option passed to :func:`getSoapEngine`). Defaults to None.
         centersmask:
-            the indexes of the atoms whose SOAP fingerprint will be calculated
-            (option passed getSoapEngine). Defaults to None.
+            The indexes of the atoms whose SOAP fingerprint will be calculated
+            (option passed to :func:`getSoapEngine`). Defaults to None.
         soap_respectpbc:
             Determines whether the system is considered to be periodic (option
             passed to the desired SOAP engine). Defaults to True.
         soapkwargs:
-            additional keyword arguments to be passed to the selected SOAP
-            engine.
-            Defaults to {}.
+            Additional keyword arguments to be passed to the selected SOAP
+            engine. Defaults to {}.
         usesoapfrom:
             This string determines the selected SOAP engine for the
-            calculations.
-            Defaults to "dscribe".
+            calculations. Defaults to "dscribe".
         dooverride:
-            if False will raise and exception if the user ask to override an
+            If False, raises an exception if the user tries to override an
             already existing DataSet. Defaults to False.
         verbose:
-            regulates the verbosity of the step by step operations.
+            Regulates the verbosity of the step-by-step operations.
             Defaults to True.
         usetype:
             The precision used to store the data. Defaults to "float64".
-
     """
     SOAPify.saponifyMultipleTrajectories(
         trajContainers=trajcontainers,

@@ -9,6 +9,9 @@ import dynsight
 def test_lens_signals() -> None:
     """Test the consistency of LENS calculations with a control calculation.
 
+    * Original author: Martina Crippa
+    * Mantainer: Matteo Becchi
+
     This test verifies that the LENS calculation (LENS and nn) yields the same
     values as a control calculation at different r_cut.
 

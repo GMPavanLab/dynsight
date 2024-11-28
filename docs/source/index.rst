@@ -50,7 +50,7 @@ To get :mod:`.dynsight`, you can install it with pip::
 Dependencies
 ............
 
-The main dependancies are for SOAP analysis:
+The main dependencies are for SOAP analysis:
 
 * `cpctools <https://github.com/GMPavanLab/cpctools>`_
 * `dscribe (1.2.0 - 1.2.2) <https://singroup.github.io/dscribe/latest/>`_

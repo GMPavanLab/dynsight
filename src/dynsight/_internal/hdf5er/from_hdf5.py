@@ -15,6 +15,8 @@ def create_universe_from_slice(
 ) -> MDAnalysis.Universe:
     """Creates a MDanalysis.Universe from a trajectory group.
 
+    * Original author: Daniele Rapetti
+
     Parameters:
         trajectorygroup:
             the given trajectory group

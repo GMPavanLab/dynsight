@@ -15,29 +15,32 @@ def fill_soap_vector_from_dscribe(
     atomtypes: list[str] | None = None,
     atomicslices: dict[str, Any] | None = None,
 ) -> np.ndarray[float, Any]:
-    """Returns the SOAP power spectrum from dscribe results.
+    """Return the SOAP power spectrum from dscribe results.
 
-    With also the symmetric part explicitly stored, see the note in
-    https://singroup.github.io/dscribe/1.2.x/tutorials/descriptors/soap.html
+    * Original author: Daniele Rapetti
+    * Maintainer: Matteo Becchi
 
-    No controls are implemented on the shape of the soapfromdscribe vector.
+    Includes the symmetric part explicitly stored. See the note in
+    https://singroup.github.io/dscribe/1.2.x/tutorials/descriptors/soap.html.
+
+    No controls are implemented on the shape of the `soapfromdscribe` vector.
 
     Parameters:
         soapfromdscribe:
-            the result of the SOAP calculation from the dscribe utility
+            The result of the SOAP calculation from the dscribe utility.
         lmax:
-            the l_max specified in the calculation.
+            The l_max specified in the calculation.
         nmax:
-            the n_max specified in the calculation.
+            The n_max specified in the calculation.
         atomtypes:
-            the list of atomic species. Defaults to None.
+            The list of atomic species. Defaults to None.
         atomicslices:
-            the slices of the SOAP vector relative to the atomic species
+            The slices of the SOAP vector relative to the atomic species
             combinations. Defaults to None.
 
     Returns:
         numpy.ndarray:
-            The full soap spectrum, with the symmetric part sorted explicitly.
+            The full SOAP spectrum, with the symmetric part explicitly stored.
     """
     return SOAPify.fillSOAPVectorFromdscribe(
         soapFromdscribe=soapfromdscribe,
@@ -49,20 +52,23 @@ def fill_soap_vector_from_dscribe(
 
 
 def get_soap_settings(fitsetdata: h5py.Dataset) -> dict[str, Any]:
-    """Gets the settings of the SOAP calculation.
+    """Get the settings of the SOAP calculation.
 
-    You can feed directly this output to :func:`fillSOAPVectorFromdscribe`
+    * Original author: Daniele Rapetti
+    * Maintainer: Matteo Becchi
+
+    You can feed this output directly to :func:`fillSOAPVectorFromdscribe`.
 
     Parameters:
         fitsetdata:
-            A soap dataset with attributes.
+            A SOAP dataset with attributes.
 
     Returns:
-        dict: a dictionary with the following components:
-            - **nMax**
-            - **lMax**
-            - **atomTypes**
-            - **atomicSlices**
-
+        dict:
+            A dictionary with the following components:
+                - **nMax**
+                - **lMax**
+                - **atomTypes**
+                - **atomicSlices**
     """
     return SOAPify.getSOAPSettings(fitsetdata)

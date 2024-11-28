@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from MDAnalysis import AtomGroup, Universe
@@ -14,22 +14,22 @@ def list_neighbours_along_trajectory(
     cutoff: float,
     trajslice: slice | None = None,
 ) -> list[list[AtomGroup]]:
-    """Produce a per frame list of the neighbours, atom per atom.
+    """Produce a per-frame list of the neighbors, atom by atom.
 
     * Original author: Martina Crippa
-    * Mantainer: Daniele Rapetti
+    * Maintainer: Matteo Becchi
 
     Parameters:
         input_universe (Universe):
-            the universe, or the atomgroup containing the trajectory.
+            The universe, or the atom group containing the trajectory.
         cutoff (float):
-            the maximum neighbour distance.
+            The maximum neighbor distance.
         trajslice (slice, optional):
-            the slice of the trajectory to consider. Defaults to slice(None).
+            The slice of the trajectory to consider. Defaults to slice(None).
 
     Returns:
         list[list[AtomGroup]]:
-            list of AtomGroup wint the neighbours of each atom for each frame
+            List of AtomGroups with the neighbors of each atom for each frame.
     """
     if trajslice is None:
         trajslice = slice(None)
@@ -48,24 +48,29 @@ def list_neighbours_along_trajectory(
 
 def neighbour_change_in_time(
     neigh_list_per_frame: list[list[AtomGroup]],
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:  # type: ignore[type-arg]
-    """return, listed per each atoms the parameters used in the LENS analysis.
+) -> tuple[
+    np.ndarray[float, Any],
+    np.ndarray[int, Any],
+    np.ndarray[float, Any],
+    np.ndarray[float, Any],
+]:
+    """Return, listed per atom, the parameters used in the LENS analysis.
 
     * Original author: Martina Crippa
-    * Mantainer: Daniele Rapetti
+    * Mantainer: Matteo Becchi
 
     Parameters:
         neigh_list_per_frame:
-             a frame by frame list of the neighbours of each atom output
-             of :func:`listNeighboursAlongTrajectory`.
+            A frame-by-frame list of the neighbors of each atom, output
+            of :func:`listNeighboursAlongTrajectory`.
 
     Returns:
-        - **lensArray** The calculated LENS parameter
-        - **numberOfNeighs** the count of neighbours per frame
-        - **lensNumerators** the numerators used for calculating LENS
-            parameter
-        - **lensDenominators** the denominators used for calculating LENS
-            parameter
+        tuple:
+            A tuple of the following elements:
+                - lensArray: The calculated LENS parameter.
+                - numberOfNeighs: The count of neighbors per frame.
+                - lensNumerators: The numerators used for calculating LENS.
+                - lensDenominators: The denominators used for calculating LENS.
     """
     nat = np.asarray(neigh_list_per_frame, dtype=object).shape[1]
     nframes = np.asarray(neigh_list_per_frame, dtype=object).shape[0]
