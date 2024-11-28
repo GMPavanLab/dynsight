@@ -37,17 +37,20 @@ def saponify_trajectory(
 
     Parameters:
         trajcontainer:
-            Container of trajectory.
-        trajFname (str):
-            The name of the hdf5 file in wich the trajectory is stored
-        trajectoryGroupPath (str):
-            the path of the group that contains the trajectory in trajFname
+            the name of the hdf5 file that contains the input trajectory.
         soapoutcontainer (str):
-            the name of the hdf5 file that will contain the ouput or the SOAP
+            the name of the hdf5 file that will contain the ouput of the SOAP
             analysis.
-        exportDatasetName (str):
-            the name of the dataset that will contain the SOAP results,
-            it will be saved in the group called "SOAP"
+        soaprcut (float, optional):
+            The cutoff for local region in angstroms. Should be bigger than 1
+            angstrom (option passed to the desired SOAP engine).
+            Defaults to 8.0.
+        soapnmax (int, optional):
+            The number of radial basis functions (option passed to the desired
+            SOAP engine). Defaults to 8.
+        soaplmax (int, optional):
+            The maximum degree of spherical harmonics (option passed to the
+            desired SOAP engine). Defaults to 8.
         soapoutputchunkdim (int, optional):
             The dimension of the chunck of data in the SOAP results dataset.
             Defaults to 100.
@@ -59,16 +62,6 @@ def saponify_trajectory(
             (option passed to the desired SOAP engine). Defaults to None.
         centersmask:
             Mask.
-        soaprcut (float, optional):
-            The cutoff for local region in angstroms. Should be bigger than 1
-            angstrom (option passed to the desired SOAP engine).
-            Defaults to 8.0.
-        soapnmax (int, optional):
-            The number of radial basis functions (option passed to the desired
-            SOAP engine). Defaults to 8.
-        soaplmax (int, optional):
-            The maximum degree of spherical harmonics (option passed to the
-            desired SOAP engine). Defaults to 8.
         soap_respectpbc (bool, optional):
             Determines whether the system is considered to be periodic
             (option passed to the desired SOAP engine). Defaults to True.
