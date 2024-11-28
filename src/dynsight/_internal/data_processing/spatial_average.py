@@ -67,7 +67,7 @@ def spatialaverage(
 ) -> np.ndarray[float, Any]:
     """Compute spatially averaged descriptor values over neighboring particles.
 
-    This function takes a molecular dynamics (MD) simulation stored in a
+    This function takes a molecular dynamics (MD) simulation stored in an
     `MDAnalysis.Universe` object and a NumPy array of descriptor values (such
     as a physical property for each particle in each frame of the simulation).
     For each particle in the system, the function calculates the average of
@@ -97,10 +97,10 @@ def spatialaverage(
             defines the neighborhood radius within which particles are
             considered as neighbors.
         traj_cut:
-            Number of frames to exclude from the end of the trajectory.
+            The number of frames to exclude from the end of the trajectory.
         num_processes:
             The number of processes to use for parallel computation.
-            **Warning** adjust this based on the available cores.
+            **Warning:** Adjust this based on the available cores.
 
     Returns:
         A NumPy array of the same shape as the input descriptor array,
@@ -112,7 +112,7 @@ def spatialaverage(
         vector values.
 
     Raises:
-        ValueError
+        ValueError:
             If the input descriptor array does not have 2 or 3 dimensions,
             an error is raised.
 
@@ -124,9 +124,9 @@ def spatialaverage(
             import numpy as np
 
             u = MDAnalysis.Universe('topology.gro', 'trajectory.xtc')
-            descriptor = np.load('descriptor_array.npy)
+            descriptor = np.load('descriptor_array.npy')
 
-            averaged_values=spatialaverage(
+            averaged_values = spatialaverage(
                                 universe=u,
                                 descriptor_array=descriptor,
                                 selection='name CA',
@@ -134,10 +134,10 @@ def spatialaverage(
                                 num_processes=8)
 
         This example computes the spatial averages of the descriptor values
-        for atomsselected as `CA` atoms, within a cutoff of 5.0 units, using 8
-        processes in parallel. The result is stored in `averaged_values` NumPy
-        array. All the supported input file format by MDAnalysis can be used
-        to setup the Universe.
+        for atoms selected as `CA` atoms, within a cutoff of 5.0 units, using 8
+        processes in parallel. The result is stored in `averaged_values`, a
+        NumPy array. All supported input file formats by MDAnalysis can be used
+        to set up the Universe.
     """
     selection = universe.select_atoms(selection)
 
