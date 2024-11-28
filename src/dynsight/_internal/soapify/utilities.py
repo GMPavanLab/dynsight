@@ -17,6 +17,9 @@ def fill_soap_vector_from_dscribe(
 ) -> np.ndarray[float, Any]:
     """Returns the SOAP power spectrum from dscribe results.
 
+    * Original author: Daniele Rapetti
+    * Mantainer: Matteo Becchi
+
     With also the symmetric part explicitly stored, see the note in
     https://singroup.github.io/dscribe/1.2.x/tutorials/descriptors/soap.html
 
@@ -50,6 +53,9 @@ def fill_soap_vector_from_dscribe(
 
 def get_soap_settings(fitsetdata: h5py.Dataset) -> dict[str, Any]:
     """Gets the settings of the SOAP calculation.
+
+    * Original author: Daniele Rapetti
+    * Mantainer: Matteo Becchi
 
     You can feed directly this output to :func:`fillSOAPVectorFromdscribe`
 
