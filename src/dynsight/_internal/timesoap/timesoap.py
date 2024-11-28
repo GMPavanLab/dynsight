@@ -14,12 +14,14 @@ def timesoap(
     stride: int | None = None,
     backward: bool = False,
     returndiff: bool = True,
-    distancefunction: Callable = SOAPify.simpleSOAPdistance,  # type: ignore[type-arg]
+    distancefunction: Callable[
+        [np.ndarray[float, Any], np.ndarray[float, Any], int], float
+    ] = SOAPify.simpleSOAPdistance,
 ) -> tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
     """Performs the 'timeSOAP' analysis on the given SOAP trajectory.
 
     * Original author: Cristina Caruso
-    * Mantainer: Cristina Caruso
+    * Mantainer: Matteo Becchi
 
     Parameters:
         soaptrajectory:
