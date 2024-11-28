@@ -19,6 +19,8 @@ def test_count_neigh_for_lens(
 ) -> None:
     """Test :class:`.list_neighbours_along_trajectory`.
 
+    * Original author: Martina Crippa
+
     Parameters:
 
         hdf5_file:

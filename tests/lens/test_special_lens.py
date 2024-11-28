@@ -8,6 +8,8 @@ import dynsight
 def test_special_lens(lensfixtures: MDAnalysis.Universe) -> None:
     """Test :class:`.` SOMETHING.
 
+    * Original author: Martina Crippa
+
     Parameters:
 
         hdf5_file:
