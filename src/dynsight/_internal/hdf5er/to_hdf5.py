@@ -23,6 +23,8 @@ def mda_to_hdf5(
 ) -> None:
     """Creates an HDF5 trajectory groupfrom an mda trajectory.
 
+    * Original author: Daniele Rapetti
+
     Opens or creates the given HDF5 file, request the user's chosen group,
     then uploads an mda.Universe or an mda.AtomGroup to a h5py.Group in an
     hdf5 file
@@ -73,6 +75,8 @@ def universe_to_hdf5(
     usetype: str = "float64",
 ) -> None:
     """Uploads an mda.Universe or mda.AtomGroup to a h5py.Group in hdf5 file.
+
+    * Original author: Daniele Rapetti
 
     Parameters:
         mdatrajectory:
