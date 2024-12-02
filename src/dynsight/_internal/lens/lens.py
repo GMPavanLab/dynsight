@@ -54,7 +54,7 @@ def neighbour_change_in_time(
     np.ndarray[float, Any],
     np.ndarray[float, Any],
 ]:
-    """Return, listed per atom, the parameters used in the LENS analysis.
+    """Return, listed per atom, the LENS values at each frame.
 
     * Original author: Martina Crippa
     * Mantainer: Matteo Becchi
