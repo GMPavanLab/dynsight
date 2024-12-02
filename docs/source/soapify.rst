@@ -1,7 +1,7 @@
 SOAPify
 =======
 
-This package uses `cpctools` to run `SOAP <https://doi.org/10.1103/PhysRevB.87.184115>`_  analysis on molecular systems.
+This package uses `cpctools` and `DScribe <https://singroup.github.io/dscribe/latest/>`_ to run `SOAP <https://doi.org/10.1103/PhysRevB.87.184115>`_  analysis on molecular systems. For a detailed explanation of the parameters of the SOAP calculation, refer to the `DScribe documentation <https://singroup.github.io/dscribe/latest/tutorials/descriptors/soap.html>`_. 
 
 Saponify
 --------
@@ -21,3 +21,8 @@ Utilities
 
   get_soap_settings <_autosummary/dynsight.soapify.get_soap_settings>
   fill_soap_vector_from_dscribe <_autosummary/dynsight.soapify.fill_soap_vector_from_dscribe>
+
+Acknowledgements
+----------------
+
+The SOAPify code was originally written by Daniele Rapetti. 
