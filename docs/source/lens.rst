@@ -1,5 +1,5 @@
 LENS
-####
+====
 
 The `Local Environments and Neighbors Shuffling <https://doi.org/10.1073/pnas.2300565120>`_ (LENS) descriptor is a single-particle descriptor which allows measuring local diffusivity by tracking the changes in particles' neighbors identities along a trajectory. 
 
@@ -15,7 +15,7 @@ In this way, LENS is defined as a number between 0 and 1, where 0 correspond to 
 Examples of how to compute LENS can be found at ``examples/lens.py``. 
 
 Functions
-*********
+---------
 
 .. toctree::
   :maxdepth: 1
@@ -24,6 +24,6 @@ Functions
   neighbour_change_in_time <_autosummary/dynsight.lens.neighbour_change_in_time>
 
 Acknowledgements
-================
+----------------
 
 If you use LENS in your work, please cite `this paper <https://doi.org/10.1073/pnas.2300565120>`_. The LENS code was written by Martina Crippa.

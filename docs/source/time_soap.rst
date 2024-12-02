@@ -1,5 +1,5 @@
 timeSOAP
-########
+========
 
 `TimeSOAP <https://doi.org/10.1063/5.0147025>`_ (tSOAP) is a single-particle descriptor which allows monitoring the changes in the local particles' spatial arrangement by computing the variation, frame by frame, of the direction of the `SOAP <https://doi.org/10.1103/PhysRevB.87.184115>`_ vector centered on each particle. 
 
@@ -18,7 +18,7 @@ In this way, tSOAP is defined as a number between 0 and 2, where 0 correspond to
 Examples of how to compute tSOAP can be found at ``examples/timesoap.py``. 
 
 Functions
-*********
+---------
 
 .. toctree::
   :maxdepth: 1
@@ -28,6 +28,6 @@ Functions
   gettimesoapsimple <_autosummary/dynsight.time_soap.gettimesoapsimple>
 
 Acknowledgements
-================
+----------------
 
 If you use tSOAP in your work, please cite `this paper <https://doi.org/10.1063/5.0147025>`_. The tSOAP code was written by Cristina Caruso.
