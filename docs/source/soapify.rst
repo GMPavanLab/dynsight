@@ -1,8 +1,7 @@
 SOAPify
 =======
 
-This package uses `cpctools` to run SOAP (add citation) analysis on molecular
-systems.
+This package uses `cpctools` to run `SOAP <https://doi.org/10.1103/PhysRevB.87.184115>`_  analysis on molecular systems.
 
 Saponify
 --------

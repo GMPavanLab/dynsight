@@ -1,7 +1,7 @@
 timeSOAP
 ########
 
-`TimeSOAP <https://doi.org/10.1063/5.0147025>`_ (tSOAP) is a single-particle descriptor which allows monitoring the changes in the local particles' spatial arrangement by computing the variation, frame by frame, of the direction of the SOAP vector centered on each particle. 
+`TimeSOAP <https://doi.org/10.1063/5.0147025>`_ (tSOAP) is a single-particle descriptor which allows monitoring the changes in the local particles' spatial arrangement by computing the variation, frame by frame, of the direction of the `SOAP <https://doi.org/10.1103/PhysRevB.87.184115>`_ vector centered on each particle. 
 
 For each particle, at each trajectory frame, the SOAP power spectrum can be computed, giving an approximate representation of the chemical surrounding of that particle. 
 
