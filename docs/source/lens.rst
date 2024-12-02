@@ -26,4 +26,4 @@ Functions
 Acknowledgements
 ================
 
-The LENS code was written by Martina Crippa.
+If you use LENS in your work, please cite `this paper <https://doi.org/10.1073/pnas.2300565120>`_. The LENS code was written by Martina Crippa.
