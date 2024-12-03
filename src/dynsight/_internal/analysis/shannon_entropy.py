@@ -27,8 +27,31 @@ def compute_data_entropy(
             The number of bins with which the data histogram must be computed.
 
     Returns:
-        entropy:
-            The value of the normalized Shannon entropy of the dataset.
+        float:
+            entropy:
+                The value of the normalized Shannon entropy of the dataset.
+
+    Example:
+
+        .. testcode:: shannon1-test
+
+            import numpy as np
+            from dynsight.analysis import compute_data_entropy
+
+            np.random.seed(1234)
+            data = np.random.rand(100, 100)
+            data_range = (float(np.min(data)), float(np.max(data)))
+
+            data_entropy = compute_data_entropy(
+                data,
+                data_range,
+                n_bins=40,
+            )
+
+        .. testcode:: shannon1-test
+            :hide:
+
+            assert data_entropy == 0.9993954419344714
     """
     counts, _ = np.histogram(
         data,
@@ -63,6 +86,28 @@ def compute_entropy_gain(
     Returns:
         A float which is the difference between the entropy of the raw and
         clustered data, relative to the entropy of the raw data.
+
+    Example:
+
+        .. testcode:: shannon2-test
+
+            import numpy as np
+            from dynsight.analysis import compute_entropy_gain
+
+            np.random.seed(1234)
+            data = np.random.rand(100, 100)
+            labels = np.random.randint(-1, 2, size=(100, 100))
+
+            entropy_gain = compute_entropy_gain(
+                data,
+                labels,
+                n_bins=40,
+            )
+
+        .. testcode:: shannon2-test
+            :hide:
+
+            assert entropy_gain == 0.0010065005804883983
     """
     if data.shape[0] != labels.shape[0]:
         msg = (

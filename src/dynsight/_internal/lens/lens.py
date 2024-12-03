@@ -30,6 +30,36 @@ def list_neighbours_along_trajectory(
     Returns:
         list[list[AtomGroup]]:
             List of AtomGroups with the neighbors of each atom for each frame.
+
+    Example:
+
+        .. testsetup:: lens1-test
+
+            import pathlib
+
+            path = pathlib.Path('source/_static/ex_test_files')
+
+        .. testcode:: lens1-test
+
+            import numpy as np
+            import MDAnalysis
+            from dynsight.lens import list_neighbours_along_trajectory
+
+            univ = MDAnalysis.Universe(path / "trajectory.xyz")
+            cutoff = 2.0
+
+            neigh_counts = list_neighbours_along_trajectory(
+                input_universe=univ,
+                cutoff=cutoff,
+            )
+
+        .. testcode:: lens1-test
+            :hide:
+
+            assert neigh_counts[0][0][3] == 17
+
+        All supported input file formats by MDAnalysis can be used
+        to set up the Universe.
     """
     if trajslice is None:
         trajslice = slice(None)
@@ -54,7 +84,7 @@ def neighbour_change_in_time(
     np.ndarray[float, Any],
     np.ndarray[float, Any],
 ]:
-    """Return, listed per atom, the parameters used in the LENS analysis.
+    """Return, listed per atom, the LENS values at each frame.
 
     * Original author: Martina Crippa
     * Mantainer: Matteo Becchi
@@ -68,9 +98,45 @@ def neighbour_change_in_time(
         tuple:
             A tuple of the following elements:
                 - lensArray: The calculated LENS parameter.
+                    It's a numpy.array of shape (n_particles, n_frames - 1)
                 - numberOfNeighs: The count of neighbors per frame.
+                    It's a numpy.array of shape (n_particles, n_frames)
                 - lensNumerators: The numerators used for calculating LENS.
+                    It's a numpy.array of shape (n_particles, n_frames - 1)
                 - lensDenominators: The denominators used for calculating LENS.
+                    It's a numpy.array of shape (n_particles, n_frames - 1)
+
+    Example:
+
+        .. testsetup:: lens2-test
+
+            import pathlib
+
+            path = pathlib.Path('source/_static/ex_test_files')
+
+        .. testcode:: lens2-test
+
+            import numpy as np
+            import MDAnalysis
+            import dynsight.lens as lens
+
+            univ = MDAnalysis.Universe(path / "trajectory.xyz")
+            cutoff = 3.0
+
+            neig_counts = lens.list_neighbours_along_trajectory(
+                input_universe=univ,
+                cutoff=cutoff,
+            )
+
+            lens, n_neigh, *_ = lens.neighbour_change_in_time(neig_counts)
+
+        .. testcode:: lens2-test
+            :hide:
+
+            assert lens[0][4] == 0.75
+
+        All supported input file formats by MDAnalysis can be used
+        to set up the Universe.
     """
     nat = np.asarray(neigh_list_per_frame, dtype=object).shape[1]
     nframes = np.asarray(neigh_list_per_frame, dtype=object).shape[0]

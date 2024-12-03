@@ -1,6 +1,10 @@
 analysis
 ========
 
+The ``analysis`` modulus contains functions for miscellaneous analyses on many-body trajectories. 
+
+Functions
+---------
 
 .. toctree::
   :maxdepth: 1

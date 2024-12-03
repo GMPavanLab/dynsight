@@ -62,6 +62,37 @@ def compute_rdf(
     Returns:
         Two arrays where the pair separation distances and the RDF values
         are stored, respectively.
+
+    Example:
+
+        .. testsetup:: rdf-test
+
+            import pathlib
+
+            path = pathlib.Path('source/_static/ex_test_files')
+
+        .. testcode:: rdf-test
+
+            import numpy as np
+            import MDAnalysis
+            from dynsight.analysis import compute_rdf
+
+            univ = MDAnalysis.Universe(path / "trajectory.xyz", dt=1.0)
+            univ.dimensions = np.array([10.0, 10.0, 10.0, 90.0, 90.0, 90.0])
+
+            r_dist, rdf = compute_rdf(
+                universe=univ,
+                distances_range=[0.0, 10.0],
+                nbins=100,
+            )
+
+        .. testcode:: rdf-test
+            :hide:
+
+            assert rdf[7] == 1.3168471372060335
+
+        All supported input file formats by MDAnalysis can be used
+        to set up the Universe.
     """
     selection_1 = universe.select_atoms(s1)
     selection_2 = universe.select_atoms(s2)
@@ -78,4 +109,4 @@ def compute_rdf(
     )
 
     rdf.run(verbose=True, start=start, stop=stop, step=step)
-    return rdf.bins, rdf.rdf
+    return rdf.results.bins, rdf.results.rdf
