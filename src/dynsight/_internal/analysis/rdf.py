@@ -80,7 +80,7 @@ def compute_rdf(
             univ = MDAnalysis.Universe(path / "trajectory.xyz", dt=1.0)
             univ.dimensions = np.array([10.0, 10.0, 10.0, 90.0, 90.0, 90.0])
 
-            _, rdf = compute_rdf(
+            r_dist, rdf = compute_rdf(
                 universe=univ,
                 distances_range=[0.0, 10.0],
                 nbins=100,
