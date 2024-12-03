@@ -33,19 +33,30 @@ def list_neighbours_along_trajectory(
 
     Example:
 
-        .. code-block:: python
+        .. testsetup:: lens1-test
+
+            import pathlib
+
+            path = pathlib.Path('source/_static/ex_test_files')
+
+        .. testcode:: lens1-test
 
             import numpy as np
             import MDAnalysis
             from dynsight.lens import list_neighbours_along_trajectory
 
-            univ = MDAnalysis.Universe('topology.gro', 'trajectory.xtc')
-            cutoff = 10.0
+            univ = MDAnalysis.Universe(path / "trajectory.xyz")
+            cutoff = 2.0
 
-            neig_counts = dynsight.lens.list_neighbours_along_trajectory(
+            neigh_counts = list_neighbours_along_trajectory(
                 input_universe=univ,
                 cutoff=cutoff,
             )
+
+        .. testcode:: lens1-test
+            :hide:
+
+            assert neigh_counts[0][0][3] == 17
 
         All supported input file formats by MDAnalysis can be used
         to set up the Universe.
@@ -97,14 +108,20 @@ def neighbour_change_in_time(
 
     Example:
 
-        .. code-block:: python
+        .. testsetup:: lens2-test
+
+            import pathlib
+
+            path = pathlib.Path('source/_static/ex_test_files')
+
+        .. testcode:: lens2-test
 
             import numpy as np
             import MDAnalysis
             import dynsight.lens as lens
 
-            univ = MDAnalysis.Universe('topology.gro', 'trajectory.xtc')
-            cutoff = 10.0
+            univ = MDAnalysis.Universe(path / "trajectory.xyz")
+            cutoff = 3.0
 
             neig_counts = lens.list_neighbours_along_trajectory(
                 input_universe=univ,
@@ -112,6 +129,11 @@ def neighbour_change_in_time(
             )
 
             lens, n_neigh, *_ = lens.neighbour_change_in_time(neig_counts)
+
+        .. testcode:: lens2-test
+            :hide:
+
+            assert lens[0][4] == 0.75
 
         All supported input file formats by MDAnalysis can be used
         to set up the Universe.
