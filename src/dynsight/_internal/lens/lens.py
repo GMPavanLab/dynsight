@@ -30,6 +30,25 @@ def list_neighbours_along_trajectory(
     Returns:
         list[list[AtomGroup]]:
             List of AtomGroups with the neighbors of each atom for each frame.
+
+    Example:
+
+        .. code-block:: python
+
+            import numpy as np
+            import MDAnalysis
+            from dynsight.lens import list_neighbours_along_trajectory
+
+            univ = MDAnalysis.Universe('topology.gro', 'trajectory.xtc')
+            cutoff = 10.0
+
+            neig_counts = dynsight.lens.list_neighbours_along_trajectory(
+                input_universe=univ,
+                cutoff=cutoff,
+            )
+
+        All supported input file formats by MDAnalysis can be used
+        to set up the Universe.
     """
     if trajslice is None:
         trajslice = slice(None)
@@ -68,9 +87,34 @@ def neighbour_change_in_time(
         tuple:
             A tuple of the following elements:
                 - lensArray: The calculated LENS parameter.
+                    It's a numpy.array of shape (n_particles, n_frames - 1)
                 - numberOfNeighs: The count of neighbors per frame.
+                    It's a numpy.array of shape (n_particles, n_frames)
                 - lensNumerators: The numerators used for calculating LENS.
+                    It's a numpy.array of shape (n_particles, n_frames - 1)
                 - lensDenominators: The denominators used for calculating LENS.
+                    It's a numpy.array of shape (n_particles, n_frames - 1)
+
+    Example:
+
+        .. code-block:: python
+
+            import numpy as np
+            import MDAnalysis
+            import dynsight.lens as lens
+
+            univ = MDAnalysis.Universe('topology.gro', 'trajectory.xtc')
+            cutoff = 10.0
+
+            neig_counts = lens.list_neighbours_along_trajectory(
+                input_universe=univ,
+                cutoff=cutoff,
+            )
+
+            lens, n_neigh, *_ = lens.neighbour_change_in_time(neig_counts)
+
+        All supported input file formats by MDAnalysis can be used
+        to set up the Universe.
     """
     nat = np.asarray(neigh_list_per_frame, dtype=object).shape[1]
     nframes = np.asarray(neigh_list_per_frame, dtype=object).shape[0]
