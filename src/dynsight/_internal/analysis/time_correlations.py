@@ -8,7 +8,7 @@ import numpy as np
 def self_time_correlation(
     data: np.ndarray[float, Any],
     max_delay: int | None = None,
-) -> np.ndarray[float, Any]:
+) -> tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
     """Computes the mean self time correlation function for time-series.
 
     Takes as input an array of shape (n_particles, n_frames), where the
@@ -29,8 +29,11 @@ def self_time_correlation(
             delay. Default is None.
 
     Returns:
-        np.ndarray of shape (max_delay,):
-            The values of the TCF for all delays from zero to max_delay - 1.
+        tuple[np.ndarray, np.ndarray]:
+            * The values of the TCF for all delays from zero to max_delay - 1.
+
+            * The stndard error on the TCF for all delays from zero to
+                max_delay - 1.
 
     Example:
 
@@ -45,12 +48,12 @@ def self_time_correlation(
             n_frames = 100
             data = np.random.rand(n_particles, n_frames)
 
-            time_corr = self_time_correlation(data)
+            time_corr, _ = self_time_correlation(data)
 
         .. testcode:: tcf-test
             :hide:
 
-            assert time_corr[1] == 0.005519088806189558
+            assert time_corr[1] == 0.005519088806189553
 
     """
     n_part, n_frames = data.shape
@@ -61,20 +64,25 @@ def self_time_correlation(
         max_delay = n_frames
 
     correlation = np.zeros(max_delay)
+    correlation_error = np.zeros(max_delay)
     for t_prime in range(max_delay):
         # Compute correlation for time lag t_prime
         valid_t = n_frames - t_prime
-        corr_sum = 0
-        for n in range(n_part):
-            corr_sum += np.dot(
-                data[n, :valid_t],
-                data[n, t_prime : valid_t + t_prime],
+        corr_sum = [
+            np.dot(
+                tmp[:valid_t],
+                tmp[t_prime : valid_t + t_prime],
             )
-        correlation[t_prime] = corr_sum / (n_part * valid_t)
+            for tmp in data
+        ]
+        correlation[t_prime] = np.mean(corr_sum) / valid_t
+        correlation_error[t_prime] = np.std(corr_sum) / valid_t
 
     # Normalize the correlation function
     correlation /= correlation[0]
-    return correlation
+    correlation_error /= correlation[0]
+
+    return correlation, correlation_error
 
 
 def cross_time_correlation(
