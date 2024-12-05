@@ -50,7 +50,7 @@ def self_time_correlation(
         .. testcode:: tcf-test
             :hide:
 
-            assert time_corr[0] == 1.0
+            assert time_corr[1] == 0.005519088806189558
 
     """
     n_part, n_frames = data.shape
@@ -121,7 +121,7 @@ def cross_time_correlation(
         .. testcode:: tcf-test
             :hide:
 
-            assert time_corr[0] > 0.0
+            assert time_corr[0] == 0.0002474572311281276
 
     """
     n_part, n_frames = data.shape
