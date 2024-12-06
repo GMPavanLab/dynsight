@@ -76,7 +76,8 @@ def self_time_correlation(
             for tmp in data
         ]
         correlation[t_prime] = np.mean(corr_sum) / valid_t
-        correlation_error[t_prime] = np.std(corr_sum) / (valid_t * n_part)
+        correlation_error[t_prime] = np.std(corr_sum) / (
+            valid_t * np.sqrt(n_part))
 
     # Normalize the correlation function
     norm_fact = correlation[0]
