@@ -65,6 +65,7 @@ def self_time_correlation(
 
     correlation = np.zeros(max_delay)
     correlation_error = np.zeros(max_delay)
+
     for t_prime in range(max_delay):
         # Compute correlation for time lag t_prime
         valid_t = n_frames - t_prime
@@ -91,7 +92,7 @@ def self_time_correlation(
 def cross_time_correlation(
     data: np.ndarray[float, Any],
     max_delay: int | None = None,
-) -> np.ndarray[float, Any]:
+) -> tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
     """Computes the mean cross time correlation function for time-series.
 
     Takes as input an array of shape (n_particles, n_frames), where the
@@ -111,8 +112,11 @@ def cross_time_correlation(
             delay. Default is None.
 
     Returns:
-        np.ndarray of shape (max_delay,):
-            The values of the TCF for all delays from zero to max_delay - 1.
+        tuple[np.ndarray, np.ndarray]:
+            * The values of the TCF for all delays from zero to max_delay - 1.
+
+            * The stndard error on the TCF for all delays from zero to
+                max_delay - 1.
 
     Example:
 
@@ -127,12 +131,12 @@ def cross_time_correlation(
             n_frames = 100
             data = np.random.rand(n_particles, n_frames)
 
-            time_corr = cross_time_correlation(data)
+            time_corr, _ = cross_time_correlation(data)
 
         .. testcode:: tcf-test
             :hide:
 
-            assert time_corr[0] == 0.0002474572311281276
+            assert time_corr[0] == 0.0002474572311281272
 
     """
     n_part, n_frames = data.shape
@@ -145,24 +149,28 @@ def cross_time_correlation(
 
     # Initialize the cross-correlation array
     cross_correlation = np.zeros(max_delay)
+    correlation_error = np.zeros(max_delay)
 
     # Loop over all time lags t'
     for t_prime in range(max_delay):
         valid_t = n_frames - t_prime
-        corr_sum = 0
+        corr_sum: list[float] = []
 
         # Compute cross-correlation for each pair of particles (i, j)
         for i in range(n_part):
-            for j in range(n_part):
-                if i != j:  # Skip self-correlation
-                    corr_sum += np.dot(
-                        data[i, :valid_t],
-                        data[j, t_prime : valid_t + t_prime],
-                    )
+            corr_sum.extend(
+                np.dot(
+                    data[i, :valid_t],
+                    data[j, t_prime : valid_t + t_prime],
+                )
+                for j in range(n_part)
+                if i != j  # Skip self-correlation
+            )
 
         # Average over particle pairs (i, j)
-        cross_correlation[t_prime] = corr_sum / (
-            n_part * (n_part - 1) * valid_t
+        cross_correlation[t_prime] = np.mean(corr_sum) / valid_t
+        correlation_error[t_prime] = np.std(corr_sum) / (
+            valid_t * np.sqrt(n_part * (n_part - 1))
         )
 
-    return cross_correlation
+    return cross_correlation, correlation_error
