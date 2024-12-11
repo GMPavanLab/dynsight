@@ -1,4 +1,4 @@
-from __future__ import annotations
+"""Functions for computing correlation functions between particles."""
 
 from typing import Any
 
@@ -25,8 +25,8 @@ def self_time_correlation(
 
         max_delay:
             The TCF will be computed for all the delay values from zero to
-            max_delay - 1. If None, il will be set to the maximum possible
-            delay. Default is None.
+            max_delay - 1 frames. If None, il will be set to the maximum
+            possible delay. Default is None.
 
     Returns:
         tuple[np.ndarray, np.ndarray]:
@@ -108,8 +108,8 @@ def cross_time_correlation(
 
         max_delay:
             The TCF will be computed for all the delay values from zero to
-            max_delay - 1. If None, il will be set to the maximum possible
-            delay. Default is None.
+            max_delay - 1 frames. If None, il will be set to the maximum
+            possible delay. Default is None.
 
     Returns:
         tuple[np.ndarray, np.ndarray]:
