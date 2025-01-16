@@ -77,7 +77,7 @@ def main() -> None:
     """ STEP 2: CLUSTERING THE WHOLE RANGE OF TIME RESOLUTIONS
     This allows to select the optimal time resolution for the analysis,
     avoiding an a priori choice."""
-    tau_windows = np.unique(np.geomspace(2, 499, num=20, dtype=int))
+    tau_windows = np.unique(np.geomspace(2, n_frames, num=20, dtype=int))
 
     tra = np.zeros((len(tau_windows), 3))  # List of number of states and
     # ENV0 population for each tau_window
