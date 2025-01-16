@@ -124,7 +124,7 @@ def main() -> None:
     fig, axes = plt.subplots(2, sharey=True)
     for i in range(4):
         axes[0].plot(tsoap[:, i], label=f"Atom {i}")
-        axes[1].plot(tsoap[:, natoms - 1 - i], label=f"Atom {natoms-1-i}")
+        axes[1].plot(tsoap[:, natoms - 1 - i], label=f"Atom {natoms - 1 - i}")
 
     for ax in axes:
         ax.legend()
@@ -139,7 +139,7 @@ def main() -> None:
     fig, axes = plt.subplots(2, sharey=True)
     for i in range(4):
         axes[0].plot(dtsoap[i], label=f"Atom {i}")
-        axes[1].plot(dtsoap[308 - i], label=f"Atom {308-i}")
+        axes[1].plot(dtsoap[308 - i], label=f"Atom {308 - i}")
 
     for ax in axes:
         ax.legend()

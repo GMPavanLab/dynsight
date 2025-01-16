@@ -62,7 +62,7 @@ def main() -> None:
     fig, axes = plt.subplots(2, sharey=True)
     for i in range(4):
         axes[0].plot(lens[i], label=f"Atom {i}")
-        axes[1].plot(lens[natoms - 1 - i], label=f"Atom {natoms-1-i}")
+        axes[1].plot(lens[natoms - 1 - i], label=f"Atom {natoms - 1 - i}")
 
     for ax in axes:
         ax.legend()
