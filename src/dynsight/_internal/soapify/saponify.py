@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import MDAnalysis
-    import numpy as np
 
+import numpy as np
 from ase import Atoms
 from dscribe.descriptors import SOAP
 
@@ -78,3 +78,38 @@ def saponify_trajectory(
         traj.append(frame)
 
     return soap.create(system=traj, n_jobs=n_core)
+
+
+def fill_soap_vector_from_dscribe(
+    soapfromdscribe: np.ndarray[float, Any],
+    lmax: int = 8,
+    nmax: int = 8,
+) -> np.ndarray[float, Any]:
+    """Return the SOAP power spectrum from dscribe results.
+
+    * Author: Matteo Becchi
+
+    Parameters:
+        soapfromdscribe:
+            The result of the SOAP calculation from the dscribe utility.
+        lmax:
+            The l_max specified in the calculation.
+        nmax:
+            The n_max specified in the calculation.
+
+    Returns:
+        numpy.ndarray:
+            The full SOAP spectrum, with the symmetric part explicitly stored.
+    """
+    n_particles, n_frames, _ = soapfromdscribe.shape
+    indices = np.triu_indices(nmax)
+    matrix_shape = (lmax + 1, nmax, nmax)
+    reshaped_soap = soapfromdscribe.reshape(
+        n_particles, n_frames, lmax + 1, -1
+    )
+
+    matrix = np.zeros((n_particles, n_frames, *matrix_shape))
+    matrix[:, :, :, indices[0], indices[1]] = reshaped_soap
+    matrix[:, :, :, indices[1], indices[0]] = reshaped_soap
+
+    return matrix.reshape(n_particles, n_frames, -1)
