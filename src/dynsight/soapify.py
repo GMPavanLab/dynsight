@@ -1,7 +1,6 @@
 """SOAPify package."""
 
 from dynsight._internal.soapify.saponify import (
-    saponify_multiple_trajectories,
     saponify_trajectory,
 )
 from dynsight._internal.soapify.utilities import (
@@ -12,6 +11,5 @@ from dynsight._internal.soapify.utilities import (
 __all__ = [
     "fill_soap_vector_from_dscribe",
     "get_soap_settings",
-    "saponify_multiple_trajectories",
     "saponify_trajectory",
 ]

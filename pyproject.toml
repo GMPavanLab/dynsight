@@ -108,6 +108,8 @@ disallow_any_generics = true
 
 [[tool.mypy.overrides]]
 module = [
+  'ase.*',
+  'dscribe.descriptors.*',
   'MDAnalysis.*',
   'h5py.*',
   'SOAPify.*',
