@@ -35,7 +35,6 @@ def saponify_trajectory(
         soaprcut:
             The cutoff for the local region in angstroms. Should be greater
             than 1 angstrom (option passed to the desired SOAP engine).
-            Defaults to 8.0.
         soapnmax:
             The number of radial basis functions (option passed to the desired
             SOAP engine). Defaults to 8.
@@ -52,6 +51,10 @@ def saponify_trajectory(
             Defaults to {}.
         n_core : int = 1
             Number of core used for parallel processing.
+
+    Returns:
+        np.ndarray of shape (n_atoms, n_frames, n_components)
+        The SOAP spectra for all the particles and frames.
     """
     sel = universe.select_atoms(selection)
     species = list(set(sel.atoms.types))
@@ -77,7 +80,9 @@ def saponify_trajectory(
         )
         traj.append(frame)
 
-    return soap.create(system=traj, n_jobs=n_core)
+    tmp_soap = soap.create(system=traj, n_jobs=n_core)
+
+    return tmp_soap.reshape(tmp_soap.shape[1], tmp_soap.shape[0], -1)
 
 
 def fill_soap_vector_from_dscribe(
