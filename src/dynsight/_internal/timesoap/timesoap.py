@@ -35,7 +35,7 @@ def normalize_soap(
 def soap_distance(
     v_1: np.ndarray[float, Any],
     v_2: np.ndarray[float, Any],
-) -> float:
+) -> np.ndarray[float, Any]:
     r"""Computes the Kernel SOAP distance between 2 SOAP spectra.
 
     The SOAP distance is calculated with:

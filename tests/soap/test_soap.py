@@ -48,11 +48,16 @@ def test_soap_vectors() -> None:
                 soapnmax=8,
             )
 
+            _ = dynsight.soapify.fill_soap_vector_from_dscribe(
+                test_soap,
+            )
+
             # Define control and test SOAP calculation as numpy array
-            check_soap = np.array(file[f"SOAP_{i}"][traj_name])
+            tmp_soap = np.array(file[f"SOAP_{i}"][traj_name])
+            check_soap = np.transpose(tmp_soap, (1, 0, 2))
 
             # Check if control and test array are similar
-            assert np.allclose(check_soap, test_soap, atol=1e-5, rtol=1e-2), (
+            assert np.allclose(check_soap, test_soap, atol=1e-8, rtol=1e-2), (
                 f"SOAP analyses provided different values "
                 f"compared to the control system "
                 f"for r_cut: {r_c}."

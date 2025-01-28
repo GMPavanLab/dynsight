@@ -82,7 +82,7 @@ def saponify_trajectory(
 
     tmp_soap = soap.create(system=traj, n_jobs=n_core)
 
-    return tmp_soap.reshape(tmp_soap.shape[1], tmp_soap.shape[0], -1)
+    return np.transpose(tmp_soap, (1, 0, 2))
 
 
 def fill_soap_vector_from_dscribe(
