@@ -16,7 +16,7 @@ def test_soap_vectors() -> None:
     To disregard these differences, the function np.allclose() is employed.
 
     Control file path:
-        - tests/systems/octahedron.hdf5
+        - tests/systems/octahedron.xyz
 
     Dynsight function tested:
         - dynsight.soap.saponify_trajectory()
