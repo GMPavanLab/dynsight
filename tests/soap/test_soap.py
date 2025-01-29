@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import h5py
+import MDAnalysis
 import numpy as np
 
 import dynsight
@@ -28,43 +28,37 @@ def test_soap_vectors() -> None:
     """
     # Define input and output files
     original_dir = Path(__file__).absolute().parent
-    input_file = original_dir / "../systems/octahedron.hdf5"
+    input_file = original_dir / "../systems/octahedron.xyz"
 
-    # Define trajectory parameters
-    traj_name = "Octahedron"
     # Define r_cuts
     soap_r_cuts = [1.75, 2.0, 2.15, 2.3, 2.45, 2.60, 2.75]
 
-    with h5py.File(input_file, "r") as file:
-        group = file["Trajectories"][traj_name]
-        universe = dynsight.hdf5er.create_universe_from_slice(group)
+    universe = MDAnalysis.Universe(input_file, dt=1)
 
-        # Run SOAP calculation for different r_cuts
-        for i, r_c in enumerate(soap_r_cuts):
-            test_soap = dynsight.soap.saponify_trajectory(
-                universe=universe,
-                soaprcut=r_c,
-                soaplmax=8,
-                soapnmax=8,
-            )
+    # Run SOAP calculation for different r_cuts
+    for i, r_c in enumerate(soap_r_cuts):
+        test_soap = dynsight.soap.saponify_trajectory(
+            universe=universe,
+            soaprcut=r_c,
+            soaplmax=8,
+            soapnmax=8,
+        )
 
-            _ = dynsight.soap.fill_soap_vector_from_dscribe(
-                test_soap[0][0],
-            )
-            _ = dynsight.soap.fill_soap_vector_from_dscribe(
-                test_soap[0],
-            )
-            _ = dynsight.soap.fill_soap_vector_from_dscribe(
-                test_soap,
-            )
+        _ = dynsight.soap.fill_soap_vector_from_dscribe(
+            test_soap[0][0],
+        )
+        _ = dynsight.soap.fill_soap_vector_from_dscribe(
+            test_soap[0],
+        )
+        _ = dynsight.soap.fill_soap_vector_from_dscribe(
+            test_soap,
+        )
 
-            # Define control and test SOAP calculation as numpy array
-            tmp_soap = np.array(file[f"SOAP_{i}"][traj_name])
-            check_soap = np.transpose(tmp_soap, (1, 0, 2))
+        check_soap = np.load(original_dir / f"../systems/SOAP_{i}.npy")
 
-            # Check if control and test array are similar
-            assert np.allclose(check_soap, test_soap, atol=1e-8, rtol=1e-2), (
-                f"SOAP analyses provided different values "
-                f"compared to the control system "
-                f"for r_cut: {r_c}."
-            )
+        # Check if control and test array are similar
+        assert np.allclose(check_soap, test_soap, atol=1e-6, rtol=1e-2), (
+            f"SOAP analyses provided different values "
+            f"compared to the control system "
+            f"for r_cut: {r_c}."
+        )
