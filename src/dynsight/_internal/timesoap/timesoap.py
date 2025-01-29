@@ -134,6 +134,9 @@ def timesoap(
 ) -> np.ndarray[float, Any]:
     """Performs the 'timeSOAP' analysis on the given SOAP trajectory.
 
+    timeSOAP was developed by Cristina Caurso. See for reference the paper
+    https://doi.org/10.1063/5.0147025.
+
     Parameters:
         soaptrajectory: shape (n_particles, n_frames, n_comp)
             The SOAP spctra for the trajectory.
