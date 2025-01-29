@@ -32,6 +32,7 @@ def test_time_soap_vectors() -> None:
 
     # Define r_cuts
     soap_r_cuts = [1.75, 2.0, 2.15, 2.3, 2.45, 2.60, 2.75]
+    check_file = np.load(original_dir / "../systems/tSOAP.npz")
 
     universe = MDAnalysis.Universe(input_file, dt=1)
 
@@ -49,7 +50,7 @@ def test_time_soap_vectors() -> None:
 
         test_tsoap = dynsight.soap.timesoap(soaptrajectory=soap_traj)
 
-        check_tsoap = np.load(original_dir / f"../systems/tSOAP_{i}.npy")
+        check_tsoap = check_file[f"arr{i + 1}"]
 
         # Check if control and test array are similar
         assert np.allclose(test_tsoap, check_tsoap, atol=1e-8, rtol=1e-2)

@@ -32,6 +32,7 @@ def test_soap_vectors() -> None:
 
     # Define r_cuts
     soap_r_cuts = [1.75, 2.0, 2.15, 2.3, 2.45, 2.60, 2.75]
+    check_file = np.load(original_dir / "../systems/SOAP.npz")
 
     universe = MDAnalysis.Universe(input_file, dt=1)
 
@@ -54,7 +55,7 @@ def test_soap_vectors() -> None:
             test_soap,
         )
 
-        check_soap = np.load(original_dir / f"../systems/SOAP_{i}.npy")
+        check_soap = check_file[f"arr{i + 1}"]
 
         # Check if control and test array are similar
         assert np.allclose(check_soap, test_soap, atol=1e-6, rtol=1e-2), (
