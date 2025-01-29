@@ -8,7 +8,7 @@
    :caption: dynsight
    :maxdepth: 2
 
-   SOAPify <soapify>
+   SOAP <soap>
    timeSOAP <time_soap>
    LENS <lens>
    onion clustering <onion>
@@ -50,9 +50,8 @@ To get :mod:`.dynsight`, you can install it with pip::
 Dependencies
 ............
 
-The main dependencies are for SOAP analysis:
+The main dependency is for SOAP analysis:
 
-* `cpctools <https://github.com/GMPavanLab/cpctools>`_
 * `dscribe (1.2.0 - 1.2.2) <https://singroup.github.io/dscribe/latest/>`_
 
 Developer Setup

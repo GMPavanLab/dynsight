@@ -19,7 +19,7 @@ def test_soap_vectors() -> None:
         - tests/systems/octahedron.hdf5
 
     Dynsight function tested:
-        - dynsight.soapify.saponify_trajectory()
+        - dynsight.soap.saponify_trajectory()
             - soaplmax = 8
             - soapnmax = 8
 
@@ -41,20 +41,20 @@ def test_soap_vectors() -> None:
 
         # Run SOAP calculation for different r_cuts
         for i, r_c in enumerate(soap_r_cuts):
-            test_soap = dynsight.soapify.saponify_trajectory(
+            test_soap = dynsight.soap.saponify_trajectory(
                 universe=universe,
                 soaprcut=r_c,
                 soaplmax=8,
                 soapnmax=8,
             )
 
-            _ = dynsight.soapify.fill_soap_vector_from_dscribe(
+            _ = dynsight.soap.fill_soap_vector_from_dscribe(
                 test_soap[0][0],
             )
-            _ = dynsight.soapify.fill_soap_vector_from_dscribe(
+            _ = dynsight.soap.fill_soap_vector_from_dscribe(
                 test_soap[0],
             )
-            _ = dynsight.soapify.fill_soap_vector_from_dscribe(
+            _ = dynsight.soap.fill_soap_vector_from_dscribe(
                 test_soap,
             )
 

@@ -35,8 +35,10 @@ def normalize_soap(
 
             import numpy as np
             import MDAnalysis
-            from dynsight.soapify import saponify_trajectory
-            from dynsight.time_soap import normalize_soap
+            from dynsight.soap import (
+                saponify_trajectory,
+                normalize_soap,
+            )
 
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
             cutoff = 2.0
@@ -101,8 +103,7 @@ def soap_distance(
 
             import numpy as np
             import MDAnalysis
-            from dynsight.soapify import saponify_trajectory
-            from dynsight.time_soap import soap_distance
+            from dynsight.soap import saponify_trajectory, soap_distance
 
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
             cutoff = 2.0
@@ -162,8 +163,7 @@ def timesoap(
 
             import numpy as np
             import MDAnalysis
-            from dynsight.soapify import saponify_trajectory
-            from dynsight.time_soap import timesoap
+            from dynsight.soap import saponify_trajectory, timesoap
 
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
             cutoff = 2.0

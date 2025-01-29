@@ -68,7 +68,7 @@ def saponify_trajectory(
 
             import numpy as np
             import MDAnalysis
-            from dynsight.soapify import saponify_trajectory
+            from dynsight.soap import saponify_trajectory
 
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
             cutoff = 2.0
@@ -142,7 +142,7 @@ def fill_soap_vector_from_dscribe(
 
             import numpy as np
             import MDAnalysis
-            from dynsight.soapify import (
+            from dynsight.soap import (
                 saponify_trajectory,
                 fill_soap_vector_from_dscribe,
             )

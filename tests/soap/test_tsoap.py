@@ -21,7 +21,7 @@ def test_time_soap_vectors() -> None:
         - tests/systems/octahedron.hdf5
 
     Dynsight function tested:
-        - dynsight.time_soap.timesoap()
+        - dynsight.soap.timesoap()
 
     r_cuts checked:
         - [1.75, 2.0, 2.15, 2.3, 2.45, 2.60, 2.75]
@@ -41,17 +41,17 @@ def test_time_soap_vectors() -> None:
         universe = dynsight.hdf5er.create_universe_from_slice(group)
 
         for i, r_c in enumerate(soap_r_cuts):
-            soap_traj = dynsight.soapify.saponify_trajectory(
+            soap_traj = dynsight.soap.saponify_trajectory(
                 universe=universe,
                 soaprcut=r_c,
             )
 
             with pytest.raises(ValueError, match="delay value outside bounds"):
-                test_tsoap = dynsight.time_soap.timesoap(
+                test_tsoap = dynsight.soap.timesoap(
                     soaptrajectory=soap_traj, delay=20
                 )
 
-            test_tsoap = dynsight.time_soap.timesoap(soaptrajectory=soap_traj)
+            test_tsoap = dynsight.soap.timesoap(soaptrajectory=soap_traj)
 
             check_tsoap = np.array(file[f"timeSOAP_{i}"][f"timeSOAP_{i}"])
             check_tsoap = np.transpose(check_tsoap, (1, 0))

@@ -43,7 +43,7 @@ def main() -> None:
     )
     universe.atoms.types = ["Au"] * len(universe.atoms)
 
-    soap = dynsight.soapify.saponify_trajectory(
+    soap = dynsight.soap.saponify_trajectory(
         universe,
         soaprcut=4.48023312,
         soapnmax=8,
@@ -51,7 +51,7 @@ def main() -> None:
         n_core=4,
     )
 
-    tsoap = dynsight.time_soap.timesoap(soap)
+    tsoap = dynsight.soap.timesoap(soap)
 
     natoms = tsoap.shape[0]
     fig, axes = plt.subplots(2, sharey=True)
