@@ -23,9 +23,9 @@ Functions
 .. toctree::
   :maxdepth: 1
 
+  normalize_soap <_autosummary/dynsight.time_soap.normalize_soap>
+  soap_distance <_autosummary/dynsight.time_soap.soap_distance>
   timesoap <_autosummary/dynsight.time_soap.timesoap>
-  timesoapsimple <_autosummary/dynsight.time_soap.timesoapsimple>
-  gettimesoapsimple <_autosummary/dynsight.time_soap.gettimesoapsimple>
 
 Acknowledgements
 ----------------

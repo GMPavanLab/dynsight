@@ -30,7 +30,7 @@ def saponify_trajectory(
     * Author: Simone Martino
 
     Parameters:
-        universe : MDAnalysis.Universe
+        universe:
             Contains the trajectory.
         soaprcut:
             The cutoff for the local region in angstroms. Should be greater
@@ -49,12 +49,37 @@ def saponify_trajectory(
         soapkwargs (dict, optional):
             Additional keyword arguments to be passed to the SOAP engine.
             Defaults to {}.
-        n_core : int = 1
-            Number of core used for parallel processing.
+        n_core:
+            Number of core used for parallel processing. Default to 1.
 
     Returns:
-        np.ndarray of shape (n_atoms, n_frames, n_components)
-        The SOAP spectra for all the particles and frames.
+        The SOAP spectra for all the particles and frames. np.ndarray of shape
+        (n_atoms, n_frames, n_components)
+
+    Example:
+
+        .. testsetup:: soap1-test
+
+            import pathlib
+
+            path = pathlib.Path('source/_static/ex_test_files')
+
+        .. testcode:: soap1-test
+
+            import numpy as np
+            import MDAnalysis
+            from dynsight.soapify import saponify_trajectory
+
+            univ = MDAnalysis.Universe(path / "trajectory.xyz")
+            cutoff = 2.0
+
+            soap = saponify_trajectory(univ, cutoff)
+
+        .. testcode:: soap1-test
+            :hide:
+
+            assert np.isclose(
+                np.sum(soap[0]), 8627.847941030795, atol=1e-6, rtol=1e-3)
     """
     sel = universe.select_atoms(selection)
     species = list(set(sel.atoms.types))
@@ -103,8 +128,36 @@ def fill_soap_vector_from_dscribe(
             The n_max specified in the calculation.
 
     Returns:
-        numpy.ndarray:
-            The full SOAP spectrum, with the symmetric part explicitly stored.
+        The full SOAP spectrum, with the symmetric part explicitly stored.
+
+    Example:
+
+        .. testsetup:: soap2-test
+
+            import pathlib
+
+            path = pathlib.Path('source/_static/ex_test_files')
+
+        .. testcode:: soap2-test
+
+            import numpy as np
+            import MDAnalysis
+            from dynsight.soapify import (
+                saponify_trajectory,
+                fill_soap_vector_from_dscribe,
+            )
+
+            univ = MDAnalysis.Universe(path / "trajectory.xyz")
+            cutoff = 2.0
+
+            soap = saponify_trajectory(univ, cutoff)
+
+            full_soap = fill_soap_vector_from_dscribe(soap)
+
+        .. testcode:: soap2-test
+            :hide:
+
+            assert full_soap.shape[2] == 576
     """
     input_shape = soapfromdscribe.shape
 
