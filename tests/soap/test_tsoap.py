@@ -2,6 +2,7 @@ from pathlib import Path
 
 import h5py
 import numpy as np
+import pytest
 
 import dynsight
 
@@ -44,6 +45,11 @@ def test_time_soap_vectors() -> None:
                 universe=universe,
                 soaprcut=r_c,
             )
+
+            with pytest.raises(ValueError, match="delay value outside bounds"):
+                test_tsoap = dynsight.time_soap.timesoap(
+                    soaptrajectory=soap_traj, delay=20
+                )
 
             test_tsoap = dynsight.time_soap.timesoap(soaptrajectory=soap_traj)
 

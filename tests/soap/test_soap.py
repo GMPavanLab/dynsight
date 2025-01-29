@@ -49,6 +49,12 @@ def test_soap_vectors() -> None:
             )
 
             _ = dynsight.soapify.fill_soap_vector_from_dscribe(
+                test_soap[0][0],
+            )
+            _ = dynsight.soapify.fill_soap_vector_from_dscribe(
+                test_soap[0],
+            )
+            _ = dynsight.soapify.fill_soap_vector_from_dscribe(
                 test_soap,
             )
 
