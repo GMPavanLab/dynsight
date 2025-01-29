@@ -12,6 +12,7 @@ maintainers = [
 
 dependencies = [
   "numpy < 2", # Needed right now, to remove in the future
+  "cpctools",
   "dscribe >1.2.0, <=1.2.2",
   "tropea-clustering",
 ]
