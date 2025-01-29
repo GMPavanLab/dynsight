@@ -94,8 +94,9 @@ def timesoap(
     timesoap : np.ndarray of shape (n_particles, n_frames - 1)
         Values of timesoap of each particle at each frame.
     """
+    value_error = "delay value outside bounds"
     if delay < 1 or delay >= soaptrajectory.shape[1]:
-        raise ValueError
+        raise ValueError(value_error)
 
     return soap_distance(
         soaptrajectory[:, :-delay, :], soaptrajectory[:, delay:, :]

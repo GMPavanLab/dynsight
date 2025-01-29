@@ -106,6 +106,14 @@ def fill_soap_vector_from_dscribe(
         numpy.ndarray:
             The full SOAP spectrum, with the symmetric part explicitly stored.
     """
+    input_shape = soapfromdscribe.shape
+
+    # Ensure the input is 3D for consistent reshaping
+    if soapfromdscribe.ndim == 1:
+        soapfromdscribe = soapfromdscribe[np.newaxis, np.newaxis, :]
+    elif soapfromdscribe.ndim == 2:  # noqa: PLR2004
+        soapfromdscribe = soapfromdscribe[:, np.newaxis, :]
+
     n_particles, n_frames, _ = soapfromdscribe.shape
     indices = np.triu_indices(nmax)
     matrix_shape = (lmax + 1, nmax, nmax)
@@ -117,4 +125,11 @@ def fill_soap_vector_from_dscribe(
     matrix[:, :, :, indices[0], indices[1]] = reshaped_soap
     matrix[:, :, :, indices[1], indices[0]] = reshaped_soap
 
-    return matrix.reshape(n_particles, n_frames, -1)
+    output = matrix.reshape(n_particles, n_frames, -1)
+
+    # Restore the original shape
+    if len(input_shape) == 1:
+        return output.squeeze()
+    if len(input_shape) == 2:  # noqa: PLR2004
+        return output.squeeze(1)
+    return output
