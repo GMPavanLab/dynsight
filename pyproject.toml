@@ -111,7 +111,6 @@ module = [
   'dscribe.descriptors.*',
   'MDAnalysis.*',
   'h5py.*',
-  'SOAPify.*',
   'numba.*',
   'dynsight.onion.plot.*',
   'scipy.*',
