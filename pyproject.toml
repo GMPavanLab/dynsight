@@ -110,10 +110,11 @@ module = [
   'ase.*',
   'dscribe.descriptors.*',
   'MDAnalysis.*',
-  'h5py.*',
   'numba.*',
   'dynsight.onion.plot.*',
   'scipy.*',
   'tropea_clustering.*',
+  'h5py.*',
+  'SOAPify.*',
 ]
 ignore_missing_imports = true
