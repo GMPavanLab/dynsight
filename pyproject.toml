@@ -110,6 +110,7 @@ disallow_any_generics = true
 module = [
   'ase.*',
   'dscribe.descriptors.*',
+  'matplotlib.*',
   'MDAnalysis.*',
   'numba.*',
   'dynsight.onion.plot.*',
