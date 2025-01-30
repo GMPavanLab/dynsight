@@ -4,11 +4,6 @@ data_processing
 Pre-analysis tools
 ------------------
 
-.. toctree::
-  :maxdepth: 1
-
-  spatialaverage <_autosummary/dynsight.data_processing.spatialaverage>
-
 SOAP distances
 --------------
 
