@@ -7,6 +7,7 @@ import pytest
 import dynsight
 
 
+@pytest.mark.filterwarnings(r"ignore:.*np\.str.*:DeprecationWarning")
 def test_time_soap_vectors() -> None:
     """Test the consistency of tSOAP calculations with a control calculation.
 

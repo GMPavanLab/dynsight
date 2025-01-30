@@ -2,10 +2,12 @@ from pathlib import Path
 
 import MDAnalysis
 import numpy as np
+import pytest
 
 import dynsight
 
 
+@pytest.mark.filterwarnings(r"ignore:.*np\.str.*:DeprecationWarning")
 def test_soap_vectors() -> None:
     """Test the consistency of SOAP calculations with a control calculation.
 
