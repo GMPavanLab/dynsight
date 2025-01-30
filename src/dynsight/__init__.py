@@ -1,5 +1,7 @@
 """dynsight package."""
 
+import contextlib
+
 from dynsight import (
     analysis,
     lens,
@@ -8,15 +10,11 @@ from dynsight import (
     utilities,
 )
 
-try:
-    from dynsight import data_processing
-except ModuleNotFoundError:
-    data_processing = None
+with contextlib.suppress(ModuleNotFoundError):
+    from dynsight import data_processing  # Only if cpctools is installed
 
-try:
-    from dynsight import hdf5er
-except ModuleNotFoundError:
-    hdf5er = None
+with contextlib.suppress(ModuleNotFoundError):
+    from dynsight import hdf5er  # Only if cpctools is installed
 
 __all__ = [
     "analysis",
