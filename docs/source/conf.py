@@ -7,6 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 from __future__ import annotations
 
+import sys
+from unittest.mock import MagicMock
+
 project = "dynsight"
 project_copyright = "2023, Andrew Tarzia"
 author = "Andrew Tarzia"
@@ -37,6 +40,9 @@ intersphinx_mapping = {
 
 templates_path = ["_templates"]
 exclude_patterns: list[str] = []
+
+MOCK_MODULES = ["dynsight.data_processing", "dynsight.hdf5er", "cpctools"]
+sys.modules.update({mod: MagicMock() for mod in MOCK_MODULES})
 
 
 # -- Options for HTML output -------------------------------------------------
