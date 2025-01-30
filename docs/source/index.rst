@@ -12,9 +12,9 @@
    timeSOAP <time_soap>
    LENS <lens>
    onion clustering <onion>
+   analysis <analysis>
    data processing <data_processing>
    HDF5er <hdf5er>
-   analysis <analysis>
 
 .. toctree::
   :hidden:

@@ -4,7 +4,7 @@ from pathlib import Path
 import MDAnalysis
 import numpy as np
 
-from dynsight.utilities import spatialaverage
+from dynsight.analysis import spatialaverage
 
 
 def test_spatialaverage() -> None:
