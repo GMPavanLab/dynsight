@@ -1,12 +1,8 @@
 from __future__ import annotations
 
-import pathlib  # noqa: TC003
-
 import MDAnalysis
 import numpy as np
 import pytest
-
-import dynsight
 
 
 def fewframeuniverse(
@@ -208,25 +204,6 @@ def giveuniverse_longchangingbox(
 )
 def input_universe(request: pytest.FixtureRequest) -> MDAnalysis.Universe:
     return request.param
-
-
-@pytest.fixture(scope="session")
-def hdf5_file(
-    tmp_path_factory: pytest.TempdirFactory,
-    input_universe: MDAnalysis.Universe,
-) -> tuple[pathlib.Path, MDAnalysis.Universe]:
-    fouratomsfiveframes = input_universe((90.0, 90.0, 90.0))
-
-    testfname = (
-        tmp_path_factory.mktemp("data")
-        / f"test{fouratomsfiveframes.myUsefulName}.hdf5"
-    )
-
-    dynsight.hdf5er.mda_to_hdf5(
-        fouratomsfiveframes, testfname, "4Atoms5Frames", override=True
-    )
-
-    return testfname, fouratomsfiveframes
 
 
 def lensiszerofixtures() -> MDAnalysis.Universe:

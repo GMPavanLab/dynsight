@@ -14,3 +14,4 @@ Functions
   compute_rdf <_autosummary/dynsight.analysis.compute_rdf>
   self_time_correlation <_autosummary/dynsight.analysis.self_time_correlation>
   cross_time_correlation <_autosummary/dynsight.analysis.cross_time_correlation>
+  spatialaverage <_autosummary/dynsight.analysis.spatialaverage.rst>

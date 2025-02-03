@@ -2,13 +2,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+try:
+    import h5py
+    import SOAPify
+except ImportError:
+    h5py = None
+    SOAPify = None
+
 if TYPE_CHECKING:
     import pathlib
 
-    import h5py
     from MDAnalysis import AtomGroup, Universe
-
-import SOAPify
 
 
 def mda_to_hdf5(
@@ -53,6 +57,10 @@ def mda_to_hdf5(
         usetype:
             The precision used to store the data. Defaults to "float64".
     """
+    if SOAPify is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     if trajslice is None:
         trajslice = slice(None)
     SOAPify.HDF5er.MDA2HDF5(
@@ -91,6 +99,10 @@ def universe_to_hdf5(
         usetype:
             The precision used to store the data. Defaults to "float64".
     """
+    if SOAPify is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     if trajslice is None:
         trajslice = slice(None)
     SOAPify.HDF5er.universe2HDF5(

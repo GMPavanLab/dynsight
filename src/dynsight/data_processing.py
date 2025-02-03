@@ -17,9 +17,6 @@ from dynsight._internal.data_processing.distances import (
     soapdistance,
     soapdistancenormalized,
 )
-from dynsight._internal.data_processing.spatial_average import (
-    spatialaverage,
-)
 
 __all__ = [
     "applyclassification",
@@ -35,5 +32,4 @@ __all__ = [
     "simplesoapdistance",
     "soapdistance",
     "soapdistancenormalized",
-    "spatialaverage",
 ]

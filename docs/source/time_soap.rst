@@ -15,7 +15,7 @@ and represents the angle between the two SOAP vectors :math:`\vec{a}` and :math:
 
 In this way, tSOAP is defined as a number between 0 and 2, where 0 correspond to the case where no change in the SOAP vector's direction was observed, and 2 to the case where the vector's direction flipped completely. 
 
-Examples of how to compute tSOAP can be found at ``examples/timesoap.py``. 
+Examples of how to compute tSOAP can be found at ``examples/soap.py``. 
 
 Functions
 ---------
@@ -23,9 +23,7 @@ Functions
 .. toctree::
   :maxdepth: 1
 
-  timesoap <_autosummary/dynsight.time_soap.timesoap>
-  timesoapsimple <_autosummary/dynsight.time_soap.timesoapsimple>
-  gettimesoapsimple <_autosummary/dynsight.time_soap.gettimesoapsimple>
+  timesoap <_autosummary/dynsight.soap.timesoap>
 
 Acknowledgements
 ----------------

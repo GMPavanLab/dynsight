@@ -1,13 +1,10 @@
-Data processing
+data_processing
 ===============
 
-Pre-analysis tools
-------------------
+This module requires to install :mod:`cpctools`. This can be done with with pip::
 
-.. toctree::
-  :maxdepth: 1
+  $ pip install cpctools
 
-  spatialaverage <_autosummary/dynsight.data_processing.spatialaverage>
 
 SOAP distances
 --------------
@@ -36,4 +33,3 @@ Classification
   savereferences <_autosummary/dynsight.data_processing.savereferences>
   getreferencesfromdataset <_autosummary/dynsight.data_processing.getreferencesfromdataset>
   applyclassification <_autosummary/dynsight.data_processing.applyclassification>
-

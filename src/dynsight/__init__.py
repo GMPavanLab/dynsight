@@ -6,8 +6,7 @@ from dynsight import (
     hdf5er,
     lens,
     onion,
-    soapify,
-    time_soap,
+    soap,
     utilities,
 )
 
@@ -17,7 +16,6 @@ __all__ = [
     "hdf5er",
     "lens",
     "onion",
-    "soapify",
-    "time_soap",
+    "soap",
     "utilities",
 ]

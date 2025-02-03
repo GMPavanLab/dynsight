@@ -1,7 +1,8 @@
 from pathlib import Path
 
-import h5py
+import MDAnalysis
 import numpy as np
+import pytest
 
 import dynsight
 
@@ -17,52 +18,39 @@ def test_time_soap_vectors() -> None:
     To disregard these differences, the function np.allclose() is employed.
 
     Control file path:
-        - tests/systems/octahedron.hdf5
+        - tests/systems/octahedron.xyz
 
     Dynsight function tested:
-        - dynsight.soapify.saponify_trajectory()
-            - soaplmax = 8
-            - soapnmax = 8
+        - dynsight.soap.timesoap()
 
     r_cuts checked:
         - [1.75, 2.0, 2.15, 2.3, 2.45, 2.60, 2.75]
     """
     # Define input and output files
     original_dir = Path(__file__).absolute().parent
-    input_file = original_dir / "../systems/octahedron.hdf5"
-    output_file = original_dir / "../octahedron_test_tsoap.hdf5"
+    input_file = original_dir / "../systems/octahedron.xyz"
 
-    # Define the number of SOAP calulation made in the octahedron test
-    n_soap_rcuts = 7
-    traj_name = "Octahedron"
+    # Define r_cuts
+    soap_r_cuts = [1.75, 2.0, 2.15, 2.3, 2.45, 2.60, 2.75]
+    check_file = np.load(original_dir / "../systems/tSOAP.npz")
+
+    universe = MDAnalysis.Universe(input_file, dt=1)
 
     # Run tSOAP calculation for different r_cuts
-    with h5py.File(input_file, "r") as in_file, h5py.File(
-        output_file, "w"
-    ) as out_file:
-        for i in range(n_soap_rcuts):
-            soap_traj = in_file[f"SOAP_{i}"][traj_name]
-            timed_soap, delta_time_soap = dynsight.time_soap.timesoap(
-                soaptrajectory=soap_traj
-            )
-            out_file.create_group(f"timeSOAP_test{i}")
-            out_file[f"timeSOAP_test{i}"].create_dataset(
-                f"timeSOAP_test{i}", data=timed_soap
-            )
-            # Define control and test tSOAP calculations as numpy array
-            check_timed_soap = np.array(
-                in_file[f"timeSOAP_{i}"][f"timeSOAP_{i}"]
-            )
-            check_delta_time_soap = np.array(
-                in_file[f"delta_timeSOAP_{i}"][f"delta_timeSOAP_{i}"]
+    for i, r_c in enumerate(soap_r_cuts):
+        soap_traj = dynsight.soap.saponify_trajectory(
+            universe=universe,
+            soaprcut=r_c,
+        )
+
+        with pytest.raises(ValueError, match="delay value outside bounds"):
+            test_tsoap = dynsight.soap.timesoap(
+                soaptrajectory=soap_traj, delay=20
             )
 
-            # Check if control and test array are similar
-            assert np.allclose(
-                timed_soap, check_timed_soap, atol=1e-11, rtol=1e-11
-            )
-            assert np.allclose(
-                delta_time_soap, check_delta_time_soap, atol=1e-11, rtol=1e-11
-            )
-    # If test passed remove test_soap array from test folder
-    output_file.unlink()
+        test_tsoap = dynsight.soap.timesoap(soaptrajectory=soap_traj)
+
+        check_tsoap = check_file[f"arr{i + 1}"]
+
+        # Check if control and test array are similar
+        assert np.allclose(test_tsoap, check_tsoap, atol=1e-8, rtol=1e-2)

@@ -8,13 +8,13 @@
    :caption: dynsight
    :maxdepth: 2
 
-   SOAPify <soapify>
+   SOAP <soap>
    timeSOAP <time_soap>
    LENS <lens>
    onion clustering <onion>
+   analysis <analysis>
    data processing <data_processing>
    HDF5er <hdf5er>
-   analysis <analysis>
 
 .. toctree::
   :hidden:
@@ -50,10 +50,16 @@ To get :mod:`.dynsight`, you can install it with pip::
 Dependencies
 ............
 
-The main dependencies are for SOAP analysis:
+The main dependency is for SOAP analysis:
 
-* `cpctools <https://github.com/GMPavanLab/cpctools>`_
 * `dscribe (1.2.0 - 1.2.2) <https://singroup.github.io/dscribe/latest/>`_
+
+Optional Dependancies
+.....................
+
+Old versions :mod:`dynsight` used :mod:`cpctools` for SOAP calculations, if you are using Python 3.10 and below, you can use :mod:`cpctools` to access :mod:`SOAPify` and :mod:`hd5er` using ::
+
+  $ pip install cpctools
 
 Developer Setup
 ...............
