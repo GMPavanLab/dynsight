@@ -1,6 +1,6 @@
+import argparse
 import logging
 import pathlib
-import sys
 
 import h5py
 import matplotlib.pyplot as plt
@@ -11,6 +11,12 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",
 )
+
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("data_path", type=str, help="path with test files")
+    return parser.parse_args()
 
 
 def main() -> None:
@@ -29,15 +35,10 @@ def main() -> None:
     # wget https://github.com/GMPavanLab/dynNP/releases/download/V1.0-trajectories/ico309.hdf5
     # We'll start by caclulating the neighbours and the LENS parameters.
     # using cutoff=2.88*1.1 that is 10% more than the Au radius.
-    first_line = f"Usage: {__file__}.py data_directory"
-    num_args = 2
-    if len(sys.argv) != num_args:
-        logging.info(first_line)
-        sys.exit()
-    else:
-        data_directory = sys.argv[1]
 
-    data_path = pathlib.Path(data_directory)
+    args = _parse_args()
+
+    data_path = pathlib.Path(args.data_path)
 
     trajfilename = data_path / "ico309.hdf5"
     cutoff = 2.88 * 1.1
