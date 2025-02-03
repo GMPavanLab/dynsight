@@ -4,9 +4,8 @@ import pathlib
 
 try:
     import h5py
-except ModuleNotFoundError as exc:
-    msg = "Please install h5py with cpctools."
-    raise ModuleNotFoundError(msg) from exc
+except ImportError:
+    h5py = None
 
 import matplotlib.pyplot as plt
 
@@ -40,6 +39,9 @@ def main() -> None:
     # wget https://github.com/GMPavanLab/dynNP/releases/download/V1.0-trajectories/ico309.hdf5
     # We'll start by caclulating the neighbours and the LENS parameters.
     # using cutoff=2.88*1.1 that is 10% more than the Au radius.
+    if h5py is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
 
     args = _parse_args()
 

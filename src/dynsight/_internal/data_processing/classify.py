@@ -2,12 +2,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
+try:
     import h5py
+    import SOAPify
+except ImportError:
+    h5py = None
+    SOAPify = None
+
+
+if TYPE_CHECKING:
     import numpy as np
 from typing import Callable
-
-import SOAPify
 
 
 def createreferencesfromtrajectory(
@@ -49,6 +54,10 @@ def createreferencesfromtrajectory(
         SOAPReferences:
             the container with the selected references
     """
+    if SOAPify is None or h5py is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.createReferencesFromTrajectory(
         h5SOAPDataSet=h5soapdataset,
         addresses=addresses,
@@ -80,6 +89,10 @@ def getdistancebetween(
             the array of the distances (the shape is
             `(data.shape[0], spectra.shape[0])`)
     """
+    if SOAPify is None or h5py is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.getDistanceBetween(
         data=data,
         spectra=spectra,
@@ -111,6 +124,10 @@ def getdistancesfromref(
     Returns:
         np.ndarray: the "trajectory" of distance from the given references
     """
+    if SOAPify is None or h5py is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.getDistancesFromRef(
         SOAPTrajData=soaptrajdata,
         references=references,
@@ -139,6 +156,10 @@ def getdistancesfromrefnormalized(
     Returns:
         the trajectory of distance from the given references
     """
+    if SOAPify is None or h5py is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.getDistancesFromRefNormalized(
         SOAPTrajData=soaptrajdata,
         references=references,
@@ -157,6 +178,10 @@ def mergereferences(*x: SOAPify.SOAPReferences) -> SOAPify.SOAPReferences:
             a new `SOAPReferences` that contains the concatenated list of
             references
     """
+    if SOAPify is None or h5py is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.mergeReferences(x)
 
 
@@ -175,6 +200,10 @@ def savereferences(
         refs:
             the `SOAPReferences` object to be exported
     """
+    if SOAPify is None or h5py is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.saveReferences(
         h5position=h5position,
         targetDatasetName=targetdatasetname,
@@ -194,6 +223,10 @@ def getreferencesfromdataset(dataset: h5py.Dataset) -> SOAPify.SOAPReferences:
     Returns:
         SOAPReferences: the prepared references container
     """
+    if SOAPify is None or h5py is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.getReferencesFromDataset(dataset)
 
 
@@ -222,6 +255,10 @@ def applyclassification(
     Returns:
         SOAPclassification: The result of the classification
     """
+    if SOAPify is None or h5py is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.applyClassification(
         SOAPTrajData=soaptrajdata,
         references=references,
