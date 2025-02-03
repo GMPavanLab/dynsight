@@ -1,8 +1,5 @@
 """Compute timeSOAP."""
 
-# Author: Matteo Becchi <bechmath@gmail.com>
-# Date: January 28, 2025
-
 from __future__ import annotations
 
 from typing import Any
