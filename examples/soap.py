@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import argparse
 import logging
 import pathlib
-import sys
 
 import matplotlib.pyplot as plt
 import MDAnalysis
@@ -13,6 +13,12 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",
 )
+
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("data_path", type=str, help="path with test files")
+    return parser.parse_args()
 
 
 def main() -> None:
@@ -26,15 +32,10 @@ def main() -> None:
     # We'll start by caclulating the SOAP fingerprints of the simulation
     # using lMax=8, nMax=8, and cutoff=4.48023312 that is 10% more than the Au
     # cell
-    first_line = f"Usage: {__file__}.py data_directory"
-    num_args = 2
-    if len(sys.argv) != num_args:
-        logging.info(first_line)
-        sys.exit()
-    else:
-        data_directory = sys.argv[1]
 
-    data_path = pathlib.Path(data_directory)
+    args = _parse_args()
+
+    data_path = pathlib.Path(args.data_path)
 
     universe = MDAnalysis.Universe(
         data_path / "ih55.data",

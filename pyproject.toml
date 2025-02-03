@@ -5,16 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "dynsight"
 maintainers = [
-  { name = "Andrew Tarzia", email = "andrew.tarzia@gmail.com" },
-  { name = "Matteo Becchi", email = "bechmath@gmail.com"},
-  { name = "Simone Martino", email = "s.martino0898@gmail.com"},
+    { name = "Andrew Tarzia", email = "andrew.tarzia@gmail.com" },
+    { name = "Matteo Becchi", email = "bechmath@gmail.com" },
+    { name = "Simone Martino", email = "s.martino0898@gmail.com" },
 ]
 
 dependencies = [
-  "numpy < 2", # Needed right now, to remove in the future
-  "dscribe >1.2.0, <=1.2.2",
-  "tropea-clustering",
-  "MDAnalysis",
+    "numpy < 1.24.0",          # Needed right now, to remove in the future
+    "dscribe >1.2.0, <=1.2.2",
+    "tropea-clustering",
+    "MDAnalysis",
 ]
 # Set by cpctools.
 requires-python = "<3.11,>=3.8"
@@ -24,16 +24,16 @@ description = "Simplifies analysis of Molecular Dynamics simulations."
 
 [project.optional-dependencies]
 dev = [
-  "ruff",
-  "mypy",
-  "pytest",
-  "pytest-cov",
-  "sphinx",
-  "sphinx-copybutton",
-  "build",
-  "twine",
-  "furo",
-  "numba",
+    "ruff",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+    "sphinx",
+    "sphinx-copybutton",
+    "build",
+    "twine",
+    "furo",
+    "numba",
 ]
 
 [project.urls]
@@ -47,50 +47,42 @@ line-length = 79
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = [
-  "ANN401",
-  "COM812",
-  "ISC001",
-  "FBT001",
-  "FBT002",
-  "PLR0913",
-  "G004",
-]
+ignore = ["ANN401", "COM812", "ISC001", "FBT001", "FBT002", "PLR0913", "G004"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
-  "D100",
-  "D101",
-  "D102",
-  "D103",
-  "D104",
-  "D105",
-  "D106",
-  "D107",
-  "S101",
-  "INP001",
-  "ANN001",
-  "ANN201",
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D106",
+    "D107",
+    "S101",
+    "INP001",
+    "ANN001",
+    "ANN201",
 ]
 "examples/*" = [
-  "D100",
-  "D101",
-  "D102",
-  "D103",
-  "D104",
-  "D105",
-  "D106",
-  "D107",
-  "S101",
-  "INP001",
-  "C901",
-  "N803",
-  "ANN001",
-  "PLR0912",
-  "PLR0915",
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D106",
+    "D107",
+    "S101",
+    "INP001",
+    "C901",
+    "N803",
+    "ANN001",
+    "PLR0912",
+    "PLR0915",
 ]
 "docs/source/conf.py" = ["D100", "INP001"]
 
@@ -108,15 +100,15 @@ disallow_any_generics = true
 
 [[tool.mypy.overrides]]
 module = [
-  'ase.*',
-  'dscribe.descriptors.*',
-  'matplotlib.*',
-  'MDAnalysis.*',
-  'numba.*',
-  'dynsight.onion.plot.*',
-  'scipy.*',
-  'tropea_clustering.*',
-  'h5py.*',
-  'SOAPify.*',
+    'ase.*',
+    'dscribe.descriptors.*',
+    'matplotlib.*',
+    'MDAnalysis.*',
+    'numba.*',
+    'dynsight.onion.plot.*',
+    'scipy.*',
+    'tropea_clustering.*',
+    'h5py.*',
+    'SOAPify.*',
 ]
 ignore_missing_imports = true

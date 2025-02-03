@@ -2,9 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+try:
+    import SOAPify
+except ImportError:
+    SOAPify = None
+
 if TYPE_CHECKING:
     import numpy as np
-import SOAPify
 
 
 def simplekernelsoap(x: np.ndarray, y: np.ndarray) -> float:  # type: ignore[type-arg]
@@ -21,6 +25,10 @@ def simplekernelsoap(x: np.ndarray, y: np.ndarray) -> float:  # type: ignore[typ
     Returns:
         kernel value
     """
+    if SOAPify is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.simpleKernelSoap(x, y)
 
 
@@ -39,6 +47,10 @@ def simplesoapdistance(x: np.ndarray, y: np.ndarray) -> float:  # type: ignore[t
         float: the distance between the two fingerprints, between
         :math:`0` and :math:`2`.
     """
+    if SOAPify is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.simpleSOAPdistance(x, y)
 
 
@@ -58,6 +70,10 @@ def kernelsoap(x: np.ndarray, y: np.ndarray, n: int) -> float:  # type: ignore[t
     Returns:
         kernel value
     """
+    if SOAPify is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.kernelSoap(x, y, n)
 
 
@@ -78,6 +94,10 @@ def soapdistance(x: np.ndarray, y: np.ndarray, n: int = 1) -> float:  # type: ig
         float: the distance between the two fingerprints, between
         :math:`0` and :math:`2`
     """
+    if SOAPify is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.SOAPdistance(x, y, n)
 
 
@@ -99,4 +119,8 @@ def soapdistancenormalized(x: np.ndarray, y: np.ndarray) -> float:  # type: igno
         float: the distance between the two fingerprints, between
         :math:`0` and :math:`2`
     """
+    if SOAPify is None:
+        msg = "Please install SOAPify|h5py with cpctools."
+        raise ModuleNotFoundError(msg)
+
     return SOAPify.SOAPdistanceNormalized(x, y)
