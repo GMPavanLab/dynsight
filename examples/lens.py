@@ -2,7 +2,12 @@ import argparse
 import logging
 import pathlib
 
-import h5py
+try:
+    import h5py
+except ModuleNotFoundError as exc:
+    msg = "Please install h5py with cpctools."
+    raise ModuleNotFoundError(msg) from exc
+
 import matplotlib.pyplot as plt
 
 import dynsight
