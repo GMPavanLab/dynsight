@@ -17,6 +17,7 @@ def compute_rdf(
     s2: str = "all",
     exclusion_block: list[int] | None = None,
     nbins: int = 200,
+    norm: str | None = "rdf",
     start: int | None = None,
     stop: int | None = None,
     step: int = 1,
@@ -52,6 +53,11 @@ def compute_rdf(
         nbins:
             The number of bins used to divide the distance range for
             histogramming the RDF.
+        norm : {'rdf', 'density', 'none'}, optional
+            Type of normalization to apply:
+            - 'rdf': Standard RDF normalization (default).
+            - 'density': Normalize with respect to system density.
+            - None: No normalization applied.
         start:
             Initial molecular dynamics step.
         stop:
@@ -106,6 +112,7 @@ def compute_rdf(
         nbins=nbins,
         range=distances_range,
         exclusion_block=exclusion_block,
+        norm=norm,
     )
 
     rdf.run(verbose=True, start=start, stop=stop, step=step)
