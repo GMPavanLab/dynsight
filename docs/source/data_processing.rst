@@ -6,9 +6,6 @@ This module requires to install :mod:`cpctools`. This can be done with with pip:
   $ pip install cpctools
 
 
-Pre-analysis tools
-------------------
-
 SOAP distances
 --------------
 

@@ -7,8 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 from __future__ import annotations
 
-import sys
-from unittest.mock import MagicMock
+import importlib
 
 project = "dynsight"
 project_copyright = "2023, Andrew Tarzia"
@@ -27,6 +26,13 @@ extensions = [
     "sphinx.ext.mathjax",
 ]
 
+# Check if SOAPify is available
+SOAPIFY_AVAILABLE = importlib.util.find_spec("SOAPify") is not None
+
+# Manually control autodoc
+if not SOAPIFY_AVAILABLE:
+    autodoc_mock_imports = ["SOAPify"]
+
 autosummary_imported_members = True
 
 autodoc_typehints = "description"
@@ -40,9 +46,6 @@ intersphinx_mapping = {
 
 templates_path = ["_templates"]
 exclude_patterns: list[str] = []
-
-MOCK_MODULES = ["dynsight.data_processing", "dynsight.hdf5er", "cpctools"]
-sys.modules.update({mod: MagicMock() for mod in MOCK_MODULES})
 
 
 # -- Options for HTML output -------------------------------------------------
