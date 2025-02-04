@@ -14,7 +14,7 @@ def compute_data_entropy(
 
     It is normalized so that a uniform distribution has unitary entropy.
 
-    * Original author: Matteo Becchi
+    * Author: Matteo Becchi
 
     Parameters:
         data:
@@ -72,7 +72,7 @@ def compute_entropy_gain(
 ) -> float | None:
     """Compute the relative information gained by the clustering.
 
-    * Original author: Matteo Becchi
+    * Author: Matteo Becchi
 
     Parameters:
         data:
@@ -151,7 +151,7 @@ def sample_entropy(
 ) -> float | None:
     """Compute the sample entropy of a single time-series.
 
-    * Author: Matteo Becchi <bechmath@gmail.com>
+    * Author: Matteo Becchi
 
     Parameters:
         particle : np.ndarray of shape (n_frames,)
@@ -164,7 +164,7 @@ def sample_entropy(
             The similarity threshold between signal windows.
 
     Returns:
-        sampen : float | None
+        float | None
             The sample entropy of the time-seris.
 
     Example:
@@ -219,9 +219,9 @@ def compute_sample_entropy(
     m_par: int = 2,
     r_factor: float = 0.2,
 ) -> float | None:
-    """Compute the sample entropy of a time-series dataset.
+    """Compute the average sample entropy of a time-series dataset.
 
-    * Author: Matteo Becchi <bechmath@gmail.com>
+    * Author: Matteo Becchi
 
     Parameters:
         data : np.ndarray of shape (n_particles, n_frames)
@@ -233,7 +233,7 @@ def compute_sample_entropy(
             The similarity threshold between signal windows.
 
     Returns:
-        sampen : float | None
+        float | None
             The sample entropy of the dataset (average over all the particles).
 
     Example:
