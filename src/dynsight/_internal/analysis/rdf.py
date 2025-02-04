@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     import MDAnalysis
@@ -17,7 +17,7 @@ def compute_rdf(
     s2: str = "all",
     exclusion_block: list[int] | None = None,
     nbins: int = 200,
-    norm: str | None = "rdf",
+    norm: Literal["rdf", "density", "none"] = "rdf",
     start: int | None = None,
     stop: int | None = None,
     step: int = 1,
@@ -58,7 +58,7 @@ def compute_rdf(
 
             - **'rdf'**: Standard RDF normalization (default).
             - **'density'**: Normalize with respect to system density.
-            - **None**: No normalization applied.
+            - **'none'**: No normalization applied.
         start:
             Initial molecular dynamics step.
         stop:
