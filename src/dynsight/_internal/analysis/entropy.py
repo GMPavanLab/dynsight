@@ -153,39 +153,61 @@ def sample_entropy(
 
     * Author: Matteo Becchi <bechmath@gmail.com>
 
-    Parameters
-    ----------
-    particle : np.ndarray of shape (n_frames,)
-        The time-series data for a single particle.
+    Parameters:
+        particle : np.ndarray of shape (n_frames,)
+            The time-series data for a single particle.
 
-    m_par : int (default 2)
-        The m parameter (length of the considered overlapping windows).
+        m_par : int (default 2)
+            The m parameter (length of the considered overlapping windows).
 
-    r_factor : float (default 0.2)
-        The similarity threshold between signal windows.
+        r_factor : float (default 0.2)
+            The similarity threshold between signal windows.
 
     Returns:
-    -------
-    sampen : float | None
-        The sample entropy of the time-seris.
+        sampen : float | None
+            The sample entropy of the time-seris.
+
+    Example:
+
+        .. testcode:: sampen1-test
+
+            import numpy as np
+            from dynsight.analysis import sample_entropy
+
+            np.random.seed(1234)
+            data = np.random.rand(1000)
+
+            samp_en = sample_entropy(
+                data,
+                m_par=2,
+                r_factor=0.2,
+            )
+
+        .. testcode:: sampen1-test
+            :hide:
+
+            assert np.isclose(samp_en, 2.2351853395754424, atol=1e-7,
+                rtol=1e-6)
     """
-    n = len(particle)
-    if n < m_par + 1:
+    n_frames = len(particle)
+    if n_frames < m_par + 1:
         return None
-    r = r_factor * np.std(particle)
+    r_th = r_factor * np.std(particle)
 
     # To store counts of similar pairs for m and m+1
     number_of_pairs = [0, 0]
 
     for i, m in enumerate([m_par + 1, m_par]):
         # Create overlapping windows of length m
-        window_list = np.array([particle[j : j + m] for j in range(n - m + 1)])
+        window_list = np.array(
+            [particle[j : j + m] for j in range(n_frames - m + 1)]
+        )
 
         # Compute pairwise distances (Chebyshev is typical for SampEn)
         distances = pdist(window_list, metric="chebyshev")
 
-        # Count pairs within the threshold r
-        number_of_pairs[i] = np.sum(distances < r)
+        # Count pairs within the threshold r_th
+        number_of_pairs[i] = np.sum(distances < r_th)
 
     if number_of_pairs[1] == 0.0 or number_of_pairs[0] == 0.0:
         return None  # Ignore it, often due to too short windows
@@ -202,20 +224,40 @@ def compute_sample_entropy(
 
     * Author: Matteo Becchi <bechmath@gmail.com>
 
-    Parameters
-    ----------
-    data : np.ndarray of shape (n_particles, n_frames)
+    Parameters:
+        data : np.ndarray of shape (n_particles, n_frames)
 
-    m_par : int (default 2)
-        The m parameter (length of the considered overlapping windows).
+        m_par : int (default 2)
+            The m parameter (length of the considered overlapping windows).
 
-    r_factor : float (default 0.2)
-        The similarity threshold between signal windows.
+        r_factor : float (default 0.2)
+            The similarity threshold between signal windows.
 
     Returns:
-    -------
-    sampen : float | None
-        The sample entropy of the dataset (average over all the particles).
+        sampen : float | None
+            The sample entropy of the dataset (average over all the particles).
+
+    Example:
+
+        .. testcode:: sampen2-test
+
+            import numpy as np
+            from dynsight.analysis import compute_sample_entropy
+
+            np.random.seed(1234)
+            data = np.random.rand(100, 100)
+
+            aver_samp_en = compute_sample_entropy(
+                data,
+                m_par=2,
+                r_factor=0.2,
+            )
+
+        .. testcode:: sampen2-test
+            :hide:
+
+            assert np.isclose(aver_samp_en, 2.210674176898837, atol=1e-7,
+                rtol=1e-6)
     """
     sampen_list = []
     for particle in data:
