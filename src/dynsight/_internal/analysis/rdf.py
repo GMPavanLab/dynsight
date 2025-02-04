@@ -90,7 +90,6 @@ def compute_rdf(
                 universe=univ,
                 distances_range=[0.0, 10.0],
                 nbins=100,
-                norm=None,
             )
 
         .. testcode:: rdf-test
