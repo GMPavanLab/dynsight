@@ -1,10 +1,12 @@
 """analysis package."""
 
-from dynsight._internal.analysis.rdf import compute_rdf
-from dynsight._internal.analysis.shannon_entropy import (
+from dynsight._internal.analysis.entropy import (
     compute_data_entropy,
     compute_entropy_gain,
+    compute_sample_entropy,
+    sample_entropy,
 )
+from dynsight._internal.analysis.rdf import compute_rdf
 from dynsight._internal.analysis.spatial_average import (
     spatialaverage,
 )
@@ -17,7 +19,9 @@ __all__ = [
     "compute_data_entropy",
     "compute_entropy_gain",
     "compute_rdf",
+    "compute_sample_entropy",
     "cross_time_correlation",
+    "sample_entropy",
     "self_time_correlation",
     "spatialaverage",
 ]

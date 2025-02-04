@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import numpy.typing as npt
+from scipy.spatial.distance import pdist
 
 
 def compute_data_entropy(
@@ -141,3 +142,87 @@ def compute_entropy_gain(
     clustered_entropy = np.dot(frac, entr)
 
     return (total_entropy - clustered_entropy) / total_entropy
+
+
+def sample_entropy(
+    particle: npt.NDArray[np.float64],
+    m_par: int = 2,
+    r_factor: float = 0.2,
+) -> float | None:
+    """Compute the sample entropy of a single time-series.
+
+    * Author: Matteo Becchi <bechmath@gmail.com>
+
+    Parameters
+    ----------
+    particle : np.ndarray of shape (n_frames,)
+        The time-series data for a single particle.
+
+    m_par : int (default 2)
+        The m parameter (length of the considered overlapping windows).
+
+    r_factor : float (default 0.2)
+        The similarity threshold between signal windows.
+
+    Returns:
+    -------
+    sampen : float | None
+        The sample entropy of the time-seris.
+    """
+    n = len(particle)
+    if n < m_par + 1:
+        return None
+    r = r_factor * np.std(particle)
+
+    # To store counts of similar pairs for m and m+1
+    number_of_pairs = [0, 0]
+
+    for i, m in enumerate([m_par + 1, m_par]):
+        # Create overlapping windows of length m
+        window_list = np.array([particle[j : j + m] for j in range(n - m + 1)])
+
+        # Compute pairwise distances (Chebyshev is typical for SampEn)
+        distances = pdist(window_list, metric="chebyshev")
+
+        # Count pairs within the threshold r
+        number_of_pairs[i] = np.sum(distances < r)
+
+    if number_of_pairs[1] == 0.0 or number_of_pairs[0] == 0.0:
+        return None  # Ignore it, often due to too short windows
+
+    return -np.log(number_of_pairs[0] / number_of_pairs[1])
+
+
+def compute_sample_entropy(
+    data: npt.NDArray[np.float64],
+    m_par: int = 2,
+    r_factor: float = 0.2,
+) -> float | None:
+    """Compute the sample entropy of a time-series dataset.
+
+    * Author: Matteo Becchi <bechmath@gmail.com>
+
+    Parameters
+    ----------
+    data : np.ndarray of shape (n_particles, n_frames)
+
+    m_par : int (default 2)
+        The m parameter (length of the considered overlapping windows).
+
+    r_factor : float (default 0.2)
+        The similarity threshold between signal windows.
+
+    Returns:
+    -------
+    sampen : float | None
+        The sample entropy of the dataset (average over all the particles).
+    """
+    sampen_list = []
+    for particle in data:
+        tmp = sample_entropy(particle, m_par, r_factor)
+        if tmp is not None:
+            sampen_list.append(tmp)
+
+    sampen = np.array(sampen_list)
+
+    return None if sampen.size == 0 else np.mean(sampen)
