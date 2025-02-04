@@ -55,6 +55,7 @@ def compute_rdf(
             histogramming the RDF.
         norm :
             Type of normalization to apply:
+
             - **'rdf'**: Standard RDF normalization (default).
             - **'density'**: Normalize with respect to system density.
             - **None**: No normalization applied.
