@@ -148,7 +148,7 @@ def sample_entropy(
     particle: npt.NDArray[np.float64],
     m_par: int = 2,
     r_factor: float = 0.2,
-) -> float | None:
+) -> float:
     """Compute the sample entropy of a single time-series.
 
     * Author: Matteo Becchi
@@ -164,7 +164,7 @@ def sample_entropy(
             The similarity threshold between signal windows.
 
     Returns:
-        float | None
+        float
             The sample entropy of the time-seris.
 
     Example:
@@ -190,7 +190,8 @@ def sample_entropy(
     """
     n_frames = len(particle)
     if n_frames < m_par + 1:
-        return None
+        err_msg = "Time-series too short"
+        raise ValueError(err_msg)
     r_th = r_factor * np.std(particle)
 
     # To store counts of similar pairs for m and m+1
@@ -208,8 +209,9 @@ def sample_entropy(
         # Count pairs within the threshold r_th
         number_of_pairs[i] = np.sum(distances < r_th)
 
-    if number_of_pairs[1] == 0.0 or number_of_pairs[0] == 0.0:
-        return None  # Ignore it, often due to too short windows
+    if number_of_pairs[1] == 0.0 and number_of_pairs[0] == 0.0:
+        err_msg = "Distance threshold too strict"
+        raise ValueError(err_msg)
 
     return -np.log(number_of_pairs[0] / number_of_pairs[1])
 
@@ -218,7 +220,7 @@ def compute_sample_entropy(
     data: npt.NDArray[np.float64],
     m_par: int = 2,
     r_factor: float = 0.2,
-) -> float | None:
+) -> float:
     """Compute the average sample entropy of a time-series dataset.
 
     * Author: Matteo Becchi
@@ -233,7 +235,7 @@ def compute_sample_entropy(
             The similarity threshold between signal windows.
 
     Returns:
-        float | None
+        float
             The sample entropy of the dataset (average over all the particles).
 
     Example:
@@ -257,12 +259,6 @@ def compute_sample_entropy(
 
             assert np.isclose(aver_samp_en, 2.210674176898837)
     """
-    sampen_list = []
-    for particle in data:
-        tmp = sample_entropy(particle, m_par, r_factor)
-        if tmp is not None:
-            sampen_list.append(tmp)
+    sampen = [sample_entropy(particle, m_par, r_factor) for particle in data]
 
-    sampen = np.array(sampen_list)
-
-    return None if sampen.size == 0 else np.mean(sampen)
+    return float(np.nanmean(sampen))

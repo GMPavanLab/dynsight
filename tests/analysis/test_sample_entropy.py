@@ -44,18 +44,16 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
             assert np.isclose(data_sample_entropy, expected_entropy)
 
         # Test the case where time-series are too short
-        data_sample_entropy = dynsight.analysis.compute_sample_entropy(
-            random_data,
-            m_par=105,
-        )
-
-        assert data_sample_entropy is None
+        with pytest.raises(ValueError, match="Time-series too short"):
+            _ = dynsight.analysis.compute_sample_entropy(
+                random_data,
+                m_par=105,
+            )
 
         # Test the case where threshold is too strict
         random_data = rng.random(100)
-        data_sample_entropy = dynsight.analysis.sample_entropy(
-            random_data,
-            r_factor=0.001,
-        )
-
-        assert data_sample_entropy is None
+        with pytest.raises(ValueError, match="Distance threshold too strict"):
+            _ = dynsight.analysis.sample_entropy(
+                random_data,
+                r_factor=0.001,
+            )
