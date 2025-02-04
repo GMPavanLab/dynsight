@@ -53,11 +53,12 @@ def compute_rdf(
         nbins:
             The number of bins used to divide the distance range for
             histogramming the RDF.
-        norm : {'rdf', 'density', 'none'}, optional
+        norm :
             Type of normalization to apply:
-            - 'rdf': Standard RDF normalization (default).
-            - 'density': Normalize with respect to system density.
-            - None: No normalization applied.
+
+            - **'rdf'**: Standard RDF normalization (default).
+            - **'density'**: Normalize with respect to system density.
+            - **None**: No normalization applied.
         start:
             Initial molecular dynamics step.
         stop:
@@ -90,6 +91,7 @@ def compute_rdf(
                 universe=univ,
                 distances_range=[0.0, 10.0],
                 nbins=100,
+                norm=None,
             )
 
         .. testcode:: rdf-test
