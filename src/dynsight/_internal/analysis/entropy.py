@@ -186,8 +186,7 @@ def sample_entropy(
         .. testcode:: sampen1-test
             :hide:
 
-            assert np.isclose(samp_en, 2.2351853395754424, atol=1e-7,
-                rtol=1e-6)
+            assert np.isclose(samp_en, 2.2351853395754424)
     """
     n_frames = len(particle)
     if n_frames < m_par + 1:
@@ -256,8 +255,7 @@ def compute_sample_entropy(
         .. testcode:: sampen2-test
             :hide:
 
-            assert np.isclose(aver_samp_en, 2.210674176898837, atol=1e-7,
-                rtol=1e-6)
+            assert np.isclose(aver_samp_en, 2.210674176898837)
     """
     sampen_list = []
     for particle in data:
