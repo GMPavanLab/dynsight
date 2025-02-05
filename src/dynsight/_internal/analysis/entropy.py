@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import numpy.typing as npt
+from scipy.spatial.distance import pdist
 
 
 def compute_data_entropy(
@@ -13,7 +14,7 @@ def compute_data_entropy(
 
     It is normalized so that a uniform distribution has unitary entropy.
 
-    * Original author: Matteo Becchi
+    * Author: Matteo Becchi
 
     Parameters:
         data:
@@ -71,7 +72,7 @@ def compute_entropy_gain(
 ) -> float | None:
     """Compute the relative information gained by the clustering.
 
-    * Original author: Matteo Becchi
+    * Author: Matteo Becchi
 
     Parameters:
         data:
@@ -141,3 +142,123 @@ def compute_entropy_gain(
     clustered_entropy = np.dot(frac, entr)
 
     return (total_entropy - clustered_entropy) / total_entropy
+
+
+def sample_entropy(
+    particle: npt.NDArray[np.float64],
+    m_par: int = 2,
+    r_factor: float = 0.2,
+) -> float:
+    """Compute the sample entropy of a single time-series.
+
+    * Author: Matteo Becchi
+
+    Parameters:
+        particle : np.ndarray of shape (n_frames,)
+            The time-series data for a single particle.
+
+        m_par : int (default 2)
+            The m parameter (length of the considered overlapping windows).
+
+        r_factor : float (default 0.2)
+            The similarity threshold between signal windows.
+
+    Returns:
+        float
+            The sample entropy of the time-seris.
+
+    Example:
+
+        .. testcode:: sampen1-test
+
+            import numpy as np
+            from dynsight.analysis import sample_entropy
+
+            np.random.seed(1234)
+            data = np.random.rand(1000)
+
+            samp_en = sample_entropy(
+                data,
+                m_par=2,
+                r_factor=0.2,
+            )
+
+        .. testcode:: sampen1-test
+            :hide:
+
+            assert np.isclose(samp_en, 2.2351853395754424)
+    """
+    n_frames = len(particle)
+    if n_frames < m_par + 1:
+        err_msg = "Time-series too short"
+        raise ValueError(err_msg)
+    r_th = r_factor * np.std(particle)
+
+    # To store counts of similar pairs for m and m+1
+    number_of_pairs = [0, 0]
+
+    for i, m in enumerate([m_par + 1, m_par]):
+        # Create overlapping windows of length m
+        window_list = np.array(
+            [particle[j : j + m] for j in range(n_frames - m + 1)]
+        )
+
+        # Compute pairwise distances (Chebyshev is typical for SampEn)
+        distances = pdist(window_list, metric="chebyshev")
+
+        # Count pairs within the threshold r_th
+        number_of_pairs[i] = np.sum(distances < r_th)
+
+    if number_of_pairs[1] == 0.0 and number_of_pairs[0] == 0.0:
+        err_msg = "Distance threshold too strict"
+        raise ValueError(err_msg)
+
+    return -np.log(number_of_pairs[0] / number_of_pairs[1])
+
+
+def compute_sample_entropy(
+    data: npt.NDArray[np.float64],
+    m_par: int = 2,
+    r_factor: float = 0.2,
+) -> float:
+    """Compute the average sample entropy of a time-series dataset.
+
+    * Author: Matteo Becchi
+
+    Parameters:
+        data : np.ndarray of shape (n_particles, n_frames)
+
+        m_par : int (default 2)
+            The m parameter (length of the considered overlapping windows).
+
+        r_factor : float (default 0.2)
+            The similarity threshold between signal windows.
+
+    Returns:
+        float
+            The sample entropy of the dataset (average over all the particles).
+
+    Example:
+
+        .. testcode:: sampen2-test
+
+            import numpy as np
+            from dynsight.analysis import compute_sample_entropy
+
+            np.random.seed(1234)
+            data = np.random.rand(100, 100)
+
+            aver_samp_en = compute_sample_entropy(
+                data,
+                m_par=2,
+                r_factor=0.2,
+            )
+
+        .. testcode:: sampen2-test
+            :hide:
+
+            assert np.isclose(aver_samp_en, 2.210674176898837)
+    """
+    sampen = [sample_entropy(particle, m_par, r_factor) for particle in data]
+
+    return float(np.nanmean(sampen))
