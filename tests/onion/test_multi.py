@@ -77,4 +77,4 @@ def test_output_files(original_wd: Path) -> None:
 
         ### Compare the contents of the expected and actual output ###
         expected_output = np.load(expected_output_path)
-        assert np.allclose(expected_output, labels, atol=1e-07)
+        assert np.allclose(expected_output, labels)
