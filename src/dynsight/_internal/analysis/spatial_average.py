@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import MDAnalysis
+    from numpy.typing import NDArray
 
 import ctypes
 from multiprocessing import Array, Pool
@@ -11,11 +12,11 @@ from multiprocessing import Array, Pool
 import numpy as np
 from MDAnalysis.analysis.distances import distance_array
 
-array: np.ndarray[float, Any]
+array: NDArray[np.float64]
 
 
 def initworker(
-    shared_array: np.ndarray[float, Any],
+    shared_array: NDArray[np.float64],
     shape: int,
     dtype: tuple[float, Any],
 ) -> None:
@@ -27,7 +28,7 @@ def initworker(
 
 def processframe(
     args: tuple[MDAnalysis.Universe, MDAnalysis.AtomGroup, float, int, bool],
-) -> tuple[int, np.ndarray[float, Any]]:
+) -> tuple[int, NDArray[np.float64]]:
     universe, selection, cutoff, frame, is_vector = args
     universe.trajectory[frame]
     distances = distance_array(
@@ -59,12 +60,12 @@ def processframe(
 
 def spatialaverage(
     universe: MDAnalysis.Universe,
-    descriptor_array: np.ndarray[float, Any],
+    descriptor_array: NDArray[np.float64],
     selection: str,
     cutoff: float,
     traj_cut: int = 0,
     num_processes: int = 4,
-) -> np.ndarray[float, Any]:
+) -> NDArray[np.float64]:
     """Compute spatially averaged descriptor values over neighboring particles.
 
     This function takes a molecular dynamics (MD) simulation stored in an

@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import MDAnalysis
+    from numpy.typing import NDArray
 
 import numpy as np
 from ase import Atoms
@@ -21,7 +22,7 @@ def saponify_trajectory(
     soap_respectpbc: bool = True,
     n_core: int = 1,
     **soapkwargs: Any,
-) -> np.ndarray[float, Any]:
+) -> NDArray[np.float64]:
     """Calculate the SOAP fingerprints for each atom in a MDA universe.
 
     * Author: Simone Martino
@@ -108,10 +109,10 @@ def saponify_trajectory(
 
 
 def fill_soap_vector_from_dscribe(
-    soapfromdscribe: np.ndarray[float, Any],
+    soapfromdscribe: NDArray[np.float64],
     lmax: int = 8,
     nmax: int = 8,
-) -> np.ndarray[float, Any]:
+) -> NDArray[np.float64]:
     """Return the SOAP power spectrum from dscribe results.
 
     * Author: Matteo Becchi

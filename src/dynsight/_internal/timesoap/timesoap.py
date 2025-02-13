@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 import numpy as np
 
 
 def normalize_soap(
-    soaptrajectory: np.ndarray[float, Any],
-) -> np.ndarray[float, Any]:
+    soaptrajectory: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """Returns the SOAP spectra normalized to unitary length.
 
     Parameters:
@@ -58,9 +61,9 @@ def normalize_soap(
 
 
 def soap_distance(
-    v_1: np.ndarray[float, Any],
-    v_2: np.ndarray[float, Any],
-) -> np.ndarray[float, Any]:
+    v_1: NDArray[np.float64],
+    v_2: NDArray[np.float64],
+) -> NDArray[np.float64]:
     r"""Computes the Kernel SOAP distance between two SOAP spectra.
 
     The SOAP distance is calculated with:
@@ -86,7 +89,7 @@ def soap_distance(
             SOAP spectra.
 
     Returns:
-        np.ndarray[float, Any] : the SOAP distances between the input spectra.
+        NDArray[np.float64] : the SOAP distances between the input spectra.
 
     Example:
 
@@ -127,9 +130,9 @@ def soap_distance(
 
 
 def timesoap(
-    soaptrajectory: np.ndarray[float, Any],
+    soaptrajectory: NDArray[np.float64],
     delay: int = 1,
-) -> np.ndarray[float, Any]:
+) -> NDArray[np.float64]:
     """Performs the 'timeSOAP' analysis on the given SOAP trajectory.
 
     timeSOAP was developed by Cristina Caurso. See for reference the paper
@@ -144,7 +147,7 @@ def timesoap(
             Default is 1.
 
     Returns:
-        np.ndarray[float, Any]
+        NDArray[np.float64]
             Values of timesoap of each particle at each frame.
             Has shape (n_particles, n_frames - 1).
 

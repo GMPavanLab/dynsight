@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from MDAnalysis import AtomGroup, Universe
+    from numpy.typing import NDArray
 
 import numpy as np
 from MDAnalysis.lib.NeighborSearch import AtomNeighborSearch
@@ -79,10 +80,10 @@ def list_neighbours_along_trajectory(
 def neighbour_change_in_time(
     neigh_list_per_frame: list[list[AtomGroup]],
 ) -> tuple[
-    np.ndarray[float, Any],
-    np.ndarray[int, Any],
-    np.ndarray[float, Any],
-    np.ndarray[float, Any],
+    NDArray[np.float64],
+    NDArray[np.int64],
+    NDArray[np.float64],
+    NDArray[np.float64],
 ]:
     """Return, listed per atom, the LENS values at each frame.
 
@@ -143,7 +144,7 @@ def neighbour_change_in_time(
     # this is the number of common NN between frames
     lensarray = np.zeros((nat, nframes))
     # this is the number of NN at that frame
-    numberofneighs = np.zeros((nat, nframes))
+    numberofneighs = np.zeros((nat, nframes), dtype=int)
     # this is the numerator of LENS
     lensnumerators = np.zeros((nat, nframes))
     # this is the denominator of lens

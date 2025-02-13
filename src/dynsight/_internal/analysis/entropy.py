@@ -52,7 +52,7 @@ def compute_data_entropy(
         .. testcode:: shannon1-test
             :hide:
 
-            assert data_entropy == 0.9993954419344714
+            assert np.isclose(data_entropy, 0.9993954419344714)
     """
     counts, _ = np.histogram(
         data,
@@ -108,7 +108,7 @@ def compute_entropy_gain(
         .. testcode:: shannon2-test
             :hide:
 
-            assert entropy_gain == 0.0010065005804883983
+            assert np.isclose(entropy_gain, 0.0010065005804883983)
     """
     if data.shape[0] != labels.shape[0]:
         msg = (
