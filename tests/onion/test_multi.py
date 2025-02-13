@@ -75,8 +75,6 @@ def test_output_files(original_wd: Path) -> None:
         results_dir = original_wd / "tests/onion/"
         expected_output_path = results_dir / "output_multi/labels.npy"
 
-        np.save(expected_output_path, labels)
-
         ### Compare the contents of the expected and actual output ###
         expected_output = np.load(expected_output_path)
         assert np.allclose(expected_output, labels, atol=1e-07)
