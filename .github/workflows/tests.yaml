@@ -10,18 +10,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10', '3.13', 'pypy3.8' ]
+        python-version: ['3.10', '3.13' ]
     name: Python ${{ matrix.python-version }} sample
-    ruff:
-      runs-on: ubuntu-22.04
-      steps:
-        - uses: actions/checkout@v3
-        - uses: actions/setup-python@v4
-          with:
-            python-version: ${{ matrix.python-version }}
-            cache: "pip"
-        - run: pip install -e '.[dev]'
-        - run: ruff check .
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - run: pip install -e '.[dev]'
+      - run: ruff check .
     mypy:
       runs-on: ubuntu-22.04
       steps:
