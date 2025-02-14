@@ -36,9 +36,13 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
         os.chdir(temp_dir)
 
         # Test the use of the function computing entropy
+
+        # This is necessary because of type checking:
+        data_min = float(np.min(random_data))
+        data_max = float(np.max(random_data))
         data_entropy = dynsight.analysis.compute_data_entropy(
             random_data,
-            data_range=(np.min(random_data), np.max(random_data)),
+            data_range=(data_min, data_max),
             n_bins=20,
         )
 

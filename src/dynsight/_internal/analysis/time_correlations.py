@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 import numpy as np
 
 
 def self_time_correlation(
-    data: np.ndarray[float, Any],
+    data: NDArray[np.float64],
     max_delay: int | None = None,
-) -> tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Computes the mean self time correlation function for time-series.
 
     Takes as input an array of shape (n_particles, n_frames), where the
@@ -92,9 +95,9 @@ def self_time_correlation(
 
 
 def cross_time_correlation(
-    data: np.ndarray[float, Any],
+    data: NDArray[np.float64],
     max_delay: int | None = None,
-) -> tuple[np.ndarray[float, Any], np.ndarray[float, Any]]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Computes the mean cross time correlation function for time-series.
 
     Takes as input an array of shape (n_particles, n_frames), where the

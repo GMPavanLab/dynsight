@@ -11,13 +11,13 @@ maintainers = [
 ]
 
 dependencies = [
-    "numpy < 1.24.0",          # Needed right now, to remove in the future
-    "dscribe >1.2.0, <=1.2.2",
+    "numpy",
+    "dscribe",
     "tropea-clustering",
     "MDAnalysis",
 ]
 # Set by cpctools.
-requires-python = "<3.11,>=3.8"
+requires-python = ">=3.8"
 dynamic = ["version"]
 readme = "README.rst"
 description = "Simplifies analysis of Molecular Dynamics simulations."
