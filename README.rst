@@ -55,7 +55,7 @@ Acknowledgements
 ================
 
 We developed this code when working in the Pavan group,
-https://www.gmpavanlab.com/, whose members often provide very valuable
+https://www.gmpavanlab.polito.it/, whose members often provide very valuable
 feedback, which we gratefully acknowledge.
 
 Much of the original code in ``cpctools`` was written by Daniele Rapetti (Iximiel).
