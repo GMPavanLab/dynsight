@@ -76,7 +76,7 @@ def spatialaverage(
     particles within a specified cutoff radius. The calculation is parallelized
     across multiple processes for efficiency.
 
-    Warning:
+    .. caution::
         This function utilizes multiprocessing and **must** be called from
         within a `main()` function. To avoid runtime errors, ensure that the
         script includes the following guard:
