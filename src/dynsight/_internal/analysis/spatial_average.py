@@ -118,12 +118,12 @@ def spatialaverage(
             an error is raised.
 
     Warning:
-        This function utilizes multiprocessing and **must** be called from 
+        This function utilizes multiprocessing and **must** be called from
         within a `main()` function. To avoid runtime errors, ensure that the
         script includes the following guard:
 
         .. code-block:: python
-        
+
             if __name__ == "__main__":
                 main()
 
