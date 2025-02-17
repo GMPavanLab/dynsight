@@ -76,7 +76,20 @@ def spatialaverage(
     particles within a specified cutoff radius. The calculation is parallelized
     across multiple processes for efficiency.
 
-    **Key Features**:
+    Warning:
+        This function utilizes multiprocessing and **must** be called from
+        within a `main()` function. To avoid runtime errors, ensure that the
+        script includes the following guard:
+
+        .. code-block:: python
+
+            if __name__ == "__main__":
+                main()
+
+        Failure to follow this structure may result in unexpected behavior
+        or crashes, especially on Windows and MacOS.
+
+    .. important::
         - Supports both scalar descriptors (2D) and vector descriptors (3D).
         - Utilizes multiprocessing to speed up the computation.
 
@@ -116,19 +129,6 @@ def spatialaverage(
         ValueError:
             If the input descriptor array does not have 2 or 3 dimensions,
             an error is raised.
-
-    Warning:
-        This function utilizes multiprocessing and **must** be called from
-        within a `main()` function. To avoid runtime errors, ensure that the
-        script includes the following guard:
-
-        .. code-block:: python
-
-            if __name__ == "__main__":
-                main()
-
-        Failure to follow this structure may result in unexpected behavior
-        or crashes, especially on Windows and MacOS.
 
     Example:
 
