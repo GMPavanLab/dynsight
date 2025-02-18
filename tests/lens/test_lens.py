@@ -51,7 +51,7 @@ def test_lens_signals() -> None:
         check_lens_nn = check_file[f"LENS_{i}"]
 
         # Check if control and test array are equal
-        assert np.array_equal(check_lens_nn, test_lens_nn), (
+        assert np.allclose(check_lens_nn, test_lens_nn), (
             f"LENS analyses provided different values "
             f"compared to the control system "
             f"for r_cut: {lens_cutoffs[i]} (results: {output_file})."

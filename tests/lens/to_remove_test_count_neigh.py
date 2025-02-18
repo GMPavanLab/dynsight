@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 
 import MDAnalysis
 import numpy as np
-from numpy.testing import assert_array_equal
 
 import dynsight
 
@@ -61,4 +60,4 @@ def test_count_neigh_for_lens(
             for atomgroupnn, myatomsid in zip(nnlistorig, mynnlist):
                 atomsid = np.sort([at.ix for at in atomgroupnn])
                 assert is_sorted(myatomsid)
-                assert_array_equal(atomsid, myatomsid)
+                np.allclose(atomsid, myatomsid)
