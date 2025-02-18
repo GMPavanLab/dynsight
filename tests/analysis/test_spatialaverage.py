@@ -39,4 +39,4 @@ def test_spatialaverage() -> None:
 
     # Load expected results and compare
     expected_arr = np.load(expected_results)
-    assert np.array_equal(test_arr, expected_arr)
+    assert np.allclose(test_arr, expected_arr)

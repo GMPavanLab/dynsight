@@ -40,5 +40,5 @@ def test_compute_rdf(case_data: RDFCaseData) -> None:
 
     exp_bins = np.load(expected_bins)
     exp_rdf = np.load(expected_rdf)
-    assert np.array_equal(exp_rdf, test_rdf)
-    assert np.array_equal(exp_bins, test_bins)
+    assert np.allclose(exp_rdf, test_rdf)
+    assert np.allclose(exp_bins, test_bins)

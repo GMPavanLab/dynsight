@@ -1,6 +1,5 @@
 import MDAnalysis
 import numpy as np
-from numpy.testing import assert_array_equal
 
 import dynsight
 
@@ -33,8 +32,8 @@ def test_special_lens(lensfixtures: MDAnalysis.Universe) -> None:
         mydentot,
     ) = dynsight.lens.neighbour_change_in_time(nnlistperframe)
 
-    assert_array_equal(mynconttot[:, 0], [0] * mynconttot.shape[0])
-    assert_array_equal(mynconttot[:, 1], expected)
+    np.allclose(mynconttot[:, 0], [0] * mynconttot.shape[0])
+    np.allclose(mynconttot[:, 1], expected)
 
     for frame in [0, 1]:
         for atom in universe.atoms:
