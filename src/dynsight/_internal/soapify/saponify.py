@@ -21,6 +21,7 @@ def saponify_trajectory(
     selection: str = "all",
     soap_respectpbc: bool = True,
     n_core: int = 1,
+    centers: str = "all",
     **soapkwargs: Any,
 ) -> NDArray[np.float64]:
     """Calculate the SOAP fingerprints for each atom in a MDA universe.
@@ -80,6 +81,7 @@ def saponify_trajectory(
                 np.sum(soap[0]), 8627.847941030795, atol=1e-6, rtol=1e-3)
     """
     sel = universe.select_atoms(selection)
+    centers_list = sel.select_atoms(centers).indices.tolist()
     species = list(set(sel.atoms.types))
 
     soap = SOAP(
@@ -102,8 +104,9 @@ def saponify_trajectory(
             pbc=soap_respectpbc,
         )
         traj.append(frame)
-
-    tmp_soap = soap.create(system=traj, n_jobs=n_core)
+    tmp_soap = soap.create(
+        system=traj, n_jobs=n_core, centers=[centers_list] * len(traj)
+    )
 
     return np.transpose(tmp_soap, (1, 0, 2))
 
