@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import MDAnalysis
@@ -22,7 +22,6 @@ def saponify_trajectory(
     soap_respectpbc: bool = True,
     n_core: int = 1,
     centers: str = "all",
-    **soapkwargs: Any,
 ) -> NDArray[np.float64]:
     """Calculate the SOAP fingerprints for each atom in a MDA universe.
 
@@ -88,11 +87,7 @@ def saponify_trajectory(
     species = list(set(sel.atoms.types))
 
     soap = SOAP(
-        species=species,
-        r_cut=soaprcut,
-        n_max=soapnmax,
-        l_max=soaplmax,
-        **soapkwargs,
+        species=species, r_cut=soaprcut, n_max=soapnmax, l_max=soaplmax
     )
     traj = []
     for t_s in universe.trajectory:
