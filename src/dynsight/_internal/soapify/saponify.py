@@ -81,7 +81,10 @@ def saponify_trajectory(
                 np.sum(soap[0]), 8627.847941030795, atol=1e-6, rtol=1e-3)
     """
     sel = universe.select_atoms(selection)
-    centers_list = sel.select_atoms(centers).indices.tolist()
+    centers_list_id = sel.select_atoms(centers).indices.tolist()
+    centers_list = [
+        i for i, idx in enumerate(sel.indices) if idx in centers_list_id
+    ]
     species = list(set(sel.atoms.types))
 
     soap = SOAP(
