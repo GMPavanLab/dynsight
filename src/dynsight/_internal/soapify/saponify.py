@@ -40,7 +40,11 @@ def saponify_trajectory(
             The maximum degree of spherical harmonics (option passed to the
             desired SOAP engine). Defaults to 8.
         selection : str = "all"
-            Selection of atoms in the Universe of which SOAP will be computed.
+            Selection of atoms taken from the Universe for the computation.
+        centers : str = "all"
+            Selection of atoms used as centers for the SOAP calculation. If not
+            specified all the atoms present in the selection will be used
+            as centers.
         soap_respectpbc:
             Determines whether the system is considered to be periodic
             (option passed to the desired SOAP engine). Defaults to True.
