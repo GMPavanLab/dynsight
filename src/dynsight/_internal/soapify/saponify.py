@@ -87,7 +87,11 @@ def saponify_trajectory(
     species = list(set(sel.atoms.types))
 
     soap = SOAP(
-        species=species, r_cut=soaprcut, n_max=soapnmax, l_max=soaplmax
+        species=species,
+        r_cut=soaprcut,
+        n_max=soapnmax,
+        l_max=soaplmax,
+        periodic=soap_respectpbc,
     )
     traj = []
     for t_s in universe.trajectory:
