@@ -36,7 +36,6 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
         os.chdir(temp_dir)
 
         # Test the use of the function computing entropy
-
         # This is necessary because of type checking:
         data_min = float(np.min(random_data))
         data_max = float(np.max(random_data))
@@ -49,7 +48,13 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
         expected_entropy = 0.9995963122117133004
 
         if isinstance(data_entropy, float):
-            assert data_entropy - expected_entropy < THRESHOLD
+            assert np.isclose(data_entropy, expected_entropy)
+
+        # Test the case of empty dataset
+        with pytest.raises(ValueError, match="data is empty"):
+            _ = dynsight.analysis.compute_data_entropy(
+                np.array([]), (0.0, 1.0), 20
+            )
 
         # Test the case where labels have the wrong shape
         with pytest.raises(RuntimeError):
@@ -66,7 +71,7 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
             n_bins=20,
         )
 
-        expected_gain = 0.0012652602795437606
+        expected_gain = 0.0010842808402454819
 
         if isinstance(clustering_gain, float):
-            assert clustering_gain - expected_gain < THRESHOLD
+            assert np.isclose(clustering_gain, expected_gain)

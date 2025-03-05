@@ -54,6 +54,9 @@ def compute_data_entropy(
 
             assert np.isclose(data_entropy, 0.9993954419344714)
     """
+    if data.size == 0:
+        msg = "data is empty"
+        raise ValueError(msg)
     counts, _ = np.histogram(
         data,
         bins=n_bins,
