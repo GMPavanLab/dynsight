@@ -54,6 +54,8 @@ def compute_data_entropy(
 
             assert np.isclose(data_entropy, 0.9993954419344714)
     """
+    if data.size == 0:
+        return 0.0
     counts, _ = np.histogram(
         data,
         bins=n_bins,
