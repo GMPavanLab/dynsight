@@ -51,10 +51,10 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
             assert np.isclose(data_entropy, expected_entropy)
 
         # Test the case of empty dataset
-        data_entropy = dynsight.analysis.compute_data_entropy(
-            np.array([]), (0.0, 1.0), 20
-        )
-        assert np.isclose(data_entropy, 0.0)
+        with pytest.raises(ValueError, match="data is empty"):
+            _ = dynsight.analysis.compute_data_entropy(
+                np.array([]), (0.0, 1.0), 20
+            )
 
         # Test the case where labels have the wrong shape
         with pytest.raises(RuntimeError):
