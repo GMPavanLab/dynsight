@@ -39,18 +39,18 @@ def saponify_trajectory(
         soaplmax:
             The maximum degree of spherical harmonics (option passed to the
             desired SOAP engine). Defaults to 8.
-        selection : str = "all"
+        selection:
             Selection of atoms taken from the Universe for the computation.
-        centers : str = "all"
+            More information concerning the selection language can be found
+            `here <https://userguide.mdanalysis.org/stable/selections.html>`_
+        centers:
             Selection of atoms used as centers for the SOAP calculation. If not
             specified all the atoms present in the selection will be used
-            as centers.
+            as centers. More information concerning the selection language can
+            be found `here <https://userguide.mdanalysis.org/stable/selections.html>`_
         soap_respectpbc:
             Determines whether the system is considered to be periodic
             (option passed to the desired SOAP engine). Defaults to True.
-        soapkwargs (dict, optional):
-            Additional keyword arguments to be passed to the SOAP engine.
-            Defaults to {}.
         n_core:
             Number of core used for parallel processing. Default to 1.
 
@@ -75,7 +75,7 @@ def saponify_trajectory(
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
             cutoff = 2.0
 
-            soap = saponify_trajectory(univ, cutoff,soap_respectpbc=False)
+            soap = saponify_trajectory(univ, cutoff, soap_respectpbc=False)
 
         .. testcode:: soap1-test
             :hide:
@@ -111,7 +111,9 @@ def saponify_trajectory(
         )
         traj.append(frame)
     tmp_soap = soap.create(
-        system=traj, n_jobs=n_core, centers=[centers_list] * len(traj)
+        system=traj,
+        n_jobs=n_core,
+        centers=[centers_list] * len(traj),
     )
 
     return np.transpose(tmp_soap, (1, 0, 2))

@@ -46,16 +46,6 @@ def test_soap_vectors() -> None:
             soap_respectpbc=False,
         )
 
-        _ = dynsight.soap.fill_soap_vector_from_dscribe(
-            test_soap[0][0],
-        )
-        _ = dynsight.soap.fill_soap_vector_from_dscribe(
-            test_soap[0],
-        )
-        _ = dynsight.soap.fill_soap_vector_from_dscribe(
-            test_soap,
-        )
-
         check_soap = check_file[f"arr{i + 1}"]
 
         # Check if control and test array are similar
@@ -108,18 +98,13 @@ def test_soap_centers() -> None:
             centers="id 2 or id 3",
         )
 
-        _ = dynsight.soap.fill_soap_vector_from_dscribe(
-            test_soap[0][0],
-        )
-        _ = dynsight.soap.fill_soap_vector_from_dscribe(
-            test_soap[0],
-        )
-        _ = dynsight.soap.fill_soap_vector_from_dscribe(
-            test_soap,
-        )
-
         check_soap = check_file[f"arr{i + 1}"]
 
+        # Check if id 2 and id 3 SOAPs are different
+        assert not np.array_equal(test_soap[0, :, :], test_soap[1, :, :]), (
+            "SOAP calculation provides the same results "
+            "for different particles."
+        )
         # Check if control and test array are similar
         assert np.allclose(
             check_soap[1:3, :, :], test_soap, atol=1e-6, rtol=1e-2
