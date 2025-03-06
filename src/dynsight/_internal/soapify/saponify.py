@@ -75,7 +75,7 @@ def saponify_trajectory(
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
             cutoff = 2.0
 
-            soap = saponify_trajectory(univ, cutoff)
+            soap = saponify_trajectory(univ, cutoff,soap_respectpbc=False)
 
         .. testcode:: soap1-test
             :hide:
@@ -157,7 +157,7 @@ def fill_soap_vector_from_dscribe(
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
             cutoff = 2.0
 
-            soap = saponify_trajectory(univ, cutoff)
+            soap = saponify_trajectory(univ, cutoff, soap_respectpbc=False)
 
             full_soap = fill_soap_vector_from_dscribe(soap)
 

@@ -43,7 +43,7 @@ def normalize_soap(
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
             cutoff = 2.0
 
-            soap = saponify_trajectory(univ, cutoff)
+            soap = saponify_trajectory(univ, cutoff, soap_respectpbc=False)
             unitary_soap = normalize_soap(soap)
 
         .. testcode:: tsoap1-test
@@ -108,7 +108,7 @@ def soap_distance(
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
             cutoff = 2.0
 
-            soap = saponify_trajectory(univ, cutoff)
+            soap = saponify_trajectory(univ, cutoff, soap_respectpbc=False)
             soap_dist = soap_distance(soap[0][0], soap[0][1])
 
         .. testcode:: tsoap2-test
@@ -168,7 +168,7 @@ def timesoap(
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
             cutoff = 2.0
 
-            soap = saponify_trajectory(univ, cutoff)
+            soap = saponify_trajectory(univ, cutoff, soap_respectpbc=False)
             tsoap = timesoap(soap)
 
         .. testcode:: tsoap3-test
