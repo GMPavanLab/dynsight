@@ -39,8 +39,7 @@ def test_time_soap_vectors() -> None:
     # Run tSOAP calculation for different r_cuts
     for i, r_c in enumerate(soap_r_cuts):
         soap_traj = dynsight.soap.saponify_trajectory(
-            universe=universe,
-            soaprcut=r_c,
+            universe=universe, soaprcut=r_c, soap_respectpbc=False
         )
 
         with pytest.raises(ValueError, match="delay value outside bounds"):
