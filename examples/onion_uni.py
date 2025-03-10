@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from dynsight import onion
-from dynsight.utilities import find_extrema_points
 
 
 def main() -> None:
@@ -25,39 +24,18 @@ def main() -> None:
     ### Load the input data - it's an array of shape (n_particles, n_frames)
     ### The first LENS frame has to be removed because it's always zero
     input_data = np.load(path_to_input_data)[:, 1:]
+    n_particles = input_data.shape[0]
     n_frames = input_data.shape[1]
-
-    """ STEP 0: STATIC CLUSTERING
-    Before using Onion Clustering, a simple pattern recognition analysis can
-    be performed with dynsight, identifying the maxima of the data
-    distribution. This analysis ignores the time correlations withing the
-    data. The value of 'prominance' tunes the sensibility to the data
-    histogram roughness. Plot the histogram to set the best value.
-
-    The results is an array which lists the (x, y) value of each peak.
-    """
-    counts, bins = np.histogram(
-        input_data.flatten(),
-        bins=50,
-        density=True,
-    )
-    _ = find_extrema_points(
-        x_axis=bins[1:],
-        y_axis=counts,
-        extrema_type="max",
-        prominence=0.2,
-    )
 
     """ STEP 1: CLUSTERING WITH A SINGLE TIME RESOLUTION
     Chose the time resolution --> the length of the windows in which the
     time-series will be divided. This is the minimum lifetime required for
     a state to be considered stable."""
-    tau_window = 5
-    n_windows = int(n_frames / tau_window)  # Number of windows
+    delta_t = 5
 
-    ### The input array needs to be (n_parrticles * n_windows, tau_window)
+    ### The input array needs to be (n_particles * n_windows, delta_t)
     ### because each window is trerated as a single data-point
-    reshaped_data = onion.helpers.reshape_from_nt(input_data, tau_window)
+    reshaped_data = onion.helpers.reshape_from_nt(input_data, delta_t)
 
     ### onion_uni() returns the list of states and the label for each
     ### signal window
@@ -65,26 +43,26 @@ def main() -> None:
 
     ### These functions are examples of how to visualize the results
     onion.plot.plot_output_uni(
-        "Fig1.png", reshaped_data, n_windows, state_list
+        "Fig1.png", reshaped_data, n_particles, state_list
     )
     onion.plot.plot_one_trj_uni(
-        "Fig2.png", 1234, reshaped_data, labels, n_windows
+        "Fig2.png", 1234, reshaped_data, n_particles, labels
     )
     onion.plot.plot_medoids_uni("Fig3.png", reshaped_data, labels)
-    onion.plot.plot_state_populations("Fig4.png", n_windows, labels)
-    onion.plot.plot_sankey("Fig5.png", labels, n_windows, [10, 20, 30, 40])
+    onion.plot.plot_state_populations("Fig4.png", n_particles, delta_t, labels)
+    onion.plot.plot_sankey("Fig5.png", labels, n_particles, [10, 20, 30, 40])
 
     """ STEP 2: CLUSTERING THE WHOLE RANGE OF TIME RESOLUTIONS
     This allows to select the optimal time resolution for the analysis,
     avoiding an a priori choice."""
-    tau_windows = np.unique(np.geomspace(2, n_frames, num=20, dtype=int))
+    all_delta_t = np.unique(np.geomspace(2, n_frames, num=20, dtype=int))
 
-    tra = np.zeros((len(tau_windows), 3))  # List of number of states and
-    # ENV0 population for each tau_window
-    list_of_pop = []  # List of the states' population for each tau_window
+    tra = np.zeros((len(all_delta_t), 3))  # List of number of states and
+    # ENV0 population for each delta_t
+    list_of_pop = []  # List of the states' population for each delta_t
 
-    for i, tau_window in enumerate(tau_windows):
-        reshaped_data = onion.helpers.reshape_from_nt(input_data, tau_window)
+    for i, delta_t in enumerate(all_delta_t):
+        reshaped_data = onion.helpers.reshape_from_nt(input_data, delta_t)
 
         state_list, labels = onion.onion_uni(reshaped_data)
 
@@ -92,7 +70,7 @@ def main() -> None:
         pop_list.insert(0, 1 - np.sum(np.array(pop_list)))  # Add ENV0 fraction
         list_of_pop.append(pop_list)
 
-        tra[i][0] = tau_window
+        tra[i][0] = delta_t
         tra[i][1] = len(state_list)
         tra[i][2] = pop_list[0]
 
