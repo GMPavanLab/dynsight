@@ -24,8 +24,7 @@ def main() -> None:
     ### Load the input data - it's an array of shape (n_particles, n_frames)
     ### The first LENS frame has to be removed because it's always zero
     input_data = np.load(path_to_input_data)[:, 1:]
-    n_particles = input_data.shape[0]
-    n_frames = input_data.shape[1]
+    n_particles, n_frames = input_data.shape
 
     """ STEP 1: CLUSTERING WITH A SINGLE TIME RESOLUTION
     Chose the time resolution --> the length of the windows in which the
