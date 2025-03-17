@@ -65,7 +65,7 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
             )
 
         # Test the case where it works
-        clustering_gain = dynsight.analysis.compute_entropy_gain(
+        _, clustering_gain, *_ = dynsight.analysis.compute_entropy_gain(
             random_data,
             random_labels,
             n_bins=20,
