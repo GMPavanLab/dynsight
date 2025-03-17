@@ -14,8 +14,6 @@ def compute_data_entropy(
 
     It is normalized so that a uniform distribution has unitary entropy.
 
-    * Author: Matteo Becchi
-
     Parameters:
         data:
             The dataset for which the entropy is to be computed.
@@ -74,8 +72,6 @@ def compute_entropy_gain(
     n_bins: int = 20,
 ) -> tuple[float, float, float, float]:
     """Compute the relative information gained by the clustering.
-
-    * Author: Matteo Becchi
 
     Parameters:
         data:
@@ -164,8 +160,6 @@ def sample_entropy(
 ) -> float:
     """Compute the sample entropy of a single time-series.
 
-    * Author: Matteo Becchi
-
     Parameters:
         particle : np.ndarray of shape (n_frames,)
             The time-series data for a single particle.
@@ -235,8 +229,6 @@ def compute_sample_entropy(
     r_factor: float = 0.2,
 ) -> float:
     """Compute the average sample entropy of a time-series dataset.
-
-    * Author: Matteo Becchi
 
     Parameters:
         data : np.ndarray of shape (n_particles, n_frames)
