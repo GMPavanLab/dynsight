@@ -14,8 +14,6 @@ def compute_data_entropy(
 
     It is normalized so that a uniform distribution has unitary entropy.
 
-    * Author: Matteo Becchi
-
     Parameters:
         data:
             The dataset for which the entropy is to be computed.
@@ -72,10 +70,8 @@ def compute_entropy_gain(
     data: npt.NDArray[np.float64],
     labels: npt.NDArray[np.int64],
     n_bins: int = 20,
-) -> float | None:
+) -> tuple[float, float, float, float]:
     """Compute the relative information gained by the clustering.
-
-    * Author: Matteo Becchi
 
     Parameters:
         data:
@@ -84,12 +80,16 @@ def compute_entropy_gain(
         labels:
             The clustering labels. Has the same shape as "data".
 
-        n_bins (default = 20):
+        n_bins:
             The number of bins with which the data histogram must be computed.
+            Default is 20.
 
     Returns:
-        A float which is the difference between the entropy of the raw and
-        clustered data, relative to the entropy of the raw data.
+        tuple[float, float, float, float]
+            * The absolute information gain :math:`H_0 - H_{clust}`
+            * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
+            * The Shannon entropy of the initial data :math:`H_0`
+            * The shannon entropy of the clustered data :math:`H_{clust}`
 
     Example:
 
@@ -102,7 +102,7 @@ def compute_entropy_gain(
             data = np.random.rand(100, 100)
             labels = np.random.randint(-1, 2, size=(100, 100))
 
-            entropy_gain = compute_entropy_gain(
+            _, entropy_gain, *_ = compute_entropy_gain(
                 data,
                 labels,
                 n_bins=40,
@@ -143,8 +143,14 @@ def compute_entropy_gain(
 
     # Compute the entropy of the clustered data
     clustered_entropy = np.dot(frac, entr)
+    info_gain = total_entropy - clustered_entropy
 
-    return (total_entropy - clustered_entropy) / total_entropy
+    return (
+        info_gain,
+        info_gain / total_entropy,
+        total_entropy,
+        clustered_entropy,
+    )
 
 
 def sample_entropy(
@@ -153,8 +159,6 @@ def sample_entropy(
     r_factor: float = 0.2,
 ) -> float:
     """Compute the sample entropy of a single time-series.
-
-    * Author: Matteo Becchi
 
     Parameters:
         particle : np.ndarray of shape (n_frames,)
@@ -225,8 +229,6 @@ def compute_sample_entropy(
     r_factor: float = 0.2,
 ) -> float:
     """Compute the average sample entropy of a time-series dataset.
-
-    * Author: Matteo Becchi
 
     Parameters:
         data : np.ndarray of shape (n_particles, n_frames)

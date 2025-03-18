@@ -59,7 +59,8 @@ def main() -> None:
         )
 
     natoms = len(universe.atoms)
-    logging.info(natoms)
+    logger = logging.getLogger(__name__)
+    logger.info(natoms)
 
     neigcounts = dynsight.lens.list_neighbours_along_trajectory(
         input_universe=universe,
