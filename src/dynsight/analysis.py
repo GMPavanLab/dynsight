@@ -3,6 +3,8 @@
 from dynsight._internal.analysis.entropy import (
     compute_data_entropy,
     compute_entropy_gain,
+    compute_multivariate_entropy,
+    compute_multivariate_gain,
     compute_sample_entropy,
     sample_entropy,
 )
@@ -18,6 +20,8 @@ from dynsight._internal.analysis.time_correlations import (
 __all__ = [
     "compute_data_entropy",
     "compute_entropy_gain",
+    "compute_multivariate_entropy",
+    "compute_multivariate_gain",
     "compute_rdf",
     "compute_sample_entropy",
     "cross_time_correlation",
