@@ -117,12 +117,15 @@ def compute_multivariate_entropy(
 
             assert np.isclose(data_entropy, 0.8837924363474094)
     """
+    n_points, delta_t, n_dims = data.shape
     if data.size == 0:
         msg = "data is empty"
         raise ValueError(msg)
-    if data.shape[1] != len(data_ranges) or data.shape[1] != len(n_bins):
+    if n_dims != len(data_ranges) or n_dims != len(n_bins):
         msg = "Mismatch between data dimensions, data_ranges, and n_bins"
         raise ValueError(msg)
+
+    data_reshaped = np.reshape(data, (n_points * delta_t, n_dims))
 
     counts, _ = np.histogramdd(data, bins=n_bins, range=data_ranges)
     probs = counts / np.sum(counts)  # Probability distribution
