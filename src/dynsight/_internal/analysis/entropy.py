@@ -77,8 +77,8 @@ def compute_multivariate_entropy(
 
     Parameters:
         data:
+            shape (n_samples, n_dimensions)
             The dataset for which the entropy is to be computed.
-            Should be of shape (n_samples, n_dimensions).
 
         data_ranges:
             A list of tuples [(min1, max1), (min2, max2), ...] specifying
@@ -117,15 +117,13 @@ def compute_multivariate_entropy(
 
             assert np.isclose(data_entropy, 0.8837924363474094)
     """
-    n_points, delta_t, n_dims = data.shape
+    n_points, n_dims = data.shape
     if data.size == 0:
         msg = "data is empty"
         raise ValueError(msg)
     if n_dims != len(data_ranges) or n_dims != len(n_bins):
         msg = "Mismatch between data dimensions, data_ranges, and n_bins"
         raise ValueError(msg)
-
-    data_reshaped = np.reshape(data, (n_points * delta_t, n_dims))
 
     counts, _ = np.histogramdd(data, bins=n_bins, range=data_ranges)
     probs = counts / np.sum(counts)  # Probability distribution
@@ -231,10 +229,12 @@ def compute_multivariate_gain(
 
     Parameters:
         data:
+            shape (n_samples, n_dimensions)
             The dataset over which the clustering is performed.
 
         labels:
-            The clustering labels. Has the same shape as "data".
+            shape (n_samples,)
+            The clustering labels.
 
         n_bins:
             The number of bins with which the data histogram must be computed,
