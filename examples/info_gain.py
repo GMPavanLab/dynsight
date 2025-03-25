@@ -20,17 +20,18 @@ def energy_landscape_1(x: float, y: float) -> float:
     """A potential energy landscape with 2 minima."""
     sigma = 0.12  # Width of the Gaussian wells
     gauss1 = np.exp(-(x**2 + y**2) / (2 * sigma**2))
-    gauss2 = np.exp(-((x - 1) ** 2 + y**2) / (2 * sigma**2))
+    gauss2 = np.exp(-(x**2 + (y - 1) ** 2) / (2 * sigma**2))
     return -np.log(gauss1 + gauss2 + 1e-6)
 
 
 def energy_landscape_2(x: float, y: float) -> float:
-    """A potential energy landscape with 3 minima."""
+    """A potential energy landscape with 4 minima."""
     sigma = 0.12  # Width of the Gaussian wells
     gauss1 = np.exp(-(x**2 + y**2) / (2 * sigma**2))
     gauss2 = np.exp(-((x - 1) ** 2 + y**2) / (2 * sigma**2))
     gauss3 = np.exp(-(x**2 + (y - 1) ** 2) / (2 * sigma**2))
-    return -np.log(gauss1 + gauss2 + gauss3 + 1e-6)
+    gauss4 = np.exp(-((x - 1) ** 2 + (y - 1) ** 2) / (2 * sigma**2))
+    return -np.log(gauss1 + gauss2 + gauss3 + gauss4 + 1e-6)
 
 
 def numerical_gradient(
@@ -43,17 +44,25 @@ def numerical_gradient(
 
 
 def create_trajectory(
-    energy_landscape: Callable[[float, float], float], name: str
+    energy_landscape: Callable[[float, float], float], file_name: str
 ) -> NDArray[np.float64]:
-    """Simulate a Langevin Dynamics on a given energy landscape."""
+    """Simulate Langevin Dynamics on a given energy landscape."""
     rng = np.random.default_rng(0)
     n_atoms = 100
     time_steps = 10000
     dt = 0.01  # Time step
     diffusion_coeff = 0.6  # Diffusion coefficient (random noise strength)
 
-    particles = rng.standard_normal((n_atoms, 2)) * 0.2
-    particles[n_atoms // 2 :, 0] += 1
+    if energy_landscape == energy_landscape_1:
+        particles = rng.standard_normal((n_atoms, 2)) * 0.2
+        particles[n_atoms // 2 :, 1] += 1.0
+    else:
+        particles = rng.standard_normal((n_atoms, 2)) * 0.2
+        n_group = n_atoms // 4
+        particles[n_group : 2 * n_group, 1] += 1  # (0, 1)
+        particles[2 * n_group : 3 * n_group, 0] += 1  # (1, 0)
+        particles[3 * n_group :, 0] += 1  # (1, 1)
+        particles[3 * n_group :, 1] += 1
 
     trajectory = np.zeros((time_steps, n_atoms, 2))
     for t in range(time_steps):
@@ -74,7 +83,7 @@ def create_trajectory(
     plt.show()
 
     dataset = np.transpose(trajectory, (1, 0, 2))
-    np.save(f"info_gain/trj_{name}.npy", dataset)
+    np.save(f"info_gain/{file_name}.npy", dataset)
     return dataset
 
 
@@ -86,73 +95,83 @@ def main() -> None:
     if file_1.exists():
         dataset_1 = np.load(file_1)
     else:
-        dataset_1 = create_trajectory(energy_landscape_1, "1")
+        dataset_1 = create_trajectory(energy_landscape_1, "trj_1")
     if file_2.exists():
         dataset_2 = np.load(file_2)
     else:
-        dataset_2 = create_trajectory(energy_landscape_2, "2")
+        dataset_2 = create_trajectory(energy_landscape_2, "trj_2")
 
     results = []
-    delta_t_list = np.unique(np.geomspace(2, 300, 40, dtype=int))
-    example_delta_t = 4  #  Choosing a ∆t which works well to show results
+    env0 = []
+    delta_t_list = np.unique(np.geomspace(2, 1000, 45, dtype=int))
+    example_delta_t = 4  #  Choosing a ∆t which works well to plot results
 
-    for k, dataset in enumerate([dataset_1, dataset_2]):
+    for i, dataset in enumerate([dataset_1, dataset_2]):
         n_atoms, n_frames, n_dims = dataset.shape
 
         # We can do clustering on one single variable:
-        x_positions = dataset[:, :, 0]
-        info_gain_x = np.zeros(delta_t_list.size)
+        y_positions = dataset[:, :, 1]
+        info_gain_y = np.zeros(delta_t_list.size)
+        tmp_env0 = np.zeros(delta_t_list.size)
 
-        for i, delta_t in enumerate(delta_t_list):
+        for j, delta_t in enumerate(delta_t_list):
             reshaped_data = dynsight.onion.helpers.reshape_from_nt(
-                x_positions, delta_t
+                y_positions, delta_t
             )
             state_list, labels = dynsight.onion.onion_uni(reshaped_data)
+            tmp_env0[j] = np.sum(labels == -1) / labels.size
 
-            if i == example_delta_t:
+            if j == example_delta_t:
                 dynsight.onion.plot.plot_output_uni(
-                    f"info_gain/tmp_{k}_1D.png",
+                    f"info_gain/tmp_{i}_1D.png",
                     reshaped_data,
                     n_atoms,
                     state_list,
                 )
 
-            # and compute the relative information gain:
-            info_gain_x[i], *_ = dynsight.analysis.compute_entropy_gain(
+            # and compute the information gain:
+            info_gain_y[j], *_ = dynsight.analysis.compute_entropy_gain(
                 reshaped_data, labels, n_bins=40
             )
-        results.append(info_gain_x)
+        results.append(info_gain_y)
+        env0.append(tmp_env0)
 
-        # We can do clustering on both variables:
+        # Or we can do clustering on both variables:
         info_gain_xy = np.zeros(delta_t_list.size)
+        tmp_env0 = np.zeros(delta_t_list.size)
         tmp1_dataset = np.transpose(dataset, (2, 0, 1))
-        for i, delta_t in enumerate(delta_t_list):
+        for j, delta_t in enumerate(delta_t_list):
             reshaped_data = dynsight.onion.helpers.reshape_from_dnt(
                 tmp1_dataset, delta_t
             )
             state_list, labels = dynsight.onion.onion_multi(reshaped_data)
+            tmp_env0[j] = np.sum(labels == -1) / labels.size
 
-            if i == example_delta_t:
+            if j == example_delta_t:
                 dynsight.onion.plot.plot_output_multi(
-                    f"info_gain/tmp_{k}_2D.png",
+                    f"info_gain/tmp_{i}_2D.png",
                     tmp1_dataset,
                     state_list,
                     labels,
                     delta_t,
                 )
 
-            # and compute the relative information gain:
-            # We need an array (n_samples, n_dims)
+            # and compute the information gain:
+            # We need an array (n_samples, n_dims), and labels (n_samples,)
             n_sequences = int(n_frames / delta_t)
             long_labels = np.repeat(labels, delta_t)
             tmp = dataset[:, : n_sequences * delta_t, :]
             ds_reshaped = tmp.reshape((-1, n_dims))
 
-            info_gain_xy[i], *_ = dynsight.analysis.compute_multivariate_gain(
+            info_gain_xy[j], *_ = dynsight.analysis.compute_multivariate_gain(
                 ds_reshaped, long_labels, n_bins=[40, 40]
             )
-        info_gain_xy *= 2  # Need to multiply by two because it's 2 dimensional
+        # Need to multiply by two because it's 2 dimensional, and the output
+        # of the info_gain functions is normalized by the log volume of the
+        # phase space, which is 2D is doubled
+        info_gain_xy *= 2
         results.append(info_gain_xy)
+        env0.append(tmp_env0)
 
     fig, ax = plt.subplots()
     ax.plot(
@@ -162,29 +181,28 @@ def main() -> None:
         delta_t_list,
         results[1],
         label="2 minima - 2D clustering",
-        marker="o",
         c="C2",
+        marker="o",
     )
     ax.plot(
         delta_t_list,
         results[2],
-        label="3 minima - 1D clustering",
-        marker="o",
+        label="4 minima - 1D clustering",
         ls="--",
         c="C1",
+        marker="o",
     )
     ax.plot(
         delta_t_list,
         results[3],
-        label="3 minima - 2D clustering",
-        marker="o",
+        label="4 minima - 2D clustering",
         c="C3",
+        marker="o",
     )
     ax.set_xlabel(r"Time resolution $\Delta t$ [frame]")
     ax.set_ylabel(r"Information gain $\Delta H$ [bit]")
     ax.set_xscale("log")
     ax.legend()
-    plt.show()
     fig.savefig("info_gain/Information_gains.png", dpi=600)
 
 
