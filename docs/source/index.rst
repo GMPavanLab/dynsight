@@ -19,6 +19,13 @@
 .. toctree::
   :hidden:
   :maxdepth: 2
+  :caption: Examples:
+
+  Information gain <info_gain>
+
+.. toctree::
+  :hidden:
+  :maxdepth: 2
   :caption: Modules:
 
   Modules <modules>
