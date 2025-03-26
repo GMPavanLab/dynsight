@@ -140,7 +140,7 @@ To check if the clustering is working in a meaningful way, we also plot the resu
 
             if j == example_delta_t:
                 dynsight.onion.plot.plot_output_uni(
-                    f"info_gain/Example_{i}_1D.png",
+                    f"Example_{i}_1D.png",
                     reshaped_data,
                     n_atoms,
                     state_list,
@@ -163,7 +163,7 @@ To check if the clustering is working in a meaningful way, we also plot the resu
 
             if j == example_delta_t:
                 dynsight.onion.plot.plot_output_multi(
-                    f"info_gain/Example_{i}_2D.png",
+                    f"Example_{i}_2D.png",
                     tmp1_dataset,
                     state_list,
                     labels,
@@ -216,8 +216,10 @@ We can now plot, for every case and for every choice of ∆t, the corresponding 
     ax.legend()
     plt.show()
 
-As can be seen (INSERT FIGURE?), clustering both datasets using only the y coordinate gives the same information gain, because only two clusters can be distinguished. 
+As can be seen in the plot below, clustering both datasets using only the y coordinate gives the same information gain, because only two clusters can be distinguished. 
 
 Clustering the trajectories in the energy potential with two minima using both variables gives once again the same information gain for small values of ∆t; then, the clustering performance degrades because the fraction of classifiable data points starts to decreases. 
 
 Finally, clustering the trajectories in the energy potential with four minima using both variables gives an information gain which is double the previous ones (at least for small ∆t), which makes sense, because 4 clusters are discovered instead of 2. For larger ∆t, we see the same degrading in performance that always affects clustering on multivariate distributions. 
+
+.. image:: _static/Information_gains.png
