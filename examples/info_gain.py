@@ -173,32 +173,25 @@ def main() -> None:
         results.append(info_gain_xy)
         env0.append(tmp_env0)
 
+    colorlist = ["C0", "C2", "C1", "C3"]
+    markerlist = ["s", "o", "d", "o"]
+    labellist = [
+        "2 peaks - 1D clustering",
+        "2 peaks - 2D clustering",
+        "4 peaks - 1D clustering",
+        "4 peaks - 2D clustering",
+    ]
+
     fig, ax = plt.subplots()
-    ax.plot(
-        delta_t_list, results[0], label="2 minima - 1D clustering", marker="o"
-    )
-    ax.plot(
-        delta_t_list,
-        results[1],
-        label="2 minima - 2D clustering",
-        c="C2",
-        marker="o",
-    )
-    ax.plot(
-        delta_t_list,
-        results[2],
-        label="4 minima - 1D clustering",
-        ls="--",
-        c="C1",
-        marker="o",
-    )
-    ax.plot(
-        delta_t_list,
-        results[3],
-        label="4 minima - 2D clustering",
-        c="C3",
-        marker="o",
-    )
+    for i, system in enumerate(results):
+        ax.plot(
+            delta_t_list,
+            system,
+            label=labellist[i],
+            c=colorlist[i],
+            marker=markerlist[i],
+        )
+
     ax.set_xlabel(r"Time resolution $\Delta t$ [frame]")
     ax.set_ylabel(r"Information gain $\Delta H$ [bit]")
     ax.set_xscale("log")
