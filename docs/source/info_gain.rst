@@ -1,9 +1,11 @@
 Information gain computation
 ============================
 
+For the theoretical aspects of this work, see INSERT REF.
+
 Here we show how to compute the information gain through clustering. To this end, we create two datasets by simulation the Langevin Dynamics of particles moving in two different bidimensional potential energy landscapes, one with two and one with four minima. We compare the information gain after clustering the particles' trajectories, using either one or both variables. 
 
-Firts, we want to simulate the Lngevin Dynamics. We start defining the potential energy landscapes, with two and four minima. 
+Firts, we want to simulate the Langevin Dynamics. We start defining the potential energy landscapes, with two and four minima. 
 
 .. code-block:: python
 
