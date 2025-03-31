@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import numpy as np
 import numpy.typing as npt
-from scipy.spatial.distance import pdist
 
 
 def compute_shannon(
@@ -339,45 +338,73 @@ def sample_entropy(
             from dynsight.analysis import sample_entropy
 
             np.random.seed(1234)
-            data = np.random.rand(1000)
+            data = np.random.rand(100)
 
             samp_en = sample_entropy(
                 data,
                 m_par=2,
-                r_factor=0.2,
+                r_factor=0.5,
             )
 
         .. testcode:: sampen1-test
             :hide:
 
-            assert np.isclose(samp_en, 2.2351853395754424)
+            assert np.isclose(samp_en, 1.5869650565820417)
     """
-    n_frames = len(particle)
-    if n_frames < m_par + 1:
-        err_msg = "Time-series too short"
-        raise ValueError(err_msg)
-    r_th = r_factor * np.std(particle)
+    resc_data = (particle - np.mean(particle)) / np.std(particle)
+    n_sum = len(resc_data) - m_par
 
-    # To store counts of similar pairs for m and m+1
-    number_of_pairs = [0, 0]
+    if n_sum < 1:
+        msg = "Time-series too short"
+        raise ValueError(msg)
 
-    for i, m in enumerate([m_par + 1, m_par]):
-        # Create overlapping windows of length m
-        window_list = np.array(
-            [particle[j : j + m] for j in range(n_frames - m + 1)]
-        )
+    pos = np.zeros(n_sum)
+    mat = np.zeros(n_sum)
 
-        # Compute pairwise distances (Chebyshev is typical for SampEn)
-        distances = pdist(window_list, metric="chebyshev")
+    index_range = np.arange(m_par + 2)
 
-        # Count pairs within the threshold r_th
-        number_of_pairs[i] = np.sum(distances < r_th)
+    for i in range(n_sum):
+        possibles = 0
+        matches = 0
 
-    if number_of_pairs[1] == 0.0 and number_of_pairs[0] == 0.0:
-        err_msg = "Distance threshold too strict"
-        raise ValueError(err_msg)
+        mask = np.arange(n_sum) != i  # Create mask to avoid self-matches
 
-    return -np.log(number_of_pairs[0] / number_of_pairs[1])
+        for j in np.where(mask)[0]:
+            if i + m_par + 1 >= len(resc_data) or j + m_par + 1 >= len(
+                resc_data
+            ):
+                continue  # Skip if i or j would go out of bounds
+
+            # Calculate the differences for all k (from 0 to m_par + 1)
+            diffs = np.abs(
+                resc_data[i + index_range] - resc_data[j + index_range]
+            )
+
+            # Step 1: Check for k < m_par
+            if np.any(
+                diffs[:m_par] > r_factor
+            ):  # If any diffs for k < m_par exceed r_factor, break
+                continue
+
+            # Step 2: Check for k == m_par
+            if diffs[m_par] > r_factor:  # For k == m_par
+                continue
+            possibles += 1  # Count this as a possible match
+
+            # Step 3: Check for k > m_par
+            if diffs[m_par + 1] > r_factor:  # For k > m_par
+                continue
+            matches += 1  # Count this as a full match
+
+        pos[i] = possibles
+        mat[i] = matches
+
+    if np.sum(mat) == 0.0:
+        msg = "Distance threshold too strict"
+        raise ValueError(msg)
+
+    ratio = np.sum(mat) / np.sum(pos)
+    return -np.log(ratio)
 
 
 def compute_sample_entropy(
@@ -408,18 +435,18 @@ def compute_sample_entropy(
             from dynsight.analysis import compute_sample_entropy
 
             np.random.seed(1234)
-            data = np.random.rand(100, 100)
+            data = np.random.rand(10, 100)
 
             aver_samp_en = compute_sample_entropy(
                 data,
                 m_par=2,
-                r_factor=0.2,
+                r_factor=0.5,
             )
 
         .. testcode:: sampen2-test
             :hide:
 
-            assert np.isclose(aver_samp_en, 2.210674176898837)
+            assert np.isclose(aver_samp_en, 1.3966129833994323)
     """
     sampen = [sample_entropy(particle, m_par, r_factor) for particle in data]
 
