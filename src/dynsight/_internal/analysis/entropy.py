@@ -5,12 +5,12 @@ import numpy.typing as npt
 from scipy.spatial.distance import pdist
 
 
-def compute_data_entropy(
+def compute_shannon(
     data: npt.NDArray[np.float64],
     data_range: tuple[float, float],
     n_bins: int,
 ) -> float:
-    """Compute the entropy of a data distribution.
+    """Compute the Shannon entropy of a univariate data distribution.
 
     It is normalized so that a uniform distribution has unitary entropy.
 
@@ -35,13 +35,13 @@ def compute_data_entropy(
         .. testcode:: shannon1-test
 
             import numpy as np
-            from dynsight.analysis import compute_data_entropy
+            from dynsight.analysis import compute_shannon
 
             np.random.seed(1234)
             data = np.random.rand(100, 100)
             data_range = (float(np.min(data)), float(np.max(data)))
 
-            data_entropy = compute_data_entropy(
+            data_entropy = compute_shannon(
                 data,
                 data_range,
                 n_bins=40,
@@ -66,12 +66,12 @@ def compute_data_entropy(
     return entropy
 
 
-def compute_multivariate_entropy(
+def compute_shannon_multi(
     data: npt.NDArray[np.float64],
     data_ranges: list[tuple[float, float]],
     n_bins: list[int],
 ) -> float:
-    """Compute the entropy of a multivariate data distribution.
+    """Compute the Shannon entropy of a multivariate data distribution.
 
     It is normalized so that a uniform distribution has unitary entropy.
 
@@ -99,14 +99,14 @@ def compute_multivariate_entropy(
         .. testcode:: shannon-multi-test
 
             import numpy as np
-            from dynsight.analysis import compute_multivariate_entropy
+            from dynsight.analysis import compute_shannon_multi
 
             np.random.seed(1234)
             data = np.random.rand(1000, 2)  # 2D dataset
             data_ranges = [(0.0, 1.0), (0.0, 1.0)]
             n_bins = [40, 40]
 
-            data_entropy = compute_multivariate_entropy(
+            data_entropy = compute_shannon_multi(
                 data,
                 data_ranges,
                 n_bins,
@@ -190,7 +190,7 @@ def compute_entropy_gain(
     data_range = (float(np.min(data)), float(np.max(data)))
 
     # Compute the entropy of the raw data
-    total_entropy = compute_data_entropy(
+    total_entropy = compute_shannon(
         data,
         data_range,
         n_bins,
@@ -202,7 +202,7 @@ def compute_entropy_gain(
     for i, label in enumerate(np.unique(labels)):
         mask = labels == label
         frac[i] = np.sum(mask) / labels.size
-        entr[i] = compute_data_entropy(
+        entr[i] = compute_shannon(
             data[mask],
             data_range,
             n_bins,
@@ -220,7 +220,7 @@ def compute_entropy_gain(
     )
 
 
-def compute_multivariate_gain(
+def compute_entropy_gain_multi(
     data: npt.NDArray[np.float64],
     labels: npt.NDArray[np.int64],
     n_bins: list[int],
@@ -252,14 +252,14 @@ def compute_multivariate_gain(
         .. testcode:: shannon2-multi-test
 
             import numpy as np
-            from dynsight.analysis import compute_multivariate_gain
+            from dynsight.analysis import compute_entropy_gain_multi
 
             np.random.seed(1234)
             data = np.random.rand(1000, 2)  # 2D dataset
             n_bins = [40, 40]
             labels = np.random.randint(-1, 2, size=1000)
 
-            _, entropy_gain, *_ = compute_multivariate_gain(
+            _, entropy_gain, *_ = compute_entropy_gain_multi(
                 data,
                 labels,
                 n_bins=n_bins,
@@ -280,7 +280,7 @@ def compute_multivariate_gain(
     data_range = [(float(np.min(tmp)), float(np.max(tmp))) for tmp in data.T]
 
     # Compute the entropy of the raw data
-    total_entropy = compute_multivariate_entropy(
+    total_entropy = compute_shannon_multi(
         data,
         data_range,
         n_bins,
@@ -292,7 +292,7 @@ def compute_multivariate_gain(
     for i, label in enumerate(np.unique(labels)):
         mask = labels == label
         frac[i] = np.sum(mask) / labels.size
-        entr[i] = compute_multivariate_entropy(
+        entr[i] = compute_shannon_multi(
             data[mask],
             data_range,
             n_bins,

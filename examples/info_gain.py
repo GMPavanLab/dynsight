@@ -163,7 +163,7 @@ def main() -> None:
             tmp = dataset[:, : n_sequences * delta_t, :]
             ds_reshaped = tmp.reshape((-1, n_dims))
 
-            info_gain_xy[j], *_ = dynsight.analysis.compute_multivariate_gain(
+            info_gain_xy[j], *_ = dynsight.analysis.compute_entropy_gain_multi(
                 ds_reshaped, long_labels, n_bins=[40, 40]
             )
         # Need to multiply by two because it's 2 dimensional, and the output

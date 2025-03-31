@@ -9,8 +9,10 @@ Functions
 .. toctree::
   :maxdepth: 1
 
-  compute_data_entropy <_autosummary/dynsight.analysis.compute_data_entropy>
+  compute_shannon <_autosummary/dynsight.analysis.compute_shannon>
   compute_entropy_gain <_autosummary/dynsight.analysis.compute_entropy_gain>
+  compute_shannon_multi <_autosummary/dynsight.analysis.compute_shannon_multi>
+  compute_entropy_gain_multi <_autosummary/dynsight.analysis.compute_entropy_gain_multi>
   sample_entropy <_autosummary/dynsight.analysis.sample_entropy>
   compute_sample_entropy <_autosummary/dynsight.analysis.compute_sample_entropy>
   compute_rdf <_autosummary/dynsight.analysis.compute_rdf>
