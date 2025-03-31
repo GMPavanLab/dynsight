@@ -1,6 +1,6 @@
 import pytest
 
-from .case_data import RDFCaseData
+from tests.analysis.rdf.case_data import RDFCaseData
 
 
 @pytest.fixture(
