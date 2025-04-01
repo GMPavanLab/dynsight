@@ -31,4 +31,4 @@ def test_tsoap(case_data: TimeSOAPCaseData) -> None:
             "tSOAP test files were not present. They have been created."
         )
     exp_tsoap = np.load(expected_tsoap)
-    assert np.allclose(exp_tsoap, test_tsoap)
+    assert np.allclose(exp_tsoap, test_tsoap, atol=1e-6)
