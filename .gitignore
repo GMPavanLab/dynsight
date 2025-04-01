@@ -8,3 +8,4 @@ docs/build
 docs/source/_autosummary
 examples/onion_example_files
 tests/systems/coex/.*
+tests/systems/.*
