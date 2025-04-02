@@ -29,6 +29,7 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
 
     data_shape = (10, 100)
     random_data = rng.random(data_shape)
+    r_fact = 0.5 * np.std(random_data)
 
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
@@ -37,23 +38,16 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
         with pytest.raises(ValueError, match="Time-series too short"):
             _ = dynsight.analysis.compute_sample_entropy(
                 random_data,
+                r_factor=r_fact,
                 m_par=105,
             )
 
         # Test the use of the function computing entropy
         data_sample_entropy = dynsight.analysis.compute_sample_entropy(
             random_data,
-            r_factor=0.5,
+            r_factor=r_fact,
         )
 
-        expected_entropy = 1.4033039160177359
+        expected_entropy = 1.4362888881597131
         if isinstance(data_sample_entropy, float):
             assert np.isclose(data_sample_entropy, expected_entropy)
-
-        # Test the case where threshold is too strict
-        random_data = rng.random(100)
-        with pytest.raises(ValueError, match="Distance threshold too strict"):
-            _ = dynsight.analysis.sample_entropy(
-                random_data,
-                r_factor=0.001,
-            )

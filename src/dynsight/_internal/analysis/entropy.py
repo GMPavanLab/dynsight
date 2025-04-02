@@ -311,8 +311,8 @@ def compute_entropy_gain_multi(
 
 def sample_entropy(
     particle: npt.NDArray[np.float64],
+    r_factor: np.float64 | float,
     m_par: int = 2,
-    r_factor: float = 0.2,
 ) -> float:
     """Compute the sample entropy of a single time-series.
 
@@ -320,11 +320,12 @@ def sample_entropy(
         particle : np.ndarray of shape (n_frames,)
             The time-series data for a single particle.
 
+        r_factor : float
+            The similarity threshold between signal windows. A common choice
+            is 0.2 * the standard deviation of the time-series.
+
         m_par : int (default 2)
             The m parameter (length of the considered overlapping windows).
-
-        r_factor : float (default 0.2)
-            The similarity threshold between signal windows.
 
     Returns:
         float
@@ -342,8 +343,8 @@ def sample_entropy(
 
             samp_en = sample_entropy(
                 data,
+                r_factor=0.5 * np.std(data),
                 m_par=2,
-                r_factor=0.5,
             )
 
         .. testcode:: sampen1-test
@@ -351,8 +352,7 @@ def sample_entropy(
 
             assert np.isclose(samp_en, 1.5869650565820417)
     """
-    resc_data = (particle - np.mean(particle)) / np.std(particle)
-    n_sum = len(resc_data) - m_par
+    n_sum = len(particle) - m_par
 
     if n_sum < 1:
         msg = "Time-series too short"
@@ -370,14 +370,14 @@ def sample_entropy(
         mask = np.arange(n_sum) != i  # Create mask to avoid self-matches
 
         for j in np.where(mask)[0]:
-            if i + m_par + 1 >= len(resc_data) or j + m_par + 1 >= len(
-                resc_data
+            if i + m_par + 1 >= len(particle) or j + m_par + 1 >= len(
+                particle
             ):
                 continue  # Skip if i or j would go out of bounds
 
             # Calculate the differences for all k (from 0 to m_par + 1)
             diffs = np.abs(
-                resc_data[i + index_range] - resc_data[j + index_range]
+                particle[i + index_range] - particle[j + index_range]
             )
 
             # Step 1: Check for k < m_par
@@ -399,29 +399,31 @@ def sample_entropy(
         pos[i] = possibles
         mat[i] = matches
 
-    if np.sum(mat) == 0.0:
-        msg = "Distance threshold too strict"
-        raise ValueError(msg)
+    if np.sum(mat) == 0.0 or np.sum(pos) == 0.0:
+        return np.nan
 
     ratio = np.sum(mat) / np.sum(pos)
     return -np.log(ratio)
 
 
 def compute_sample_entropy(
-    data: npt.NDArray[np.float64],
+    data: list[npt.NDArray[np.float64]] | npt.NDArray[np.float64],
+    r_factor: np.float64 | float,
     m_par: int = 2,
-    r_factor: float = 0.2,
 ) -> float:
     """Compute the average sample entropy of a time-series dataset.
+
+    The average is computed ignoring the eventual nan values.
 
     Parameters:
         data : np.ndarray of shape (n_particles, n_frames)
 
+        r_factor : float
+            The similarity threshold between signal windows. A common choice
+            is 0.2 * the standard deviation of the dataset.
+
         m_par : int (default 2)
             The m parameter (length of the considered overlapping windows).
-
-        r_factor : float (default 0.2)
-            The similarity threshold between signal windows.
 
     Returns:
         float
@@ -436,18 +438,24 @@ def compute_sample_entropy(
 
             np.random.seed(1234)
             data = np.random.rand(10, 100)
+            r_factor = 0.5 * np.std(data)
 
             aver_samp_en = compute_sample_entropy(
                 data,
                 m_par=2,
-                r_factor=0.5,
+                r_factor=r_factor,
             )
 
         .. testcode:: sampen2-test
             :hide:
 
-            assert np.isclose(aver_samp_en, 1.3966129833994323)
+            assert np.isclose(aver_samp_en, 1.374789583119083)
     """
-    sampen = [sample_entropy(particle, m_par, r_factor) for particle in data]
+    sampen = []
+    for particle in data:
+        tmp_se = sample_entropy(particle, r_factor, m_par)
+        if np.isnan(tmp_se):
+            continue
+        sampen.append(tmp_se)
 
-    return float(np.nanmean(sampen))
+    return float(np.mean(sampen))
