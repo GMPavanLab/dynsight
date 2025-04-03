@@ -7,7 +7,8 @@ import numpy as np
 import pytest
 
 from dynsight.soap import saponify_trajectory
-from tests.soap.case_data import SOAPCaseData
+
+from .case_data import SOAPCaseData
 
 
 def test_soap(case_data: SOAPCaseData) -> None:
