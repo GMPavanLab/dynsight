@@ -7,7 +7,8 @@ import numpy as np
 import pytest
 
 from dynsight.analysis import compute_rdf
-from tests.analysis.rdf.case_data import RDFCaseData
+
+from .case_data import RDFCaseData
 
 
 def test_compute_rdf(case_data: RDFCaseData) -> None:

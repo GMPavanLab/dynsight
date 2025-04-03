@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import MDAnalysis
@@ -21,7 +21,7 @@ def saponify_trajectory(
     selection: str = "all",
     soap_respectpbc: bool = True,
     n_core: int = 1,
-    **soapkwargs: Any,
+    centers: str = "all",
 ) -> NDArray[np.float64]:
     """Calculate the SOAP fingerprints for each atom in a MDA universe.
 
@@ -39,14 +39,18 @@ def saponify_trajectory(
         soaplmax:
             The maximum degree of spherical harmonics (option passed to the
             desired SOAP engine). Defaults to 8.
-        selection : str = "all"
-            Selection of atoms in the Universe of which SOAP will be computed.
+        selection:
+            Selection of atoms taken from the Universe for the computation.
+            More information concerning the selection language can be found
+            `here <https://userguide.mdanalysis.org/stable/selections.html>`_
+        centers:
+            Selection of atoms used as centers for the SOAP calculation. If not
+            specified all the atoms present in the selection will be used
+            as centers. More information concerning the selection language can
+            be found `here <https://userguide.mdanalysis.org/stable/selections.html>`_
         soap_respectpbc:
             Determines whether the system is considered to be periodic
             (option passed to the desired SOAP engine). Defaults to True.
-        soapkwargs (dict, optional):
-            Additional keyword arguments to be passed to the SOAP engine.
-            Defaults to {}.
         n_core:
             Number of core used for parallel processing. Default to 1.
 
@@ -71,7 +75,7 @@ def saponify_trajectory(
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
             cutoff = 2.0
 
-            soap = saponify_trajectory(univ, cutoff)
+            soap = saponify_trajectory(univ, cutoff, soap_respectpbc=False)
 
         .. testcode:: soap1-test
             :hide:
@@ -80,6 +84,10 @@ def saponify_trajectory(
                 np.sum(soap[0]), 8627.847941030795, atol=1e-6, rtol=1e-3)
     """
     sel = universe.select_atoms(selection)
+    centers_list_id = sel.select_atoms(centers).indices.tolist()
+    centers_list = [
+        i for i, idx in enumerate(sel.indices) if idx in centers_list_id
+    ]
     species = list(set(sel.atoms.types))
 
     soap = SOAP(
@@ -87,7 +95,7 @@ def saponify_trajectory(
         r_cut=soaprcut,
         n_max=soapnmax,
         l_max=soaplmax,
-        **soapkwargs,
+        periodic=soap_respectpbc,
     )
     traj = []
     for t_s in universe.trajectory:
@@ -102,8 +110,11 @@ def saponify_trajectory(
             pbc=soap_respectpbc,
         )
         traj.append(frame)
-
-    tmp_soap = soap.create(system=traj, n_jobs=n_core)
+    tmp_soap = soap.create(
+        system=traj,
+        n_jobs=n_core,
+        centers=[centers_list] * len(traj),
+    )
 
     return np.transpose(tmp_soap, (1, 0, 2))
 
@@ -148,7 +159,7 @@ def fill_soap_vector_from_dscribe(
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
             cutoff = 2.0
 
-            soap = saponify_trajectory(univ, cutoff)
+            soap = saponify_trajectory(univ, cutoff, soap_respectpbc=False)
 
             full_soap = fill_soap_vector_from_dscribe(soap)
 

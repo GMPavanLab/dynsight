@@ -134,7 +134,7 @@ def spatialaverage(
 
         .. code-block:: python
 
-            from dynsight.data_processing import spatialaverage
+            from dynsight.analysis import spatialaverage
             import numpy as np
 
             u = MDAnalysis.Universe('topology.gro', 'trajectory.xtc')

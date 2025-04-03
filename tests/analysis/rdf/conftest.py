@@ -1,11 +1,12 @@
 import pytest
 
-from .case_data import RDFCaseData
+from tests.analysis.rdf.case_data import RDFCaseData
 
 
 @pytest.fixture(
     scope="session",
     params=(
+        # Case 0: Default case
         lambda name: RDFCaseData(
             topology_filename="test_coex.gro",
             trajectory_filename="test_coex.xtc",
@@ -14,6 +15,7 @@ from .case_data import RDFCaseData
             norm="rdf",
             name=name,
         ),
+        # Case 1: Density normalization
         lambda name: RDFCaseData(
             topology_filename="test_coex.gro",
             trajectory_filename="test_coex.xtc",
@@ -22,6 +24,7 @@ from .case_data import RDFCaseData
             norm="density",
             name=name,
         ),
+        # Case 2: No normalization
         lambda name: RDFCaseData(
             topology_filename="test_coex.gro",
             trajectory_filename="test_coex.xtc",
