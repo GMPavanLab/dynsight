@@ -316,6 +316,9 @@ def pairwise_probabilities(
 ) -> tuple[int, int]:
     """Finds the sequence matchings for computing sample entropy.
 
+    Counts the number of data sequences of length m_par and m_par + 1 which
+    have Chebyshev distance smaller than r_factor.
+
     .. warning::
         This function is Work In Progress. Do not trust its output.
 
