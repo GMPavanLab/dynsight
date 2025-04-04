@@ -61,7 +61,7 @@ This function simulates, for both energy landscapes, the dynamics of 100 particl
 .. code-block:: python
 
     def create_trajectory(
-        energy_landscape: Callable[[float, float], float], file_name: str
+        energy_landscape: Callable[[float, float], float], file_name: Path
     ) -> np.ndarray:
         """Simulate Langevin Dynamics on a given energy landscape."""
         rng = np.random.default_rng(0)
@@ -100,7 +100,7 @@ This function simulates, for both energy landscapes, the dynamics of 100 particl
         plt.show()
 
         dataset = np.transpose(trajectory, (1, 0, 2))
-        np.save(folder_path / f"{file_name}.npy", dataset)
+        np.save(filename, dataset)
         return dataset
 
 
@@ -112,12 +112,12 @@ Let's simulate the trajectories and store them in two variables. We also save th
     file_2 = folder_path / "trj_4.npy"  #  With 4 minima
 
     if not file_1.exists():
-        dataset_1 = create_trajectory(energy_landscape_1, "trj_2")
+        dataset_1 = create_trajectory(energy_landscape_1, file_1)
 
     dataset_1 = np.load(file_1)
 
     if not file_2.exists():
-        dataset_2 = create_trajectory(energy_landscape_2, "trj_4")
+        dataset_2 = create_trajectory(energy_landscape_2, file_2)
 
     dataset_2 = np.load(file_2)
 
