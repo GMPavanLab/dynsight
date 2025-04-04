@@ -309,12 +309,15 @@ def compute_entropy_gain_multi(
     )
 
 
-def sample_entropy(
+def pairwise_probabilities(
     particle: npt.NDArray[np.float64],
     r_factor: np.float64 | float,
     m_par: int = 2,
-) -> float:
-    """Compute the sample entropy of a single time-series.
+) -> tuple[int, int]:
+    """Finds the sequence matchings for computing sample entropy.
+
+    .. warning::
+        This function is Work In Progress. Do not trust its output.
 
     Parameters:
         particle : np.ndarray of shape (n_frames,)
@@ -328,29 +331,8 @@ def sample_entropy(
             The m parameter (length of the considered overlapping windows).
 
     Returns:
-        float
-            The sample entropy of the time-seris.
-
-    Example:
-
-        .. testcode:: sampen1-test
-
-            import numpy as np
-            from dynsight.analysis import sample_entropy
-
-            np.random.seed(1234)
-            data = np.random.rand(100)
-
-            samp_en = sample_entropy(
-                data,
-                r_factor=0.5 * np.std(data),
-                m_par=2,
-            )
-
-        .. testcode:: sampen1-test
-            :hide:
-
-            assert np.isclose(samp_en, 1.5869650565820417)
+        tuple[int, int]
+            The numbers of possible and effective sequence matches.
     """
     n_sum = len(particle) - m_par
 
@@ -358,8 +340,8 @@ def sample_entropy(
         msg = "Time-series too short"
         raise ValueError(msg)
 
-    pos = np.zeros(n_sum)
-    mat = np.zeros(n_sum)
+    pos = np.zeros(n_sum, dtype=int)
+    mat = np.zeros(n_sum, dtype=int)
 
     index_range = np.arange(m_par + 2)
 
@@ -399,11 +381,7 @@ def sample_entropy(
         pos[i] = possibles
         mat[i] = matches
 
-    if np.sum(mat) == 0.0 or np.sum(pos) == 0.0:
-        return np.nan
-
-    ratio = np.sum(mat) / np.sum(pos)
-    return -np.log(ratio)
+    return np.sum(pos), np.sum(mat)
 
 
 def compute_sample_entropy(
@@ -412,6 +390,9 @@ def compute_sample_entropy(
     m_par: int = 2,
 ) -> float:
     """Compute the average sample entropy of a time-series dataset.
+
+    .. warning::
+        This function is Work In Progress. Do not trust its output.
 
     The average is computed ignoring the eventual nan values.
 
@@ -449,13 +430,20 @@ def compute_sample_entropy(
         .. testcode:: sampen2-test
             :hide:
 
-            assert np.isclose(aver_samp_en, 1.374789583119083)
+            assert np.isclose(aver_samp_en, 1.3191091688299446)
     """
-    sampen = []
-    for particle in data:
-        tmp_se = sample_entropy(particle, r_factor, m_par)
-        if np.isnan(tmp_se):
-            continue
-        sampen.append(tmp_se)
+    if isinstance(data, np.ndarray) and data.ndim == 1:
+        data = [data]
 
-    return float(np.mean(sampen))
+    pos, mat = 0, 0
+    for particle in data:
+        pos_i, mat_i = pairwise_probabilities(particle, r_factor, m_par)
+        pos += pos_i
+        mat += mat_i
+
+    if pos * mat == 0:
+        msg = "No matching sequences found"
+        raise ValueError(msg)
+
+    ratio = mat / pos
+    return -np.log(ratio)
