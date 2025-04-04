@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 import dynsight
-
-COMPUTE = True
 
 
 def extract_sequences_for_label(
@@ -78,10 +78,16 @@ def extract_sequences_for_label(
 
 def main() -> None:
     """How to use the code for the sample entropy computation."""
-    # Let's import the LENS signals for water/ice coexistence
+    cwd = Path.cwd()
+    folder_name = "samp_en"
+    folder_path = cwd / folder_name
+    if not folder_path.exists():
+        folder_path.mkdir()
+
     delta_t_list = np.unique(np.geomspace(6, 499, 20, dtype=int))
     t_samp = 0.1
 
+    # Let's import the LENS signals for water/ice coexistence
     data_directory = "onion_example_files/data/univariate_time-series.npy"
     data = np.load(data_directory)[::10, 1:]  # First frame of LENS is zero
 
@@ -90,99 +96,94 @@ def main() -> None:
     r_fact *= np.std(data)
 
     # We start computing the average sample entropy of the entire dataset
-    if COMPUTE:
-        aver_samp_en = dynsight.analysis.compute_sample_entropy(
-            data, r_factor=r_fact
-        )
-    else:
-        aver_samp_en = 0.1873359455516944
+    aver_samp_en = dynsight.analysis.compute_sample_entropy(
+        data, r_factor=r_fact
+    )
 
-    if COMPUTE:
-        # Then we can perform Onion Clustering at different ∆t and compute
-        # the sample entropy of the different clusters
-        samp_en_list = []
-        fractions = []
-        for _, delta_t in enumerate(delta_t_list):
-            reshaped_data = dynsight.onion.helpers.reshape_from_nt(
-                data, delta_t
+    # Then we can perform Onion Clustering at different ∆t and compute
+    # the sample entropy of the different clusters
+    samp_en_list = []
+    fractions = []
+    for _, delta_t in enumerate(delta_t_list):
+        reshaped_data = dynsight.onion.helpers.reshape_from_nt(data, delta_t)
+        state_list, labels = dynsight.onion.onion_uni(reshaped_data)
+
+        tmp_list = []
+        tmp_frac = []
+        for label in np.unique(labels):
+            # This function is necessary to extract and concatenate all the
+            # sequences clustered in the cluster under analysis
+            selected_data = extract_sequences_for_label(
+                data,
+                reshaped_data,
+                labels,
+                delta_t,
+                label,
             )
-            state_list, labels = dynsight.onion.onion_uni(reshaped_data)
 
-            tmp_list = []
-            tmp_frac = []
-            for label in np.unique(labels):
-                # This function is necessary to extract and concatenate all the
-                # sequences clustered in the cluster under analysis
-                selected_data = extract_sequences_for_label(
-                    data,
-                    reshaped_data,
-                    labels,
-                    delta_t,
-                    label,
-                )
+            tmp_sampen = dynsight.analysis.compute_sample_entropy(
+                selected_data, r_factor=r_fact
+            )
+            tmp_list.append(tmp_sampen)
+            fraction = np.sum(labels == label) / labels.size
+            tmp_frac.append(fraction)
 
-                tmp_sampen = dynsight.analysis.compute_sample_entropy(
-                    selected_data, r_factor=r_fact
-                )
-                tmp_list.append(tmp_sampen)
-                fraction = np.sum(labels == label) / labels.size
-                tmp_frac.append(fraction)
+        samp_en_list.append(tmp_list)
+        fractions.append(tmp_frac)
 
-            samp_en_list.append(tmp_list)
-            fractions.append(tmp_frac)
+    max_n_states = np.max([len(tmp) for tmp in samp_en_list])
+    for i, tmp in enumerate(samp_en_list):
+        while len(tmp) < max_n_states:
+            tmp.append(0.0)
+            fractions[i].append(0.0)
 
-        max_n_states = np.max([len(tmp) for tmp in samp_en_list])
-        for i, tmp in enumerate(samp_en_list):
-            while len(tmp) < max_n_states:
-                tmp.append(0.0)
-                fractions[i].append(0.0)
+    samp_en_array = np.array(samp_en_list).T
+    frac_array = np.array(fractions).T
 
-        samp_en_array = np.array(samp_en_list).T
-        frac_array = np.array(fractions).T
-        np.savetxt("samp_en/tmp_sampen_array.txt", samp_en_array)
-        np.savetxt("samp_en/tmp_frac_array.txt", frac_array)
+    labels = ["Unclassified", "Ice", "Interface", "Liquid", "Total SampEn"]
 
-    samp_en_array = np.loadtxt("samp_en/tmp_sampen_array.txt")
-    frac_array = np.loadtxt("samp_en/tmp_frac_array.txt")
-
-    labels = ["Unclassified", "Ice", "Interface", "Liquid"]
-
-    fig, ax = plt.subplots(2, 2, figsize=(9, 8))
-
+    fig, ax = plt.subplots()
     for i, state in enumerate(samp_en_array):
         mask = state != 0.0
-        ax[0][0].plot(
+        ax.plot(
             delta_t_list[mask] * t_samp,
             state[mask],
             label=labels[i],
             marker="o",
         )
-        ax[0][1].plot(
+    ax.plot(
+        delta_t_list * t_samp,
+        aver_samp_en * np.ones(len(delta_t_list)),
+        label=labels[-1],
+        ls="--",
+        c="k",
+    )
+    ax.set_xlabel(r"Time resolution $\Delta t$ [ns]")
+    ax.set_ylabel("Sample Entropy")
+    ax.set_xscale("log")
+    ax.set_ylim(bottom=0.0)
+    ax.legend()
+    fig.savefig(folder_path / "Fig2.png", dpi=600)
+
+    fig, ax = plt.subplots()
+    for i, state in enumerate(samp_en_array):
+        mask = state != 0.0
+        ax.plot(
             delta_t_list * t_samp,
             frac_array[i],
             label=labels[i],
             marker="o",
         )
-    ax[0][0].plot(
-        delta_t_list * t_samp,
-        aver_samp_en * np.ones(len(delta_t_list)),
-        label="Total SampEn",
-        ls="--",
-        c="k",
-    )
-    ax[0][0].set_xlabel(r"Time resolution $\Delta t$ [ns]")
-    ax[0][0].set_ylabel("Sample Entropy")
-    ax[0][0].set_xscale("log")
-    ax[0][0].set_ylim(bottom=0.0)
-    ax[0][0].legend()
+    ax.set_xlabel(r"Time resolution $\Delta t$ [ns]")
+    ax.set_ylabel("State population fraction")
+    ax.set_xscale("log")
+    ax.legend()
+    fig.savefig(folder_path / "Fig1.png", dpi=600)
 
-    ax[0][1].set_xlabel(r"Time resolution $\Delta t$ [ns]")
-    ax[0][1].set_ylabel("State population fraction")
-    ax[0][1].set_xscale("log")
-
+    fig, ax = plt.subplots()
     y_val = np.zeros(samp_en_array.shape[1])
     for i, state in enumerate(samp_en_array):
-        ax[1][0].fill_between(
+        ax.fill_between(
             delta_t_list * 0.1,
             y_val,
             y_val + state * frac_array[i],
@@ -190,19 +191,19 @@ def main() -> None:
             alpha=0.8,
         )
         y_val += state * frac_array[i]
-    ax[1][0].plot(
+    ax.plot(
         delta_t_list * 0.1,
         aver_samp_en * np.ones(len(delta_t_list)),
+        label=labels[-1],
         ls="--",
         c="k",
     )
-    ax[1][0].set_xlabel(r"Time resolution $\Delta t$ [ns]")
-    ax[1][0].set_ylabel("Weighted Sample Entropy")
-    ax[1][0].set_xscale("log")
+    ax.set_xlabel(r"Time resolution $\Delta t$ [ns]")
+    ax.set_ylabel("Weighted Sample Entropy")
+    ax.set_xscale("log")
+    ax.legend()
+    fig.savefig(folder_path / "Fig3.png", dpi=600)
 
-    ax[1][1].set_axis_off()
-
-    fig.savefig("samp_en/tmp_SampleEntropy.png", dpi=600)
     plt.show()
 
 
