@@ -39,7 +39,7 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
         # This is necessary because of type checking:
         data_min = float(np.min(random_data))
         data_max = float(np.max(random_data))
-        data_entropy = dynsight.analysis.compute_data_entropy(
+        data_entropy = dynsight.analysis.compute_shannon(
             random_data,
             data_range=(data_min, data_max),
             n_bins=20,
@@ -52,9 +52,7 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
 
         # Test the case of empty dataset
         with pytest.raises(ValueError, match="data is empty"):
-            _ = dynsight.analysis.compute_data_entropy(
-                np.array([]), (0.0, 1.0), 20
-            )
+            _ = dynsight.analysis.compute_shannon(np.array([]), (0.0, 1.0), 20)
 
         # Test the case where labels have the wrong shape
         with pytest.raises(RuntimeError):

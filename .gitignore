@@ -7,5 +7,6 @@ __pycache__
 docs/build
 docs/source/_autosummary
 examples/onion_example_files
+examples/info_gain/trj_*.npy
 tests/systems/coex/.*
 tests/systems/.*

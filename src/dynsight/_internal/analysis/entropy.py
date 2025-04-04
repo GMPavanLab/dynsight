@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import numpy as np
 import numpy.typing as npt
-from scipy.spatial.distance import pdist
 
 
-def compute_data_entropy(
+def compute_shannon(
     data: npt.NDArray[np.float64],
     data_range: tuple[float, float],
     n_bins: int,
 ) -> float:
-    """Compute the entropy of a data distribution.
+    """Compute the Shannon entropy of a univariate data distribution.
 
     It is normalized so that a uniform distribution has unitary entropy.
 
@@ -35,13 +34,13 @@ def compute_data_entropy(
         .. testcode:: shannon1-test
 
             import numpy as np
-            from dynsight.analysis import compute_data_entropy
+            from dynsight.analysis import compute_shannon
 
             np.random.seed(1234)
             data = np.random.rand(100, 100)
             data_range = (float(np.min(data)), float(np.max(data)))
 
-            data_entropy = compute_data_entropy(
+            data_entropy = compute_shannon(
                 data,
                 data_range,
                 n_bins=40,
@@ -63,6 +62,73 @@ def compute_data_entropy(
     probs = counts / np.sum(counts)  # Data probabilities are needed
     entropy = -np.sum([p * np.log2(p) for p in probs if p > 0.0])
     entropy /= np.log2(n_bins)
+    return entropy
+
+
+def compute_shannon_multi(
+    data: npt.NDArray[np.float64],
+    data_ranges: list[tuple[float, float]],
+    n_bins: list[int],
+) -> float:
+    """Compute the Shannon entropy of a multivariate data distribution.
+
+    It is normalized so that a uniform distribution has unitary entropy.
+
+    Parameters:
+        data:
+            shape (n_samples, n_dimensions)
+            The dataset for which the entropy is to be computed.
+
+        data_ranges:
+            A list of tuples [(min1, max1), (min2, max2), ...] specifying
+            the range over which the histogram must be computed for each
+            dimension.
+
+        n_bins:
+            A list of integers specifying the number of bins for each
+            dimension.
+
+    Returns:
+        float:
+            entropy:
+                The value of the normalized Shannon entropy of the dataset.
+
+    Example:
+
+        .. testcode:: shannon-multi-test
+
+            import numpy as np
+            from dynsight.analysis import compute_shannon_multi
+
+            np.random.seed(1234)
+            data = np.random.rand(1000, 2)  # 2D dataset
+            data_ranges = [(0.0, 1.0), (0.0, 1.0)]
+            n_bins = [40, 40]
+
+            data_entropy = compute_shannon_multi(
+                data,
+                data_ranges,
+                n_bins,
+            )
+
+        .. testcode:: shannon-multi-test
+            :hide:
+
+            assert np.isclose(data_entropy, 0.8837924363474094)
+    """
+    n_points, n_dims = data.shape
+    if data.size == 0:
+        msg = "data is empty"
+        raise ValueError(msg)
+    if n_dims != len(data_ranges) or n_dims != len(n_bins):
+        msg = "Mismatch between data dimensions, data_ranges, and n_bins"
+        raise ValueError(msg)
+
+    counts, _ = np.histogramdd(data, bins=n_bins, range=data_ranges)
+    probs = counts / np.sum(counts)  # Probability distribution
+    entropy = -np.sum(probs[probs > 0] * np.log2(probs[probs > 0]))
+    entropy /= np.log2(np.prod(n_bins))  # Normalization
+
     return entropy
 
 
@@ -123,7 +189,7 @@ def compute_entropy_gain(
     data_range = (float(np.min(data)), float(np.max(data)))
 
     # Compute the entropy of the raw data
-    total_entropy = compute_data_entropy(
+    total_entropy = compute_shannon(
         data,
         data_range,
         n_bins,
@@ -135,7 +201,7 @@ def compute_entropy_gain(
     for i, label in enumerate(np.unique(labels)):
         mask = labels == label
         frac[i] = np.sum(mask) / labels.size
-        entr[i] = compute_data_entropy(
+        entr[i] = compute_shannon(
             data[mask],
             data_range,
             n_bins,
@@ -153,91 +219,217 @@ def compute_entropy_gain(
     )
 
 
-def sample_entropy(
+def compute_entropy_gain_multi(
+    data: npt.NDArray[np.float64],
+    labels: npt.NDArray[np.int64],
+    n_bins: list[int],
+) -> tuple[float, float, float, float]:
+    """Compute the relative information gained by the clustering.
+
+    Parameters:
+        data:
+            shape (n_samples, n_dimensions)
+            The dataset over which the clustering is performed.
+
+        labels:
+            shape (n_samples,)
+            The clustering labels.
+
+        n_bins:
+            The number of bins with which the data histogram must be computed,
+            one for each dimension.
+
+    Returns:
+        tuple[float, float, float, float]
+            * The absolute information gain :math:`H_0 - H_{clust}`
+            * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
+            * The Shannon entropy of the initial data :math:`H_0`
+            * The shannon entropy of the clustered data :math:`H_{clust}`
+
+    Example:
+
+        .. testcode:: shannon2-multi-test
+
+            import numpy as np
+            from dynsight.analysis import compute_entropy_gain_multi
+
+            np.random.seed(1234)
+            data = np.random.rand(1000, 2)  # 2D dataset
+            n_bins = [40, 40]
+            labels = np.random.randint(-1, 2, size=1000)
+
+            _, entropy_gain, *_ = compute_entropy_gain_multi(
+                data,
+                labels,
+                n_bins=n_bins,
+            )
+
+        .. testcode:: shannon2-multi-test
+            :hide:
+
+            assert np.isclose(entropy_gain, 0.13171418273750357)
+    """
+    if data.shape[0] != labels.shape[0]:
+        msg = (
+            f"data ({data.shape}) and labels ({labels.shape}) "
+            "must have same shape[0]"
+        )
+        raise RuntimeError(msg)
+
+    data_range = [(float(np.min(tmp)), float(np.max(tmp))) for tmp in data.T]
+
+    # Compute the entropy of the raw data
+    total_entropy = compute_shannon_multi(
+        data,
+        data_range,
+        n_bins,
+    )
+
+    # Compute the fraction and the entropy of the single clusters
+    n_clusters = np.unique(labels).size
+    frac, entr = np.zeros(n_clusters), np.zeros(n_clusters)
+    for i, label in enumerate(np.unique(labels)):
+        mask = labels == label
+        frac[i] = np.sum(mask) / labels.size
+        entr[i] = compute_shannon_multi(
+            data[mask],
+            data_range,
+            n_bins,
+        )
+
+    # Compute the entropy of the clustered data
+    clustered_entropy = np.dot(frac, entr)
+    info_gain = total_entropy - clustered_entropy
+
+    return (
+        info_gain,
+        info_gain / total_entropy,
+        total_entropy,
+        clustered_entropy,
+    )
+
+
+def pairwise_probabilities(
     particle: npt.NDArray[np.float64],
+    r_factor: np.float64 | float,
     m_par: int = 2,
-    r_factor: float = 0.2,
-) -> float:
-    """Compute the sample entropy of a single time-series.
+) -> tuple[int, int]:
+    """Finds the sequence matchings for computing sample entropy.
+
+    Counts the number of data sequences of length m_par and m_par + 1 which
+    have Chebyshev distance smaller than r_factor.
+
+    .. warning::
+        This function is Work In Progress. Do not trust its output.
 
     Parameters:
         particle : np.ndarray of shape (n_frames,)
             The time-series data for a single particle.
 
+        r_factor : float
+            The similarity threshold between signal windows. A common choice
+            is 0.2 * the standard deviation of the time-series.
+
         m_par : int (default 2)
             The m parameter (length of the considered overlapping windows).
 
-        r_factor : float (default 0.2)
-            The similarity threshold between signal windows.
-
     Returns:
-        float
-            The sample entropy of the time-seris.
+        tuple[int, int]
+            The numbers of possible and effective sequence matches.
 
     Example:
 
         .. testcode:: sampen1-test
 
             import numpy as np
-            from dynsight.analysis import sample_entropy
+            from dynsight.analysis import pairwise_probabilities
 
             np.random.seed(1234)
-            data = np.random.rand(1000)
+            data = np.random.rand(100)
+            r_factor = 0.5 * np.std(data)
 
-            samp_en = sample_entropy(
+            pos, mat = pairwise_probabilities(
                 data,
+                r_factor=r_factor,
                 m_par=2,
-                r_factor=0.2,
             )
 
         .. testcode:: sampen1-test
             :hide:
 
-            assert np.isclose(samp_en, 2.2351853395754424)
+            assert pos == 176 and mat == 36
     """
-    n_frames = len(particle)
-    if n_frames < m_par + 1:
-        err_msg = "Time-series too short"
-        raise ValueError(err_msg)
-    r_th = r_factor * np.std(particle)
+    n_sum = len(particle) - m_par
 
-    # To store counts of similar pairs for m and m+1
-    number_of_pairs = [0, 0]
+    if n_sum < 1:
+        msg = "Time-series too short"
+        raise ValueError(msg)
 
-    for i, m in enumerate([m_par + 1, m_par]):
-        # Create overlapping windows of length m
-        window_list = np.array(
-            [particle[j : j + m] for j in range(n_frames - m + 1)]
-        )
+    pos = np.zeros(n_sum, dtype=int)
+    mat = np.zeros(n_sum, dtype=int)
 
-        # Compute pairwise distances (Chebyshev is typical for SampEn)
-        distances = pdist(window_list, metric="chebyshev")
+    index_range = np.arange(m_par + 2)
 
-        # Count pairs within the threshold r_th
-        number_of_pairs[i] = np.sum(distances < r_th)
+    for i in range(n_sum):
+        possibles = 0
+        matches = 0
 
-    if number_of_pairs[1] == 0.0 and number_of_pairs[0] == 0.0:
-        err_msg = "Distance threshold too strict"
-        raise ValueError(err_msg)
+        mask = np.arange(n_sum) != i  # Create mask to avoid self-matches
 
-    return -np.log(number_of_pairs[0] / number_of_pairs[1])
+        for j in np.where(mask)[0]:
+            if i + m_par + 1 >= len(particle) or j + m_par + 1 >= len(
+                particle
+            ):
+                continue  # Skip if i or j would go out of bounds
+
+            # Calculate the differences for all k (from 0 to m_par + 1)
+            diffs = np.abs(
+                particle[i + index_range] - particle[j + index_range]
+            )
+
+            # Step 1: Check for k < m_par
+            if np.any(
+                diffs[:m_par] > r_factor
+            ):  # If any diffs for k < m_par exceed r_factor, break
+                continue
+
+            # Step 2: Check for k == m_par
+            if diffs[m_par] > r_factor:  # For k == m_par
+                continue
+            possibles += 1  # Count this as a possible match
+
+            # Step 3: Check for k > m_par
+            if diffs[m_par + 1] > r_factor:  # For k > m_par
+                continue
+            matches += 1  # Count this as a full match
+
+        pos[i] = possibles
+        mat[i] = matches
+
+    return np.sum(pos), np.sum(mat)
 
 
 def compute_sample_entropy(
-    data: npt.NDArray[np.float64],
+    data: list[npt.NDArray[np.float64]] | npt.NDArray[np.float64],
+    r_factor: np.float64 | float,
     m_par: int = 2,
-    r_factor: float = 0.2,
 ) -> float:
     """Compute the average sample entropy of a time-series dataset.
+
+    .. warning::
+        This function is Work In Progress. Do not trust its output.
+
+    The average is computed ignoring the eventual nan values.
 
     Parameters:
         data : np.ndarray of shape (n_particles, n_frames)
 
+        r_factor : float
+            The similarity threshold between signal windows. A common choice
+            is 0.2 * the standard deviation of the dataset.
+
         m_par : int (default 2)
             The m parameter (length of the considered overlapping windows).
-
-        r_factor : float (default 0.2)
-            The similarity threshold between signal windows.
 
     Returns:
         float
@@ -251,19 +443,32 @@ def compute_sample_entropy(
             from dynsight.analysis import compute_sample_entropy
 
             np.random.seed(1234)
-            data = np.random.rand(100, 100)
+            data = np.random.rand(10, 100)
+            r_factor = 0.5 * np.std(data)
 
             aver_samp_en = compute_sample_entropy(
                 data,
                 m_par=2,
-                r_factor=0.2,
+                r_factor=r_factor,
             )
 
         .. testcode:: sampen2-test
             :hide:
 
-            assert np.isclose(aver_samp_en, 2.210674176898837)
+            assert np.isclose(aver_samp_en, 1.3191091688299446)
     """
-    sampen = [sample_entropy(particle, m_par, r_factor) for particle in data]
+    if isinstance(data, np.ndarray) and data.ndim == 1:
+        data = [data]
 
-    return float(np.nanmean(sampen))
+    pos, mat = 0, 0
+    for particle in data:
+        pos_i, mat_i = pairwise_probabilities(particle, r_factor, m_par)
+        pos += pos_i
+        mat += mat_i
+
+    if pos * mat == 0:
+        msg = "No matching sequences found"
+        raise ValueError(msg)
+
+    ratio = mat / pos
+    return -np.log(ratio)
