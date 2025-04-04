@@ -48,6 +48,6 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
             r_factor=r_fact,
         )
 
-        expected_entropy = 1.3974926864299202
+        expected_entropy = 1.4659489119049185
         if isinstance(data_sample_entropy, float):
             assert np.isclose(data_sample_entropy, expected_entropy)

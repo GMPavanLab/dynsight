@@ -314,7 +314,7 @@ def pairwise_probabilities(
     particle: npt.NDArray[np.float64],
     r_factor: np.float64 | float,
     m_par: int = 2,
-) -> tuple[int, int]:
+) -> float | None:
     """Finds the sequence matchings for computing sample entropy.
 
     Counts the number of data sequences of length m_par and m_par + 1 which
@@ -335,8 +335,9 @@ def pairwise_probabilities(
             The m parameter (length of the considered overlapping windows).
 
     Returns:
-        tuple[int, int]
-            The numbers of possible and effective sequence matches.
+        float | None
+            Sample entropy of the input time-series. If the result is not a
+            float, None is returned.
 
     Example:
 
@@ -349,7 +350,7 @@ def pairwise_probabilities(
             data = np.random.rand(100)
             r_factor = 0.5 * np.std(data)
 
-            pos, mat = pairwise_probabilities(
+            sampen = pairwise_probabilities(
                 data,
                 r_factor=r_factor,
                 m_par=2,
@@ -358,7 +359,7 @@ def pairwise_probabilities(
         .. testcode:: sampen1-test
             :hide:
 
-            assert pos == 180 and mat == 36
+            assert np.isclose(sampen, 1.6094379124341003)
     """
     n_sum = len(particle) - m_par
 
@@ -378,7 +379,10 @@ def pairwise_probabilities(
     pos = np.sum(dist_matrix_1 < r_factor)
     mat = np.sum(dist_matrix_2 < r_factor)
 
-    return pos, mat
+    if pos == 0 or mat == 0:
+        return None
+
+    return -np.log(mat / pos)
 
 
 def compute_sample_entropy(
@@ -427,20 +431,15 @@ def compute_sample_entropy(
         .. testcode:: sampen2-test
             :hide:
 
-            assert np.isclose(aver_samp_en, 1.3492738688762116)
+            assert np.isclose(aver_samp_en, 1.4060395369518306)
     """
     if isinstance(data, np.ndarray) and data.ndim == 1:
         data = [data]
 
-    pos, mat = 0, 0
+    sampen = []
     for particle in data:
-        pos_i, mat_i = pairwise_probabilities(particle, r_factor, m_par)
-        pos += pos_i
-        mat += mat_i
+        tmp = pairwise_probabilities(particle, r_factor, m_par)
+        if tmp is not None:
+            sampen.append(tmp)
 
-    if pos * mat == 0:
-        msg = "No matching sequences found"
-        raise ValueError(msg)
-
-    ratio = mat / pos
-    return -np.log(ratio)
+    return float(np.mean(sampen))
