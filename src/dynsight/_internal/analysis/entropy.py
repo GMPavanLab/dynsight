@@ -336,6 +336,28 @@ def pairwise_probabilities(
     Returns:
         tuple[int, int]
             The numbers of possible and effective sequence matches.
+
+    Example:
+
+        .. testcode:: sampen1-test
+
+            import numpy as np
+            from dynsight.analysis import pairwise_probabilities
+
+            np.random.seed(1234)
+            data = np.random.rand(100)
+            r_factor = 0.5 * np.std(data)
+
+            pos, mat = pairwise_probabilities(
+                data,
+                r_factor=r_factor,
+                m_par=2,
+            )
+
+        .. testcode:: sampen1-test
+            :hide:
+
+            assert pos == 176 and mat == 36
     """
     n_sum = len(particle) - m_par
 
