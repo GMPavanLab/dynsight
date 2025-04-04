@@ -87,9 +87,7 @@ def main() -> None:
 
     # We need to set a unique closeness threshold, to use for each cluster
     r_fact = 0.2  # This is the default value
-    print(f"Std dev of the dataset = {np.std(data)}")
     r_fact *= np.std(data)
-    print(f"Closeness threshold = {r_fact}")
 
     # We start computing the average sample entropy of the entire dataset
     if COMPUTE:
@@ -98,7 +96,6 @@ def main() -> None:
         )
     else:
         aver_samp_en = 0.1873359455516944
-    print(f"Total SampEn = {aver_samp_en}")
 
     if COMPUTE:
         # Then we can perform Onion Clustering at different ∆t and compute

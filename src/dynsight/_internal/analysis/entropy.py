@@ -310,18 +310,14 @@ def compute_entropy_gain_multi(
     )
 
 
-def pairwise_probabilities(
+def sample_entropy(
     particle: npt.NDArray[np.float64],
     r_factor: np.float64 | float,
     m_par: int = 2,
 ) -> float | None:
-    """Finds the sequence matchings for computing sample entropy.
+    """Computes the Sample Entropy of a single time-series.
 
-    Counts the number of data sequences of length m_par and m_par + 1 which
-    have Chebyshev distance smaller than r_factor.
-
-    .. warning::
-        This function is Work In Progress. Do not trust its output.
+    The Chebyshev distance is used. SampEn takes values between 0 and +inf.
 
     Parameters:
         particle : np.ndarray of shape (n_frames,)
@@ -337,20 +333,20 @@ def pairwise_probabilities(
     Returns:
         float | None
             Sample entropy of the input time-series. If the result is not a
-            float, None is returned.
+            number, None is returned.
 
     Example:
 
         .. testcode:: sampen1-test
 
             import numpy as np
-            from dynsight.analysis import pairwise_probabilities
+            from dynsight.analysis import sample_entropy
 
             np.random.seed(1234)
             data = np.random.rand(100)
             r_factor = 0.5 * np.std(data)
 
-            sampen = pairwise_probabilities(
+            sampen = sample_entropy(
                 data,
                 r_factor=r_factor,
                 m_par=2,
@@ -395,7 +391,7 @@ def compute_sample_entropy(
     .. warning::
         This function is Work In Progress. Do not trust its output.
 
-    The average is computed ignoring the eventual nan values.
+    The average is computed ignoring possible nan values.
 
     Parameters:
         data : np.ndarray of shape (n_particles, n_frames)
@@ -438,7 +434,7 @@ def compute_sample_entropy(
 
     sampen = []
     for particle in data:
-        tmp = pairwise_probabilities(particle, r_factor, m_par)
+        tmp = sample_entropy(particle, r_factor, m_par)
         if tmp is not None:
             sampen.append(tmp)
 
