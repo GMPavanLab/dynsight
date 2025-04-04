@@ -22,6 +22,7 @@
   :caption: Examples:
 
   Information gain <info_gain>
+  Sample Entropy <sample_entropy>
 
 .. toctree::
   :hidden:

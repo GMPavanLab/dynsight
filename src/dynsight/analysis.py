@@ -6,7 +6,7 @@ from dynsight._internal.analysis.entropy import (
     compute_sample_entropy,
     compute_shannon,
     compute_shannon_multi,
-    pairwise_probabilities,
+    sample_entropy,
 )
 from dynsight._internal.analysis.rdf import compute_rdf
 from dynsight._internal.analysis.spatial_average import (
@@ -25,7 +25,7 @@ __all__ = [
     "compute_shannon",
     "compute_shannon_multi",
     "cross_time_correlation",
-    "pairwise_probabilities",
+    "sample_entropy",
     "self_time_correlation",
     "spatialaverage",
 ]
