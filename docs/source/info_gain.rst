@@ -3,13 +3,27 @@ Information gain computation
 
 For the theoretical aspects of this work, see INSERT REF.
 
-Here we show how to compute the information gain through clustering. To this end, we create two datasets by simulation the Langevin Dynamics of particles moving in two different bidimensional potential energy landscapes, one with two and one with four minima. We compare the information gain after clustering the particles' trajectories, using either one or both variables. 
+Here we show how to compute the information gain through clustering. To this end, we create two datasets by simulating the Langevin Dynamics of particles moving in two different bidimensional potential energy landscapes, one with two and one with four minima. We compare the information gain after clustering the particles' trajectories, using either one or both variables. 
 
-Firts, we want to simulate the Langevin Dynamics. We start defining the potential energy landscapes, with two and four minima. 
+To start, let's import the packages we will need and create a folder in the cwd to save the results in.
 
 .. code-block:: python
 
+    from pathlib import Path
+    from typing import Callable
     import numpy as np
+    import matplotlib.pyplot as plt
+
+    cwd = Path.cwd()
+    folder_name = "info_gain"
+    folder_path = cwd / folder_name
+    if not folder_path.exists():
+        folder_path.mkdir()
+
+
+Now, we want to simulate the Langevin Dynamics. We start defining the potential energy landscapes, with two and four minima. 
+
+.. code-block:: python
 
     def energy_landscape_1(x: float, y: float) -> float:
         """A potential energy landscape with 2 minima."""
@@ -33,8 +47,6 @@ To compute the force acting on the particle, we need to compute the potential en
 
 .. code-block:: python
 
-    from typing import Callable
-
     def numerical_gradient(
         f: Callable[[float, float], float], x: float, y: float, h: float = 1e-5
     ) -> tuple[float, float]:
@@ -44,11 +56,9 @@ To compute the force acting on the particle, we need to compute the potential en
         return -grad_x, -grad_y
 
 
-This function simulates, for bopth energy landscapes, the dynamics of 100 particles for 10000 timesteps. Particles are initialized close to the minima. 
+This function simulates, for both energy landscapes, the dynamics of 100 particles for 10000 timesteps. Particles are initialized close to the minima. 
 
 .. code-block:: python
-
-    import matplotlib.pyplot as plt
 
     def create_trajectory(
         energy_landscape: Callable[[float, float], float], file_name: str
@@ -90,7 +100,7 @@ This function simulates, for bopth energy landscapes, the dynamics of 100 partic
         plt.show()
 
         dataset = np.transpose(trajectory, (1, 0, 2))
-        np.save(f"info_gain/{file_name}.npy", dataset)
+        np.save(folder_path / f"{file_name}.npy", dataset)
         return dataset
 
 
@@ -98,18 +108,18 @@ Let's simulate the trajectories and store them in two variables. We also save th
 
 .. code-block:: python
 
-    from pathlib import Path
+    file_1 = folder_path / "trj_2.npy"  #  With 2 minima
+    file_2 = folder_path / "trj_4.npy"  #  With 4 minima
 
-    file_1 = Path("info_gain/trj_2.npy")  #  With 2 minima
-    file_2 = Path("info_gain/trj_4.npy")  #  With 4 minima
-    if file_1.exists():
-        dataset_1 = np.load(file_1)
-    else:
+    if not file_1.exists():
         dataset_1 = create_trajectory(energy_landscape_1, "trj_2")
-    if file_2.exists():
-        dataset_2 = np.load(file_2)
-    else:
+
+    dataset_1 = np.load(file_1)
+
+    if not file_2.exists():
         dataset_2 = create_trajectory(energy_landscape_2, "trj_4")
+
+    dataset_2 = np.load(file_2)
 
 
 Now that we have the trajectories, we can, for each one, perform Onion clustering and computing the corresponding information gain, using either 
@@ -187,6 +197,26 @@ To check if the clustering is working in a meaningful way, we also plot the resu
         # phase space, which is 2D is doubled
         info_gain_xy *= 2
         results.append(info_gain_xy)
+
+
+Here are the plots of the two datasets, with the different clusters identified when clustering the full, bi-dimensional data, using ∆t = 4 frames:
+
+.. list-table::
+   :widths: auto
+   :align: center
+
+   * - .. image:: _static/info_gain_clusters_1d.png
+     - .. image:: _static/info_gain_clusters_2d.png
+
+
+As can be seen, all the clusters are correctly identified at this time resolution ∆t. When we are using only the y-coordinate instead, as expected in both cases just two clusters can be identified (the two plots look the same but they are actually from the two different systems):
+
+.. list-table::
+   :widths: auto
+   :align: center
+
+   * - .. image:: _static/info_gain_clusters_1d_y.png
+     - .. image:: _static/info_gain_clusters_2d_y.png
 
 
 We can now plot, for every case and for every choice of ∆t, the corresponding information gain. 
