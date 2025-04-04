@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import numpy.typing as npt
+from scipy.spatial.distance import cdist
 
 
 def compute_shannon(
@@ -357,7 +358,7 @@ def pairwise_probabilities(
         .. testcode:: sampen1-test
             :hide:
 
-            assert pos == 176 and mat == 36
+            assert pos == 180 and mat == 36
     """
     n_sum = len(particle) - m_par
 
@@ -365,48 +366,19 @@ def pairwise_probabilities(
         msg = "Time-series too short"
         raise ValueError(msg)
 
-    pos = np.zeros(n_sum, dtype=int)
-    mat = np.zeros(n_sum, dtype=int)
+    m1_seq = np.array([particle[i : i + m_par + 1] for i in range(n_sum)])
+    m2_seq = np.array([particle[i : i + m_par + 2] for i in range(n_sum - 1)])
 
-    index_range = np.arange(m_par + 2)
+    dist_matrix_1 = cdist(m1_seq, m1_seq, metric="chebyshev")
+    dist_matrix_2 = cdist(m2_seq, m2_seq, metric="chebyshev")
 
-    for i in range(n_sum):
-        possibles = 0
-        matches = 0
+    np.fill_diagonal(dist_matrix_1, 2 * r_factor)
+    np.fill_diagonal(dist_matrix_2, 2 * r_factor)
 
-        mask = np.arange(n_sum) != i  # Create mask to avoid self-matches
+    pos = np.sum(dist_matrix_1 < r_factor)
+    mat = np.sum(dist_matrix_2 < r_factor)
 
-        for j in np.where(mask)[0]:
-            if i + m_par + 1 >= len(particle) or j + m_par + 1 >= len(
-                particle
-            ):
-                continue  # Skip if i or j would go out of bounds
-
-            # Calculate the differences for all k (from 0 to m_par + 1)
-            diffs = np.abs(
-                particle[i + index_range] - particle[j + index_range]
-            )
-
-            # Step 1: Check for k < m_par
-            if np.any(
-                diffs[:m_par] > r_factor
-            ):  # If any diffs for k < m_par exceed r_factor, break
-                continue
-
-            # Step 2: Check for k == m_par
-            if diffs[m_par] > r_factor:  # For k == m_par
-                continue
-            possibles += 1  # Count this as a possible match
-
-            # Step 3: Check for k > m_par
-            if diffs[m_par + 1] > r_factor:  # For k > m_par
-                continue
-            matches += 1  # Count this as a full match
-
-        pos[i] = possibles
-        mat[i] = matches
-
-    return np.sum(pos), np.sum(mat)
+    return pos, mat
 
 
 def compute_sample_entropy(
@@ -455,7 +427,7 @@ def compute_sample_entropy(
         .. testcode:: sampen2-test
             :hide:
 
-            assert np.isclose(aver_samp_en, 1.3191091688299446)
+            assert np.isclose(aver_samp_en, 1.3492738688762116)
     """
     if isinstance(data, np.ndarray) and data.ndim == 1:
         data = [data]
