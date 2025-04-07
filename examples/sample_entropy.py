@@ -181,6 +181,21 @@ def main() -> None:
     for i, state in enumerate(samp_en_array):
         mask = state != 0.0
         ax.plot(
+            delta_t_list * t_samp,
+            frac_array[i],
+            label=labels[i],
+            marker="o",
+        )
+    ax.set_xlabel(r"Time resolution $\Delta t$ [ns]")
+    ax.set_ylabel("State population fraction")
+    ax.set_xscale("log")
+    ax.legend()
+    fig.savefig(folder_path / "Fig1.png", dpi=600)
+
+    fig, ax = plt.subplots()
+    for i, state in enumerate(samp_en_array):
+        mask = state != 0.0
+        ax.plot(
             delta_t_list[mask] * t_samp,
             state[mask],
             label=labels[i],
@@ -199,21 +214,6 @@ def main() -> None:
     ax.set_ylim(bottom=0.0)
     ax.legend()
     fig.savefig(folder_path / "Fig2.png", dpi=600)
-
-    fig, ax = plt.subplots()
-    for i, state in enumerate(samp_en_array):
-        mask = state != 0.0
-        ax.plot(
-            delta_t_list * t_samp,
-            frac_array[i],
-            label=labels[i],
-            marker="o",
-        )
-    ax.set_xlabel(r"Time resolution $\Delta t$ [ns]")
-    ax.set_ylabel("State population fraction")
-    ax.set_xscale("log")
-    ax.legend()
-    fig.savefig(folder_path / "Fig1.png", dpi=600)
 
     fig, ax = plt.subplots()
     y_val = np.zeros(samp_en_array.shape[1])
