@@ -1,7 +1,13 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
 import numpy as np
 import numpy.typing as npt
+from scipy.spatial.distance import cdist
 
 
 def compute_shannon(
@@ -309,22 +315,20 @@ def compute_entropy_gain_multi(
     )
 
 
-def pairwise_probabilities(
-    particle: npt.NDArray[np.float64],
+def sample_entropy(
+    time_series: NDArray[np.float64],
     r_factor: np.float64 | float,
     m_par: int = 2,
-) -> tuple[int, int]:
-    """Finds the sequence matchings for computing sample entropy.
+) -> float:
+    """Computes the Sample Entropy of a single time-series.
 
-    Counts the number of data sequences of length m_par and m_par + 1 which
-    have Chebyshev distance smaller than r_factor.
-
-    .. warning::
-        This function is Work In Progress. Do not trust its output.
+    The Chebyshev distance is used. SampEn takes values between 0 and +inf.
+    If the time-series is too short for the chosen m_par, raises ValueError.
+    If no matching sequences can be found, raises RuntimeError.
 
     Parameters:
-        particle : np.ndarray of shape (n_frames,)
-            The time-series data for a single particle.
+        time_series : np.ndarray of shape (n_frames,)
+            The time-series data.
 
         r_factor : float
             The similarity threshold between signal windows. A common choice
@@ -334,21 +338,21 @@ def pairwise_probabilities(
             The m parameter (length of the considered overlapping windows).
 
     Returns:
-        tuple[int, int]
-            The numbers of possible and effective sequence matches.
+        float
+            Sample entropy of the input time-series.
 
     Example:
 
         .. testcode:: sampen1-test
 
             import numpy as np
-            from dynsight.analysis import pairwise_probabilities
+            from dynsight.analysis import sample_entropy
 
             np.random.seed(1234)
             data = np.random.rand(100)
             r_factor = 0.5 * np.std(data)
 
-            pos, mat = pairwise_probabilities(
+            sampen = sample_entropy(
                 data,
                 r_factor=r_factor,
                 m_par=2,
@@ -357,118 +361,30 @@ def pairwise_probabilities(
         .. testcode:: sampen1-test
             :hide:
 
-            assert pos == 176 and mat == 36
+            assert np.isclose(sampen, 1.6094379124341003)
     """
-    n_sum = len(particle) - m_par
+    n_sum = len(time_series) - m_par
 
     if n_sum < 1:
         msg = "Time-series too short"
         raise ValueError(msg)
 
-    pos = np.zeros(n_sum, dtype=int)
-    mat = np.zeros(n_sum, dtype=int)
+    m1_seq = np.array([time_series[i : i + m_par + 1] for i in range(n_sum)])
+    m2_seq = np.array(
+        [time_series[i : i + m_par + 2] for i in range(n_sum - 1)]
+    )
 
-    index_range = np.arange(m_par + 2)
+    dist_matrix_1 = cdist(m1_seq, m1_seq, metric="chebyshev")
+    dist_matrix_2 = cdist(m2_seq, m2_seq, metric="chebyshev")
 
-    for i in range(n_sum):
-        possibles = 0
-        matches = 0
+    np.fill_diagonal(dist_matrix_1, 2 * r_factor)
+    np.fill_diagonal(dist_matrix_2, 2 * r_factor)
 
-        mask = np.arange(n_sum) != i  # Create mask to avoid self-matches
+    pos = np.sum(dist_matrix_1 < r_factor)
+    mat = np.sum(dist_matrix_2 < r_factor)
 
-        for j in np.where(mask)[0]:
-            if i + m_par + 1 >= len(particle) or j + m_par + 1 >= len(
-                particle
-            ):
-                continue  # Skip if i or j would go out of bounds
+    if pos == 0 or mat == 0:
+        msg = "No matching sequences found."
+        raise RuntimeError(msg)
 
-            # Calculate the differences for all k (from 0 to m_par + 1)
-            diffs = np.abs(
-                particle[i + index_range] - particle[j + index_range]
-            )
-
-            # Step 1: Check for k < m_par
-            if np.any(
-                diffs[:m_par] > r_factor
-            ):  # If any diffs for k < m_par exceed r_factor, break
-                continue
-
-            # Step 2: Check for k == m_par
-            if diffs[m_par] > r_factor:  # For k == m_par
-                continue
-            possibles += 1  # Count this as a possible match
-
-            # Step 3: Check for k > m_par
-            if diffs[m_par + 1] > r_factor:  # For k > m_par
-                continue
-            matches += 1  # Count this as a full match
-
-        pos[i] = possibles
-        mat[i] = matches
-
-    return np.sum(pos), np.sum(mat)
-
-
-def compute_sample_entropy(
-    data: list[npt.NDArray[np.float64]] | npt.NDArray[np.float64],
-    r_factor: np.float64 | float,
-    m_par: int = 2,
-) -> float:
-    """Compute the average sample entropy of a time-series dataset.
-
-    .. warning::
-        This function is Work In Progress. Do not trust its output.
-
-    The average is computed ignoring the eventual nan values.
-
-    Parameters:
-        data : np.ndarray of shape (n_particles, n_frames)
-
-        r_factor : float
-            The similarity threshold between signal windows. A common choice
-            is 0.2 * the standard deviation of the dataset.
-
-        m_par : int (default 2)
-            The m parameter (length of the considered overlapping windows).
-
-    Returns:
-        float
-            The sample entropy of the dataset (average over all the particles).
-
-    Example:
-
-        .. testcode:: sampen2-test
-
-            import numpy as np
-            from dynsight.analysis import compute_sample_entropy
-
-            np.random.seed(1234)
-            data = np.random.rand(10, 100)
-            r_factor = 0.5 * np.std(data)
-
-            aver_samp_en = compute_sample_entropy(
-                data,
-                m_par=2,
-                r_factor=r_factor,
-            )
-
-        .. testcode:: sampen2-test
-            :hide:
-
-            assert np.isclose(aver_samp_en, 1.3191091688299446)
-    """
-    if isinstance(data, np.ndarray) and data.ndim == 1:
-        data = [data]
-
-    pos, mat = 0, 0
-    for particle in data:
-        pos_i, mat_i = pairwise_probabilities(particle, r_factor, m_par)
-        pos += pos_i
-        mat += mat_i
-
-    if pos * mat == 0:
-        msg = "No matching sequences found"
-        raise ValueError(msg)
-
-    ratio = mat / pos
-    return -np.log(ratio)
+    return -np.log(mat / pos)
