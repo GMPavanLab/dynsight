@@ -1,9 +1,9 @@
 Sample Entropy computation
 ==========================
 
-Here we show how to compute the Sample Entropy (SampEn) of a dataset of time-series, comparing the SampEn of the entire dataset with the one of the clusters identified by Onion Clustering.
+Here we show how to compute the Sample Entropy (SampEn) of a dataset of time-series, comparing the SampEn of the entire dataset with the one of the clusters identified by Onion Clustering. 
 
-To start, let's import the packages we will need and create a folder in the cwd to save the results in.
+To start, let's import the packages we will need and create a folder in the current working directory to save the results in.
 
 .. code-block:: python
 
@@ -25,7 +25,7 @@ As data, we use LENS signals from a water/ice coexistence simulation which can b
 
     git clone git@github.com:matteobecchi/onion_example_files.git
 
-Let's load the dataset; SampEn calculation is quite time-consuming, so we can use the data from one in every ten molecules. Also, the first frame of the LENS array is always 0.0, so we ignore that value. The sampling time of the time-series is 0.1 ns.
+Let's load the dataset; SampEn calculation is quite time-consuming, so we can use the data from one in every ten molecules. Also, the first frame of the LENS array is always 0.0, so we ignore that value. The sampling time of the time-series is 0.1 ns. 
 
 .. code-block:: python
 
@@ -34,14 +34,52 @@ Let's load the dataset; SampEn calculation is quite time-consuming, so we can us
     t_samp = 0.1
 
 
+The main goal of this example is to compute the combined SampEn of a collection of time-series. We do that by defining the following function, which computes the SampEn of each time-series and then takes the average, ignoring the cases where the result is NaN: 
+
+.. code-block:: python
+
+    def combined_sample_entropies(
+        data: np.ndarray | list[np.ndarray],
+        r_factor: float | np.float64,
+        m_par: int = 2,
+    ) -> float:
+        """Compute the average sample entropy of a time-series dataset.
+
+        The average is computed ignoring possible NaN values.
+
+        Parameters:
+            data : np.ndarray of shape (n_particles, n_frames) or list of np.ndarray of shape (n_frames,).
+
+            r_factor : float
+                The similarity threshold between signal windows. A common choice
+                is 0.2 * the standard deviation of the dataset.
+
+            m_par : int (default 2)
+                The m parameter (length of the considered overlapping windows).
+
+        Returns:
+            float: The sample entropy of the dataset (average over all the particles, ignoring NaN).
+        """
+        if isinstance(data, np.ndarray) and data.ndim == 1:
+            data = [data]
+
+        sampen = []
+        for particle in data:
+            try:
+                tmp = dynsight.analysis.sample_entropy(particle, r_factor, m_par)
+                sampen.append(tmp)
+            except RuntimeError:
+                continue
+
+        return np.mean(np.array(sampen))
+
+
 Now, we can compute the SampEn for the entire dataset. We have to set the distance threshold r_factor, which is usually set equal to 0.2 times the standard deviation of the dataset. 
 
 .. code-block:: python
 
     r_fact = 0.2 * np.std(data)
-    aver_samp_en = dynsight.analysis.compute_sample_entropy(
-        data, r_factor=r_fact
-    )
+    aver_samp_en = combined_sample_entropies(data, r_factor=r_fact)
 
 Then we can perform Onion Clustering at different ∆t and compute the sample entropy of the different clusters. We want to store both the absolute value of the sampe entropy and the fraction of data-points in each cluster, so that we can then compute the weighted SampEn by multiplying the two quantities. 
 
@@ -135,7 +173,7 @@ With this function, we are ready to perform Onion at different ∆t.
                 label,
             )
 
-            tmp_sampen = dynsight.analysis.compute_sample_entropy(
+            tmp_sampen = combined_sample_entropies(
                 selected_data, r_factor=r_fact
             )
             tmp_list.append(tmp_sampen)
