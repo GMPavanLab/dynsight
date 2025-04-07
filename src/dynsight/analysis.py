@@ -3,7 +3,6 @@
 from dynsight._internal.analysis.entropy import (
     compute_entropy_gain,
     compute_entropy_gain_multi,
-    compute_sample_entropy,
     compute_shannon,
     compute_shannon_multi,
     sample_entropy,
@@ -21,7 +20,6 @@ __all__ = [
     "compute_entropy_gain",
     "compute_entropy_gain_multi",
     "compute_rdf",
-    "compute_sample_entropy",
     "compute_shannon",
     "compute_shannon_multi",
     "cross_time_correlation",

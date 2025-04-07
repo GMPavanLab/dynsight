@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
 import numpy as np
 import numpy.typing as npt
 from scipy.spatial.distance import cdist
@@ -311,17 +316,19 @@ def compute_entropy_gain_multi(
 
 
 def sample_entropy(
-    particle: npt.NDArray[np.float64],
+    time_series: NDArray[np.float64],
     r_factor: np.float64 | float,
     m_par: int = 2,
-) -> float | None:
+) -> float:
     """Computes the Sample Entropy of a single time-series.
 
     The Chebyshev distance is used. SampEn takes values between 0 and +inf.
+    If the time-series is too short for the chosen m_par, raises ValueError.
+    If no matching sequences can be found, raises RuntimeError.
 
     Parameters:
-        particle : np.ndarray of shape (n_frames,)
-            The time-series data for a single particle.
+        time_series : np.ndarray of shape (n_frames,)
+            The time-series data.
 
         r_factor : float
             The similarity threshold between signal windows. A common choice
@@ -331,9 +338,8 @@ def sample_entropy(
             The m parameter (length of the considered overlapping windows).
 
     Returns:
-        float | None
-            Sample entropy of the input time-series. If the result is not a
-            number, None is returned.
+        float
+            Sample entropy of the input time-series.
 
     Example:
 
@@ -357,14 +363,16 @@ def sample_entropy(
 
             assert np.isclose(sampen, 1.6094379124341003)
     """
-    n_sum = len(particle) - m_par
+    n_sum = len(time_series) - m_par
 
     if n_sum < 1:
         msg = "Time-series too short"
         raise ValueError(msg)
 
-    m1_seq = np.array([particle[i : i + m_par + 1] for i in range(n_sum)])
-    m2_seq = np.array([particle[i : i + m_par + 2] for i in range(n_sum - 1)])
+    m1_seq = np.array([time_series[i : i + m_par + 1] for i in range(n_sum)])
+    m2_seq = np.array(
+        [time_series[i : i + m_par + 2] for i in range(n_sum - 1)]
+    )
 
     dist_matrix_1 = cdist(m1_seq, m1_seq, metric="chebyshev")
     dist_matrix_2 = cdist(m2_seq, m2_seq, metric="chebyshev")
@@ -376,66 +384,7 @@ def sample_entropy(
     mat = np.sum(dist_matrix_2 < r_factor)
 
     if pos == 0 or mat == 0:
-        return None
+        msg = "No matching sequences found."
+        raise RuntimeError(msg)
 
     return -np.log(mat / pos)
-
-
-def compute_sample_entropy(
-    data: list[npt.NDArray[np.float64]] | npt.NDArray[np.float64],
-    r_factor: np.float64 | float,
-    m_par: int = 2,
-) -> float:
-    """Compute the average sample entropy of a time-series dataset.
-
-    .. warning::
-        This function is Work In Progress. Do not trust its output.
-
-    The average is computed ignoring possible nan values.
-
-    Parameters:
-        data : np.ndarray of shape (n_particles, n_frames)
-
-        r_factor : float
-            The similarity threshold between signal windows. A common choice
-            is 0.2 * the standard deviation of the dataset.
-
-        m_par : int (default 2)
-            The m parameter (length of the considered overlapping windows).
-
-    Returns:
-        float
-            The sample entropy of the dataset (average over all the particles).
-
-    Example:
-
-        .. testcode:: sampen2-test
-
-            import numpy as np
-            from dynsight.analysis import compute_sample_entropy
-
-            np.random.seed(1234)
-            data = np.random.rand(10, 100)
-            r_factor = 0.5 * np.std(data)
-
-            aver_samp_en = compute_sample_entropy(
-                data,
-                m_par=2,
-                r_factor=r_factor,
-            )
-
-        .. testcode:: sampen2-test
-            :hide:
-
-            assert np.isclose(aver_samp_en, 1.4060395369518306)
-    """
-    if isinstance(data, np.ndarray) and data.ndim == 1:
-        data = [data]
-
-    sampen = []
-    for particle in data:
-        tmp = sample_entropy(particle, r_factor, m_par)
-        if tmp is not None:
-            sampen.append(tmp)
-
-    return float(np.mean(sampen))
