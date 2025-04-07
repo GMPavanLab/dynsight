@@ -76,6 +76,43 @@ def extract_sequences_for_label(
     return sequences
 
 
+def combined_sample_entropies(
+    data: list[NDArray[np.float64]] | NDArray[np.float64],
+    r_factor: np.float64 | float,
+    m_par: int = 2,
+) -> float:
+    """Compute the average sample entropy of a time-series dataset.
+
+    The average is computed ignoring possible nan values.
+
+    Parameters:
+        data : np.ndarray of shape (n_particles, n_frames)
+
+        r_factor : float
+            The similarity threshold between signal windows. A common choice
+            is 0.2 * the standard deviation of the dataset.
+
+        m_par : int (default 2)
+            The m parameter (length of the considered overlapping windows).
+
+    Returns:
+        float
+            The sample entropy of the dataset (average over all the particles).
+    """
+    if isinstance(data, np.ndarray) and data.ndim == 1:
+        data = [data]
+
+    sampen = []
+    for particle in data:
+        try:
+            tmp = dynsight.analysis.sample_entropy(particle, r_factor, m_par)
+            sampen.append(tmp)
+        except RuntimeError:  # noqa: PERF203
+            continue
+
+    return np.mean(np.array(sampen))
+
+
 def main() -> None:
     """How to use the code for the sample entropy computation."""
     cwd = Path.cwd()
@@ -96,9 +133,7 @@ def main() -> None:
     r_fact *= np.std(data)
 
     # We start computing the average sample entropy of the entire dataset
-    aver_samp_en = dynsight.analysis.compute_sample_entropy(
-        data, r_factor=r_fact
-    )
+    aver_samp_en = combined_sample_entropies(data, r_factor=r_fact)
 
     # Then we can perform Onion Clustering at different ∆t and compute
     # the sample entropy of the different clusters
@@ -121,7 +156,7 @@ def main() -> None:
                 label,
             )
 
-            tmp_sampen = dynsight.analysis.compute_sample_entropy(
+            tmp_sampen = combined_sample_entropies(
                 selected_data, r_factor=r_fact
             )
             tmp_list.append(tmp_sampen)

@@ -1,7 +1,7 @@
 Sample Entropy computation
 ==========================
 
-Here we show how to compute the Sample Entropy (SampEn) of a dataset of time-series, comparing the SampEn of the entire edataset with the one of the clusters identified by Onion Clustering.
+Here we show how to compute the Sample Entropy (SampEn) of a dataset of time-series, comparing the SampEn of the entire dataset with the one of the clusters identified by Onion Clustering.
 
 To start, let's import the packages we will need and create a folder in the cwd to save the results in.
 
@@ -25,7 +25,7 @@ As data, we use LENS signals from a water/ice coexistence simulation which can b
 
     git clone git@github.com:matteobecchi/onion_example_files.git
 
-Let's load the dataset; SampEn calculation is quite time-consuming, so we can use the data from one every ten molecules. Also, the first frame of the LENS array is always 0.0, so we ignore that value. The sampling time of the time-series is 0.1 ns.
+Let's load the dataset; SampEn calculation is quite time-consuming, so we can use the data from one in every ten molecules. Also, the first frame of the LENS array is always 0.0, so we ignore that value. The sampling time of the time-series is 0.1 ns.
 
 .. code-block:: python
 
@@ -43,7 +43,7 @@ Now, we can compute the SampEn for the entire dataset. We have to set the distan
         data, r_factor=r_fact
     )
 
-Then we can perform Onion Clustering at different ∆t and compute the sample entropy of the different clusters. We want to store both the absolute value fo the sampe entropy and the fraction of data-points in each cluster, so that we can then compute the weighted SampEn by multiplying the two quantities. 
+Then we can perform Onion Clustering at different ∆t and compute the sample entropy of the different clusters. We want to store both the absolute value of the sampe entropy and the fraction of data-points in each cluster, so that we can then compute the weighted SampEn by multiplying the two quantities. 
 
 For the computation of the SampEn of a cluster, we need a function that creates a list of all the time-series assigned to that cluster. 
 
@@ -110,7 +110,7 @@ For the computation of the SampEn of a cluster, we need a function that creates 
         return sequences
 
 
-With this function, we are ready for performing Onion ad different ∆t. 
+With this function, we are ready to perform Onion at different ∆t. 
 
 .. code-block:: python
 
@@ -217,7 +217,7 @@ Then, we can plot the SamEn of each individual cluster:
 
 As expected, solid ice has a very low SampEn, liquid water has the highest, and the interface has intermediate values. Moreover, the SampEn decreases as ∆t increases, because a larger ∆t enforces clusters with stronger temporal coherence. 
 
-Finally, we can plot the SampEn weighted with the population fraction of each cluster. Differently from Shannon entropy, there is no guarantee that SampEn is convex, and thus values larger that the SampEn of the entire dataset are possible.
+Finally, we can plot the SampEn weighted with the population fraction of each cluster. Differently from Shannon entropy, there is no guarantee that SampEn is convex, and thus values larger than the SampEn of the entire dataset are possible.
 
 .. code-block:: python
 
