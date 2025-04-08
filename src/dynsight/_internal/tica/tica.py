@@ -33,10 +33,10 @@ def many_body_tica(
             The multivariated data for tICA dimensionality reduction.
 
         lag_time
-            The time at which time correlations are maximized.
+            The lagtime under which time correlations are maximized.
 
         tica_dim
-            The number of tIC to compute.
+            The number of dimensions to keep.
 
     Returns:
         * The typical relaxation time-scale of each tIC
