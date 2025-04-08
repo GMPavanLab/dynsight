@@ -11,6 +11,7 @@
    SOAP <soap>
    timeSOAP <time_soap>
    LENS <lens>
+   tICA <tica>
    onion clustering <onion>
    analysis <analysis>
    data processing <data_processing>
