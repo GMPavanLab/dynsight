@@ -25,7 +25,8 @@ def many_body_tica(
     suggested one if data are subsequently clustered.
 
     This function uses the TICA module from the deeptime package; refer to
-    Moritz Hoffmann et al 2022 Mach. Learn.: Sci. Technol. 3 015009.
+    `Moritz Hoffmann et al 2022 Mach. Learn.: Sci. Technol. 3 015009
+    <https://iopscience.iop.org/article/10.1088/2632-2153/ac3de0/meta>`_.
 
     Parameters:
         data: shape (n_atoms, n_frames, n_dims)
