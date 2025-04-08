@@ -11,6 +11,7 @@ docs:
 # Do a dev install.
 dev:
   pip install -e '.[dev]'
+  conda install -c conda-forge deeptime -y
 
 # Run code checks.
 check:
