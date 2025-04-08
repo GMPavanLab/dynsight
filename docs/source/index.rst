@@ -11,6 +11,7 @@
    SOAP <soap>
    timeSOAP <time_soap>
    LENS <lens>
+   tICA <tica>
    onion clustering <onion>
    analysis <analysis>
    data processing <data_processing>
@@ -68,6 +69,14 @@ Optional Dependancies
 Old versions :mod:`dynsight` used :mod:`cpctools` for SOAP calculations, if you are using Python 3.10 and below, you can use :mod:`cpctools` to access :mod:`SOAPify` and :mod:`hd5er` using ::
 
   $ pip install cpctools
+
+If you want to use the :mod:`dynsight.tica` module you will need to install the deeptime package. This can be done with with pip::
+
+  $ pip install deeptime
+
+or with conda::
+
+  $ conda install -c conda-forge deeptime
 
 Developer Setup
 ...............
