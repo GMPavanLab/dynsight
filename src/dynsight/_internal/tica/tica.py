@@ -8,7 +8,11 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 import numpy as np
-from deeptime.decomposition import TICA
+
+try:
+    from deeptime.decomposition import TICA
+except ImportError:
+    TICA = None
 
 
 def many_body_tica(
@@ -47,7 +51,7 @@ def many_body_tica(
 
     Example:
 
-        .. testcode:: tica1-test
+        .. code-block:: python
 
             import numpy as np
             import dynsight
@@ -55,16 +59,14 @@ def many_body_tica(
             np.random.seed(42)
             random_array = np.random.rand(100, 100, 10)
 
-            relax_times, *_ = dynsight.tica.many_body_tica(
+            relax_times, coeffs, tica_data = dynsight.tica.many_body_tica(
                 random_array, lag_time=10, tica_dim=3)
-
-        .. testcode:: tica1-test
-            :hide:
-
-            assert np.isclose(relax_times[0], 3.104290041516281)
-
     """
     *_, n_dim = data.shape
+
+    if TICA is None:
+        msg = "Please install deeptime using pip or conda."
+        raise ModuleNotFoundError(msg)
 
     tica = TICA(lagtime=lag_time, dim=tica_dim)
     full_dataset = data.reshape(-1, n_dim)
@@ -75,6 +77,6 @@ def many_body_tica(
 
     eigenvectors = koopman_model.instantaneous_coefficients
 
-    tica_soap = np.array([tica.transform(atom) for atom in data])
+    tica_data = np.array([tica.transform(atom) for atom in data])
 
-    return relax_times, eigenvectors[:tica_dim], tica_soap
+    return relax_times, eigenvectors[:tica_dim], tica_data

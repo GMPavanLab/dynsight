@@ -70,6 +70,14 @@ Old versions :mod:`dynsight` used :mod:`cpctools` for SOAP calculations, if you 
 
   $ pip install cpctools
 
+If you want to use the :mod:`dynsight.tica` module you will need to install the deeptime package. This can be done with with pip::
+
+  $ pip install deeptime
+
+or with conda::
+
+  $ conda install -c conda-forge deeptime
+
 Developer Setup
 ...............
 
