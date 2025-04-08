@@ -21,6 +21,8 @@ def many_body_tica(
     The tICA model is fitted on the entire dataset, concatenating different
     atoms one after the other. Then, with this model, the trajectories of the
     individual atoms are trnsformed individually.
+    The model is fitted using the 'kinetic_map' scaling, which is the
+    suggested one if data are subsequently clustered.
 
     This function uses the TICA module from the deeptime package; refer to
     Moritz Hoffmann et al 2022 Mach. Learn.: Sci. Technol. 3 015009.
