@@ -19,7 +19,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
       - run: pip install -e '.[dev]'
-      - run: conda install -c conda-forge deeptime -y
       - run: ruff check .
   mypy:
     runs-on: ubuntu-22.04
@@ -34,7 +33,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
       - run: pip install -e '.[dev]'
-      - run: conda install -c conda-forge deeptime -y
       - run: mypy .
   ruff-format:
     runs-on: ubuntu-22.04
@@ -49,7 +47,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
       - run: pip install -e '.[dev]'
-      - run: conda install -c conda-forge deeptime -y
       - run: ruff format --check .
   pytest:
     runs-on: ubuntu-22.04
@@ -64,7 +61,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
       - run: pip install -e '.[dev]'
-      - run: conda install -c conda-forge deeptime -y
       - run: pytest --cov=src --cov-report term-missing
   doctest:
     runs-on: ubuntu-22.04
@@ -79,5 +75,4 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
       - run: pip install -e '.[dev]'
-      - run: conda install -c conda-forge deeptime -y
       - run: make -C docs doctest
