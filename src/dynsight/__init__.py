@@ -8,6 +8,7 @@ from dynsight import (
     onion,
     soap,
     utilities,
+    vision,
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "onion",
     "soap",
     "utilities",
+    "vision",
 ]
