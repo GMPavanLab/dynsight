@@ -82,7 +82,7 @@ class Detect:
                 images_folder=training_items_path,
                 width=collage_size[0],
                 height=collage_size[1],
-                max_epeats=collage_max_repeats,
+                max_repeats=collage_max_repeats,
             )
             subset = assignements[i - 1]
             if subset == "train":
