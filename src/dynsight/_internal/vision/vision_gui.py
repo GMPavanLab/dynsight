@@ -48,10 +48,10 @@ class VisionGUI:
             width=3,
         )
         self.v_line = self.canvas.create_line(
-            x0=0,
-            y0=0,
-            x1=0,
-            y1=self.image.height(),
+            0,  # x0
+            0,  # y0
+            0,  # x1
+            self.image.height(),  # y1
             fill="blue",
             dash=(2, 2),
             width=3,
@@ -105,10 +105,10 @@ class VisionGUI:
         """Starts drawing the box on mouse press."""
         self.start_x, self.start_y = event.x, event.y
         self.current_box = self.canvas.create_rectangle(
-            x0=self.start_x,
-            y0=self.start_y,
-            x1=self.start_x,
-            y1=self.start_y,
+            self.start_x,  # x0
+            self.start_y,  # y0
+            self.start_x,  # x1
+            self.start_y,  # y1
             outline="red",
             width=3,
         )
@@ -137,44 +137,44 @@ class VisionGUI:
         """Update the box coordinates while dragging the mouse."""
         sel_x, sel_y = event.x, event.y
         self.canvas.coords(
-            tagOrId=self.current_box,
-            x1=self.start_x,
-            y1=self.start_y,
-            x2=sel_x,
-            y2=sel_y,
+            self.current_box,  # ID
+            self.start_x,  # x0
+            self.start_y,  # y0
+            sel_x,  # x1
+            sel_y,  # y1
         )
         # Sync rulers too
         self.canvas.coords(
-            tagOrId=self.h_line,
-            x1=0,
-            y1=sel_y,
-            x2=self.image.width(),
-            y2=sel_y,
+            self.h_line,  # ID
+            0,  # x0
+            sel_y,  # y0
+            self.image.width(),  # x1
+            sel_y,  # y1
         )
         self.canvas.coords(
-            tagOrId=self.v_line,
-            x1=sel_x,
-            y1=0,
-            x2=sel_x,
-            y2=self.image.height(),
+            self.v_line,  # ID
+            sel_x,  # x0
+            0,  # y0
+            sel_x,  # x1
+            self.image.height(),  # y1
         )
 
     def _follow_mouse(self, event: tk.Event) -> None:
         """Sync guide lines position with mouse movement."""
         x, y = event.x, event.y
         self.canvas.coords(
-            tagOrId=self.h_line,
-            x1=0,
-            y1=y,
-            x2=self.image.width(),
-            y2=y,
+            self.h_line,  # ID
+            0,  # x0
+            y,  # y0
+            self.image.width(),  # x1
+            y,  # y1
         )
         self.canvas.coords(
-            tagOrId=self.v_line,
-            x1=x,
-            y1=0,
-            x2=x,
-            y2=self.image.height(),
+            self.v_line,  # ID
+            x,  # x0
+            0,  # y0
+            x,  # x1
+            self.image.height(),  # y1
         )
 
     # Button functions
