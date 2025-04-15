@@ -36,7 +36,7 @@ class VisionGUI:
             cursor="crosshair",
         )
         self.canvas.grid(row=0, column=0, sticky="nsew")
-        self.canvas.create_image(x=0, y=0, anchor=tk.NW, image=self.image)
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.image)
         # Rulers
         self.h_line = self.canvas.create_line(
             x0=0,
