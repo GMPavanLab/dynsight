@@ -95,10 +95,10 @@ class VisionGUI:
         self.boxes = []
 
         # Mouse bindings
-        self.canvas.bind("<Button-1>", self._on_click_press())
-        self.canvas.bind("<ButtonRelease-1>", self._on_click_release())
-        self.canvas.bind("<B1-Motion>", self._on_mouse_drag())
-        self.canvas.bind("<Motion>", self._follow_mouse())
+        self.canvas.bind("<Button-1>", self._on_click_press)
+        self.canvas.bind("<ButtonRelease-1>", self._on_click_release)
+        self.canvas.bind("<B1-Motion>", self._on_mouse_drag)
+        self.canvas.bind("<Motion>", self._follow_mouse)
 
     # Mouse functions
     def _on_click_press(self, event: tk.Event) -> None:
