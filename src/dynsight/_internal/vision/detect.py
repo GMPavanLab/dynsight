@@ -33,7 +33,7 @@ class Detect:
     ) -> None:
         if sample_from == "gui":
             if reference_img_path is None:
-                reference_img_path = self.frames_dir / "0.png"
+                reference_img_path = self.frames_dir / "0.jpg"
             root = tk.Tk()
             VisionGUI(
                 master=root,
