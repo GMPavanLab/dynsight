@@ -67,7 +67,7 @@ class Detect:
             labels_train_dir,
             labels_val_dir,
         ]:
-            d.mkdir(exist_ok=True)
+            d.mkdir(exist_ok=True, parents=True)
 
         num_val = int(dataset_dimension * validation_set_fraction)
         num_train = dataset_dimension - num_val
