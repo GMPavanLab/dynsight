@@ -39,10 +39,10 @@ class VisionGUI:
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.image)
         # Rulers
         self.h_line = self.canvas.create_line(
-            x0=0,
-            y0=0,
-            x1=self.image.width(),
-            y1=0,
+            0,  # x0
+            0,  # y0
+            self.image.width(),  # x1
+            0,  # y1
             fill="blue",
             dash=(2, 2),
             width=3,
