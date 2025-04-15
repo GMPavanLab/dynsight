@@ -31,7 +31,7 @@ class Video:
             if not ret:
                 break
             self.frames.append(frame)
-            frame_filename = frames_dir / f"{frame_idx}.jpg"
+            frame_filename = frames_dir / f"{frame_idx}.png"
             cv2.imwrite(str(frame_filename), frame)
             frame_idx += 1
         capture.release()
