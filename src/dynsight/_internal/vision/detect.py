@@ -98,7 +98,7 @@ class Detect:
                 for line in label_lines:
                     f.write(line + "\n")
             # YAML file
-            yaml_file_name = self.project_folder / "synthetic_dataset.yaml"
+            yaml_file_name = self.project_folder / "training_options.yaml"
             yaml_config_data = {
                 "path": "synthetic_dataset",
                 "train": "images/train",
