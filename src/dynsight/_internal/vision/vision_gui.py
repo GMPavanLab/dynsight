@@ -180,12 +180,13 @@ class VisionGUI:
     # Button functions
     def _submit(self) -> None:
         """Save the cropped images."""
-        self.destination_folder.mkdir(exist_ok=True)
+        cropped_img_folder = self.destination_folder / "training_items"
+        cropped_img_folder.mkdir(exist_ok=True)
         pil_image = Image.open(self.image_path)
         for i, box in enumerate(self.boxes):
             abs_coords = box["abs_coords"]
             cropped_image = pil_image.crop(abs_coords)
-            save_path = self.destination_folder / f"training_items/{i}.png"
+            save_path = cropped_img_folder / f"{i}.png"
             cropped_image.save(save_path)
         self.master.quit()
 

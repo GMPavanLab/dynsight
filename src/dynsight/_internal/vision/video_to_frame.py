@@ -17,7 +17,7 @@ class Video:
     frames: list[np.ndarray] = field(default_factory=list)
 
     def extract_frames(self, working_dir: pathlib.Path) -> list[np.ndarray]:
-        frames_dir = working_dir / "Frames"
+        frames_dir = working_dir / "frames"
         frames_dir.mkdir(exist_ok=True)
         capture = cv2.VideoCapture(str(self.video_path))
         if not capture.isOpened():

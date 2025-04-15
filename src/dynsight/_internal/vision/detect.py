@@ -18,7 +18,7 @@ class Detect:
         project_folder: pathlib.Path = Path("output_folder"),
     ) -> None:
         self.project_folder = project_folder
-        self.frames_dir = project_folder / "Frames"
+        self.frames_dir = project_folder / "frames"
         if not (self.frames_dir.exists() and self.frames_dir.is_dir()):
             input_video.extract_frames(project_folder)
 
