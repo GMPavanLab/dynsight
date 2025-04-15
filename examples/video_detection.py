@@ -20,7 +20,7 @@ def main() -> None:
     input_video = Path("video.mp4")
     frames = dynsight.vision.Video(input_video)
     output_folder = Path("output_folder")
-    output_folder.mkdir(exist_ok="True")
+    output_folder.mkdir(exist_ok=True)
 
     # Check if data synthesised exists.
     if (

@@ -6,6 +6,7 @@ import tkinter as tk
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
+import yaml
 from PIL import Image
 
 from .vision_gui import VisionGUI
@@ -96,6 +97,17 @@ class Detect:
             with label_save_path.open("w") as f:
                 for line in label_lines:
                     f.write(line + "\n")
+            # YAML file
+            yaml_file_name = self.project_folder / "synthetic_dataset.yaml"
+            yaml_config_data = {
+                "path": "synthetic_dataset",
+                "train": "images/train",
+                "val": "images/val",
+                "nc": 1,
+                "names": ["obj"],
+            }
+            with Path.open(yaml_file_name, "w") as file:
+                yaml.dump(yaml_config_data, file, sort_keys=False)
 
     def _create_collage(
         self,
