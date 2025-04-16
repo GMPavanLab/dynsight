@@ -132,6 +132,13 @@ class Detect:
             device=device,
         )
 
+    def predict(
+        self,
+        model_path: str | pathlib.Path,
+    ) -> None:
+        model = YOLO(model_path)
+        model.predict(source=self.frames_dir / "0.png")
+
     def _create_collage(
         self,
         images_folder: pathlib.Path,
