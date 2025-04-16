@@ -174,7 +174,7 @@ class Detect:
             batch_size=batch_size,
             workers=workers,
             device=device,
-            name=guess_model_name,
+            training_name=guess_model_name,
         )
         current_model = (
             self.project_folder
