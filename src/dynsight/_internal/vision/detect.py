@@ -142,7 +142,7 @@ class Detect:
             project=self.project_folder,
             source=self.frames_dir / "0.png",
             augment=True,
-            line_width=1,
+            line_width=None,
             save=True,
             show_labels=False,
             save_txt=True,
