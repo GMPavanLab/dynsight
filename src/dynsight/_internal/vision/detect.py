@@ -135,9 +135,21 @@ class Detect:
     def predict(
         self,
         model_path: str | pathlib.Path,
+        detections_iou: float = 0.1,
     ) -> None:
         model = YOLO(model_path)
-        model.predict(source=self.frames_dir / "0.png", save=True)
+        model.predict(
+            project=self.project_folder,
+            source=self.frames_dir / "0.png",
+            augment=True,
+            line_width=1,
+            save=True,
+            show_labels=False,
+            save_txt=True,
+            save_conf=True,
+            iou=detections_iou,
+            max_det=20000,
+        )
 
     def _create_collage(
         self,
