@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Literal
 
 import yaml
 from PIL import Image
+from ultralytics import YOLO
 
 from .vision_gui import VisionGUI
 
@@ -25,10 +26,10 @@ class Detect:
         self.frames_dir = project_folder / "frames"
         if not (self.frames_dir.exists() and self.frames_dir.is_dir()):
             input_video.extract_frames(project_folder)
+        self.video_size = input_video.resolution()
 
     def synthesize(
         self,
-        n_epochs: int = 2,
         dataset_dimension: int = 1000,
         reference_img_path: None | pathlib.Path = None,
         validation_set_fraction: float = 0.2,
@@ -108,6 +109,28 @@ class Detect:
             }
             with Path.open(yaml_file_name, "w") as file:
                 yaml.dump(yaml_config_data, file, sort_keys=False)
+
+    def train(
+        self,
+        yaml_file: pathlib.Path,
+        initial_model: str | pathlib.Path = "yolo12x.pt",
+        training_epochs: int = 100,
+        training_patience: int = 100,
+        batch_size: int = 16,
+        workers: int = 8,
+        device: int | str | list[int] | None = None,
+    ) -> None:
+        model = YOLO(initial_model)
+        model.train(
+            data=yaml_file,
+            epochs=training_epochs,
+            patience=training_patience,
+            batch=batch_size,
+            imgsz=self.video_size,
+            workers=workers,
+            project=self.project_folder,
+            device=device,
+        )
 
     def _create_collage(
         self,

@@ -16,6 +16,15 @@ class Video:
     video_path: pathlib.Path
     frames: list[np.ndarray] = field(default_factory=list)
 
+    def resolution(self) -> tuple[int, int]:
+        capture = cv2.VideoCapture(str(self.video_path))
+        if not capture.isOpened():
+            msg = f"Impossible to load the video: {self.video_path}"
+            raise ValueError(msg)
+        width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        return (width, height)
+
     def extract_frames(self, working_dir: pathlib.Path) -> list[np.ndarray]:
         frames_dir = working_dir / "frames"
         frames_dir.mkdir(exist_ok=True)

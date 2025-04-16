@@ -34,7 +34,6 @@ def main() -> None:
         project_folder=output_folder,
     )
     dataset = detection.synthesize(
-        n_epochs=2,
         dataset_dimension=1000,
         reference_img="0.png",
         training_set_fraction=0.7,
