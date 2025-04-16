@@ -114,6 +114,7 @@ class Detect:
         self,
         yaml_file: pathlib.Path,
         initial_model: str | pathlib.Path = "yolo12x.pt",
+        training_name: str | None = None,
         training_epochs: int = 100,
         training_patience: int = 100,
         batch_size: int = 16,
@@ -129,6 +130,7 @@ class Detect:
             imgsz=self.video_size,
             workers=workers,
             project=self.project_folder,
+            name=training_name,
             device=device,
         )
 
@@ -136,19 +138,50 @@ class Detect:
         self,
         model_path: str | pathlib.Path,
         detections_iou: float = 0.1,
+        prediction_name: str = "prediction",
     ) -> None:
         model = YOLO(model_path)
         model.predict(
             project=self.project_folder,
             source=self.frames_dir / "0.png",
+            name=prediction_name,
             augment=True,
-            line_width=None,
+            line_width=2,
             save=True,
             show_labels=False,
             save_txt=True,
             save_conf=True,
             iou=detections_iou,
             max_det=20000,
+        )
+
+    def fit(
+        self,
+        initial_dataset: pathlib.Path,
+        initial_model: str | pathlib.Path = "yolo12x.pt",
+        training_epochs: int = 100,
+        training_patience: int = 100,
+        batch_size: int = 16,
+        workers: int = 8,
+        device: int | str | list[int] | None = None,
+    ) -> None:
+        current_dataset = initial_dataset
+        guess_model_name = "v0"
+        self.train(
+            yaml_file=current_dataset,
+            initial_model=initial_model,
+            training_epochs=2,
+            batch_size=batch_size,
+            workers=workers,
+            device=device,
+            name=guess_model_name,
+        )
+        current_model = (
+            self.project_folder
+            / "train"
+            / guess_model_name
+            / "weights"
+            / "best.pt"
         )
 
     def _create_collage(
