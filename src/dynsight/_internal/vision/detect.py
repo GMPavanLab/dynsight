@@ -137,7 +137,7 @@ class Detect:
         model_path: str | pathlib.Path,
     ) -> None:
         model = YOLO(model_path)
-        model.predict(source=self.frames_dir / "0.png")
+        model.predict(source=self.frames_dir / "0.png", save=True)
 
     def _create_collage(
         self,
