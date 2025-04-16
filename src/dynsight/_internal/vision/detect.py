@@ -129,7 +129,7 @@ class Detect:
             batch=batch_size,
             imgsz=self.video_size,
             workers=workers,
-            project=self.project_folder,
+            project=self.project_folder / "models",
             name=training_name,
             device=device,
         )
