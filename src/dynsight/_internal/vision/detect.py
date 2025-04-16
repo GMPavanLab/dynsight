@@ -101,7 +101,7 @@ class Detect:
             # YAML file
             yaml_file_name = self.project_folder / "training_options.yaml"
             yaml_config_data = {
-                "path": "synthetic_dataset",
+                "path": str(syn_dataset_path.resolve()),
                 "train": "images/train",
                 "val": "images/val",
                 "nc": 1,
