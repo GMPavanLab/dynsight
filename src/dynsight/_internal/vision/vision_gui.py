@@ -188,7 +188,7 @@ class VisionGUI:
             cropped_image = pil_image.crop(abs_coords)
             save_path = cropped_img_folder / f"{i}.png"
             cropped_image.save(save_path)
-        self.master.quit()
+        self.master.destroy()
 
     def _undo(self) -> None:
         """Remove the last drawn box."""
@@ -198,4 +198,4 @@ class VisionGUI:
 
     def _close(self) -> None:
         """Close without saving."""
-        self.master.quit()
+        self.master.destroy()
