@@ -148,14 +148,14 @@ def test_emulate_lens(
     assert len(mydentot) == len(den_tot)
 
     # lens Value
-    for atomdata, wantedatomdata in zip(mynconttot, ncont_tot):
-        assert_array_almost_equal(atomdata, wantedatomdata)
+    for atomdata1, wantedatomdata1 in zip(mynconttot, ncont_tot):
+        assert_array_almost_equal(atomdata1, wantedatomdata1)
     # NN count
-    for atomdata, wantedatomdata in zip(mynntot, nn_tot):
-        assert_array_almost_equal(atomdata, wantedatomdata)
+    for atomdata2, wantedatomdata2 in zip(mynntot, nn_tot):
+        assert_array_almost_equal(atomdata2, wantedatomdata2)
     # LENS numerator
-    for atomdata, wantedatomdata in zip(mynumtot, num_tot):
-        assert_array_almost_equal(atomdata, wantedatomdata)
+    for atomdata3, wantedatomdata3 in zip(mynumtot, num_tot):
+        assert_array_almost_equal(atomdata3, wantedatomdata3)
     # LENS denominator
-    for atomdata, wantedatomdata in zip(mydentot, den_tot):
-        assert_array_almost_equal(atomdata, wantedatomdata)
+    for atomdata4, wantedatomdata4 in zip(mydentot, den_tot):
+        assert_array_almost_equal(atomdata4, wantedatomdata4)
