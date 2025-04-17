@@ -11,7 +11,7 @@ maintainers = [
 ]
 
 dependencies = [
-    "numpy<=2.1",
+    "numpy",
     "dscribe",
     "tropea-clustering",
     "MDAnalysis",
@@ -110,6 +110,5 @@ module = [
     'tropea_clustering.*',
     'h5py.*',
     'SOAPify.*',
-    'deeptime.*'
 ]
 ignore_missing_imports = true
