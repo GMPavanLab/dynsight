@@ -16,6 +16,15 @@ class Video:
     video_path: pathlib.Path
     frames: list[np.ndarray] = field(default_factory=list)
 
+    def count_frame(self) -> int:
+        capture = cv2.VideoCapture(str(self.video_path))
+        if not capture.isOpened():
+            msg = f"Impossible to load the video: {self.video_path}"
+            raise ValueError(msg)
+        count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        capture.release()
+        return count
+
     def resolution(self) -> tuple[int, int]:
         capture = cv2.VideoCapture(str(self.video_path))
         if not capture.isOpened():
