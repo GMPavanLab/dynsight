@@ -168,12 +168,12 @@ def spatialaverage(
     two_dim = 2
     three_dim = 3
     if descriptor_array.ndim == two_dim:
-        sp_array = np.zeros(
+        sp_array_2 = np.zeros(
             (descriptor_array.shape[0], descriptor_array.shape[1])
         )
         is_vector = False
     elif descriptor_array.ndim == three_dim:
-        sp_array = np.zeros(
+        sp_array_3 = np.zeros(
             (
                 descriptor_array.shape[0],
                 descriptor_array.shape[1],
@@ -198,9 +198,12 @@ def spatialaverage(
     results = pool.map(processframe, args)
     pool.close()
     pool.join()
+
+    if is_vector:
+        for frame, sp_array_frame in results:
+            sp_array_3[:, frame, :] = sp_array_frame
+        return sp_array_3
+
     for frame, sp_array_frame in results:
-        if is_vector:
-            sp_array[:, frame, :] = sp_array_frame
-        else:
-            sp_array[:, frame] = sp_array_frame
-    return sp_array
+        sp_array_2[:, frame] = sp_array_frame
+    return sp_array_2
