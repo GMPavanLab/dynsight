@@ -48,14 +48,15 @@ def processframe(
             if len(value) == 0:
                 continue
             sp_array_frame[key, :] = np.mean(array[value, frame, :], axis=0)
-    else:
-        sp_array_frame = np.zeros(array.shape[0])
-        for key, value in sp_dict.items():
-            if len(value) == 0:
-                continue
-            sp_array_frame[key] = np.mean(array[value, frame])
+        return frame, sp_array_frame
 
-    return frame, sp_array_frame
+    sp_array_frame_1 = np.zeros(array.shape[0])
+    for key, value in sp_dict.items():
+        if len(value) == 0:
+            continue
+        sp_array_frame_1[key] = np.mean(array[value, frame])
+
+    return frame, sp_array_frame_1
 
 
 def spatialaverage(
