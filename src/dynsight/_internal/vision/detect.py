@@ -27,6 +27,7 @@ class Detect:
         if not (self.frames_dir.exists() and self.frames_dir.is_dir()):
             input_video.extract_frames(project_folder)
         self.video_size = input_video.resolution()
+        self.n_frames = input_video.count_frame()
 
     def synthesize(
         self,
@@ -185,7 +186,8 @@ class Detect:
             / "best.pt"
         )
         prediction_number = 0
-        for frame_file in self.frames_dir.glob("*.png"):
+        for f in range(self.n_frames):
+            frame_file = self.frames_dir / f"{f}.png"
             current_model.predict(
                 source=frame_file,
                 imgsz=self.video_size,
