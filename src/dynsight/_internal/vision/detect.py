@@ -197,7 +197,7 @@ class Detect:
                 name=f"attempt_{prediction_number}",
                 iou=0.1,
                 max_det=20000,
-                project="predictions",
+                project=self.project_folder / "predictions",
                 line_width=2,
             )
 
