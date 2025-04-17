@@ -165,10 +165,6 @@ class Detect:
         workers: int = 8,
         device: int | str | list[int] | None = None,
     ) -> None:
-        # Fixing backend
-        import matplotlib
-
-        matplotlib.use("Agg")
         current_dataset = initial_dataset
         guess_model_name = "v0"
         self.train(
@@ -179,6 +175,7 @@ class Detect:
             workers=workers,
             device=device,
             training_name=guess_model_name,
+            plots=False,
         )
         current_model = YOLO(
             self.project_folder
