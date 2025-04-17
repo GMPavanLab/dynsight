@@ -28,7 +28,7 @@ def test_output_files(original_wd: Path) -> None:  # noqa: ARG001
     rng = np.random.default_rng(12345)
 
     random_data = rng.random(100)
-    r_fact = 0.5 * np.std(random_data)
+    r_fact = float(0.5 * np.std(random_data))
 
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
