@@ -176,13 +176,29 @@ class Detect:
             device=device,
             training_name=guess_model_name,
         )
-        current_model = (
+        current_model = YOLO(
             self.project_folder
             / "train"
             / guess_model_name
             / "weights"
             / "best.pt"
         )
+        prediction_number = 0
+        for frame_file in self.frames_dir.glob("*.png"):
+            current_model.predict(
+                source=self.frames_dir / frame_file,
+                imgsz=self.video_size,
+                augment=True,
+                save=True,
+                save_txt=True,
+                save_conf=True,
+                show_label=False,
+                name=f"attempt_{prediction_number}",
+                iou=0.1,
+                max_det=20000,
+                project="predictions",
+                line_width=2,
+            )
 
     def _create_collage(
         self,
