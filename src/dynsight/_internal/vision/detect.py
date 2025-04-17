@@ -178,7 +178,7 @@ class Detect:
         )
         current_model = YOLO(
             self.project_folder
-            / "train"
+            / "models"
             / guess_model_name
             / "weights"
             / "best.pt"
