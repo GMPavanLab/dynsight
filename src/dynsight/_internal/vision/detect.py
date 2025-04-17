@@ -132,6 +132,7 @@ class Detect:
             project=self.project_folder / "models",
             name=training_name,
             device=device,
+            plots=False,
         )
 
     def predict(
@@ -175,7 +176,6 @@ class Detect:
             workers=workers,
             device=device,
             training_name=guess_model_name,
-            plots=False,
         )
         current_model = YOLO(
             self.project_folder
