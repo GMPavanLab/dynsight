@@ -199,6 +199,7 @@ class Detect:
                 max_det=20000,
                 project=self.project_folder / "predictions",
                 line_width=2,
+                exist_ok=True,
             )
 
     def _create_collage(
