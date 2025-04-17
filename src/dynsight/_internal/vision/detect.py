@@ -187,7 +187,7 @@ class Detect:
         prediction_number = 0
         for frame_file in self.frames_dir.glob("*.png"):
             current_model.predict(
-                source=self.frames_dir / frame_file,
+                source=frame_file,
                 imgsz=self.video_size,
                 augment=True,
                 save=True,
