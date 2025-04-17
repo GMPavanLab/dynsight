@@ -193,7 +193,7 @@ class Detect:
                 save=True,
                 save_txt=True,
                 save_conf=True,
-                show_label=False,
+                show_labels=False,
                 name=f"attempt_{prediction_number}",
                 iou=0.1,
                 max_det=20000,
