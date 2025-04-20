@@ -18,8 +18,9 @@ def main() -> None:
     # We can do spatial average on the computed LENS
     water_lens.spatial_average(water_trj)
 
-    # And we can perform onion-clustering
-    water_lens.get_onion(delta_t="all")
+    # And we can perform onion-clustering. Here there should be some way to
+    # do all the calculations in parallel using 'yield' in the method...
+    water_lens.get_onion(delta_t=10)
 
     # Save the Insight with all the results
     water_lens.save()

@@ -18,7 +18,7 @@ class Insight:
     def spatial_average(self, trajectory: Trj) -> None:
         pass
 
-    def get_onion(self, delta_t: str) -> None:
+    def get_onion(self, delta_t: int) -> None:
         pass
 
     def save(self) -> None:
