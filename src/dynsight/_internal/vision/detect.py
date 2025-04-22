@@ -206,9 +206,9 @@ class Detect:
                 exist_ok=True,
             )
             n_detection = len(prediction)
-            xywh = prediction.boxes.xywh.cpu().numpy()
-            conf = prediction.boxes.conf.cpu().numpy()
-            cls = prediction.boxes.cls.cpu().numpy()
+            xywh = prediction[0].boxes.xywh.cpu().numpy()
+            conf = prediction[0].boxes.conf.cpu().numpy()
+            cls = prediction[0].boxes.cls.cpu().numpy()
 
             for i in range(n_detection):
                 x, y, w, h = xywh[i]
