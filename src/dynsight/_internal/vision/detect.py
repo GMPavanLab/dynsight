@@ -233,6 +233,7 @@ class Detect:
             [d["height"] for d in detection_results],
             dtype=float,
         )
+        """
         outliers_plt_folder = (
             self.project_folder
             / "predictions"
@@ -261,6 +262,7 @@ class Detect:
             and (det["height"] not in out_height)
         ]
         detection_results = filtered_detections
+        """
         self._build_dataset(
             detection_results=detection_results,
             name=f"dataset_{prediction_number}",
