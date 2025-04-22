@@ -222,6 +222,10 @@ class Detect:
                         "confidence": float(conf[i]),
                     }
                 )
+            widths = [d["width"] for d in detection_results]
+            heights = [d["height"] for d in detection_results]
+            print(widths)
+            print(heights)
 
     def _create_collage(
         self,
