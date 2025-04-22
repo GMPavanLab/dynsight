@@ -186,9 +186,10 @@ class Detect:
             / "best.pt"
         )
         prediction_number = 0
+        detection_results = []
         for f in range(self.n_frames):
             frame_file = self.frames_dir / f"{f}.png"
-            current_model.predict(
+            prediction = current_model.predict(
                 source=frame_file,
                 imgsz=self.video_size,
                 augment=True,
@@ -203,6 +204,24 @@ class Detect:
                 line_width=2,
                 exist_ok=True,
             )
+            n_detection = len(prediction)
+            xywh = prediction.boxes.xywh.cpu().numpy()
+            conf = prediction.boxes.conf.cpu().numpy()
+            cls = prediction.boxes.cls.cpu().numpy()
+
+            for i in range(n_detection):
+                x, y, w, h = xywh[i]
+                detection_results.append(
+                    {
+                        "frame": f,
+                        "class_id": int(cls[i]),
+                        "center_x": float(x),
+                        "center_y": float(y),
+                        "width": float(w),
+                        "height": float(h),
+                        "confidence": float(conf[i]),
+                    }
+                )
 
     def _create_collage(
         self,
