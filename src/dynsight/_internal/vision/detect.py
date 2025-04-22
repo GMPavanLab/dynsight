@@ -192,7 +192,7 @@ class Detect:
         )
         prediction_number = 0
         detection_results = []
-        for f in range(self.n_frames):
+        for f in range(0, self.n_frames, 20):  # TEMPORARY
             frame_file = self.frames_dir / f"{f}.png"
             prediction = current_model.predict(
                 source=frame_file,
