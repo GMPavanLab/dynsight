@@ -6,8 +6,12 @@ import tkinter as tk
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
+import matplotlib.pyplot as plt
+import numpy as np
 import yaml
 from PIL import Image
+from scipy.stats import norm
+from scpiy.optimize import curve_fit
 from ultralytics import YOLO
 
 from .vision_gui import VisionGUI
@@ -223,10 +227,30 @@ class Detect:
                         "confidence": float(conf[i]),
                     }
                 )
-            widths = [d["width"] for d in detection_results]
-            heights = [d["height"] for d in detection_results]
-            print(widths)
-            print(heights)
+        widths = np.array([d["width"] for d in detection_results], dtype=float)
+        heights = np.array(
+            [d["height"] for d in detection_results],
+            dtype=float,
+        )
+        outliers_plt_folder = (
+            self.project_folder
+            / "predictions"
+            / f"attempt_{prediction_number}"
+            / "outliers"
+        )
+        outliers_plt_folder.mkdir(exist_ok=True)
+        out_width = _find_outliers(
+            distribution=widths,
+            save_path=outliers_plt_folder,
+            fig_name="width",
+        )
+        out_height = _find_outliers(
+            distribution=heights,
+            save_path=outliers_plt_folder,
+            fig_name="height",
+        )
+        print(out_width)
+        print(out_height)
 
     def _create_collage(
         self,
@@ -294,3 +318,80 @@ class Detect:
             if not placed:
                 break
         return collage, label_lines
+
+
+def _find_outliers(
+    distribution: np.ndarray,
+    save_path: pathlib.Path,
+    fig_name: str,
+    thr: float = 1e-5,
+) -> np.ndarray:
+    def _gaussian(
+        x: np.ndarray, mu: float, sigma: float, amplitude: float
+    ) -> np.ndarray:
+        return amplitude * norm.pdf(x, mu, sigma)
+
+    # Compute histogram and bin centers
+    hist, bin_edges = np.histogram(distribution, bins="auto", density=True)
+    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+    # Fit the Gaussian curve to the histogram data
+    popt, _ = curve_fit(
+        _gaussian,
+        bin_centers,
+        hist,
+        p0=[np.mean(distribution), np.std(distribution), np.max(hist)],
+    )
+    mu, sigma, amplitude = popt
+
+    # Generate fitted Gaussian curve for plotting
+    x = np.linspace(bin_edges[0], bin_edges[-1], 1000)
+    fitted_curve = _gaussian(x, mu, sigma, amplitude)
+
+    # Calculate PDF threshold-based cutoffs
+    base_pdf = amplitude / (sigma * np.sqrt(2 * np.pi))
+    x_threshold_min = mu - np.sqrt(-2 * sigma**2 * np.log(thr / base_pdf))
+    x_threshold_max = mu + np.sqrt(-2 * sigma**2 * np.log(thr / base_pdf))
+
+    # Identify outliers using numpy boolean indexing
+    outliers: np.ndarray = distribution[
+        (distribution < x_threshold_min) | (distribution > x_threshold_max)
+    ]
+
+    # Plot histogram, fitted curve, and threshold lines
+    plt.hist(
+        distribution,
+        bins="auto",
+        density=True,
+        alpha=0.6,
+        color="g",
+        label="Histogram",
+    )
+    plt.plot(
+        x,
+        fitted_curve,
+        "k-",
+        linewidth=2,
+        label=f"Gaussian fit  μ={mu:.2f}, σ={sigma:.2f}",
+    )
+    plt.axvline(
+        x_threshold_min,
+        color="r",
+        linestyle="--",
+        label=f"Threshold Min = {x_threshold_min:.2f}",
+    )
+    plt.axvline(
+        x_threshold_max,
+        color="b",
+        linestyle="--",
+        label=f"Threshold Max = {x_threshold_max:.2f}",
+    )
+    plt.legend(loc="best")
+    plt.title("Histogram with Gaussian Fit and Thresholds")
+    plt.xlabel("Values")
+    plt.ylabel("Density")
+    plt.tight_layout()
+    plt.savefig(save_path / fig_name)
+    plt.close()
+
+    return outliers
