@@ -169,6 +169,7 @@ class Detect:
     ) -> None:
         current_dataset = initial_dataset
         guess_model_name = "v0"
+        """
         self.train(
             yaml_file=current_dataset,
             initial_model=initial_model,
@@ -177,7 +178,7 @@ class Detect:
             workers=workers,
             device=device,
             training_name=guess_model_name,
-        )
+        )"""
         current_model = YOLO(
             self.project_folder
             / "models"
