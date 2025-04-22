@@ -265,7 +265,7 @@ class Detect:
         """
         self._build_dataset(
             detection_results=detection_results,
-            name=f"dataset_{prediction_number}",
+            dataset_name=f"dataset_{prediction_number}",
         )
 
     def _build_dataset(
