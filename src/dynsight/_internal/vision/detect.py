@@ -324,7 +324,7 @@ class Detect:
                     w = det["width"]
                     h = det["height"]
                     cls = det["class_id"]
-                    # Normalizza
+
                     x_ctr_n = x_ctr / img_w
                     y_ctr_n = y_ctr / img_h
                     w_n = w / img_w
