@@ -210,24 +210,26 @@ class Detect:
                 line_width=2,
                 exist_ok=True,
             )
-            n_detection = len(prediction)
-            xywh = prediction[0].boxes.xywh.cpu().numpy()
-            conf = prediction[0].boxes.conf.cpu().numpy()
-            cls = prediction[0].boxes.cls.cpu().numpy()
+            # Assicurati che prediction[0].boxes non sia vuoto
+            if prediction and prediction[0].boxes:
+                xywh = prediction[0].boxes.xywh.cpu().numpy()
+                conf = prediction[0].boxes.conf.cpu().numpy()
+                cls = prediction[0].boxes.cls.cpu().numpy()
+                n_detection = len(xywh)
 
-            for i in range(n_detection):
-                x, y, w, h = xywh[i]
-                detection_results.append(
-                    {
-                        "frame": f,
-                        "class_id": int(cls[i]),
-                        "center_x": float(x),
-                        "center_y": float(y),
-                        "width": float(w),
-                        "height": float(h),
-                        "confidence": float(conf[i]),
-                    }
-                )
+                for i in range(n_detection):
+                    x, y, w, h = xywh[i]
+                    detection_results.append(
+                        {
+                            "frame": f,
+                            "class_id": int(cls[i]),
+                            "center_x": float(x),
+                            "center_y": float(y),
+                            "width": float(w),
+                            "height": float(h),
+                            "confidence": float(conf[i]),
+                        }
+                    )
         """
         widths = np.array([d["width"] for d in detection_results], dtype=float)
         heights = np.array(
