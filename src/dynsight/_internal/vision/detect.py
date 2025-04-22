@@ -230,7 +230,6 @@ class Detect:
                             "confidence": float(conf[i]),
                         }
                     )
-        """
         widths = np.array([d["width"] for d in detection_results], dtype=float)
         heights = np.array(
             [d["height"] for d in detection_results],
@@ -264,7 +263,6 @@ class Detect:
             and (det["height"] not in out_height)
         ]
         detection_results = filtered_detections
-        """
         print(detection_results)
         self._build_dataset(
             detection_results=detection_results,
