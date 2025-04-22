@@ -228,12 +228,12 @@ class Detect:
                         "confidence": float(conf[i]),
                     }
                 )
+        """
         widths = np.array([d["width"] for d in detection_results], dtype=float)
         heights = np.array(
             [d["height"] for d in detection_results],
             dtype=float,
         )
-        """
         outliers_plt_folder = (
             self.project_folder
             / "predictions"
@@ -263,6 +263,7 @@ class Detect:
         ]
         detection_results = filtered_detections
         """
+        print(detection_results)
         self._build_dataset(
             detection_results=detection_results,
             dataset_name=f"dataset_{prediction_number}",
@@ -324,7 +325,7 @@ class Detect:
                     w = det["width"]
                     h = det["height"]
                     cls = det["class_id"]
-
+                    # Normalizza
                     x_ctr_n = x_ctr / img_w
                     y_ctr_n = y_ctr / img_h
                     w_n = w / img_w
