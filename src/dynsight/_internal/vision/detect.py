@@ -275,9 +275,9 @@ class Detect:
             / "train_datasets"
             / f"dataset_{prediction_number}"
         )
-        self._add_dataset_to_yaml(train_dataset_path)
+        self._add_or_create_yaml(train_dataset_path)
 
-    def _add_or_create_yaml(self, new_dataset_path: Path):
+    def _add_or_create_yaml(self, new_dataset_path: Path) -> None:
         yaml_path = Path(self.yaml_file)
 
         # Percorsi relativi all'interno di ogni dataset
