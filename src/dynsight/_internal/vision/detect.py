@@ -378,7 +378,7 @@ class Detect:
             self._add_or_create_yaml(train_dataset_path)
 
     def _remove_old_dataset(self) -> None:
-        yaml_path = Path(self.yaml_file_name)
+        yaml_path = self.yaml_file
 
         if not yaml_path.exists():
             return  # Il file YAML non esiste, nulla da fare
