@@ -157,7 +157,7 @@ class Detect:
         self,
         initial_dataset: pathlib.Path,
         initial_model: str | pathlib.Path = "yolo12x.pt",
-        max_sessions: int = 1,
+        max_sessions: int = 2,
         training_epochs: int = 2,
         training_patience: int = 2,
         batch_size: int = 16,
@@ -369,6 +369,40 @@ class Detect:
                 detection_results=detection_results,
                 dataset_name=f"dataset_{prediction_number}",
             )
+            self._remove_old_dataset()
+            train_dataset_path = (
+                self.project_folder
+                / "train_datasets"
+                / f"dataset_{prediction_number}"
+            )
+            self._add_or_create_yaml(train_dataset_path)
+
+    def _remove_old_dataset(self) -> None:
+        yaml_path = Path(self.yaml_file_name)
+
+        if not yaml_path.exists():
+            return  # Il file YAML non esiste, nulla da fare
+
+        with yaml_path.open("r") as f:
+            cfg = yaml.safe_load(f) or {}
+
+        # Verifica e normalizza i campi 'train' e 'val'
+        for key in ("train", "val"):
+            if key not in cfg:
+                return  # Il campo non è presente, nulla da fare
+            if isinstance(cfg[key], str):
+                cfg[key] = [cfg[key]]
+            elif not isinstance(cfg[key], list):
+                return  # Il campo non è una lista o una stringa, struttura inattesa
+
+        # Rimuove il primo elemento da 'train' e 'val' se presenti
+        for key in ("train", "val"):
+            if cfg[key]:
+                cfg[key].pop(0)
+
+        # Riscrive il file YAML aggiornato
+        with yaml_path.open("w") as f:
+            yaml.safe_dump(cfg, f, sort_keys=False)
 
     def _add_or_create_yaml(self, new_dataset_path: Path) -> None:
         yaml_path = Path(self.yaml_file)
