@@ -264,11 +264,18 @@ class Detect:
             / f"dataset_{prediction_number}"
         )
         self._add_or_create_yaml(train_dataset_path)
+        current_model_path = (
+            self.project_folder
+            / "models"
+            / guess_model_name
+            / "weights"
+            / "best.pt"
+        )
         for s in range(max_sessions):
             new_model_name = f"v{s + 1}"
             self.train(
-                yaml_file=str(self.yaml_file),
-                initial_model=current_model,
+                yaml_file=self.yaml_file,
+                initial_model=current_model_path,
                 training_epochs=training_epochs,
                 training_patience=training_patience,
                 batch_size=batch_size,
@@ -276,13 +283,14 @@ class Detect:
                 device=device,
                 training_name=new_model_name,
             )
-            current_model = YOLO(
+            current_model_path = (
                 self.project_folder
                 / "models"
                 / new_model_name
                 / "weights"
                 / "best.pt"
             )
+            current_model = YOLO(current_model_path)
             prediction_number += 1
             detection_results = []
             for f in range(0, self.n_frames, 50):  # TEMP
