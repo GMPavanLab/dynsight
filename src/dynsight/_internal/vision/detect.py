@@ -277,61 +277,60 @@ class Detect:
         )
         self._add_dataset_to_yaml(train_dataset_path)
 
+    def _add_or_create_yaml(self, new_dataset_path: Path):
+        yaml_path = Path(self.yaml_file)
 
-def _add_or_create_yaml(self, new_dataset_path: Path):
-    yaml_path = Path(self.yaml_file)
+        # Percorsi relativi all'interno di ogni dataset
+        train_rel = "images/train"
+        val_rel = "images/val"
 
-    # Percorsi relativi all'interno di ogni dataset
-    train_rel = "images/train"
-    val_rel = "images/val"
+        # Se il file NON esiste → inizializzazione da zero
+        if not yaml_path.exists():
+            cfg = {
+                # 'path' può restare o essere rimosso, ma per chiarezza lo togliamo
+                # perché useremo liste multiple
+                "train": [str((new_dataset_path / train_rel).resolve())],
+                "val": [str((new_dataset_path / val_rel).resolve())],
+                "nc": 1,
+                "names": ["obj"],
+            }
+        else:
+            # Carico configurazione esistente
+            with yaml_path.open("r") as f:
+                cfg = yaml.safe_load(f) or {}
 
-    # Se il file NON esiste → inizializzazione da zero
-    if not yaml_path.exists():
-        cfg = {
-            # 'path' può restare o essere rimosso, ma per chiarezza lo togliamo
-            # perché useremo liste multiple
-            "train": [str((new_dataset_path / train_rel).resolve())],
-            "val": [str((new_dataset_path / val_rel).resolve())],
-            "nc": 1,
-            "names": ["obj"],
-        }
-    else:
-        # Carico configurazione esistente
-        with yaml_path.open("r") as f:
-            cfg = yaml.safe_load(f) or {}
+            # Inizializzo i campi se mancanti
+            cfg.setdefault("train", [])
+            cfg.setdefault("val", [])
+            cfg.setdefault("nc", 1)
+            cfg.setdefault("names", ["obj"])
 
-        # Inizializzo i campi se mancanti
-        cfg.setdefault("train", [])
-        cfg.setdefault("val", [])
-        cfg.setdefault("nc", 1)
-        cfg.setdefault("names", ["obj"])
+            # Normalizzo in lista
+            if not isinstance(cfg["train"], list):
+                cfg["train"] = [cfg["train"]]
+            if not isinstance(cfg["val"], list):
+                cfg["val"] = [cfg["val"]]
 
-        # Normalizzo in lista
-        if not isinstance(cfg["train"], list):
-            cfg["train"] = [cfg["train"]]
-        if not isinstance(cfg["val"], list):
-            cfg["val"] = [cfg["val"]]
+            # Preparo i nuovi percorsi
+            train_p = str((new_dataset_path / train_rel).resolve())
+            val_p = str((new_dataset_path / val_rel).resolve())
 
-        # Preparo i nuovi percorsi
-        train_p = str((new_dataset_path / train_rel).resolve())
-        val_p = str((new_dataset_path / val_rel).resolve())
+            # Aggiungo rimuovendo duplicati
+            cfg["train"].append(train_p)
+            cfg["val"].append(val_p)
+            cfg["train"] = list(dict.fromkeys(cfg["train"]))
+            cfg["val"] = list(dict.fromkeys(cfg["val"]))
 
-        # Aggiungo rimuovendo duplicati
-        cfg["train"].append(train_p)
-        cfg["val"].append(val_p)
-        cfg["train"] = list(dict.fromkeys(cfg["train"]))
-        cfg["val"] = list(dict.fromkeys(cfg["val"]))
+            # Rimuovo 'path' singolo se presente
+            cfg.pop("path", None)
 
-        # Rimuovo 'path' singolo se presente
-        cfg.pop("path", None)
+        # Scrivo (o riscrivo) il file YAML
+        with yaml_path.open("w") as f:
+            yaml.safe_dump(cfg, f, sort_keys=False)
 
-    # Scrivo (o riscrivo) il file YAML
-    with yaml_path.open("w") as f:
-        yaml.safe_dump(cfg, f, sort_keys=False)
-
-    print(
-        f"YAML aggiornato: {len(cfg['train'])} train dirs, {len(cfg['val'])} val dirs."
-    )
+        print(
+            f"YAML aggiornato: {len(cfg['train'])} train dirs, {len(cfg['val'])} val dirs."
+        )
 
     def _build_dataset(
         self,
