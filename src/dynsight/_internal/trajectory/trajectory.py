@@ -37,18 +37,18 @@ class Insight:
         )
         return Insight(averaged_dataset, r_cut)
 
-    def get_onion(self, delta_t: int) -> ClusterInsight:
+    def get_onion(self, delta_t: int) -> OnionInsight:
         reshaped_data = dynsight.onion.helpers.reshape_from_nt(
             self.dataset, delta_t
         )
         state_list, labels = dynsight.onion.onion_uni(reshaped_data)
-        return ClusterInsight(
-            self.dataset,
-            self.r_cut,
-            delta_t,
-            state_list,
-            reshaped_data,
-            labels,
+        return OnionInsight(
+            dataset=self.dataset,
+            r_cut=self.r_cut,
+            labels=labels,
+            delta_t=delta_t,
+            state_list=state_list,
+            reshaped_data=reshaped_data,
         )
 
     def save(self, file_name: str) -> None:
@@ -61,10 +61,16 @@ class Insight:
 class ClusterInsight(Insight):
     """Contains a clustering analysis."""
 
+    labels: NDArray[np.int64]
+
+
+@dataclass
+class OnionInsight(ClusterInsight):
+    """Contains a onion-clustering analysis."""
+
     delta_t: int
     state_list: list[StateUni]
     reshaped_data: NDArray[np.float64]
-    labels: NDArray[np.int64]
 
     def plot_output(self, file_name: str) -> None:
         dynsight.onion.plot.plot_output_uni(
