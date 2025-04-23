@@ -33,7 +33,7 @@ class Detect:
             input_video.extract_frames(project_folder)
         self.video_size = input_video.resolution()
         self.n_frames = input_video.count_frame()
-        self.yaml_file_name = self.project_folder / "training_options.yaml"
+        self.yaml_file = self.project_folder / "training_options.yaml"
 
     def synthesize(
         self,
@@ -113,7 +113,7 @@ class Detect:
                 "nc": 1,
                 "names": ["obj"],
             }
-            with Path.open(self.yaml_file_name, "w") as file:
+            with Path.open(self.yaml_file, "w") as file:
                 yaml.dump(yaml_config_data, file, sort_keys=False)
 
     def train(
@@ -174,7 +174,6 @@ class Detect:
     ) -> None:
         current_dataset = initial_dataset
         guess_model_name = "v0"
-        """
         self.train(
             yaml_file=current_dataset,
             initial_model=initial_model,
@@ -183,7 +182,7 @@ class Detect:
             workers=workers,
             device=device,
             training_name=guess_model_name,
-        )"""
+        )
         current_model = YOLO(
             self.project_folder
             / "models"
@@ -273,15 +272,37 @@ class Detect:
             / "train_datasets"
             / f"dataset_{prediction_number}"
         )
-        yaml_config_data = {
-            "path": str(train_dataset_path.resolve()),
-            "train": "images/train",
-            "val": "images/val",
-            "nc": 1,
-            "names": ["obj"],
-        }
-        with Path.open(self.yaml_file_name, "w") as file:
-            yaml.dump(yaml_config_data, file, sort_keys=False)
+        self._add_dataset_to_yaml(train_dataset_path)
+
+    def _add_dataset_to_yaml(self, new_dataset_path: Path) -> None:
+        yaml_path = Path(self.yaml_file)
+
+        # 1) Carica la configurazione esistente (o fallisce se non c'è)
+        with yaml_path.open("r") as f:
+            cfg = yaml.safe_load(f)
+
+        # 2) Trasforma in lista se sono stringhe
+        if not isinstance(cfg.get("train", []), list):
+            cfg["train"] = [cfg["train"]]
+        if not isinstance(cfg.get("val", []), list):
+            cfg["val"] = [cfg["val"]]
+
+        # 3) Costruisci i percorsi completi del nuovo dataset
+        train_sub = str((new_dataset_path / "images/train").resolve())
+        val_sub = str((new_dataset_path / "images/val").resolve())
+
+        # 4) Aggiungi e rimuovi eventuali duplicati
+        cfg["train"].append(train_sub)
+        cfg["val"].append(val_sub)
+        cfg["train"] = list(dict.fromkeys(cfg["train"]))
+        cfg["val"] = list(dict.fromkeys(cfg["val"]))
+
+        # 5) Se era presente 'path' singolo, possiamo toglierlo (YOLOv5 ignora quando train è lista)
+        cfg.pop("path", None)
+
+        # 6) Riscrivi il file
+        with yaml_path.open("w") as f:
+            yaml.safe_dump(cfg, f, sort_keys=False)
 
     def _build_dataset(
         self,
