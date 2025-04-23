@@ -267,7 +267,7 @@ class Detect:
         for s in range(max_sessions):
             new_model_name = f"v{s + 1}"
             self.train(
-                yaml_file=self.yaml_file,
+                yaml_file=str(self.yaml_file),
                 initial_model=current_model,
                 training_epochs=training_epochs,
                 training_patience=training_patience,
