@@ -33,6 +33,7 @@ class Detect:
             input_video.extract_frames(project_folder)
         self.video_size = input_video.resolution()
         self.n_frames = input_video.count_frame()
+        self.yaml_file_name = self.project_folder / "training_options.yaml"
 
     def synthesize(
         self,
@@ -105,7 +106,6 @@ class Detect:
                 for line in label_lines:
                     f.write(line + "\n")
             # YAML file
-            yaml_file_name = self.project_folder / "training_options.yaml"
             yaml_config_data = {
                 "path": str(syn_dataset_path.resolve()),
                 "train": "images/train",
@@ -113,7 +113,7 @@ class Detect:
                 "nc": 1,
                 "names": ["obj"],
             }
-            with Path.open(yaml_file_name, "w") as file:
+            with Path.open(self.yaml_file_name, "w") as file:
                 yaml.dump(yaml_config_data, file, sort_keys=False)
 
     def train(
@@ -268,6 +268,20 @@ class Detect:
             detection_results=detection_results,
             dataset_name=f"dataset_{prediction_number}",
         )
+        train_dataset_path = (
+            self.project_folder
+            / "train_datasets"
+            / f"dataset_{prediction_number}"
+        )
+        yaml_config_data = {
+            "path": str(train_dataset_path.resolve()),
+            "train": "images/train",
+            "val": "images/val",
+            "nc": 1,
+            "names": ["obj"],
+        }
+        with Path.open(self.yaml_file_name, "w") as file:
+            yaml.dump(yaml_config_data, file, sort_keys=False)
 
     def _build_dataset(
         self,
