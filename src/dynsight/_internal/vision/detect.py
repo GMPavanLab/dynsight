@@ -157,6 +157,7 @@ class Detect:
         self,
         initial_dataset: pathlib.Path,
         initial_model: str | pathlib.Path = "yolo12x.pt",
+        max_sessions: int = 1,
         training_epochs: int = 100,
         training_patience: int = 100,
         batch_size: int = 16,
@@ -253,7 +254,6 @@ class Detect:
             and (det["height"] not in out_height)
         ]
         detection_results = filtered_detections
-        print(detection_results)
         self._build_dataset(
             detection_results=detection_results,
             dataset_name=f"dataset_{prediction_number}",
@@ -264,6 +264,103 @@ class Detect:
             / f"dataset_{prediction_number}"
         )
         self._add_or_create_yaml(train_dataset_path)
+        for s in range(max_sessions):
+            new_model_name = f"v{s + 1}"
+            self.train(
+                yaml_file=self.yaml_file,
+                initial_model=current_model,
+                training_epochs=training_epochs,
+                training_patience=training_patience,
+                batch_size=batch_size,
+                workers=workers,
+                device=device,
+                training_name=new_model_name,
+            )
+            current_model = YOLO(
+                self.project_folder
+                / "models"
+                / new_model_name
+                / "weights"
+                / "best.pt"
+            )
+            prediction_number += 1
+            detection_results = []
+            for f in range(0, self.n_frames, 50):  # TEMP
+                frame_file = self.frames_dir / f"{f}.png"
+                prediction = current_model.predict(
+                    source=frame_file,
+                    imgsz=self.video_size,
+                    augment=True,
+                    save=True,
+                    save_txt=True,
+                    save_conf=True,
+                    show_labels=False,
+                    name=f"attempt_{prediction_number}",
+                    iou=0.1,
+                    max_det=20000,
+                    project=self.project_folder / "predictions",
+                    line_width=2,
+                    exist_ok=True,
+                )
+                # Assicurati che prediction[0].boxes non sia vuoto
+                if prediction and prediction[0].boxes:
+                    xywh = prediction[0].boxes.xywh.cpu().numpy()
+                    conf = prediction[0].boxes.conf.cpu().numpy()
+                    cls = prediction[0].boxes.cls.cpu().numpy()
+                    n_detection = len(xywh)
+
+                    for i in range(n_detection):
+                        x, y, w, h = xywh[i]
+                        detection_results.append(
+                            {
+                                "frame": f,
+                                "class_id": int(cls[i]),
+                                "center_x": float(x),
+                                "center_y": float(y),
+                                "width": float(w),
+                                "height": float(h),
+                                "confidence": float(conf[i]),
+                            }
+                        )
+            widths = np.array(
+                [d["width"] for d in detection_results], dtype=float
+            )
+            heights = np.array(
+                [d["height"] for d in detection_results],
+                dtype=float,
+            )
+            outliers_plt_folder = (
+                self.project_folder
+                / "predictions"
+                / f"attempt_{prediction_number}"
+                / "outliers"
+            )
+            outliers_plt_folder.mkdir(exist_ok=True)
+            out_width = set(
+                _find_outliers(
+                    distribution=widths,
+                    save_path=outliers_plt_folder,
+                    fig_name="width",
+                )
+            )
+            out_height = set(
+                _find_outliers(
+                    distribution=heights,
+                    save_path=outliers_plt_folder,
+                    fig_name="height",
+                )
+            )
+            filtered_detections = [
+                det
+                for det in detection_results
+                if (det["width"] not in out_width)
+                and (det["height"] not in out_height)
+            ]
+            detection_results = filtered_detections
+            self._build_dataset(
+                detection_results=detection_results,
+                dataset_name=f"dataset_{prediction_number}",
+            )
 
     def _add_or_create_yaml(self, new_dataset_path: Path) -> None:
         yaml_path = Path(self.yaml_file)
