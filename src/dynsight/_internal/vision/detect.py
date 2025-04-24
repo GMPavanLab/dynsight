@@ -290,8 +290,10 @@ class Detect:
             and (det["height"] not in out_height)
         ]
         detection_results = filtered_detections
-        print(detection_results)
-        print(len(detection_results))
+        frames = [d["frame"] for d in detection_results]
+        counts = np.bincount(frames)
+        print(counts)
+        print(counts.shape)
 
         # Build a new dataset based on the "filtered" detection results
         # New dataset path
@@ -407,8 +409,10 @@ class Detect:
                 and (det["height"] not in out_height)
             ]
             detection_results = filtered_detections
-            print(detection_results)
-            print(len(detection_results))
+            frames = [d["frame"] for d in detection_results]
+            counts = np.bincount(frames)
+            print(counts)
+            print(counts.shape)
 
             # Build the new dataset
             self._build_dataset(
