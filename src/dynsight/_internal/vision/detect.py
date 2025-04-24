@@ -27,13 +27,27 @@ class Detect:
         input_video: Video,
         project_folder: pathlib.Path = Path("output_folder"),
     ) -> None:
+        # Define the project folder path
         self.project_folder = project_folder
-        self.frames_dir = project_folder / "frames"
-        if not (self.frames_dir.exists() and self.frames_dir.is_dir()):
-            input_video.extract_frames(project_folder)
+
+        # Define all the sub folders path
+        self.frames_dir = self.project_folder / "frames"
+        self.training_items_path = self.project_folder / "training_items"
+        self.syn_dataset_path = self.project_folder / "synthetic_dataset"
+        self.models_path = self.project_folder / "models"
+        self.predictions_path = self.project_folder / "predictions"
+
+        # Define the config file path for the training
+        self.yaml_file = self.project_folder / "training_options.yaml"
+
+        # Extract information from the input video
         self.video_size = input_video.resolution()
         self.n_frames = input_video.count_frame()
-        self.yaml_file = self.project_folder / "training_options.yaml"
+
+        # Check if the video's frame are already present
+        # if not -> extract them
+        if not (self.frames_dir.exists() and self.frames_dir.is_dir()):
+            input_video.extract_frames(project_folder)
 
     def synthesize(
         self,
@@ -44,9 +58,19 @@ class Detect:
         collage_max_repeats: int = 30,
         sample_from: Literal["gui"] = "gui",
     ) -> None:
+
+        # Dataset structure
+        images_train_dir = self.syn_dataset_path / "images" / "train"
+        images_val_dir = self.syn_dataset_path / "images" / "val"
+        labels_train_dir = self.syn_dataset_path / "labels" / "train"
+        labels_val_dir = self.syn_dataset_path / "labels" / "val"
+
+        # GUI mode
         if sample_from == "gui":
+            # If not specified by the user use the first img as example
             if reference_img_path is None:
                 reference_img_path = self.frames_dir / "0.png"
+            # Open the GUI
             root = tk.Tk()
             VisionGUI(
                 master=root,
@@ -54,22 +78,15 @@ class Detect:
                 destination_folder=self.project_folder,
             )
             root.mainloop()
-            training_items_path = self.project_folder / "training_items"
+            # Check if the training items has been properly created
             if not (
-                training_items_path.exists() and training_items_path.is_dir()
+                self.training_items_path.exists() and self.training_items_path.is_dir()
             ):
                 msg = "'training_items' folder not created or not found"
                 raise ValueError(msg)
 
-        # Build synthetic dataset
-        syn_dataset_path = self.project_folder / "synthetic_dataset"
-
-        images_train_dir = syn_dataset_path / "images" / "train"
-        images_val_dir = syn_dataset_path / "images" / "val"
-        labels_train_dir = syn_dataset_path / "labels" / "train"
-        labels_val_dir = syn_dataset_path / "labels" / "val"
-
-        syn_dataset_path.mkdir(exist_ok=True)
+        # Initialize a new dataset
+        self.syn_dataset_path.mkdir(exist_ok=True)
         for d in [
             images_train_dir,
             images_val_dir,
@@ -78,6 +95,7 @@ class Detect:
         ]:
             d.mkdir(exist_ok=True, parents=True)
 
+        # Split between training and validation set
         num_val = int(dataset_dimension * validation_set_fraction)
         num_train = dataset_dimension - num_val
         remaining = dataset_dimension - (num_train + num_val)
@@ -86,9 +104,11 @@ class Detect:
         assignements = ["train"] * num_train + ["val"] * num_val
         random.shuffle(assignements)
 
+        # Create synthetic images to fill the dataset
+        # Create labels for each images generated
         for i in range(1, dataset_dimension + 1):
             collage, label_lines = self._create_collage(
-                images_folder=training_items_path,
+                images_folder=self.training_items_path,
                 width=collage_size[0],
                 height=collage_size[1],
                 max_repeats=collage_max_repeats,
@@ -105,8 +125,11 @@ class Detect:
             with label_save_path.open("w") as f:
                 for line in label_lines:
                     f.write(line + "\n")
-        self._add_or_create_yaml(syn_dataset_path)
 
+        # Generate the config file for the dataset created
+        self._add_or_create_yaml(self.syn_dataset_path)
+
+    # Just a bridge to the YOLO library
     def train(
         self,
         yaml_file: pathlib.Path,
@@ -126,12 +149,13 @@ class Detect:
             batch=batch_size,
             imgsz=self.video_size,
             workers=workers,
-            project=self.project_folder / "models",
+            project=self.models_path,
             name=training_name,
             device=device,
             plots=False,
         )
 
+    # Just a bridge to the YOLO library
     def predict(
         self,
         model_path: str | pathlib.Path,
@@ -164,8 +188,14 @@ class Detect:
         workers: int = 8,
         device: int | str | list[int] | None = None,
     ) -> None:
+        # Initilize the first training
         current_dataset = initial_dataset
         guess_model_name = "v0"
+        # Initialize the first prediction
+        prediction_number = 0
+        detection_results = []
+
+        # First training
         self.train(
             yaml_file=current_dataset,
             initial_model=initial_model,
@@ -175,15 +205,16 @@ class Detect:
             device=device,
             training_name=guess_model_name,
         )
-        current_model = YOLO(
+        # Update the model with the new one
+        current_model_path = (
             self.project_folder
             / "models"
             / guess_model_name
             / "weights"
             / "best.pt"
         )
-        prediction_number = 0
-        detection_results = []
+        current_model = YOLO(current_model_path)
+        # First prediction
         for f in range(0, self.n_frames, 50):  # TEMP
             frame_file = self.frames_dir / f"{f}.png"
             prediction = current_model.predict(
@@ -197,11 +228,11 @@ class Detect:
                 name=f"attempt_{prediction_number}",
                 iou=0.1,
                 max_det=20000,
-                project=self.project_folder / "predictions",
+                project=self.predictions_path,
                 line_width=2,
                 exist_ok=True,
             )
-            # Assicurati che prediction[0].boxes non sia vuoto
+            # Read and save the prediction results
             if prediction and prediction[0].boxes:
                 xywh = prediction[0].boxes.xywh.cpu().numpy()
                 conf = prediction[0].boxes.conf.cpu().numpy()
@@ -221,11 +252,7 @@ class Detect:
                             "confidence": float(conf[i]),
                         }
                     )
-        widths = np.array([d["width"] for d in detection_results], dtype=float)
-        heights = np.array(
-            [d["height"] for d in detection_results],
-            dtype=float,
-        )
+        # Initialize outliers folder in the prediction folder
         outliers_plt_folder = (
             self.project_folder
             / "predictions"
@@ -233,6 +260,13 @@ class Detect:
             / "outliers"
         )
         outliers_plt_folder.mkdir(exist_ok=True)
+
+        # Look for outliers in the boxes width and height
+        widths = np.array([d["width"] for d in detection_results], dtype=float)
+        heights = np.array(
+            [d["height"] for d in detection_results],
+            dtype=float,
+        )
         out_width = set(
             _find_outliers(
                 distribution=widths,
@@ -247,6 +281,7 @@ class Detect:
                 fig_name="height",
             )
         )
+        # Exclude the outliers from the detection results
         filtered_detections = [
             det
             for det in detection_results
@@ -254,23 +289,24 @@ class Detect:
             and (det["height"] not in out_height)
         ]
         detection_results = filtered_detections
-        self._build_dataset(
-            detection_results=detection_results,
-            dataset_name=f"dataset_{prediction_number}",
-        )
+
+        # Build a new dataset based on the "filtered" detection results
+        # New dataset path
         train_dataset_path = (
             self.project_folder
             / "train_datasets"
             / f"dataset_{prediction_number}"
         )
-        self._add_or_create_yaml(train_dataset_path)
-        current_model_path = (
-            self.project_folder
-            / "models"
-            / guess_model_name
-            / "weights"
-            / "best.pt"
+
+        # Build the dataset
+        self._build_dataset(
+            detection_results=detection_results,
+            dataset_name=f"dataset_{prediction_number}",
         )
+        # Add the new dataset to the training config file
+        self._add_or_create_yaml(train_dataset_path)
+
+        # Iterative part to improve the model performace
         for s in range(max_sessions):
             new_model_name = f"v{s + 1}"
             self.train(
