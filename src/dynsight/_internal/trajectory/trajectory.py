@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pickle
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -9,14 +9,23 @@ if TYPE_CHECKING:
     import MDAnalysis
     import numpy as np
     from numpy.typing import NDArray
-    from tropea_clustering._internal.first_classes import StateUni
+    from tropea_clustering._internal.first_classes import StateMulti, StateUni
 
 import dynsight
+
+UNIVAR_DIM = 2
 
 
 @dataclass
 class Insight:
-    """Contains an analysis perfomed on a many-body trajectory."""
+    """Contains an analysis perfomed on a many-body trajectory.
+
+    Attributes:
+        dataset: np.ndarray of shape (n_particles, n_frames, n_dims)
+            The values of a single-particle descriptor.
+        r_cut: float
+            The spatial cutoff with the descriptor has been computed.
+    """
 
     dataset: NDArray[np.float64]
     r_cut: float
@@ -38,16 +47,25 @@ class Insight:
         return Insight(averaged_dataset, r_cut)
 
     def get_onion(self, delta_t: int) -> OnionInsight:
-        reshaped_data = dynsight.onion.helpers.reshape_from_nt(
-            self.dataset, delta_t
-        )
-        state_list, labels = dynsight.onion.onion_uni(reshaped_data)
+        if self.dataset.ndim == UNIVAR_DIM:
+            reshaped_data = dynsight.onion.helpers.reshape_from_nt(
+                self.dataset, delta_t
+            )
+            onion_clust = dynsight.onion.OnionUni()
+        else:
+            reshaped_data = dynsight.onion.helpers.reshape_from_dnt(
+                self.dataset.transpose(2, 0, 1), delta_t
+            )
+            onion_clust = dynsight.onion.OnionMulti(ndims=self.dataset.ndim)
+
+        onion_clust.fit(reshaped_data)
+
         return OnionInsight(
             dataset=self.dataset,
             r_cut=self.r_cut,
-            labels=labels,
+            labels=onion_clust.labels_,
             delta_t=delta_t,
-            state_list=state_list,
+            state_list=onion_clust.state_list_,
             reshaped_data=reshaped_data,
         )
 
@@ -69,48 +87,53 @@ class OnionInsight(ClusterInsight):
     """Contains a onion-clustering analysis."""
 
     delta_t: int
-    state_list: list[StateUni]
+    state_list: list[StateUni] | list[StateMulti]
     reshaped_data: NDArray[np.float64]
 
     def plot_output(self, file_name: str) -> None:
-        dynsight.onion.plot.plot_output_uni(
-            file_name,
-            self.reshaped_data,
-            self.dataset.shape[0],
-            self.state_list,
-        )
+        if self.dataset.ndim == UNIVAR_DIM:
+            dynsight.onion.plot.plot_output_uni(
+                file_name,
+                self.reshaped_data,
+                self.dataset.shape[0],
+                self.state_list,
+            )
 
-    def plot_one_trj(self, particle_id: int, file_name: str) -> None:
-        dynsight.onion.plot.plot_one_trj_uni(
-            file_name,
-            particle_id,
-            self.reshaped_data,
-            self.dataset.shape[0],
-            self.labels,
-        )
+    def plot_one_trj(self, file_name: str, particle_id: int) -> None:
+        if self.dataset.ndim == UNIVAR_DIM:
+            dynsight.onion.plot.plot_one_trj_uni(
+                file_name,
+                particle_id,
+                self.reshaped_data,
+                self.dataset.shape[0],
+                self.labels,
+            )
 
     def plot_medoids(self, file_name: str) -> None:
-        dynsight.onion.plot.plot_medoids_uni(
-            file_name,
-            self.reshaped_data,
-            self.labels,
-        )
+        if self.dataset.ndim == UNIVAR_DIM:
+            dynsight.onion.plot.plot_medoids_uni(
+                file_name,
+                self.reshaped_data,
+                self.labels,
+            )
 
     def plot_state_populations(self, file_name: str) -> None:
-        dynsight.onion.plot.plot_state_populations(
-            file_name,
-            self.dataset.shape[0],
-            self.delta_t,
-            self.labels,
-        )
+        if self.dataset.ndim == UNIVAR_DIM:
+            dynsight.onion.plot.plot_state_populations(
+                file_name,
+                self.dataset.shape[0],
+                self.delta_t,
+                self.labels,
+            )
 
     def plot_sankey(self, file_name: str, frame_list: list[int]) -> None:
-        dynsight.onion.plot.plot_sankey(
-            file_name,
-            self.labels,
-            self.dataset.shape[0],
-            frame_list,
-        )
+        if self.dataset.ndim == UNIVAR_DIM:
+            dynsight.onion.plot.plot_sankey(
+                file_name,
+                self.labels,
+                self.dataset.shape[0],
+                frame_list,
+            )
 
 
 @dataclass
@@ -118,10 +141,6 @@ class Trj:
     """Contains a many-body trajectory."""
 
     universe: MDAnalysis.Universe
-    dt: float = field(init=False)
-
-    def __post_init__(self) -> None:
-        self.dt = self.universe.trajectory.dt
 
     def get_lens(self, r_cut: float) -> Insight:
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
