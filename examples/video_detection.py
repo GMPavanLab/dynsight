@@ -25,7 +25,7 @@ def main() -> None:
     # Check if data synthesised exists.
     if (
         args.prepare is False
-        and not (output_folder / "synthesized_data").exist()
+        and not (output_folder / "synthetic_dataset").exist()
     ):
         raise RuntimeError
 
@@ -33,12 +33,7 @@ def main() -> None:
         input_frames=frames,
         project_folder=output_folder,
     )
-    dataset = detection.synthesize(
-        dataset_dimension=1000,
-        reference_img="0.png",
-        training_set_fraction=0.7,
-        sample_from="gui",
-    )
+    dataset = detection.synthesize()
     if args.train:
         trained_model = detection.fit(input=dataset)
     else:

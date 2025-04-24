@@ -346,7 +346,7 @@ class Detect:
                     line_width=2,
                     exist_ok=True,
                 )
-                # Assicurati che prediction[0].boxes non sia vuoto
+                # Read prediction
                 if prediction and prediction[0].boxes:
                     xywh = prediction[0].boxes.xywh.cpu().numpy()
                     conf = prediction[0].boxes.conf.cpu().numpy()
@@ -366,6 +366,7 @@ class Detect:
                                 "confidence": float(conf[i]),
                             }
                         )
+            # Look for outliers in the boxes width and height
             widths = np.array(
                 [d["width"] for d in detection_results], dtype=float
             )
@@ -394,6 +395,8 @@ class Detect:
                     fig_name="height",
                 )
             )
+
+            # Exclude the outliers from the detection results
             filtered_detections = [
                 det
                 for det in detection_results
@@ -401,42 +404,45 @@ class Detect:
                 and (det["height"] not in out_height)
             ]
             detection_results = filtered_detections
+
+            # Build the new dataset
             self._build_dataset(
                 detection_results=detection_results,
                 dataset_name=f"dataset_{prediction_number}",
             )
+            # Remove the oldest dataset in config
+            # It has been made to avoid training bias on worst results
             self._remove_old_dataset()
+
             train_dataset_path = (
                 self.project_folder
                 / "train_datasets"
                 / f"dataset_{prediction_number}"
             )
+            # Update the dataset config file
             self._add_or_create_yaml(train_dataset_path)
 
     def _remove_old_dataset(self) -> None:
         yaml_path = self.yaml_file
 
         if not yaml_path.exists():
-            return  # Il file YAML non esiste, nulla da fare
+            return
 
         with yaml_path.open("r") as f:
             cfg = yaml.safe_load(f) or {}
 
-        # Verifica e normalizza i campi 'train' e 'val'
         for key in ("train", "val"):
             if key not in cfg:
-                return  # Il campo non è presente, nulla da fare
+                return
             if isinstance(cfg[key], str):
                 cfg[key] = [cfg[key]]
             elif not isinstance(cfg[key], list):
-                return  # Il campo non è una lista o una stringa, struttura inattesa
+                return
 
-        # Rimuove il primo elemento da 'train' e 'val' se presenti
         for key in ("train", "val"):
             if cfg[key]:
                 cfg[key].pop(0)
 
-        # Riscrive il file YAML aggiornato
         with yaml_path.open("w") as f:
             yaml.safe_dump(cfg, f, sort_keys=False)
 
