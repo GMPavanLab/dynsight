@@ -58,7 +58,6 @@ class Detect:
         collage_max_repeats: int = 30,
         sample_from: Literal["gui"] = "gui",
     ) -> None:
-
         # Dataset structure
         images_train_dir = self.syn_dataset_path / "images" / "train"
         images_val_dir = self.syn_dataset_path / "images" / "val"
@@ -80,7 +79,8 @@ class Detect:
             root.mainloop()
             # Check if the training items has been properly created
             if not (
-                self.training_items_path.exists() and self.training_items_path.is_dir()
+                self.training_items_path.exists()
+                and self.training_items_path.is_dir()
             ):
                 msg = "'training_items' folder not created or not found"
                 raise ValueError(msg)
@@ -187,6 +187,7 @@ class Detect:
         batch_size: int = 16,
         workers: int = 8,
         device: int | str | list[int] | None = None,
+        real_n_particles: int | None = None,
     ) -> None:
         # Initilize the first training
         current_dataset = initial_dataset
@@ -289,6 +290,8 @@ class Detect:
             and (det["height"] not in out_height)
         ]
         detection_results = filtered_detections
+        print(detection_results)
+        print(len(detection_results))
 
         # Build a new dataset based on the "filtered" detection results
         # New dataset path
@@ -404,6 +407,8 @@ class Detect:
                 and (det["height"] not in out_height)
             ]
             detection_results = filtered_detections
+            print(detection_results)
+            print(len(detection_results))
 
             # Build the new dataset
             self._build_dataset(
