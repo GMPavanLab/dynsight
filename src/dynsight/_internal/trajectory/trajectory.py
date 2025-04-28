@@ -44,7 +44,7 @@ class Insight:
             cutoff=r_cut,
             num_processes=num_processes,
         )
-        return Insight(averaged_dataset, r_cut)
+        return Insight(averaged_dataset, self.r_cut)
 
     def get_onion(self, delta_t: int) -> OnionInsight:
         if self.dataset.ndim == UNIVAR_DIM:
@@ -149,6 +149,31 @@ class Trj:
         )
         lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
         return Insight(lens, r_cut)
+
+    def get_soap(
+        self, r_cut: float, n_max: int, l_max: int, n_core: int
+    ) -> Insight:
+        soap = dynsight.soap.saponify_trajectory(
+            self.universe,
+            soaprcut=r_cut,
+            soapnmax=n_max,
+            soaplmax=l_max,
+            n_core=n_core,
+        )
+        return Insight(soap, r_cut)
+
+    def get_timesoap(
+        self, r_cut: float, n_max: int, l_max: int, n_core: int
+    ) -> Insight:
+        soap = dynsight.soap.saponify_trajectory(
+            self.universe,
+            soaprcut=r_cut,
+            soapnmax=n_max,
+            soaplmax=l_max,
+            n_core=n_core,
+        )
+        tsoap = dynsight.soap.timesoap(soap)
+        return Insight(tsoap, r_cut)
 
     def save(self, file_name: str) -> None:
         file_path = Path(f"{file_name}.pkl")
