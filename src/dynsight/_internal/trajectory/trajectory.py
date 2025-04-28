@@ -98,6 +98,14 @@ class OnionInsight(ClusterInsight):
                 self.dataset.shape[0],
                 self.state_list,
             )
+        else:
+            dynsight.onion.plot.plot_output_multi(
+                file_name,
+                self.dataset,
+                self.state_list,
+                self.labels,
+                self.delta_t,
+            )
 
     def plot_one_trj(self, file_name: str, particle_id: int) -> None:
         if self.dataset.ndim == UNIVAR_DIM:
@@ -108,6 +116,14 @@ class OnionInsight(ClusterInsight):
                 self.dataset.shape[0],
                 self.labels,
             )
+        else:
+            dynsight.onion.plot.plot_one_trj_multi(
+                file_name,
+                particle_id,
+                self.delta_t,
+                self.dataset,
+                self.labels,
+            )
 
     def plot_medoids(self, file_name: str) -> None:
         if self.dataset.ndim == UNIVAR_DIM:
@@ -116,24 +132,29 @@ class OnionInsight(ClusterInsight):
                 self.reshaped_data,
                 self.labels,
             )
+        else:
+            dynsight.onion.plot.plot_medoids_multi(
+                file_name,
+                self.delta_t,
+                self.dataset,
+                self.labels,
+            )
 
     def plot_state_populations(self, file_name: str) -> None:
-        if self.dataset.ndim == UNIVAR_DIM:
-            dynsight.onion.plot.plot_state_populations(
-                file_name,
-                self.dataset.shape[0],
-                self.delta_t,
-                self.labels,
-            )
+        dynsight.onion.plot.plot_state_populations(
+            file_name,
+            self.dataset.shape[0],
+            self.delta_t,
+            self.labels,
+        )
 
     def plot_sankey(self, file_name: str, frame_list: list[int]) -> None:
-        if self.dataset.ndim == UNIVAR_DIM:
-            dynsight.onion.plot.plot_sankey(
-                file_name,
-                self.labels,
-                self.dataset.shape[0],
-                frame_list,
-            )
+        dynsight.onion.plot.plot_sankey(
+            file_name,
+            self.labels,
+            self.dataset.shape[0],
+            frame_list,
+        )
 
 
 @dataclass
