@@ -6,6 +6,8 @@ from PIL import Image
 
 
 class VisionGUI:
+    """GUI for interactively labeling images by drawing bounding boxes."""
+
     def __init__(
         self,
         master: tk.Tk,

@@ -36,10 +36,7 @@ def main() -> None:
     dataset = detection.synthesize()
     if args.train:
         trained_model = detection.fit(input=dataset)
-    else:
-        trained_model = detection.load_model()
-
-    detection.predict(model=trained_model)
+        detection.predict(model=trained_model)
 
 
 if __name__ == "__main__":

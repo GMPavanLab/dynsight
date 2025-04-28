@@ -22,11 +22,40 @@ if TYPE_CHECKING:
 
 
 class Detect:
+    """A class to manage the full pipeline of object detection from videos.
+
+    Attributes:
+        project_folder: Main directory for all project outputs.
+        frames_dir: Directory to store extracted video frames.
+        training_items_path: Directory to save training item crops selected.
+        syn_dataset_path: Directory for the generated synthetic dataset.
+        models_path: Directory to save trained models.
+        predictions_path: Directory to save prediction outputs.
+        yaml_file: Path to the YAML configuration file for dataset training.
+        video_size: Resolution of the input video (width, height).
+        n_frames: Total number of frames extracted from the video.
+
+    Methods:
+        synthesize(): Generate a synthetic dataset by creating random collages.
+        train(): Train a YOLO model on the synthetic dataset.
+        predict(): Make predictions using a trained model on video frames.
+    """
+
     def __init__(
         self,
         input_video: Video,
         project_folder: pathlib.Path = Path("output_folder"),
     ) -> None:
+        """Initialize a detection project.
+
+        Creates all necessary subdirectories and extracts video frames if not
+        already present.
+
+        Args:
+            input_video: The input video object from which to extract frames.
+            project_folder: Path to the main project directory.
+
+        """
         # Define the project folder path
         self.project_folder = project_folder
 
@@ -58,6 +87,23 @@ class Detect:
         collage_max_repeats: int = 30,
         sample_from: Literal["gui"] = "gui",
     ) -> None:
+        """Generate a synthetic dataset by creating collages of training items.
+
+        Args:
+            dataset_dimension: Total number of synthetic samples to generate.
+            reference_img_path: Path to the reference image to initialize the
+                GUI. If None, uses the first extracted frame.
+            validation_set_fraction: Fraction of samples to allocate to the
+                validation set.
+            collage_size: Size (width, height) of the generated collage images.
+            collage_max_repeats: Maximum number of training items that can be
+                placed in a single collage.
+            sample_from: Mode to collect training items.
+
+        Raises:
+            ValueError: If the "training_items" folder is not created after
+            GUI sampling.
+        """
         # Dataset structure
         images_train_dir = self.syn_dataset_path / "images" / "train"
         images_val_dir = self.syn_dataset_path / "images" / "val"
@@ -141,6 +187,19 @@ class Detect:
         workers: int = 8,
         device: int | str | list[int] | None = None,
     ) -> None:
+        """Train a YOLO model on the generated synthetic dataset.
+
+        Args:
+            yaml_file: Path to the dataset YAML configuration file.
+            initial_model: Pretrained model checkpoint to fine-tune.
+            training_name: Name for the training run.
+            training_epochs: Maximum number of training epochs
+            training_patience: Early stopping patience
+                (number of epochs without improvement).
+            batch_size: Batch size for training.
+            workers: Number of dataloader worker threads.
+            device: Device(s) on which to run training.
+        """
         model = YOLO(initial_model)
         model.train(
             data=yaml_file,
@@ -162,6 +221,13 @@ class Detect:
         detections_iou: float = 0.1,
         prediction_name: str = "prediction",
     ) -> None:
+        """Perform object detection predictions on the extracted frames.
+
+        Args:
+            model_path: Path to the trained model weights.
+            detections_iou: IOU threshold for object detection filtering.
+            prediction_name: Name under which to save the prediction results.
+        """
         model = YOLO(model_path)
         model.predict(
             project=self.project_folder,
@@ -187,8 +253,32 @@ class Detect:
         batch_size: int = 16,
         workers: int = 8,
         device: int | str | list[int] | None = None,
-        real_n_particles: int | None = None,
     ) -> None:
+        """Train an object detection model through iterative self-training.
+
+        This method performs multiple rounds of training and prediction:
+        1. Train the model on the initial dataset.
+        2. Predict bounding boxes on video frames using the trained model.
+        3. Identify and remove outlier detections based on box width and height.
+        4. Build a new training dataset from filtered detections.
+        5. Retrain the model on the refined dataset.
+        6. Repeat steps 2 to 5 for a given number of sessions to
+            progressively refine the model.
+
+        Args:
+            initial_dataset: Path to the initial dataset YAML file.
+            initial_model: Path to the initial model weights (.pt file).
+            max_sessions: Number of retraining cycles.
+            training_epochs: Number of epochs per training session.
+            training_patience: Early stopping patience during training.
+            batch_size: Batch size for training.
+            workers: Number of data loader workers.
+            device: Device(s) to use (e.g., "cpu", "0", [0,1]).
+            real_n_particles: Optional, real number of particles expected.
+
+        Returns:
+            None
+        """
         # Initilize the first training
         current_dataset = initial_dataset
         guess_model_name = "v0"
@@ -424,6 +514,7 @@ class Detect:
             self._add_or_create_yaml(train_dataset_path)
 
     def _remove_old_dataset(self) -> None:
+        """Removes the oldest dataset from the YAML configuration."""
         yaml_path = self.yaml_file
 
         if not yaml_path.exists():
@@ -448,6 +539,7 @@ class Detect:
             yaml.safe_dump(cfg, f, sort_keys=False)
 
     def _add_or_create_yaml(self, new_dataset_path: Path) -> None:
+        """Adds or creates a YAML configuration file with the new datasets."""
         yaml_path = Path(self.yaml_file)
 
         train_rel = "images/train"
@@ -489,12 +581,12 @@ class Detect:
 
     def _build_dataset(
         self,
-        detection_results,
+        detection_results: list[dict[str, any]],
         dataset_name: str,
         split_ratio: float = 0.8,
     ) -> None:
+        """Builds a dataset by splitting frames/labels into train and val."""
         output_dir = self.project_folder / "train_datasets" / dataset_name
-        # Prepara le directory
         imgs_train_dir = output_dir / "images" / "train"
         imgs_val_dir = output_dir / "images" / "val"
         labs_train_dir = output_dir / "labels" / "train"
@@ -502,23 +594,17 @@ class Detect:
         for d in (imgs_train_dir, imgs_val_dir, labs_train_dir, labs_val_dir):
             d.mkdir(parents=True, exist_ok=True)
 
-        # Raggruppa le detection per frame
         detections_by_frame = {}
         for det in detection_results:
             frame_idx = det["frame"]
             detections_by_frame.setdefault(frame_idx, []).append(det)
 
-        # Lista di tutti i frame con detection
         all_frames = sorted(detections_by_frame.keys())
 
-        # Suddivisione in training e validation
         split_point = int(len(all_frames) * split_ratio)
         train_frames = set(all_frames[:split_point])
-        val_frames = set(all_frames[split_point:])
 
-        # Processa ogni frame
         for frame_idx, dets in detections_by_frame.items():
-            # Determina lo split
             if frame_idx in train_frames:
                 img_dest = imgs_train_dir
                 lab_dest = labs_train_dir
@@ -526,15 +612,12 @@ class Detect:
                 img_dest = imgs_val_dir
                 lab_dest = labs_val_dir
 
-            # Copia l'immagine
             img_src = self.frames_dir / f"{frame_idx}.png"
             img_dst = img_dest / f"{frame_idx}.png"
             shutil.copy(img_src, img_dst)
 
-            # Crea il file di label
             lab_file = lab_dest / f"{frame_idx}.txt"
             with lab_file.open("w") as f:
-                # Ottieni le dimensioni dell'immagine
                 img_w, img_h = Image.open(img_src).size
 
                 for det in dets:
@@ -543,7 +626,6 @@ class Detect:
                     w = det["width"]
                     h = det["height"]
                     cls = det["class_id"]
-                    # Normalizza
                     x_ctr_n = x_ctr / img_w
                     y_ctr_n = y_ctr / img_h
                     w_n = w / img_w
@@ -551,8 +633,6 @@ class Detect:
                     f.write(
                         f"{cls} {x_ctr_n:.6f} {y_ctr_n:.6f} {w_n:.6f} {h_n:.6f}\n"
                     )
-
-        print(f"Dataset creato in {output_dir}")
 
     def _create_collage(
         self,
@@ -562,6 +642,7 @@ class Detect:
         patience: int = 1000,
         max_repeats: int = 1,
     ) -> tuple[Image.Image, list[str]]:
+        """Creates a collage of images by placing them randomly on a canvas."""
         collage = Image.new("RGBA", (width, height), (255, 255, 255, 255))
         placed_rects = []
         label_lines = []
@@ -628,6 +709,8 @@ def _find_outliers(
     fig_name: str,
     thr: float = 1e-5,
 ) -> np.ndarray:
+    """Detects outliers in a distribution by fitting a normal distribution."""
+
     def _gaussian(
         x: np.ndarray, mu: float, sigma: float, amplitude: float
     ) -> np.ndarray:
