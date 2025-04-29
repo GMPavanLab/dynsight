@@ -180,11 +180,7 @@ class Trj:
         return Insight(lens, r_cut)
 
     def get_soap(
-        self,
-        r_cut: float,
-        n_max: int,
-        l_max: int,
-        n_core: int
+        self, r_cut: float, n_max: int, l_max: int, n_core: int
     ) -> Insight:
         """Compute SOAP on the trajectory."""
         soap = dynsight.soap.saponify_trajectory(
