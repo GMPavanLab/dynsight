@@ -36,6 +36,7 @@ class Insight:
         selection: str = "all",
         num_processes: int = 1,
     ) -> Insight:
+        """Average the descripotor over the neighboring particles."""
         averaged_dataset = dynsight.analysis.spatialaverage(
             universe=trajectory.universe,
             descriptor_array=self.dataset,
@@ -46,6 +47,7 @@ class Insight:
         return Insight(averaged_dataset, self.r_cut)
 
     def get_onion(self, delta_t: int) -> OnionInsight:
+        """Perform onion clustering."""
         if self.dataset.ndim == UNIVAR_DIM:
             reshaped_data = dynsight.onion.helpers.reshape_from_nt(
                 self.dataset, delta_t
@@ -69,6 +71,7 @@ class Insight:
         )
 
     def dump_insight(self, file_name: Path) -> None:
+        """Save a copy of the Insight object."""
         file_path = file_name.with_suffix(".pkl")
         with Path.open(file_path, "wb") as file:
             pickle.dump(self, file)
@@ -90,6 +93,7 @@ class OnionInsight(ClusterInsight):
     reshaped_data: NDArray[np.float64]
 
     def plot_output(self, file_name: Path) -> None:
+        """Plot the overall onion clustering result."""
         if self.dataset.ndim == UNIVAR_DIM:
             dynsight.onion.plot.plot_output_uni(
                 file_name,
@@ -107,6 +111,7 @@ class OnionInsight(ClusterInsight):
             )
 
     def plot_one_trj(self, file_name: Path, particle_id: int) -> None:
+        """Plot one particle's trajectory colored according to clustering."""
         if self.dataset.ndim == UNIVAR_DIM:
             dynsight.onion.plot.plot_one_trj_uni(
                 file_name,
@@ -125,6 +130,7 @@ class OnionInsight(ClusterInsight):
             )
 
     def plot_medoids(self, file_name: Path) -> None:
+        """Plot the average sequence of each onion cluster."""
         if self.dataset.ndim == UNIVAR_DIM:
             dynsight.onion.plot.plot_medoids_uni(
                 file_name,
@@ -140,6 +146,7 @@ class OnionInsight(ClusterInsight):
             )
 
     def plot_state_populations(self, file_name: Path) -> None:
+        """Plot each state's population along the trajectory."""
         dynsight.onion.plot.plot_state_populations(
             file_name,
             self.dataset.shape[0],
@@ -148,6 +155,7 @@ class OnionInsight(ClusterInsight):
         )
 
     def plot_sankey(self, file_name: Path, frame_list: list[int]) -> None:
+        """Plot the Sankey diagram of the onion clustering."""
         dynsight.onion.plot.plot_sankey(
             file_name,
             self.labels,
@@ -163,6 +171,7 @@ class Trj:
     universe: MDAnalysis.Universe
 
     def get_lens(self, r_cut: float) -> Insight:
+        """Compute LENS on the trajectory."""
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
             cutoff=r_cut,
@@ -177,6 +186,7 @@ class Trj:
         l_max: int,
         n_core: int
     ) -> Insight:
+        """Compute SOAP on the trajectory."""
         soap = dynsight.soap.saponify_trajectory(
             self.universe,
             soaprcut=r_cut,
@@ -189,6 +199,7 @@ class Trj:
     def get_timesoap(
         self, r_cut: float, n_max: int, l_max: int, n_core: int
     ) -> Insight:
+        """Compute timeSOAP on the trajectory."""
         soap = dynsight.soap.saponify_trajectory(
             self.universe,
             soaprcut=r_cut,
@@ -200,6 +211,7 @@ class Trj:
         return Insight(tsoap, r_cut)
 
     def dump_trj(self, file_name: Path) -> None:
+        """Save a copy of the Trj object."""
         file_path = file_name.with_suffix(".pkl")
         with Path.open(file_path, "wb") as file:
             pickle.dump(self, file)
