@@ -69,7 +69,7 @@ class Insight:
             reshaped_data=reshaped_data,
         )
 
-    def save(self, file_name: str) -> None:
+    def dump_insight(self, file_name: str) -> None:
         file_path = Path(f"{file_name}.pkl")
         with Path.open(file_path, "wb") as file:
             pickle.dump(self, file)
@@ -196,7 +196,7 @@ class Trj:
         tsoap = dynsight.soap.timesoap(soap)
         return Insight(tsoap, r_cut)
 
-    def save(self, file_name: str) -> None:
+    def dump_trj(self, file_name: str) -> None:
         file_path = Path(f"{file_name}.pkl")
         with Path.open(file_path, "wb") as file:
             pickle.dump(self, file)

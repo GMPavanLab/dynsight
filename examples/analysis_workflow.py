@@ -13,7 +13,7 @@ def main() -> None:
     )
 
     water_trj = Trj(universe)
-    water_trj.save("analysis_workflow/water_trj")
+    water_trj.dump_trj("analysis_workflow/water_trj")
 
     # We want for instance compute LENS on this trajectory
     # This is an Insight object
@@ -30,7 +30,7 @@ def main() -> None:
     )
 
     # Save the Insight with all the results
-    water_onion.save("analysis_workflow/water_lens")
+    water_onion.dump_insight("analysis_workflow/water_lens")
 
 
 if __name__ == "__main__":
