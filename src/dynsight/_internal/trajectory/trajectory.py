@@ -90,7 +90,7 @@ class OnionInsight(ClusterInsight):
     state_list: list[StateUni] | list[StateMulti]
     reshaped_data: NDArray[np.float64]
 
-    def plot_output(self, file_name: str) -> None:
+    def plot_output(self, file_name: Path) -> None:
         if self.dataset.ndim == UNIVAR_DIM:
             dynsight.onion.plot.plot_output_uni(
                 file_name,
@@ -107,7 +107,7 @@ class OnionInsight(ClusterInsight):
                 self.delta_t,
             )
 
-    def plot_one_trj(self, file_name: str, particle_id: int) -> None:
+    def plot_one_trj(self, file_name: Path, particle_id: int) -> None:
         if self.dataset.ndim == UNIVAR_DIM:
             dynsight.onion.plot.plot_one_trj_uni(
                 file_name,
@@ -125,7 +125,7 @@ class OnionInsight(ClusterInsight):
                 self.labels,
             )
 
-    def plot_medoids(self, file_name: str) -> None:
+    def plot_medoids(self, file_name: Path) -> None:
         if self.dataset.ndim == UNIVAR_DIM:
             dynsight.onion.plot.plot_medoids_uni(
                 file_name,
@@ -140,7 +140,7 @@ class OnionInsight(ClusterInsight):
                 self.labels,
             )
 
-    def plot_state_populations(self, file_name: str) -> None:
+    def plot_state_populations(self, file_name: Path) -> None:
         dynsight.onion.plot.plot_state_populations(
             file_name,
             self.dataset.shape[0],
@@ -148,7 +148,7 @@ class OnionInsight(ClusterInsight):
             self.labels,
         )
 
-    def plot_sankey(self, file_name: str, frame_list: list[int]) -> None:
+    def plot_sankey(self, file_name: Path, frame_list: list[int]) -> None:
         dynsight.onion.plot.plot_sankey(
             file_name,
             self.labels,

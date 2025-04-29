@@ -1,5 +1,15 @@
 """trajectory package."""
 
-from dynsight._internal.trajectory.trajectory import Insight, Trj
+from dynsight._internal.trajectory.trajectory import (
+    ClusterInsight,
+    Insight,
+    OnionInsight,
+    Trj,
+)
 
-__all__ = ["Insight", "Trj"]
+__all__ = [
+    "ClusterInsight",
+    "Insight",
+    "OnionInsight",
+    "Trj",
+]

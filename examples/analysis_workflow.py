@@ -1,5 +1,7 @@
 """Creating an example for the new trajectory module."""
 
+from pathlib import Path
+
 import MDAnalysis
 
 from dynsight.trajectory import Trj
@@ -15,8 +17,9 @@ def main() -> None:
     water_trj = Trj(universe)
     water_trj.dump_trj("analysis_workflow/water_trj")
 
-    # We want for instance compute LENS on this trajectory
-    # This is an Insight object
+    # We want, for instance, compute LENS on this trajectory
+    # From here, we work with Insight objects that contain data from a
+    # Trj object
     water_lens = water_trj.get_lens(r_cut=7.5)
 
     # We can do spatial average on the computed LENS
@@ -24,10 +27,10 @@ def main() -> None:
 
     # Or we can perform onion-clustering
     water_onion = water_smooth.get_onion(delta_t=10)
-    water_onion.plot_output("analysis_workflow/tmp_fig1.png")
-    water_onion.plot_one_trj(
-        "analysis_workflow/tmp_fig2.png", particle_id=1234
-    )
+
+    output_path = Path("analysis_workflow")
+    water_onion.plot_output(output_path / "tmp_fig1.png")
+    water_onion.plot_one_trj(output_path / "tmp_fig2.png", particle_id=1234)
 
     # Save the Insight with all the results
     water_onion.dump_insight("analysis_workflow/water_lens")
