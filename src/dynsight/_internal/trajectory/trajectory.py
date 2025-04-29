@@ -69,8 +69,8 @@ class Insight:
             reshaped_data=reshaped_data,
         )
 
-    def dump_insight(self, file_name: str) -> None:
-        file_path = Path(f"{file_name}.pkl")
+    def dump_insight(self, file_name: Path) -> None:
+        file_path = file_name.with_suffix(".pkl")
         with Path.open(file_path, "wb") as file:
             pickle.dump(self, file)
 
@@ -196,7 +196,7 @@ class Trj:
         tsoap = dynsight.soap.timesoap(soap)
         return Insight(tsoap, r_cut)
 
-    def dump_trj(self, file_name: str) -> None:
-        file_path = Path(f"{file_name}.pkl")
+    def dump_trj(self, file_name: Path) -> None:
+        file_path = file_name.with_suffix(".pkl")
         with Path.open(file_path, "wb") as file:
             pickle.dump(self, file)
