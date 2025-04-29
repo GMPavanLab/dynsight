@@ -18,13 +18,12 @@ UNIVAR_DIM = 2
 
 @dataclass
 class Insight:
-    """Contains an analysis perfomed on a many-body trajectory.
+    """Contains an analysis perfomed on a trajectory.
 
     Attributes:
-        dataset: np.ndarray of shape (n_particles, n_frames, n_dims)
-            The values of a single-particle descriptor.
-        r_cut: float
-            The spatial cutoff with the descriptor has been computed.
+        dataset: the values of a single-particle descriptor. Has shape
+            (n_particles, n_frames) or (n_particles, n_frames, n_dims).
+        r_cut: the spatial cutoff with the descriptor has been computed.
     """
 
     dataset: NDArray[np.float64]
@@ -159,7 +158,7 @@ class OnionInsight(ClusterInsight):
 
 @dataclass
 class Trj:
-    """Contains a many-body trajectory."""
+    """Contains a trajectory."""
 
     universe: MDAnalysis.Universe
 
