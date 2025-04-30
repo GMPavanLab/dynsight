@@ -238,18 +238,16 @@ class OnionInsight(ClusterInsight):
         )
 
 
-@dataclass
+@dataclass(frozen=True)
 class Trj:
     """Contains a trajectory."""
 
     universe: MDAnalysis.Universe = field()
 
-    def init_from_universe(self, universe: MDAnalysis.Universe) -> None:
-        """Initialize Trj object from MDAnalysis.Universe.
-
-        This is equivalent to using __init()__.
-        """
-        self.universe = universe
+    @classmethod
+    def init_from_universe(cls, universe: MDAnalysis.Universe) -> Trj:
+        """Initialize Trj object from MDAnalysis.Universe."""
+        return Trj(universe)
 
     def get_lens(self, r_cut: float) -> Insight:
         """Compute LENS on the trajectory."""
