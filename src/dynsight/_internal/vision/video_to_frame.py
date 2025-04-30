@@ -13,101 +13,40 @@ if TYPE_CHECKING:
 
 @dataclass
 class Video:
-    """Load a video file and provides utilities.
-
-    Attributes:
-        video_path:
-            File path to the video.
-        frames:
-            List of frames in the video.
-    """
-
     video_path: pathlib.Path
     frames: list[np.ndarray] = field(default_factory=list)
+    _capture: cv2.VideoCapture = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self._capture = cv2.VideoCapture(str(self.video_path))
+        if not self._capture.isOpened():
+            msg = f"Impossible to load the video: {self.video_path}"
+            raise ValueError(msg)
+
+    def __del__(self) -> None:
+        if hasattr(self, "_capture") and self._capture.isOpened():
+            self._capture.release()
 
     def count_frames(self) -> int:
-        """Counts the total number of frames in the video.
-
-        Opens the video file at `video_path` and retrieves the frame count
-        from the video metadata.
-
-        Returns:
-            The number of frames in the video.
-
-        Raises:
-            ValueError:
-                If the video cannot be loaded.
-        """
-        capture = cv2.VideoCapture(str(self.video_path))
-        if not capture.isOpened():
-            msg = f"Impossible to load the video: {self.video_path}"
-            raise ValueError(msg)
-        count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-        capture.release()
-        return count
+        return int(self._capture.get(cv2.CAP_PROP_FRAME_COUNT))
 
     def resolution(self) -> tuple[int, int]:
-        """Retrieves the width and height of the video frames.
-
-        Opens the video file at `video_path`, reads its properties, and returns
-        the frame width and height in pixels. Raises a ValueError if the video
-        cannot be loaded.
-
-        Returns:
-            A tuple `(width, height)` representing the frame dimensions.
-
-        Raises:
-            ValueError:
-                If the video cannot be loaded.
-        """
-        capture = cv2.VideoCapture(str(self.video_path))
-        if not capture.isOpened():
-            msg = f"Impossible to load the video: {self.video_path}"
-            raise ValueError(msg)
-        width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        width = int(self._capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(self._capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         return (width, height)
 
-    def extract_frames(self, working_dir: pathlib.Path) -> list[np.ndarray]:
-        """Extracts all frames from the video and saves them as PNG images.
-
-        If it doesn't exist, creates a `frames` subdirectory inside
-        `working_dir', reads each frame from the video at `video_path`, appends
-        it to the `frames` list, and writes it to disk.
-        Clears any previously stored frames in memory before extraction.
-
-        Parameters:
-            working_dir: Directory in which to create a `frames` folder and
-            save extracted PNG images.
-
-        Returns:
-            List of all frames extracted as NumPy arrays.
-
-        Raises:
-            ValueError:
-                If the video cannot be loaded.
-        """
+    def extract_frames(self, working_dir: pathlib.Path) -> None:
         frames_dir = working_dir / "frames"
         frames_dir.mkdir(exist_ok=True)
-        capture = cv2.VideoCapture(str(self.video_path))
-        if not capture.isOpened():
-            msg = f"Impossible to load the video: {self.video_path}"
-            raise ValueError(msg)
-
-        # Clear previous frames
         self.frames.clear()
 
-        # Determine total frame count to iterate over
-        total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        self._capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        total_frames = self.count_frames()
 
         for frame_idx in range(total_frames):
-            ret, frame = capture.read()
+            ret, frame = self._capture.read()
             if not ret:
-                # End of video or read error
                 break
             self.frames.append(frame)
             frame_filename = frames_dir / f"{frame_idx}.png"
             cv2.imwrite(str(frame_filename), frame)
-
-        capture.release()
-        return self.frames
