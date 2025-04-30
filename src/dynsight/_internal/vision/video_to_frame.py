@@ -23,7 +23,7 @@ class Video:
     video_path: pathlib.Path
     frames: list[np.ndarray] = field(default_factory=list)
 
-    def count_frame(self) -> int:
+    def count_frames(self) -> int:
         """Counts the total number of frames in the video.
 
         Opens the video file at `video_path` and retrieves the frame count

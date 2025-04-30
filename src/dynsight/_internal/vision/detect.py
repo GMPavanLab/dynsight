@@ -71,7 +71,7 @@ class Detect:
 
         # Extract information from the input video
         self.video_size = input_video.resolution()
-        self.n_frames = input_video.count_frame()
+        self.n_frames = input_video.count_frames()
 
         # Check if the video's frame are already present
         # if not -> extract them
