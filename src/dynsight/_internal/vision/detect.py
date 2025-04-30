@@ -343,44 +343,11 @@ class Detect:
                             "confidence": float(conf[i]),
                         }
                     )
-        # Initialize outliers folder in the prediction folder
-        outliers_plt_folder = (
-            self.project_folder
-            / "predictions"
-            / f"attempt_{prediction_number}"
-            / "outliers"
+        # Filter detections
+        detection_results = self._filter_detections(
+            detection_results,
+            prediction_number,
         )
-        outliers_plt_folder.mkdir(exist_ok=True)
-
-        # Look for outliers in the boxes width and height
-        widths = np.array([d["width"] for d in detection_results], dtype=float)
-        heights = np.array(
-            [d["height"] for d in detection_results],
-            dtype=float,
-        )
-        out_width = set(
-            _find_outliers(
-                distribution=widths,
-                save_path=outliers_plt_folder,
-                fig_name="width",
-            )
-        )
-        out_height = set(
-            _find_outliers(
-                distribution=heights,
-                save_path=outliers_plt_folder,
-                fig_name="height",
-            )
-        )
-        # Exclude the outliers from the detection results
-        filtered_detections = [
-            det
-            for det in detection_results
-            if (det["width"] not in out_width)
-            and (det["height"] not in out_height)
-        ]
-        detection_results = filtered_detections
-
         # Build a new dataset based on the "filtered" detection results
         # New dataset path
         train_dataset_path = (
@@ -457,45 +424,12 @@ class Detect:
                                 "confidence": float(conf[i]),
                             }
                         )
-            # Look for outliers in the boxes width and height
-            widths = np.array(
-                [d["width"] for d in detection_results], dtype=float
-            )
-            heights = np.array(
-                [d["height"] for d in detection_results],
-                dtype=float,
-            )
-            outliers_plt_folder = (
-                self.project_folder
-                / "predictions"
-                / f"attempt_{prediction_number}"
-                / "outliers"
-            )
-            outliers_plt_folder.mkdir(exist_ok=True)
-            out_width = set(
-                _find_outliers(
-                    distribution=widths,
-                    save_path=outliers_plt_folder,
-                    fig_name="width",
-                )
-            )
-            out_height = set(
-                _find_outliers(
-                    distribution=heights,
-                    save_path=outliers_plt_folder,
-                    fig_name="height",
-                )
-            )
 
-            # Exclude the outliers from the detection results
-            filtered_detections = [
-                det
-                for det in detection_results
-                if (det["width"] not in out_width)
-                and (det["height"] not in out_height)
-            ]
-            detection_results = filtered_detections
-
+            # Filter detections
+            detection_results = self._filter_detections(
+                detection_results,
+                prediction_number,
+            )
             # Build the new dataset
             self._build_dataset(
                 detection_results=detection_results,
@@ -512,6 +446,48 @@ class Detect:
             )
             # Update the dataset config file
             self._add_or_create_yaml(train_dataset_path)
+
+    def _filter_detections(
+        self,
+        input_results: list[dict[str, int | float]],
+        prediction_number: int,
+    ) -> None:
+        # Initialize outliers folder in the prediction folder
+        outliers_plt_folder = (
+            self.project_folder
+            / "predictions"
+            / f"attempt_{prediction_number}"
+            / "outliers"
+        )
+        outliers_plt_folder.mkdir(exist_ok=True)
+
+        # Look for outliers in the boxes width and height
+        widths = np.array([d["width"] for d in input_results], dtype=float)
+        heights = np.array(
+            [d["height"] for d in input_results],
+            dtype=float,
+        )
+        out_width = set(
+            _find_outliers(
+                distribution=widths,
+                save_path=outliers_plt_folder,
+                fig_name="width",
+            )
+        )
+        out_height = set(
+            _find_outliers(
+                distribution=heights,
+                save_path=outliers_plt_folder,
+                fig_name="height",
+            )
+        )
+        # Exclude the outliers from the detection results
+        return [
+            det
+            for det in input_results
+            if (det["width"] not in out_width)
+            and (det["height"] not in out_height)
+        ]
 
     def _remove_old_dataset(self) -> None:
         """Removes the oldest dataset from the YAML configuration."""
