@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field, fields
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -38,7 +38,7 @@ class Insight:
             json.dump(data, file, indent=4)
 
     @classmethod
-    def load_from_json(cls, file_path: Path) -> Self:
+    def load_from_json(cls, file_path: Path) -> Insight:
         """Load the Insight object from .json file."""
         with file_path.open("r") as file:
             data = json.load(file)
@@ -105,7 +105,7 @@ class ClusterInsight:
             json.dump(data, file, indent=4)
 
     @classmethod
-    def load_from_json(cls, file_path: Path) -> Self:
+    def load_from_json(cls, file_path: Path) -> ClusterInsight:
         """Load the ClusterInsight object from .json file."""
         with file_path.open("r") as file:
             data = json.load(file)
@@ -140,7 +140,7 @@ class OnionInsight(ClusterInsight):
             json.dump(data, file, indent=4)
 
     @classmethod
-    def load_from_json(cls, file_path: Path) -> Self:
+    def load_from_json(cls, file_path: Path) -> OnionInsight:
         """Load the OnionInsight object from .json file."""
         with file_path.open("r") as file:
             data = json.load(file)
