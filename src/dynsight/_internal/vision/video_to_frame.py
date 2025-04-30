@@ -18,6 +18,8 @@ class Video:
     Attributes:
         video_path:
             File path to the video.
+        frames:
+            List of frames in the video.
     """
 
     video_path: pathlib.Path
@@ -91,16 +93,21 @@ class Video:
         if not capture.isOpened():
             msg = f"Impossible to load the video: {self.video_path}"
             raise ValueError(msg)
-        frame_idx = 0
+
+        # Clear previous frames
         self.frames.clear()
 
-        while True:
+        # Determine total frame count to iterate over
+        total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+
+        for frame_idx in range(total_frames):
             ret, frame = capture.read()
             if not ret:
+                # End of video or read error
                 break
             self.frames.append(frame)
             frame_filename = frames_dir / f"{frame_idx}.png"
             cv2.imwrite(str(frame_filename), frame)
-            frame_idx += 1
+
         capture.release()
         return self.frames
