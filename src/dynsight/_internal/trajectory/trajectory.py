@@ -314,8 +314,8 @@ class Trj:
             soapnmax=n_max,
             soaplmax=l_max,
             soap_respectpbc=respect_pbc,
-            n_core=n_core,
             centers=centers,
+            n_core=n_core,
         )
         attr_dict = {
             "r_cut": r_cut,
@@ -333,6 +333,7 @@ class Trj:
         l_max: int,
         respect_pbc: bool = True,
         centers: str = "all",
+        delay: int = 1,
         n_core: int = 1,
     ) -> Insight:
         """Compute timeSOAP on the trajectory.
@@ -344,6 +345,7 @@ class Trj:
             * respect_pbc: bust be True if trajectory has PBC
             * centers: selection of atoms used as centers for the SOAP
                 calculation.
+            * delay: the delay between frames on which timeSOAP is computed.
         """
         soap = dynsight.soap.saponify_trajectory(
             self.universe,
@@ -351,15 +353,16 @@ class Trj:
             soapnmax=n_max,
             soaplmax=l_max,
             soap_respectpbc=respect_pbc,
-            n_core=n_core,
             centers=centers,
+            n_core=n_core,
         )
-        tsoap = dynsight.soap.timesoap(soap)
+        tsoap = dynsight.soap.timesoap(soap, delay=delay)
         attr_dict = {
             "r_cut": r_cut,
             "n_max": n_max,
             "l_max": l_max,
             "respect_pbc": respect_pbc,
             "centers": centers,
+            "delay": delay,
         }
         return Insight(dataset=tsoap, meta=attr_dict)
