@@ -43,6 +43,10 @@ class Insight:
         with file_path.open("r") as file:
             data = json.load(file)
 
+        if "dataset" not in data:
+            msg = "'dataset' key not found in JSON file."
+            raise ValueError(msg)
+
         return cls(
             dataset=np.array(data.get("dataset")),
             meta=data.get("meta"),
@@ -117,6 +121,9 @@ class ClusterInsight:
         """Load the ClusterInsight object from .json file."""
         with file_path.open("r") as file:
             data = json.load(file)
+        if "labels" not in data:
+            msg = "'labels' key not found in JSON file."
+            raise ValueError(msg)
         return cls(labels=np.array(data.get("labels")))
 
 
@@ -152,7 +159,9 @@ class OnionInsight(ClusterInsight):
         """Load the OnionInsight object from .json file."""
         with file_path.open("r") as file:
             data = json.load(file)
-
+        if "state_list" not in data:
+            msg = "'state_list' key not found in JSON file."
+            raise ValueError(msg)
         return cls(
             labels=np.array(data.get("labels")),
             state_list=data.get("state_list"),
