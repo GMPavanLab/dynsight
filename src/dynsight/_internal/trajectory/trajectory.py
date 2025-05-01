@@ -268,7 +268,7 @@ class Trj:
         """Initialize Trj object from MDAnalysis.Universe."""
         return Trj(universe)
 
-    def get_lens(self, r_cut: float) -> Insight:
+    def get_lens(self, r_cut: float, neigh_count: bool = False) -> Insight:
         """Compute LENS on the trajectory.
 
         The returned Insight contains the following meta:
@@ -278,8 +278,16 @@ class Trj:
             input_universe=self.universe,
             cutoff=r_cut,
         )
-        lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
-        return Insight(dataset=lens, meta={"r_cut": r_cut})
+        lens, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
+        if neigh_count:
+            return Insight(
+                dataset=nn.astype(np.float64),
+                meta={"r_cut": r_cut, "neigh_count": neigh_count},
+            )
+        return Insight(
+            dataset=lens,
+            meta={"r_cut": r_cut, "neigh_count": neigh_count},
+        )
 
     def get_soap(
         self,
