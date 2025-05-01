@@ -15,6 +15,9 @@ dependencies = [
     "dscribe",
     "tropea-clustering",
     "MDAnalysis",
+    "ultralytics",
+    "open-python",
+    "PyYAML",
 ]
 # Set by cpctools.
 requires-python = ">=3.8"
