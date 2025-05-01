@@ -91,7 +91,9 @@ class Insight:
             reshaped_data = dynsight.onion.helpers.reshape_from_dnt(
                 self.dataset.transpose(2, 0, 1), delta_t
             )
-            onion_clust = dynsight.onion.OnionMulti(ndims=self.dataset.ndim)
+            onion_clust = dynsight.onion.OnionMulti(
+                ndims=self.dataset.ndim - 1
+            )
 
         onion_clust.fit(reshaped_data)
 
