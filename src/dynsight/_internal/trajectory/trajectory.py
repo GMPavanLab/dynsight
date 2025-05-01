@@ -55,7 +55,11 @@ class Insight:
         selection: str = "all",
         num_processes: int = 1,
     ) -> Insight:
-        """Average the descripotor over the neighboring particles."""
+        """Average the descripotor over the neighboring particles.
+
+        The returned Insight contains the following meta:
+            * sp_av_r_cut: the r_cut value used for the computation.
+        """
         averaged_dataset = dynsight.analysis.spatialaverage(
             universe=trajectory.universe,
             descriptor_array=self.dataset,
@@ -69,7 +73,11 @@ class Insight:
         )
 
     def get_onion(self, delta_t: int) -> OnionInsight:
-        """Perform onion clustering."""
+        """Perform onion clustering.
+
+        The returned OnionInsight contains the following meta:
+            * delta_t: the delta_t value used for the clustering.
+        """
         if self.dataset.ndim == UNIVAR_DIM:
             reshaped_data = dynsight.onion.helpers.reshape_from_nt(
                 self.dataset, delta_t
@@ -250,7 +258,11 @@ class Trj:
         return Trj(universe)
 
     def get_lens(self, r_cut: float) -> Insight:
-        """Compute LENS on the trajectory."""
+        """Compute LENS on the trajectory.
+
+        The returned Insight contains the following meta:
+            * r_cut: the r_cut value used for the LENS calculation.
+        """
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
             cutoff=r_cut,
@@ -265,7 +277,13 @@ class Trj:
         l_max: int,
         n_core: int,
     ) -> Insight:
-        """Compute SOAP on the trajectory."""
+        """Compute SOAP on the trajectory.
+
+        The returned Insight contains the following meta:
+            * r_cut: the r_cut value used for the SOAP calculation.
+            * n_max: the n_max value used for the SOAP calculation.
+            * l_max: the l_max value used for the SOAP calculation.
+        """
         soap = dynsight.soap.saponify_trajectory(
             self.universe,
             soaprcut=r_cut,
@@ -283,7 +301,13 @@ class Trj:
     def get_timesoap(
         self, r_cut: float, n_max: int, l_max: int, n_core: int
     ) -> Insight:
-        """Compute timeSOAP on the trajectory."""
+        """Compute timeSOAP on the trajectory.
+
+        The returned Insight contains the following meta:
+            * r_cut: the r_cut value used for the timeSOAP calculation.
+            * n_max: the n_max value used for the timeSOAP calculation.
+            * l_max: the l_max value used for the timeSOAP calculation.
+        """
         soap = dynsight.soap.saponify_trajectory(
             self.universe,
             soaprcut=r_cut,
