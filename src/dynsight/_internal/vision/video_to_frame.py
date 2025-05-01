@@ -92,9 +92,7 @@ class Video:
         total_frames = self.count_frames()
 
         for frame_idx in range(total_frames):
-            ret, frame = self._capture.read()
-            if not ret:
-                break
+            _, frame = self._capture.read()
             self.frames.append(frame)
             frame_filename = frames_dir / f"{frame_idx}.png"
             cv2.imwrite(str(frame_filename), frame)
