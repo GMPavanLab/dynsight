@@ -294,7 +294,9 @@ class Trj:
         r_cut: float,
         n_max: int,
         l_max: int,
-        n_core: int,
+        respect_pbc: bool = True,
+        centers: str = "all",
+        n_core: int = 1,
     ) -> Insight:
         """Compute SOAP on the trajectory.
 
@@ -302,23 +304,36 @@ class Trj:
             * r_cut: the r_cut value used for the SOAP calculation.
             * n_max: the n_max value used for the SOAP calculation.
             * l_max: the l_max value used for the SOAP calculation.
+            * respect_pbc: bust be True if trajectory has PBC
+            * centers: selection of atoms used as centers for the SOAP
+                calculation.
         """
         soap = dynsight.soap.saponify_trajectory(
             self.universe,
             soaprcut=r_cut,
             soapnmax=n_max,
             soaplmax=l_max,
+            soap_respectpbc=respect_pbc,
             n_core=n_core,
+            centers=centers,
         )
         attr_dict = {
             "r_cut": r_cut,
             "n_max": n_max,
             "l_max": l_max,
+            "respect_pbc": respect_pbc,
+            "centers": centers,
         }
         return Insight(dataset=soap, meta=attr_dict)
 
     def get_timesoap(
-        self, r_cut: float, n_max: int, l_max: int, n_core: int
+        self,
+        r_cut: float,
+        n_max: int,
+        l_max: int,
+        respect_pbc: bool = True,
+        centers: str = "all",
+        n_core: int = 1,
     ) -> Insight:
         """Compute timeSOAP on the trajectory.
 
@@ -326,18 +341,25 @@ class Trj:
             * r_cut: the r_cut value used for the timeSOAP calculation.
             * n_max: the n_max value used for the timeSOAP calculation.
             * l_max: the l_max value used for the timeSOAP calculation.
+            * respect_pbc: bust be True if trajectory has PBC
+            * centers: selection of atoms used as centers for the SOAP
+                calculation.
         """
         soap = dynsight.soap.saponify_trajectory(
             self.universe,
             soaprcut=r_cut,
             soapnmax=n_max,
             soaplmax=l_max,
+            soap_respectpbc=respect_pbc,
             n_core=n_core,
+            centers=centers,
         )
         tsoap = dynsight.soap.timesoap(soap)
         attr_dict = {
             "r_cut": r_cut,
             "n_max": n_max,
             "l_max": l_max,
+            "respect_pbc": respect_pbc,
+            "centers": centers,
         }
         return Insight(dataset=tsoap, meta=attr_dict)
