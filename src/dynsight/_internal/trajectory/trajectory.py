@@ -9,9 +9,10 @@ import numpy as np
 if TYPE_CHECKING:
     from pathlib import Path
 
-    import MDAnalysis
     from numpy.typing import NDArray
     from tropea_clustering._internal.first_classes import StateMulti, StateUni
+
+import MDAnalysis
 
 import dynsight
 
@@ -266,6 +267,18 @@ class Trj:
     @classmethod
     def init_from_universe(cls, universe: MDAnalysis.Universe) -> Trj:
         """Initialize Trj object from MDAnalysis.Universe."""
+        return Trj(universe)
+
+    @classmethod
+    def init_from_xyz(cls, traj_file: Path, dt: float) -> Trj:
+        """Initialize Trj object from .xyz file."""
+        universe = MDAnalysis.Universe(traj_file, dt=dt)
+        return Trj(universe)
+
+    @classmethod
+    def init_from_xtc(cls, traj_file: Path, topo_file: Path) -> Trj:
+        """Initialize Trj object from .gro and .xtc files."""
+        universe = MDAnalysis.Universe(traj_file, topo_file)
         return Trj(universe)
 
     def get_lens(self, r_cut: float, neigh_count: bool = False) -> Insight:
