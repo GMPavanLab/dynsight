@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field, fields
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -379,3 +379,42 @@ class Trj:
             "delay": delay,
         }
         return Insight(dataset=tsoap, meta=attr_dict)
+
+    def get_rdf(
+        self,
+        distances_range: list[float],
+        s1: str = "all",
+        s2: str = "all",
+        exclusion_block: list[int] | None = None,
+        nbins: int = 200,
+        norm: Literal["rdf", "density", "none"] = "rdf",
+        start: int | None = None,
+        stop: int | None = None,
+        step: int = 1,
+    ) -> Insight:
+        """Compute the radial distribution function g(r)."""
+        bins, rdf = dynsight.analysis.compute_rdf(
+            universe=self.universe,
+            distances_range=distances_range,
+            s1=s1,
+            s2=s2,
+            exclusion_block=exclusion_block,
+            nbins=nbins,
+            norm=norm,
+            start=start,
+            stop=stop,
+            step=step,
+        )
+        dataset = np.array([bins, rdf])
+        attr_dict = {
+            "distances_range=": distances_range,
+            "s1": s1,
+            "s2": s2,
+            "exclusion_block": exclusion_block,
+            "nbins": nbins,
+            "norm": norm,
+            "start": start,
+            "stop": stop,
+            "step": step,
+        }
+        return Insight(dataset=dataset, meta=attr_dict)
