@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-import cv2  # pyright: ignore  # noqa: PGH003
+import cv2
 
 if TYPE_CHECKING:
     import pathlib

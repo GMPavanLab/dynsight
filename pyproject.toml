@@ -17,8 +17,6 @@ dependencies = [
     "MDAnalysis",
     "ultralytics",
     "PyYAML",
-    "types-PyYAML",
-    "types-Pillow",
 ]
 # Set by cpctools.
 requires-python = ">=3.8"
@@ -101,7 +99,6 @@ check_untyped_defs = true
 disallow_untyped_decorators = true
 warn_unreachable = true
 disallow_any_generics = true
-ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
@@ -115,4 +112,9 @@ module = [
     'tropea_clustering.*',
     'h5py.*',
     'SOAPify.*',
+    'yaml.*',
+    'Pillow.*',
+    'ultralytics.*',
+    'opencv-python.*',
 ]
+ignore_missing_imports = true

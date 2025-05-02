@@ -13,7 +13,7 @@ import yaml
 from PIL import Image
 from scipy.optimize import curve_fit
 from scipy.stats import norm
-from ultralytics import YOLO  # pyright: ignore  # noqa: PGH003
+from ultralytics import YOLO
 
 from .vision_gui import VisionGUI
 
