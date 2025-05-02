@@ -1,10 +1,22 @@
-import tempfile
+import os
 from pathlib import Path
+from typing import Generator
 
 import MDAnalysis
 import numpy as np
+import pytest
 
-from dynsight.analysis import spatialaverage
+from dynsight.trajectory import Insight, Trj
+
+
+@pytest.fixture
+def original_wd() -> Generator[Path, None, None]:
+    original_dir = Path.cwd()
+
+    # Ensure the original working directory is restored after the test
+    yield original_dir
+
+    os.chdir(original_dir)
 
 
 def test_spatialaverage() -> None:
@@ -13,30 +25,24 @@ def test_spatialaverage() -> None:
     trajectory_file = original_dir / "../systems/coex/test_coex.xtc"
     expected_results = original_dir / "spavg/test_spavg.npy"
 
-    u = MDAnalysis.Universe(topology_file, trajectory_file)
-    atoms = u.select_atoms("type O")
+    universe = MDAnalysis.Universe(topology_file, trajectory_file)
+    example_trj = Trj(universe)
+    example_trj = Trj.init_from_xtc(trajectory_file, topology_file)
+    atoms = universe.select_atoms("type O")
 
     descriptor = np.zeros((2048, 6))
-    for ts in u.trajectory:
+    for ts in universe.trajectory:
         descriptor[:, ts.frame] = atoms.positions[:, 0]
 
-    # Create a temporary file for test_arr
-    with tempfile.NamedTemporaryFile(suffix=".npy", delete=False) as temp_file:
-        temp_file_path = Path(temp_file.name)
-        np.save(temp_file_path, descriptor)
+    example_data = Insight(descriptor)
 
-    # Load the temporary file and run spatialaverage
-    test_arr = spatialaverage(
-        universe=u,
-        descriptor_array=descriptor,
+    aver_data = example_data.spatial_average(
+        example_trj,
+        r_cut=5.0,
         selection="type O",
-        cutoff=5.0,
         num_processes=1,
     )
 
-    # Clean up temporary file
-    temp_file_path.unlink()
-
     # Load expected results and compare
     expected_arr = np.load(expected_results)
-    assert np.allclose(test_arr, expected_arr)
+    assert np.allclose(aver_data.dataset, expected_arr)

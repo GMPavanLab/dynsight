@@ -278,7 +278,7 @@ class Trj:
     @classmethod
     def init_from_xtc(cls, traj_file: Path, topo_file: Path) -> Trj:
         """Initialize Trj object from .gro and .xtc files."""
-        universe = MDAnalysis.Universe(traj_file, topo_file)
+        universe = MDAnalysis.Universe(topo_file, traj_file)
         return Trj(universe)
 
     def get_lens(self, r_cut: float, neigh_count: bool = False) -> Insight:
