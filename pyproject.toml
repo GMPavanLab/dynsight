@@ -112,6 +112,7 @@ module = [
     'tropea_clustering.*',
     'h5py.*',
     'SOAPify.*',
+    'deeptime.decomposition.*',
     'yaml.*',
     'Pillow.*',
     'ultralytics.*',
