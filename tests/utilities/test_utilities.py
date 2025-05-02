@@ -8,7 +8,7 @@ from dynsight.utilities import (
 
 
 def test_find_extrema_points() -> None:
-    x_coords = np.linspace(-5, 5, 400)
+    x_coords = np.array([float(x) for x in np.linspace(-5, 5, 400)])
     y_coords = (x_coords + 3) * (x_coords - 2) ** 2 * (x_coords + 1) ** 3
 
     min_points = find_extrema_points(
