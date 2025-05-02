@@ -268,7 +268,7 @@ class Detect:
         This method performs multiple rounds of training and prediction:
         1. Train the model on the initial dataset.
         2. Predict bounding boxes on video frames using the trained model.
-        3. Identify and remove outlier detections based on box width and height.
+        3. Identify and remove outlier detections based on width and height.
         4. Build a new training dataset from filtered detections.
         5. Retrain the model on the refined dataset.
         6. Repeat steps 2 to 5 for a given number of sessions to
@@ -549,7 +549,7 @@ class Detect:
             cfg["val"].append(val_p)
             cfg["train"] = list(dict.fromkeys(cfg["train"]))
             cfg["val"] = list(dict.fromkeys(cfg["val"]))
-            # cfg.pop("path", None)
+            # cfg.pop("path", None) # noqa: ERA001
 
             if isinstance(cfg.get("nc"), str):
                 cfg["nc"] = int(cfg["nc"])
@@ -609,7 +609,8 @@ class Detect:
                     w_n = w / img_w
                     h_n = h / img_h
                     f.write(
-                        f"{cls} {x_ctr_n:.6f} {y_ctr_n:.6f} {w_n:.6f} {h_n:.6f}\n"
+                        f"{cls} {x_ctr_n:.6f} {y_ctr_n:.6f} "
+                        f"{w_n:.6f} {h_n:.6f}\n"
                     )
 
     def _create_collage(
@@ -627,12 +628,8 @@ class Detect:
         cropped_images = []
         for file in images_folder.iterdir():
             if file.suffix.lower() in {".png", ".jpg", ".jpeg"}:
-                try:
-                    img = Image.open(file).convert("RGBA")
-                    cropped_images.append(img)
-                except Exception as e:
-                    msg = f"Error with {file.name}: {e}"
-                    print(msg)
+                img = Image.open(file).convert("RGBA")
+                cropped_images.append(img)
         if not cropped_images:
             msg = "No images found in the specified folder"
             raise ValueError(msg)
@@ -641,15 +638,16 @@ class Detect:
         placed_count = 0
 
         while placed_count < total_placement:
-            cropped = random.choice(cropped_images)
+            rng = np.random.default_rng()
+            cropped = rng.choice(cropped_images)
             w, h = cropped.size
             max_x = width - w
             max_y = height - h
             placed = False
 
             for _ in range(patience):
-                x = random.randint(0, max_x)
-                y = random.randint(0, max_y)
+                x = rng.integers(0, max_x)
+                y = rng.integers(0, max_y)
                 new_rect = (x, y, x + w, y + h)
                 overlap = any(
                     not (
@@ -735,7 +733,7 @@ def _find_outliers(
         fitted_curve,
         "k-",
         linewidth=2,
-        label=f"Gaussian fit  μ={mu:.2f}, σ={sigma:.2f}",
+        label=rf"Gaussian fit  $\mu={mu:.2f},\ \sigma={sigma:.2f}$",
     )
     plt.axvline(
         x_threshold_min,

@@ -37,14 +37,10 @@ def main() -> None:
         msg = "Synthetic dataset not found and --prepare not set."
         raise RuntimeError(msg)
 
-    detection = dynsight.vision.Detect(
+    dynsight.vision.Detect(
         input_video=video,
         project_folder=output_folder,
     )
-    # dataset = detection.synthesize()
-
-    # if args.train:
-    #    detection.fit(initial_dataset=dataset)
 
 
 if __name__ == "__main__":
