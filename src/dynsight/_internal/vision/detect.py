@@ -31,24 +31,7 @@ class YAMLConfig(TypedDict):
 
 
 class Detect:
-    """A class to manage the full pipeline of object detection from videos.
-
-    Attributes:
-        project_folder: Main directory for all project outputs.
-        frames_dir: Directory to store extracted video frames.
-        training_items_path: Directory to save training item crops selected.
-        syn_dataset_path: Directory for the generated synthetic dataset.
-        models_path: Directory to save trained models.
-        predictions_path: Directory to save prediction outputs.
-        yaml_file: Path to the YAML configuration file for dataset training.
-        video_size: Resolution of the input video (width, height).
-        n_frames: Total number of frames extracted from the video.
-
-    Methods:
-        synthesize(): Generate a synthetic dataset by creating random collages.
-        train(): Train a YOLO model on the synthetic dataset.
-        predict(): Make predictions using a trained model on video frames.
-    """
+    """A class to manage the full pipeline of object detection from videos."""
 
     def __init__(
         self,
@@ -67,20 +50,32 @@ class Detect:
         """
         # Define the project folder path
         self.project_folder = project_folder
+        """Main directory for all the project outputs."""
 
-        # Define all the sub folders path
         self.frames_dir = self.project_folder / "frames"
+        """Directory where store extracted video frames."""
+
         self.training_items_path = self.project_folder / "training_items"
+        """Directory path where save the training item crops selected."""
+
         self.syn_dataset_path = self.project_folder / "synthetic_dataset"
+        """Directory path for the generated synthetic dataset."""
+
         self.models_path = self.project_folder / "models"
+        """Directory path where save trained models."""
+
         self.predictions_path = self.project_folder / "predictions"
+        """Directory path where save prediction outputs."""
 
         # Define the config file path for the training
         self.yaml_file = self.project_folder / "training_options.yaml"
+        """Path to the YAML configuration file for dataset training."""
 
         # Extract information from the input video
         self.video_size = input_video.resolution()
+        """Resolution of the input video (width, height) in pixels."""
         self.n_frames = input_video.count_frames()
+        """Total number of frames extracted from the video."""
 
         # Check if the video's frame are already present
         # if not -> extract them
@@ -98,7 +93,7 @@ class Detect:
     ) -> None:
         """Generate a synthetic dataset by creating collages of training items.
 
-        Args:
+        Parameters:
             dataset_dimension: Total number of synthetic samples to generate.
             reference_img_path: Path to the reference image to initialize the
                 GUI. If None, uses the first extracted frame.
@@ -107,11 +102,9 @@ class Detect:
             collage_size: Size (width, height) of the generated collage images.
             collage_max_repeats: Maximum number of training items that can be
                 placed in a single collage.
-            sample_from: Mode to collect training items.
-
-        Raises:
-            ValueError: If the "training_items" folder is not created after
-            GUI sampling.
+            sample_from: Mode to collect training items. in the current version
+                only the "gui" mode is available, other modes will come
+                in the future.
         """
         # Dataset structure
         images_train_dir = self.syn_dataset_path / "images" / "train"
@@ -196,18 +189,19 @@ class Detect:
         workers: int = 8,
         device: int | str | list[int] | None = None,
     ) -> None:
-        """Train a YOLO model on the generated synthetic dataset.
+        """Train a YOLO model on the selected dataset.
 
-        Args:
+        Parameters:
             yaml_file: Path to the dataset YAML configuration file.
-            initial_model: Pretrained model checkpoint to fine-tune.
+            initial_model: Initial pretrained model to fine-tune.
             training_name: Name for the training run.
-            training_epochs: Maximum number of training epochs
+            training_epochs: Maximum number of training epochs for each
+                training session.
             training_patience: Early stopping patience
                 (number of epochs without improvement).
             batch_size: Batch size for training.
             workers: Number of dataloader worker threads.
-            device: Device(s) on which to run training.
+            device: Device(s) on which run training.
         """
         model = YOLO(initial_model)
         model.train(
@@ -232,10 +226,10 @@ class Detect:
     ) -> None:
         """Perform object detection predictions on the extracted frames.
 
-        Args:
-            model_path: Path to the trained model weights.
+        Parameters:
+            model_path: Path to the trained model.
             detections_iou: IOU threshold for object detection filtering.
-            prediction_name: Name under which to save the prediction results.
+            prediction_name: Name under which save the prediction results.
         """
         model = YOLO(model_path)
         model.predict(
@@ -266,13 +260,13 @@ class Detect:
         """Train an object detection model through iterative self-training.
 
         This method performs multiple rounds of training and prediction:
-        1. Train the model on the initial dataset.
-        2. Predict bounding boxes on video frames using the trained model.
-        3. Identify and remove outlier detections based on width and height.
-        4. Build a new training dataset from filtered detections.
-        5. Retrain the model on the refined dataset.
-        6. Repeat steps 2 to 5 for a given number of sessions to
-        progressively refine the model.
+            1. Train the model on the initial dataset.
+            2. Predict bounding boxes on video frames using the trained model.
+            3. Identify and remove outlier detections based on box sizes.
+            4. Build a new training dataset from filtered detections.
+            5. Retrain the model on the refined dataset.
+            6. Repeat steps 2 to 5 for a given number of sessions to
+            progressively refine the model.
 
         Args:
             initial_dataset: Path to the initial dataset YAML file.
@@ -284,9 +278,6 @@ class Detect:
             workers: Number of data loader workers.
             device: Device(s) to use (e.g., "cpu", "0", [0,1]).
             real_n_particles: Optional, real number of particles expected.
-
-        Returns:
-            None
         """
         # Initilize the first training
         current_dataset = initial_dataset
