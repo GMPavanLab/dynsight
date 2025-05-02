@@ -272,7 +272,7 @@ class Detect:
         4. Build a new training dataset from filtered detections.
         5. Retrain the model on the refined dataset.
         6. Repeat steps 2 to 5 for a given number of sessions to
-            progressively refine the model.
+        progressively refine the model.
 
         Args:
             initial_dataset: Path to the initial dataset YAML file.
