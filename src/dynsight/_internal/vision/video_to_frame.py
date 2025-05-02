@@ -8,8 +8,6 @@ import cv2
 if TYPE_CHECKING:
     import pathlib
 
-    import numpy as np
-
 
 @dataclass
 class Video:
@@ -21,7 +19,6 @@ class Video:
     """
 
     video_path: pathlib.Path
-    frames: list[np.ndarray] = field(default_factory=list)
     _capture: cv2.VideoCapture = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -86,13 +83,11 @@ class Video:
         """
         frames_dir = working_dir / "frames"
         frames_dir.mkdir(exist_ok=True)
-        self.frames.clear()
 
         self._capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
         total_frames = self.count_frames()
 
         for frame_idx in range(total_frames):
             _, frame = self._capture.read()
-            self.frames.append(frame)
             frame_filename = frames_dir / f"{frame_idx}.png"
             cv2.imwrite(str(frame_filename), frame)

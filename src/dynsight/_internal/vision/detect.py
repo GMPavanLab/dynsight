@@ -5,7 +5,7 @@ import random
 import shutil
 import tkinter as tk
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,7 +18,16 @@ from ultralytics import YOLO
 from .vision_gui import VisionGUI
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
     from .video_to_frame import Video
+
+
+class YAMLConfig(TypedDict):
+    train: list[str]
+    val: list[str]
+    nc: int
+    names: list[str]
 
 
 class Detect:
@@ -83,7 +92,7 @@ class Detect:
         dataset_dimension: int = 1000,
         reference_img_path: None | pathlib.Path = None,
         validation_set_fraction: float = 0.2,
-        collage_size: tuple = (1080, 1080),
+        collage_size: tuple[int, int] = (1080, 1080),
         collage_max_repeats: int = 30,
         sample_from: Literal["gui"] = "gui",
     ) -> None:
@@ -451,7 +460,7 @@ class Detect:
         self,
         input_results: list[dict[str, int | float]],
         prediction_number: int,
-    ) -> None:
+    ) -> list[dict[str, int | float]]:
         # Initialize outliers folder in the prediction folder
         outliers_plt_folder = (
             self.project_folder
@@ -515,49 +524,42 @@ class Detect:
             yaml.safe_dump(cfg, f, sort_keys=False)
 
     def _add_or_create_yaml(self, new_dataset_path: Path) -> None:
-        """Adds or creates a YAML configuration file with the new datasets."""
         yaml_path = Path(self.yaml_file)
 
-        train_rel = "images/train"
-        val_rel = "images/val"
+        train_p = str((new_dataset_path / "images/train").resolve())
+        val_p = str((new_dataset_path / "images/val").resolve())
 
         if not yaml_path.exists():
-            cfg = {
-                "train": [str((new_dataset_path / train_rel).resolve())],
-                "val": [str((new_dataset_path / val_rel).resolve())],
+            cfg: YAMLConfig = {
+                "train": [train_p],
+                "val": [val_p],
                 "nc": 1,
                 "names": ["obj"],
             }
         else:
-            with yaml_path.open("r") as f:
-                cfg = yaml.safe_load(f) or {}
+            raw = yaml.safe_load(yaml_path.open("r")) or {}
+            cfg = cast("YAMLConfig", raw)
 
-            cfg.setdefault("train", [])
-            cfg.setdefault("val", [])
-            cfg.setdefault("nc", 1)
-            cfg.setdefault("names", ["obj"])
-
-            if not isinstance(cfg["train"], list):
-                cfg["train"] = [cfg["train"]]
-            if not isinstance(cfg["val"], list):
-                cfg["val"] = [cfg["val"]]
-
-            train_p = str((new_dataset_path / train_rel).resolve())
-            val_p = str((new_dataset_path / val_rel).resolve())
+            if not isinstance(cfg.get("train"), list):
+                cfg["train"] = [str(cfg.get("train") or train_p)]
+            if not isinstance(cfg.get("val"), list):
+                cfg["val"] = [str(cfg.get("val") or val_p)]
 
             cfg["train"].append(train_p)
             cfg["val"].append(val_p)
             cfg["train"] = list(dict.fromkeys(cfg["train"]))
             cfg["val"] = list(dict.fromkeys(cfg["val"]))
+            # cfg.pop("path", None)
 
-            cfg.pop("path", None)
+            if isinstance(cfg.get("nc"), str):
+                cfg["nc"] = int(cfg["nc"])
 
         with yaml_path.open("w") as f:
             yaml.safe_dump(cfg, f, sort_keys=False)
 
     def _build_dataset(
         self,
-        detection_results: list[dict[str, any]],
+        detection_results: list[dict[str, Any]],
         dataset_name: str,
         split_ratio: float = 0.8,
     ) -> None:
@@ -570,7 +572,7 @@ class Detect:
         for d in (imgs_train_dir, imgs_val_dir, labs_train_dir, labs_val_dir):
             d.mkdir(parents=True, exist_ok=True)
 
-        detections_by_frame = {}
+        detections_by_frame: dict[int, list[dict[str, Any]]] = {}
         for det in detection_results:
             frame_idx = det["frame"]
             detections_by_frame.setdefault(frame_idx, []).append(det)
@@ -620,7 +622,7 @@ class Detect:
     ) -> tuple[Image.Image, list[str]]:
         """Creates a collage of images by placing them randomly on a canvas."""
         collage = Image.new("RGBA", (width, height), (255, 255, 255, 255))
-        placed_rects = []
+        placed_rects: list[tuple[int, int, int, int]] = []
         label_lines = []
         cropped_images = []
         for file in images_folder.iterdir():
@@ -680,16 +682,16 @@ class Detect:
 
 
 def _find_outliers(
-    distribution: np.ndarray,
+    distribution: NDArray[np.float64],
     save_path: pathlib.Path,
     fig_name: str,
     thr: float = 1e-5,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Detects outliers in a distribution by fitting a normal distribution."""
 
     def _gaussian(
-        x: np.ndarray, mu: float, sigma: float, amplitude: float
-    ) -> np.ndarray:
+        x: NDArray[np.float64], mu: float, sigma: float, amplitude: float
+    ) -> NDArray[np.float64]:
         return amplitude * norm.pdf(x, mu, sigma)
 
     # Compute histogram and bin centers
@@ -715,7 +717,7 @@ def _find_outliers(
     x_threshold_max = mu + np.sqrt(-2 * sigma**2 * np.log(thr / base_pdf))
 
     # Identify outliers using numpy boolean indexing
-    outliers: np.ndarray = distribution[
+    outliers: NDArray[np.float64] = distribution[
         (distribution < x_threshold_min) | (distribution > x_threshold_max)
     ]
 

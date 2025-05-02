@@ -28,7 +28,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     input_video = args.input
-    frames = dynsight.vision.Video(input_video)
+    video = dynsight.vision.Video(input_video)
     output_folder = Path("output_folder")
     output_folder.mkdir(exist_ok=True)
 
@@ -38,14 +38,13 @@ def main() -> None:
         raise RuntimeError(msg)
 
     detection = dynsight.vision.Detect(
-        input_frames=frames,
+        input_video=video,
         project_folder=output_folder,
     )
-    dataset = detection.synthesize()
+    # dataset = detection.synthesize()
 
-    if args.train:
-        trained_model = detection.fit(input=dataset)
-        detection.predict(model=trained_model)
+    # if args.train:
+    #    detection.fit(initial_dataset=dataset)
 
 
 if __name__ == "__main__":
