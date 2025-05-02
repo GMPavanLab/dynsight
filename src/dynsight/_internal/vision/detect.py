@@ -13,7 +13,7 @@ import yaml
 from PIL import Image
 from scipy.optimize import curve_fit
 from scipy.stats import norm
-from ultralytics import YOLO
+from ultralytics import YOLO  # pyright: ignore  # noqa: PGH003
 
 from .vision_gui import VisionGUI
 
@@ -626,29 +626,32 @@ class Detect:
         placed_rects: list[tuple[int, int, int, int]] = []
         label_lines = []
         cropped_images = []
+
         for file in images_folder.iterdir():
             if file.suffix.lower() in {".png", ".jpg", ".jpeg"}:
                 img = Image.open(file).convert("RGBA")
                 cropped_images.append(img)
+
         if not cropped_images:
             msg = "No images found in the specified folder"
             raise ValueError(msg)
 
         total_placement = len(cropped_images) * max_repeats
         placed_count = 0
-
+        cropped_images_array = np.array(cropped_images, dtype=object)
+        rng = np.random.default_rng()
         while placed_count < total_placement:
-            rng = np.random.default_rng()
-            cropped = rng.choice(cropped_images)
+            cropped = rng.choice(cropped_images_array)
             w, h = cropped.size
             max_x = width - w
             max_y = height - h
             placed = False
 
             for _ in range(patience):
-                x = rng.integers(0, max_x)
-                y = rng.integers(0, max_y)
+                x = rng.integers(0, max_x + 1)
+                y = rng.integers(0, max_y + 1)
                 new_rect = (x, y, x + w, y + h)
+
                 overlap = any(
                     not (
                         new_rect[2] <= rect[0]
@@ -658,24 +661,29 @@ class Detect:
                     )
                     for rect in placed_rects
                 )
+
                 if not overlap:
                     collage.paste(cropped, (x, y), cropped)
                     placed_rects.append(new_rect)
 
-                    center_x = (x + h / 2) / width
+                    center_x = (x + w / 2) / width
                     center_y = (y + h / 2) / height
                     width_norm = w / width
                     height_norm = h / height
                     label_line = (
-                        f"0 {center_x:.6f} {center_y:.6f} "
-                        f"{width_norm:.6f} {height_norm:.6f}"
+                        f"0 {center_x:.6f} "
+                        f"{center_y:.6f} "
+                        f"{width_norm:.6f} "
+                        f"{height_norm:.6f}"
                     )
                     label_lines.append(label_line)
                     placed_count += 1
                     placed = True
                     break
+
             if not placed:
                 break
+
         return collage, label_lines
 
 

@@ -16,7 +16,7 @@ class Box:
     center_y: float
     width: float
     height: float
-    abs_coords: tuple[float, float, float, float]
+    abs_coords: tuple[int, int, int, int]
 
 
 class VisionGUI:
@@ -105,8 +105,8 @@ class VisionGUI:
         self.close_button.pack(pady=10, fill="x")
 
         # Labelling variables
-        self.start_x = 0.0
-        self.start_y = 0.0
+        self.start_x = 0
+        self.start_y = 0
         self.current_box = 0
         self.boxes: list[Box] = []
 

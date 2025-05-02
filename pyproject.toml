@@ -16,8 +16,9 @@ dependencies = [
     "tropea-clustering",
     "MDAnalysis",
     "ultralytics",
-    "open-python",
     "PyYAML",
+    "types-PyYAML",
+    "types-Pillow",
 ]
 # Set by cpctools.
 requires-python = ">=3.8"
@@ -100,6 +101,7 @@ check_untyped_defs = true
 disallow_untyped_decorators = true
 warn_unreachable = true
 disallow_any_generics = true
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
@@ -114,4 +116,3 @@ module = [
     'h5py.*',
     'SOAPify.*',
 ]
-ignore_missing_imports = true
