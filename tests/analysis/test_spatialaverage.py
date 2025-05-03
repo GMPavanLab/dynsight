@@ -1,6 +1,7 @@
 """Pytest for dynsight.analysis.stapialaverage."""
 
 import os
+import tempfile
 from pathlib import Path
 from typing import Generator
 
@@ -21,29 +22,29 @@ def original_wd() -> Generator[Path, None, None]:
     os.chdir(original_dir)
 
 
-def test_spatialaverage() -> None:
-    original_dir = Path(__file__).resolve().parent
-    topology_file = original_dir / "../systems/coex/test_coex.gro"
-    trajectory_file = original_dir / "../systems/coex/test_coex.xtc"
-    expected_results = original_dir / "spavg/test_spavg.npy"
+def test_spatialaverage(original_wd: Path) -> None:
+    with tempfile.TemporaryDirectory() as _:
+        topology_file = original_wd / "tests/systems/coex/test_coex.gro"
+        trajectory_file = original_wd / "tests/systems/coex/test_coex.xtc"
+        expected_results = original_wd / "tests/analysis/spavg/test_spavg.npy"
 
-    universe = MDAnalysis.Universe(topology_file, trajectory_file)
-    example_trj = Trj.init_from_xtc(trajectory_file, topology_file)
-    atoms = universe.select_atoms("type O")
+        universe = MDAnalysis.Universe(topology_file, trajectory_file)
+        example_trj = Trj.init_from_xtc(trajectory_file, topology_file)
+        atoms = universe.select_atoms("type O")
 
-    descriptor = np.zeros((2048, 6))
-    for ts in universe.trajectory:
-        descriptor[:, ts.frame] = atoms.positions[:, 0]
+        descriptor = np.zeros((2048, 6))
+        for ts in universe.trajectory:
+            descriptor[:, ts.frame] = atoms.positions[:, 0]
 
-    example_data = Insight(descriptor)
+        example_data = Insight(descriptor)
 
-    aver_data = example_data.spatial_average(
-        example_trj,
-        r_cut=5.0,
-        selection="type O",
-        num_processes=1,
-    )
+        aver_data = example_data.spatial_average(
+            example_trj,
+            r_cut=5.0,
+            selection="type O",
+            num_processes=1,
+        )
 
-    # Load expected results and compare
-    expected_arr = np.load(expected_results)
-    assert np.allclose(aver_data.dataset, expected_arr)
+        # Load expected results and compare
+        expected_arr = np.load(expected_results)
+        assert np.allclose(aver_data.dataset, expected_arr)
