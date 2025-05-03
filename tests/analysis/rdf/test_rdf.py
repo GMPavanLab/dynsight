@@ -1,14 +1,25 @@
 """Pytest for dynsight.analysis.compute_rdf."""
 
+import os
 from pathlib import Path
+from typing import Generator
 
-import MDAnalysis
 import numpy as np
 import pytest
 
-from dynsight.analysis import compute_rdf
+from dynsight.trajectory import Trj
 
 from .case_data import RDFCaseData
+
+
+@pytest.fixture
+def original_wd() -> Generator[Path, None, None]:
+    original_dir = Path.cwd()
+
+    # Ensure the original working directory is restored after the test
+    yield original_dir
+
+    os.chdir(original_dir)
 
 
 def test_compute_rdf(case_data: RDFCaseData) -> None:
@@ -22,17 +33,15 @@ def test_compute_rdf(case_data: RDFCaseData) -> None:
     expected_bins = original_dir / "test_rdf" / case_data.expected_bins
     expected_rdf = original_dir / "test_rdf" / case_data.expected_rdf
 
-    u = MDAnalysis.Universe(topology_file, trajectory_file)
-
+    example_trj = Trj.init_from_xtc(trajectory_file, topology_file)
     selection = "type O"
 
-    test_bins, test_rdf = compute_rdf(
-        universe=u,
+    test_bins, test_rdf = example_trj.get_rdf(
         s1=selection,
         s2=selection,
         distances_range=[0.0, 5.0],
         norm=case_data.norm,
-    )
+    ).dataset
 
     if not expected_bins.exists() or not expected_rdf.exists():
         np.save(expected_bins, test_bins)

@@ -1,3 +1,5 @@
+"""Pytest for dynsight.analysis.stapialaverage."""
+
 import os
 from pathlib import Path
 from typing import Generator
@@ -26,7 +28,6 @@ def test_spatialaverage() -> None:
     expected_results = original_dir / "spavg/test_spavg.npy"
 
     universe = MDAnalysis.Universe(topology_file, trajectory_file)
-    example_trj = Trj(universe)
     example_trj = Trj.init_from_xtc(trajectory_file, topology_file)
     atoms = universe.select_atoms("type O")
 

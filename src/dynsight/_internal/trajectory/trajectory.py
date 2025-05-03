@@ -24,8 +24,7 @@ class Insight:
     """Contains an analysis perfomed on a trajectory.
 
     Attributes:
-        dataset: the values of a single-particle descriptor. Has shape
-            (n_particles, n_frames) or (n_particles, n_frames, n_dims).
+        dataset: the values of a some trajectory's descriptor.
     """
 
     dataset: NDArray[np.float64]
