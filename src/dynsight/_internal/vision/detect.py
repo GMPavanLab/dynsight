@@ -529,12 +529,18 @@ class Detect:
             )
             out_height = set()
 
-        return [
+        filtered_results = [
             det
             for det in input_results
             if (det["width"] not in out_width)
             and (det["height"] not in out_height)
         ]
+
+        if not filtered_results:
+            logger.warning("No outliers detected.")
+            filtered_results = input_results
+
+        return filtered_results
 
     def _remove_old_dataset(self) -> None:
         """Removes the oldest dataset from the YAML configuration."""
