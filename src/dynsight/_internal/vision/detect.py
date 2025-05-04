@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import pathlib
 import random
 import shutil
@@ -21,6 +22,9 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .video_to_frame import Video
+
+
+logger = logging.getLogger(__name__)
 
 
 class YAMLConfig(TypedDict):
@@ -495,21 +499,36 @@ class Detect:
             [d["height"] for d in input_results],
             dtype=float,
         )
-        out_width = set(
-            _find_outliers(
-                distribution=widths,
-                save_path=outliers_plt_folder,
-                fig_name="width",
+        try:
+            out_width = set(
+                _find_outliers(
+                    distribution=widths,
+                    save_path=outliers_plt_folder,
+                    fig_name="width",
+                )
             )
-        )
-        out_height = set(
-            _find_outliers(
-                distribution=heights,
-                save_path=outliers_plt_folder,
-                fig_name="height",
+        except (RuntimeError, ValueError) as e:
+            logger.warning(
+                "Outlier detection for width failed: %s. No width outliers",
+                e,
             )
-        )
-        # Exclude the outliers from the detection results
+            out_width = set()
+
+        try:
+            out_height = set(
+                _find_outliers(
+                    distribution=heights,
+                    save_path=outliers_plt_folder,
+                    fig_name="height",
+                )
+            )
+        except (RuntimeError, ValueError) as e:
+            logger.warning(
+                "Outlier detection for height failed: %s. No height outliers.",
+                e,
+            )
+            out_height = set()
+
         return [
             det
             for det in input_results
