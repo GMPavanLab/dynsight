@@ -447,6 +447,34 @@ class Detect:
             # Update the dataset config file
             self._add_or_create_yaml(train_dataset_path)
 
+    def compute_trj(
+        self,
+        detection_folder_path: pathlib.Path,
+        output_path: pathlib.Path,
+    ) -> None:
+        lab_folder = detection_folder_path / "labels"
+        frame_positions = []
+        for frame in range(self.n_frames + 1):
+            label_file = lab_folder / f"{frame}.txt"
+
+            with label_file.open("r") as file:
+                frame_detections = []
+                for line in file:
+                    values = line.strip().split()
+                    _, x, y, width, height, confidence = map(float, values)
+                    x *= self.video_size[0]
+                    y *= self.video_size[1]
+                    frame_detections.append((x, y))
+                frame_positions.append(frame_detections)
+
+        with output_path.open("w") as file:
+            for frame_index, detections in enumerate(frame_positions):
+                file.write(f"{len(detections)}\n")
+                file.write(f"Frame {frame_index}\n")
+                for x, y in detections:
+                    z = 0
+                    file.write(f"{x:.6f} {y:.6f} {z:.6f}\n")
+
     def _filter_detections(
         self,
         input_results: list[dict[str, int | float]],
@@ -685,6 +713,11 @@ def _find_outliers(
     thr: float = 1e-5,
 ) -> NDArray[np.float64]:
     """Detects outliers in a distribution by fitting a normal distribution."""
+    if distribution.size == 0:
+        msg = "Distribution is empty or contains only NaNs/Infs."
+        raise ValueError(msg)
+    if np.std(distribution) == 0:
+        return np.array([])
 
     def _gaussian(
         x: NDArray[np.float64], mu: float, sigma: float, amplitude: float
@@ -695,6 +728,12 @@ def _find_outliers(
     hist, bin_edges = np.histogram(distribution, bins="auto", density=True)
     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
 
+    mask = np.isfinite(hist) & (hist > 0)
+    hist = hist[mask]
+    bin_centers = bin_centers[mask]
+    min_n_bins = 3
+    if len(hist) < min_n_bins:
+        return np.array([])
     # Fit the Gaussian curve to the histogram data
     popt, _ = curve_fit(
         _gaussian,
