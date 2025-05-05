@@ -43,7 +43,7 @@ class Insight:
         """Load the Insight object from .json file.
 
         Raises:
-        * ValueError if the input file does not have a key "dataset".
+            ValueError if the input file does not have a key "dataset".
         """
         with file_path.open("r") as file:
             data = json.load(file)
@@ -66,8 +66,7 @@ class Insight:
     ) -> Insight:
         """Average the descripotor over the neighboring particles.
 
-        The returned Insight contains the following meta:
-            * sp_av_r_cut: the r_cut value used for the computation.
+        The returned Insight contains the following meta: sp_av_r_cut.
         """
         averaged_dataset = dynsight.analysis.spatialaverage(
             universe=trajectory.universe,
@@ -146,7 +145,7 @@ class ClusterInsight:
         """Load the ClusterInsight object from .json file.
 
         Raises:
-        * ValueError if the input file does not have a key "labels".
+            ValueError if the input file does not have a key "labels".
         """
         with file_path.open("r") as file:
             data = json.load(file)
@@ -195,7 +194,7 @@ class OnionInsight(ClusterInsight):
         """Load the OnionInsight object from .json file.
 
         Raises:
-        * ValueError if the input file does not have a key "state_list".
+            ValueError if the input file does not have a key "state_list".
         """
         with file_path.open("r") as file:
             data = json.load(file)
@@ -330,8 +329,7 @@ class Trj:
     def get_lens(self, r_cut: float, neigh_count: bool = False) -> Insight:
         """Compute LENS on the trajectory.
 
-        The returned Insight contains the following meta:
-            * r_cut: the r_cut value used for the LENS calculation.
+        The returned Insight contains the following meta: r_cut.
         """
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
