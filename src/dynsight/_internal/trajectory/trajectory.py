@@ -327,6 +327,20 @@ class Trj:
         universe = MDAnalysis.Universe(topo_file, traj_file)
         return Trj(universe)
 
+    def get_coordinates(self, selection: str) -> NDArray[np.int64]:
+        """Returns the coordinates as an array.
+
+        The array has shape (n_frames, n_atoms, n_coordinates).
+        """
+        n_frames = len(self.universe.trajectory)
+        atoms = self.universe.select_atoms(selection)
+        n_atoms = len(atoms)
+        n_coords = self.universe.atoms.positions.shape[1]
+        coords = np.zeros((n_frames, n_atoms, n_coords))
+        for i, _ in enumerate(self.universe.trajectory):
+            coords[i] = atoms.positions.copy()
+        return coords
+
     def get_lens(self, r_cut: float, neigh_count: bool = False) -> Insight:
         """Compute LENS on the trajectory.
 

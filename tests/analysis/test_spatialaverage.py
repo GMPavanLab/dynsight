@@ -5,7 +5,6 @@ import tempfile
 from pathlib import Path
 from typing import Generator
 
-import MDAnalysis
 import numpy as np
 import pytest
 
@@ -28,15 +27,9 @@ def test_spatialaverage(original_wd: Path) -> None:
         trajectory_file = original_wd / "tests/systems/coex/test_coex.xtc"
         expected_results = original_wd / "tests/analysis/spavg/test_spavg.npy"
 
-        universe = MDAnalysis.Universe(topology_file, trajectory_file)
         example_trj = Trj.init_from_xtc(trajectory_file, topology_file)
-        atoms = universe.select_atoms("type O")
-
-        descriptor = np.zeros((2048, 6))
-        for ts in universe.trajectory:
-            descriptor[:, ts.frame] = atoms.positions[:, 0]
-
-        example_data = Insight(descriptor)
+        descriptor = example_trj.get_coordinates("type O")[:, :, 0].T
+        example_data = Insight(descriptor.astype(np.float64))
 
         aver_data = example_data.spatial_average(
             example_trj,
