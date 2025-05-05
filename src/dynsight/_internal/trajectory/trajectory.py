@@ -408,16 +408,15 @@ class Trj:
         The returned Insight contains the following meta: r_cut, n_max, l_max,
         respect_pbc, centers, delay.
         """
-        soap = dynsight.soap.saponify_trajectory(
-            self.universe,
-            soaprcut=r_cut,
-            soapnmax=n_max,
-            soaplmax=l_max,
-            soap_respectpbc=respect_pbc,
+        soap = self.get_soap(
+            r_cut=r_cut,
+            n_max=n_max,
+            l_max=l_max,
+            respect_pbc=respect_pbc,
             centers=centers,
             n_core=n_core,
         )
-        tsoap = dynsight.soap.timesoap(soap, delay=delay)
+        tsoap = dynsight.soap.timesoap(soap.dataset, delay=delay)
         attr_dict = {
             "r_cut": r_cut,
             "n_max": n_max,
