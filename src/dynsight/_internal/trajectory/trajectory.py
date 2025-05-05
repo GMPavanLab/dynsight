@@ -24,8 +24,8 @@ class Insight:
     """Contains an analysis perfomed on a trajectory.
 
     Attributes:
-        dataset: the values of a some trajectory's descriptor.
-        meta: a dictionary containing the relevant parameters.
+        dataset: The values of a some trajectory's descriptor.
+        meta: A dictionary containing the relevant parameters.
     """
 
     dataset: NDArray[np.float64]
@@ -66,7 +66,8 @@ class Insight:
     ) -> Insight:
         """Average the descripotor over the neighboring particles.
 
-        The returned Insight contains the following meta: sp_av_r_cut.
+        The returned Insight contains the following meta: sp_av_r_cut,
+        selection.
         """
         averaged_dataset = dynsight.analysis.spatialaverage(
             universe=trajectory.universe,
@@ -77,7 +78,7 @@ class Insight:
         )
         return Insight(
             dataset=averaged_dataset,
-            meta={"sp_av_r_cut": r_cut},
+            meta={"sp_av_r_cut": r_cut, "selection": selection},
         )
 
     def get_onion(
@@ -128,7 +129,7 @@ class ClusterInsight:
     """Contains a clustering analysis.
 
     Attributes:
-        labels: the labels assigned by the clustering algorithm.
+        labels: The labels assigned by the clustering algorithm.
     """
 
     labels: NDArray[np.int64]
@@ -157,13 +158,13 @@ class ClusterInsight:
 
 @dataclass(frozen=True)
 class OnionInsight(ClusterInsight):
-    """Contains a onion-clustering analysis.
+    """Contains an onion-clustering analysis.
 
     Attributes:
-        labels: the labels assigned by the clustering algorithm.
-        state_list: list of the onion-clustering Gaussian states.
-        reshaped_data: the input data reshaped for onion-clustering.
-        meta: a dictionary containing the relevant parameters.
+        labels: The labels assigned by the clustering algorithm.
+        state_list: List of the onion-clustering Gaussian states.
+        reshaped_data: The input data reshaped for onion-clustering.
+        meta: A dictionary containing the relevant parameters.
     """
 
     state_list: list[StateUni] | list[StateMulti]
