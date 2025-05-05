@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field, fields
+from dataclasses import asdict, dataclass, field, fields
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -33,7 +33,7 @@ class Insight:
 
     def dump_to_json(self, file_path: Path) -> None:
         """Save the Insight object as .json file."""
-        data = self.__dict__
+        data = asdict(self)
         data["dataset"] = data["dataset"].tolist()
         with file_path.open("w") as file:
             json.dump(data, file, indent=4)
@@ -136,7 +136,7 @@ class ClusterInsight:
 
     def dump_to_json(self, file_path: Path) -> None:
         """Save the ClusterInsight object as .json file."""
-        data = self.__dict__
+        data = asdict(self)
         data["labels"] = data["labels"].tolist()
         with file_path.open("w") as file:
             json.dump(data, file, indent=4)
@@ -173,7 +173,7 @@ class OnionInsight(ClusterInsight):
 
     def dump_to_json(self, file_path: Path) -> None:
         """Save the OnionInsight object as .json file."""
-        data = self.__dict__
+        data = asdict(self)
         data["labels"] = data["labels"].tolist()
         new_state_list = []
         for state in data["state_list"]:
@@ -417,14 +417,8 @@ class Trj:
             n_core=n_core,
         )
         tsoap = dynsight.soap.timesoap(soap.dataset, delay=delay)
-        attr_dict = {
-            "r_cut": r_cut,
-            "n_max": n_max,
-            "l_max": l_max,
-            "respect_pbc": respect_pbc,
-            "centers": centers,
-            "delay": delay,
-        }
+        attr_dict = soap.meta
+        attr_dict.update({"delay": delay})
         return Insight(dataset=tsoap, meta=attr_dict)
 
     def get_rdf(
