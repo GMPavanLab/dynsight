@@ -413,7 +413,7 @@ class Trj:
             n_core=n_core,
         )
         tsoap = dynsight.soap.timesoap(soap.dataset, delay=delay)
-        attr_dict = soap.meta
+        attr_dict = soap.meta.copy()
         attr_dict.update({"delay": delay})
         return Insight(dataset=tsoap, meta=attr_dict)
 
