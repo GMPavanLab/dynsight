@@ -25,6 +25,7 @@ class Insight:
 
     Attributes:
         dataset: the values of a some trajectory's descriptor.
+        meta: a dictionary containing the relevant parameters.
     """
 
     dataset: NDArray[np.float64]
@@ -39,7 +40,11 @@ class Insight:
 
     @classmethod
     def load_from_json(cls, file_path: Path) -> Insight:
-        """Load the Insight object from .json file."""
+        """Load the Insight object from .json file.
+
+        Raises:
+        * ValueError if the input file does not have a key "dataset".
+        """
         with file_path.open("r") as file:
             data = json.load(file)
 
@@ -107,7 +112,11 @@ class Insight:
 
 @dataclass(frozen=True)
 class ClusterInsight:
-    """Contains a clustering analysis."""
+    """Contains a clustering analysis.
+
+    Attributes:
+        labels: the labels assigned by the clustering algorithm.
+    """
 
     labels: NDArray[np.int64]
 
@@ -120,7 +129,11 @@ class ClusterInsight:
 
     @classmethod
     def load_from_json(cls, file_path: Path) -> ClusterInsight:
-        """Load the ClusterInsight object from .json file."""
+        """Load the ClusterInsight object from .json file.
+
+        Raises:
+        * ValueError if the input file does not have a key "labels".
+        """
         with file_path.open("r") as file:
             data = json.load(file)
         if "labels" not in data:
@@ -131,7 +144,14 @@ class ClusterInsight:
 
 @dataclass(frozen=True)
 class OnionInsight(ClusterInsight):
-    """Contains a onion-clustering analysis."""
+    """Contains a onion-clustering analysis.
+
+    Attributes:
+        labels: the labels assigned by the clustering algorithm.
+        state_list: list of the onion-clustering Gaussian states.
+        reshaped_data: the input data reshaped for onion-clustering.
+        meta: a dictionary containing the relevant parameters.
+    """
 
     state_list: list[StateUni] | list[StateMulti]
     reshaped_data: NDArray[np.float64]
@@ -158,7 +178,11 @@ class OnionInsight(ClusterInsight):
 
     @classmethod
     def load_from_json(cls, file_path: Path) -> OnionInsight:
-        """Load the OnionInsight object from .json file."""
+        """Load the OnionInsight object from .json file.
+
+        Raises:
+        * ValueError if the input file does not have a key "state_list".
+        """
         with file_path.open("r") as file:
             data = json.load(file)
         if "state_list" not in data:
@@ -259,7 +283,16 @@ class OnionInsight(ClusterInsight):
 
 @dataclass(frozen=True)
 class Trj:
-    """Contains a trajectory."""
+    """Contains a trajectory.
+
+    Attributes:
+        universe: a MDAnalysis.Universe containing the trajectory.
+
+    .. warning::
+
+        This class is under development. The name and type of the "universe"
+        attribute may change in the future.
+    """
 
     universe: MDAnalysis.Universe = field()
 
@@ -312,13 +345,8 @@ class Trj:
     ) -> Insight:
         """Compute SOAP on the trajectory.
 
-        The returned Insight contains the following meta:
-            * r_cut: the r_cut value used for the SOAP calculation.
-            * n_max: the n_max value used for the SOAP calculation.
-            * l_max: the l_max value used for the SOAP calculation.
-            * respect_pbc: bust be True if trajectory has PBC
-            * centers: selection of atoms used as centers for the SOAP
-                calculation.
+        The returned Insight contains the following meta: r_cut, n_max, l_max,
+        respect_pbc, centers.
         """
         soap = dynsight.soap.saponify_trajectory(
             self.universe,
@@ -350,14 +378,8 @@ class Trj:
     ) -> Insight:
         """Compute timeSOAP on the trajectory.
 
-        The returned Insight contains the following meta:
-            * r_cut: the r_cut value used for the timeSOAP calculation.
-            * n_max: the n_max value used for the timeSOAP calculation.
-            * l_max: the l_max value used for the timeSOAP calculation.
-            * respect_pbc: bust be True if trajectory has PBC
-            * centers: selection of atoms used as centers for the SOAP
-                calculation.
-            * delay: the delay between frames on which timeSOAP is computed.
+        The returned Insight contains the following meta: r_cut, n_max, l_max,
+        respect_pbc, centers, delay.
         """
         soap = dynsight.soap.saponify_trajectory(
             self.universe,
@@ -391,7 +413,11 @@ class Trj:
         stop: int | None = None,
         step: int = 1,
     ) -> Insight:
-        """Compute the radial distribution function g(r)."""
+        """Compute the radial distribution function g(r).
+
+        The returned Insight contains the following meta: distances_range, s1,
+        s2, exclusion_block, nbins, norm, start, stop, step.
+        """
         bins, rdf = dynsight.analysis.compute_rdf(
             universe=self.universe,
             distances_range=distances_range,
