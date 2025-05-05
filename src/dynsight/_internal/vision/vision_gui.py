@@ -20,7 +20,10 @@ class Box:
 
 
 class VisionGUI:
-    """GUI for interactively labeling images by drawing bounding boxes."""
+    """GUI for interactively labeling images by drawing bounding boxes.
+
+    * Author: Simone Martino
+    """
 
     def __init__(
         self,

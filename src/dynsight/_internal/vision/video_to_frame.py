@@ -16,6 +16,12 @@ class Video:
     This class loads a video from a file path and provides methods
     to retrieve video information and extract frames.
 
+    * Author: Simone Martino
+
+    .. caution::
+        This part of the code is still under development and may
+        contain errors.
+
     Parameters:
         video_path: Path to the video file.
     """
@@ -59,7 +65,7 @@ class Video:
         """Extracts all frames from the video and saves them as PNG images.
 
         If it doesn't exist, creates a `frames` subdirectory inside
-        `working_dir', reads each frame from the video at `video_path`, and
+        `working_dir', reads each frame from the video and
         writes them to disk.
 
         Parameters:

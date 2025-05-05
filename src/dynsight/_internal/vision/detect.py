@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import pathlib
-import random
 import shutil
 import tkinter as tk
 from pathlib import Path
@@ -23,11 +22,16 @@ if TYPE_CHECKING:
 
     from .video_to_frame import Video
 
-
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+)
 logger = logging.getLogger(__name__)
 
 
 class YAMLConfig(TypedDict):
+    """Class for YAML file configurations."""
+
     train: list[str]
     val: list[str]
     nc: int
@@ -35,7 +39,15 @@ class YAMLConfig(TypedDict):
 
 
 class Detect:
-    """A class to manage the full pipeline of object detection from videos."""
+    """A class to manage the full pipeline of object detection from videos.
+
+    * Author: Simone Martino
+
+    .. caution::
+        This part of the code is still under development and may
+        contain errors.
+
+    """
 
     def __init__(
         self,
@@ -47,43 +59,44 @@ class Detect:
         Creates all necessary subdirectories and extracts video frames if not
         already present.
 
-        Args:
-            input_video: The input video object from which to extract frames.
-            project_folder: Path to the main project directory.
+        Parameters:
+            input_video:
+                The input video object from which to extract frames.
 
+            project_folder:
+                Path to the main project directory.
         """
-        # Define the project folder path
-        self.project_folder = project_folder
+        self._project_folder = project_folder
         """Main directory for all the project outputs."""
 
-        self.frames_dir = self.project_folder / "frames"
+        self._frame_path = self._project_folder / "frames"
         """Directory where store extracted video frames."""
 
-        self.training_items_path = self.project_folder / "training_items"
+        self._training_items_path = self._project_folder / "training_items"
         """Directory path where save the training item crops selected."""
 
-        self.syn_dataset_path = self.project_folder / "synthetic_dataset"
+        self._syn_dataset_path = self._project_folder / "synthetic_dataset"
         """Directory path for the generated synthetic dataset."""
 
-        self.models_path = self.project_folder / "models"
+        self._models_path = self._project_folder / "models"
         """Directory path where save trained models."""
 
-        self.predictions_path = self.project_folder / "predictions"
+        self._predictions_path = self._project_folder / "predictions"
         """Directory path where save prediction outputs."""
 
         # Define the config file path for the training
-        self.yaml_file = self.project_folder / "training_options.yaml"
+        self._yaml_file_path = self._project_folder / "training_options.yaml"
         """Path to the YAML configuration file for dataset training."""
 
         # Extract information from the input video
-        self.video_size = input_video.resolution()
+        self._video_size = input_video.resolution()
         """Resolution of the input video (width, height) in pixels."""
-        self.n_frames = input_video.count_frames()
+        self._n_frames = input_video.count_frames()
         """Total number of frames extracted from the video."""
 
         # Check if the video's frame are already present
         # if not -> extract them
-        if not (self.frames_dir.exists() and self.frames_dir.is_dir()):
+        if not self._frame_path.exists():
             input_video.extract_frames(project_folder)
 
     def synthesize(
@@ -91,61 +104,58 @@ class Detect:
         dataset_dimension: int = 1000,
         reference_img_path: None | pathlib.Path = None,
         validation_set_fraction: float = 0.2,
-        collage_size: tuple[int, int] = (1080, 1080),
+        collage_size: None | tuple[int, int] = None,
         collage_max_repeats: int = 30,
         sample_from: Literal["gui"] = "gui",
+        random_seed: int | None = None,
     ) -> None:
         """Generate a synthetic dataset by creating collages of training items.
 
         Parameters:
-            dataset_dimension: Total number of synthetic samples to generate.
-            reference_img_path: Path to the reference image to initialize the
-                GUI. If None, uses the first extracted frame.
-            validation_set_fraction: Fraction of samples to allocate to the
-                validation set.
-            collage_size: Size (width, height) of the generated collage images.
-            collage_max_repeats: Maximum number of training items that can be
-                placed in a single collage.
-            sample_from: Mode to collect training items. in the current version
+            dataset_dimension:
+                Total number of synthetic samples to generate.
+                reference_img_path: Path to the reference image
+                to initialize the GUI. If None, uses the first extracted frame.
+
+            validation_set_fraction:
+                Fraction of samples to allocate to the validation set.
+
+            collage_size:
+                Size (width, height) of the generated collage images.
+                If None the input_video size will be taken.
+
+            collage_max_repeats:
+                Maximum number of training items that can be placed in
+                a single collage.
+
+            sample_from:
+                Mode to collect training items. in the current version
                 only the "gui" mode is available, other modes will come
                 in the future.
-        """
-        # Dataset structure
-        images_train_dir = self.syn_dataset_path / "images" / "train"
-        images_val_dir = self.syn_dataset_path / "images" / "val"
-        labels_train_dir = self.syn_dataset_path / "labels" / "train"
-        labels_val_dir = self.syn_dataset_path / "labels" / "val"
 
-        # GUI mode
-        if sample_from == "gui":
-            # If not specified by the user use the first img as example
-            if reference_img_path is None:
-                reference_img_path = self.frames_dir / "0.png"
-            # Open the GUI
-            root = tk.Tk()
-            VisionGUI(
-                master=root,
-                image_path=reference_img_path,
-                destination_folder=self.project_folder,
-            )
-            root.mainloop()
-            # Check if the training items has been properly created
-            if not (
-                self.training_items_path.exists()
-                and self.training_items_path.is_dir()
-            ):
-                msg = "'training_items' folder not created or not found"
-                raise ValueError(msg)
+            random_seed:
+                Seed for shuffling the dataset.
+        """
+        if collage_size is None:
+            collage_size = self._video_size
+        # Dataset structure
+        images_train_dir = self._syn_dataset_path / "images" / "train"
+        images_val_dir = self._syn_dataset_path / "images" / "val"
+        labels_train_dir = self._syn_dataset_path / "labels" / "train"
+        labels_val_dir = self._syn_dataset_path / "labels" / "val"
+
+        # Sampling method
+        self._sample(
+            sample_from=sample_from,
+            reference_img_path=reference_img_path,
+        )
 
         # Initialize a new dataset
-        self.syn_dataset_path.mkdir(exist_ok=True)
-        for d in [
-            images_train_dir,
-            images_val_dir,
-            labels_train_dir,
-            labels_val_dir,
-        ]:
-            d.mkdir(exist_ok=True, parents=True)
+        self._syn_dataset_path.mkdir(exist_ok=True)
+        images_train_dir.mkdir(exist_ok=True, parents=True)
+        images_val_dir.mkdir(exist_ok=True, parents=True)
+        labels_train_dir.mkdir(exist_ok=True, parents=True)
+        labels_val_dir.mkdir(exist_ok=True, parents=True)
 
         # Split between training and validation set
         num_val = int(dataset_dimension * validation_set_fraction)
@@ -153,19 +163,21 @@ class Detect:
         remaining = dataset_dimension - (num_train + num_val)
         num_train += remaining
 
-        assignements = ["train"] * num_train + ["val"] * num_val
-        random.shuffle(assignements)
+        assignments = ["train"] * num_train + ["val"] * num_val
+
+        rng = np.random.default_rng(seed=random_seed)
+        rng.shuffle(assignments)
 
         # Create synthetic images to fill the dataset
         # Create labels for each images generated
         for i in range(1, dataset_dimension + 1):
             collage, label_lines = self._create_collage(
-                images_folder=self.training_items_path,
+                images_folder=self._training_items_path,
                 width=collage_size[0],
                 height=collage_size[1],
                 max_repeats=collage_max_repeats,
             )
-            subset = assignements[i - 1]
+            subset = assignments[i - 1]
             if subset == "train":
                 image_save_path = images_train_dir / f"{i}.png"
                 label_save_path = labels_train_dir / f"{i}.txt"
@@ -179,7 +191,7 @@ class Detect:
                     f.write(line + "\n")
 
         # Generate the config file for the dataset created
-        self._add_or_create_yaml(self.syn_dataset_path)
+        self._add_or_create_yaml(self._syn_dataset_path)
 
     # Just a bridge to the YOLO library
     def train(
@@ -195,17 +207,34 @@ class Detect:
     ) -> None:
         """Train a YOLO model on the selected dataset.
 
+        This function uses the
+        `ultralytics YOLO library <https://github.com/ultralytics/ultralytics>`_
+        for the model training.
+
         Parameters:
-            yaml_file: Path to the dataset YAML configuration file.
-            initial_model: Initial pretrained model to fine-tune.
-            training_name: Name for the training run.
-            training_epochs: Maximum number of training epochs for each
-                training session.
-            training_patience: Early stopping patience
-                (number of epochs without improvement).
-            batch_size: Batch size for training.
-            workers: Number of dataloader worker threads.
-            device: Device(s) on which run training.
+            yaml_file:
+                Path to the dataset YAML configuration file.
+
+            initial_model:
+                Initial pretrained model to fine-tune.
+
+            training_name:
+                Name for the training run.
+
+            training_epochs:
+                Maximum number of training epochs for each training session.
+
+            training_patience:
+                Early stopping patience (number of epochs without improvement).
+
+            batch_size:
+                Batch size for training.
+
+            workers:
+                Number of dataloader worker threads.
+
+            device:
+                Device(s) on which run training.
         """
         model = YOLO(initial_model)
         model.train(
@@ -213,16 +242,16 @@ class Detect:
             epochs=training_epochs,
             patience=training_patience,
             batch=batch_size,
-            imgsz=self.video_size,
+            imgsz=self._video_size,
             workers=workers,
-            project=self.models_path,
+            project=self._models_path,
             name=training_name,
             device=device,
             plots=False,
         )
 
     # Just a bridge to the YOLO library
-    def predict(
+    def predict_frames(
         self,
         model_path: str | pathlib.Path,
         detections_iou: float = 0.1,
@@ -230,25 +259,37 @@ class Detect:
     ) -> None:
         """Perform object detection predictions on the extracted frames.
 
+        This function uses the
+        `ultralytics YOLO library <https://github.com/ultralytics/ultralytics>`_
+        to detect objects in videos.
+
         Parameters:
-            model_path: Path to the trained model.
-            detections_iou: IOU threshold for object detection filtering.
-            prediction_name: Name under which save the prediction results.
+            model_path:
+                Path to the trained model.
+
+            detections_iou:
+                IOU threshold for object detection filtering.
+
+            prediction_name:
+                Name under which save the prediction results.
         """
         model = YOLO(model_path)
-        model.predict(
-            project=self.project_folder,
-            source=self.frames_dir / "0.png",
-            name=prediction_name,
-            augment=True,
-            line_width=2,
-            save=True,
-            show_labels=False,
-            save_txt=True,
-            save_conf=True,
-            iou=detections_iou,
-            max_det=20000,
-        )
+        for frame in range(self._n_frames):
+            model.predict(
+                project=self._project_folder,
+                source=self._frame_path / f"{frame}.png",
+                name=prediction_name,
+                augment=True,
+                line_width=2,
+                save=True,
+                show_labels=False,
+                save_txt=True,
+                save_conf=True,
+                iou=detections_iou,
+                max_det=20000,
+                exist_ok=True,
+                imgsz=self._video_size,
+            )
 
     def fit(
         self,
@@ -270,18 +311,35 @@ class Detect:
             4. Build a new training dataset from filtered detections.
             5. Retrain the model on the refined dataset.
             6. Repeat steps 2 to 5 for a given number of sessions to
-            progressively refine the model.
+                progressively refine the model.
 
-        Args:
-            initial_dataset: Path to the initial dataset YAML file.
-            initial_model: Path to the initial model weights (.pt file).
-            max_sessions: Number of retraining cycles.
-            training_epochs: Number of epochs per training session.
-            training_patience: Early stopping patience during training.
-            batch_size: Batch size for training.
-            workers: Number of data loader workers.
-            device: Device(s) to use (e.g., "cpu", "0", [0,1]).
-            real_n_particles: Optional, real number of particles expected.
+        This method uses the
+        `ultralytics YOLO library <https://github.com/ultralytics/ultralytics>`_.
+
+        Parameters:
+            initial_dataset:
+                Path to the initial dataset YAML file.
+
+            initial_model:
+                Path to the initial model weights (.pt file).
+
+            max_sessions:
+                Number of retraining cycles.
+
+            training_epochs:
+                Number of epochs per training session.
+
+            training_patience:
+                Early stopping patience during training.
+
+            batch_size:
+                Batch size for training.
+
+            workers:
+                Number of data loader workers.
+
+            device:
+                Device(s) to use (e.g., "cpu", "0", [0,1]).
         """
         # Initilize the first training
         current_dataset = initial_dataset
@@ -302,7 +360,7 @@ class Detect:
         )
         # Update the model with the new one
         current_model_path = (
-            self.project_folder
+            self._project_folder
             / "models"
             / guess_model_name
             / "weights"
@@ -310,11 +368,11 @@ class Detect:
         )
         current_model = YOLO(current_model_path)
         # First prediction
-        for f in range(0, self.n_frames, 50):  # TEMP
-            frame_file = self.frames_dir / f"{f}.png"
+        for f in range(0, self._n_frames, 50):  # TEMP
+            frame_file = self._frame_path / f"{f}.png"
             prediction = current_model.predict(
                 source=frame_file,
-                imgsz=self.video_size,
+                imgsz=self._video_size,
                 augment=True,
                 save=True,
                 save_txt=True,
@@ -323,7 +381,7 @@ class Detect:
                 name=f"attempt_{prediction_number}",
                 iou=0.1,
                 max_det=20000,
-                project=self.predictions_path,
+                project=self._predictions_path,
                 line_width=2,
                 exist_ok=True,
             )
@@ -355,7 +413,7 @@ class Detect:
         # Build a new dataset based on the "filtered" detection results
         # New dataset path
         train_dataset_path = (
-            self.project_folder
+            self._project_folder
             / "train_datasets"
             / f"dataset_{prediction_number}"
         )
@@ -372,7 +430,7 @@ class Detect:
         for s in range(max_sessions):
             new_model_name = f"v{s + 1}"
             self.train(
-                yaml_file=self.yaml_file,
+                yaml_file=self._yaml_file_path,
                 initial_model=current_model_path,
                 training_epochs=training_epochs,
                 training_patience=training_patience,
@@ -382,7 +440,7 @@ class Detect:
                 training_name=new_model_name,
             )
             current_model_path = (
-                self.project_folder
+                self._project_folder
                 / "models"
                 / new_model_name
                 / "weights"
@@ -391,11 +449,11 @@ class Detect:
             current_model = YOLO(current_model_path)
             prediction_number += 1
             detection_results = []
-            for f in range(0, self.n_frames, 50):  # TEMP
-                frame_file = self.frames_dir / f"{f}.png"
+            for f in range(0, self._n_frames, 50):  # TEMP
+                frame_file = self._frame_path / f"{f}.png"
                 prediction = current_model.predict(
                     source=frame_file,
-                    imgsz=self.video_size,
+                    imgsz=self._video_size,
                     augment=True,
                     save=True,
                     save_txt=True,
@@ -404,7 +462,7 @@ class Detect:
                     name=f"attempt_{prediction_number}",
                     iou=0.1,
                     max_det=20000,
-                    project=self.project_folder / "predictions",
+                    project=self._project_folder / "predictions",
                     line_width=2,
                     exist_ok=True,
                 )
@@ -444,7 +502,7 @@ class Detect:
             self._remove_old_dataset()
 
             train_dataset_path = (
-                self.project_folder
+                self._project_folder
                 / "train_datasets"
                 / f"dataset_{prediction_number}"
             )
@@ -456,9 +514,17 @@ class Detect:
         detection_folder_path: pathlib.Path,
         output_path: pathlib.Path,
     ) -> None:
+        """Computes and saves the trajectory of detections to xyz file.
+
+        Parameters:
+            detection_folder_path:
+                The path to the folder containing detection data files.
+            output_path:
+                The path where the resulting trajectory data should be saved.
+        """
         lab_folder = detection_folder_path / "labels"
         frame_positions = []
-        for frame in range(self.n_frames + 1):
+        for frame in range(self._n_frames):
             label_file = lab_folder / f"{frame}.txt"
 
             with label_file.open("r") as file:
@@ -466,8 +532,8 @@ class Detect:
                 for line in file:
                     values = line.strip().split()
                     _, x, y, width, height, confidence = map(float, values)
-                    x *= self.video_size[0]
-                    y *= self.video_size[1]
+                    x *= self._video_size[0]
+                    y *= self._video_size[1]
                     frame_detections.append((x, y))
                 frame_positions.append(frame_detections)
 
@@ -486,7 +552,7 @@ class Detect:
     ) -> list[dict[str, int | float]]:
         # Initialize outliers folder in the prediction folder
         outliers_plt_folder = (
-            self.project_folder
+            self._project_folder
             / "predictions"
             / f"attempt_{prediction_number}"
             / "outliers"
@@ -544,7 +610,7 @@ class Detect:
 
     def _remove_old_dataset(self) -> None:
         """Removes the oldest dataset from the YAML configuration."""
-        yaml_path = self.yaml_file
+        yaml_path = self._yaml_file_path
 
         if not yaml_path.exists():
             return
@@ -568,7 +634,7 @@ class Detect:
             yaml.safe_dump(cfg, f, sort_keys=False)
 
     def _add_or_create_yaml(self, new_dataset_path: Path) -> None:
-        yaml_path = Path(self.yaml_file)
+        yaml_path = Path(self._yaml_file_path)
 
         train_p = str((new_dataset_path / "images/train").resolve())
         val_p = str((new_dataset_path / "images/val").resolve())
@@ -608,7 +674,7 @@ class Detect:
         split_ratio: float = 0.8,
     ) -> None:
         """Builds a dataset by splitting frames/labels into train and val."""
-        output_dir = self.project_folder / "train_datasets" / dataset_name
+        output_dir = self._project_folder / "train_datasets" / dataset_name
         imgs_train_dir = output_dir / "images" / "train"
         imgs_val_dir = output_dir / "images" / "val"
         labs_train_dir = output_dir / "labels" / "train"
@@ -634,7 +700,7 @@ class Detect:
                 img_dest = imgs_val_dir
                 lab_dest = labs_val_dir
 
-            img_src = self.frames_dir / f"{frame_idx}.png"
+            img_src = self._frame_path / f"{frame_idx}.png"
             img_dst = img_dest / f"{frame_idx}.png"
             shutil.copy(img_src, img_dst)
 
@@ -729,6 +795,32 @@ class Detect:
                 break
 
         return collage, label_lines
+
+    def _sample(
+        self, sample_from: str, reference_img_path: pathlib.Path | None
+    ) -> None:
+        # GUI mode
+        if sample_from == "gui":
+            # If not specified by the user use the first img as example
+            if reference_img_path is None:
+                reference_img_path = self._frame_path / "0.png"
+            # Open the GUI
+            root = tk.Tk()
+            VisionGUI(
+                master=root,
+                image_path=reference_img_path,
+                destination_folder=self._project_folder,
+            )
+            root.mainloop()
+            # Check if the training items has been properly created
+            if not (
+                self._training_items_path.exists()
+                and self._training_items_path.is_dir()
+            ):
+                msg = "'training_items' folder not created or not found"
+                raise ValueError(msg)
+        else:
+            raise NotImplementedError
 
 
 def _find_outliers(
