@@ -8,7 +8,7 @@ from typing import Generator
 import numpy as np
 import pytest
 
-import dynsight
+from dynsight.trajectory import Insight
 
 
 @pytest.fixture
@@ -23,25 +23,25 @@ def original_wd() -> Generator[Path, None, None]:
 
 # Define the actual test
 def test_output_files(original_wd: Path) -> None:
-    ### Load the input data (already in the correct shape) ###
-    results_dir = original_wd / "tests/onion/"
-    input_data = np.load(results_dir / "output_multi/2D_trajectory.npy")
-
     with tempfile.TemporaryDirectory() as _:
-        ### Test the clustering class ###
-        tmp = dynsight.onion.OnionMulti()
-        tmp.fit_predict(input_data)
-        _ = tmp.get_params()
-        tmp.set_params()
+        ## Create the input data ###
+        n_particles = 5
+        n_steps = 1000
+        rng = np.random.default_rng(12345)
+        random_walk = np.zeros((n_particles, n_steps, 2))
+        for i in range(n_particles):
+            for j in range(1, n_steps):
+                d_x, d_y = rng.normal(), rng.normal()
+                random_walk[i][j][0] = random_walk[i][j - 1][0] + d_x
+                random_walk[i][j][1] = random_walk[i][j - 1][1] + d_y
 
-        ### Test the clustering function ###
-        state_list, labels = dynsight.onion.onion_multi(input_data)
+        data = Insight(random_walk)
+        clustering = data.get_onion(delta_t=10)
 
-        _ = state_list[0].get_attributes()
-
-        ### Define the paths to the expected output ###
+        # Define the paths to the expected output files
+        results_dir = original_wd / "tests/onion/"
         expected_output_path = results_dir / "output_multi/labels.npy"
 
-        ### Compare the contents of the expected and actual output ###
+        # Compare the contents of the expected and actual output
         expected_output = np.load(expected_output_path)
-        assert np.allclose(expected_output, labels)
+        assert np.allclose(expected_output, clustering.labels)
