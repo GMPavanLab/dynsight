@@ -344,7 +344,7 @@ class Trj:
     def get_lens(self, r_cut: float, neigh_count: bool = False) -> Insight:
         """Compute LENS on the trajectory.
 
-        The returned Insight contains the following meta: r_cut.
+        The returned Insight contains the following meta: r_cut, neigh_count.
         """
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
