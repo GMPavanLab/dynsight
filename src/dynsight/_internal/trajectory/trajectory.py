@@ -317,7 +317,11 @@ class Trj:
 
     @classmethod
     def init_from_xyz(cls, traj_file: Path, dt: float) -> Trj:
-        """Initialize Trj object from .xyz file."""
+        """Initialize Trj object from .xyz file.
+
+        Parameters:
+        dt: the trajectory's time-step.
+        """
         universe = MDAnalysis.Universe(traj_file, dt=dt)
         return Trj(universe)
 
