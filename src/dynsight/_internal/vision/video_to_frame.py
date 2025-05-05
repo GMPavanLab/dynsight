@@ -24,6 +24,7 @@ class Video:
 
     Parameters:
         video_path: Path to the video file.
+
     """
 
     video_path: pathlib.Path
@@ -64,13 +65,14 @@ class Video:
     def extract_frames(self, working_dir: pathlib.Path) -> None:
         """Extracts all frames from the video and saves them as PNG images.
 
-        If it doesn't exist, creates a `frames` subdirectory inside
-        `working_dir', reads each frame from the video and
+        If it doesn't exist, creates a ``frames`` subdirectory inside
+        ``working_dir``, reads each frame from the video and
         writes them to disk.
 
         Parameters:
             working_dir: Directory in which to create a `frames` folder and
             save extracted PNG images.
+
         """
         frames_dir = working_dir / "frames"
         frames_dir.mkdir(exist_ok=True)
