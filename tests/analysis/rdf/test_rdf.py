@@ -1,8 +1,6 @@
 """Pytest for dynsight.analysis.compute_rdf."""
 
-import os
 from pathlib import Path
-from typing import Generator
 
 import numpy as np
 import pytest
@@ -10,16 +8,6 @@ import pytest
 from dynsight.trajectory import Trj
 
 from .case_data import RDFCaseData
-
-
-@pytest.fixture
-def original_wd() -> Generator[Path, None, None]:
-    original_dir = Path.cwd()
-
-    # Ensure the original working directory is restored after the test
-    yield original_dir
-
-    os.chdir(original_dir)
 
 
 def test_compute_rdf(case_data: RDFCaseData) -> None:

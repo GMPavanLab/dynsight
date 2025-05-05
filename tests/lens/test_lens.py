@@ -1,22 +1,9 @@
-import os
 from pathlib import Path
-from typing import Generator
 
 import MDAnalysis
 import numpy as np
-import pytest
 
 from dynsight.trajectory import Trj
-
-
-@pytest.fixture
-def original_wd() -> Generator[Path, None, None]:
-    original_dir = Path.cwd()
-
-    # Ensure the original working directory is restored after the test
-    yield original_dir
-
-    os.chdir(original_dir)
 
 
 # Define the actual test
@@ -52,10 +39,8 @@ def test_lens_signals() -> None:
 
     # Run LENS (and nn) calculation for different r_cuts
     for i, r_cut in enumerate(lens_cutoffs):
-        nn = example_trj.get_lens(r_cut=r_cut, neigh_count=True)
-        lens = example_trj.get_lens(r_cut=r_cut)
+        test_array = example_trj.get_lens(r_cut=r_cut).dataset
 
-        test_array = [lens.dataset, nn.dataset]
         check_lens_nn = check_file[f"LENS_{i}"]
 
         # Check if control and test array are equal

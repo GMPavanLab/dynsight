@@ -349,7 +349,7 @@ class Trj:
             [atoms.positions.copy() for ts in self.universe.trajectory]
         )
 
-    def get_lens(self, r_cut: float, neigh_count: bool = False) -> Insight:
+    def get_lens(self, r_cut: float) -> Insight:
         """Compute LENS on the trajectory.
 
         The returned Insight contains the following meta: r_cut, neigh_count.
@@ -359,14 +359,10 @@ class Trj:
             cutoff=r_cut,
         )
         lens, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
-        if neigh_count:
-            return Insight(
-                dataset=nn.astype(np.float64),
-                meta={"r_cut": r_cut, "neigh_count": neigh_count},
-            )
+        dataset = np.array([lens, nn])
         return Insight(
-            dataset=lens,
-            meta={"r_cut": r_cut, "neigh_count": neigh_count},
+            dataset=dataset,
+            meta={"r_cut": r_cut},
         )
 
     def get_soap(
