@@ -150,6 +150,7 @@ class Detect:
             reference_img_path=reference_img_path,
         )
 
+        logger.info("Initializing the synthetic dataset...")
         # Initialize a new dataset
         self._syn_dataset_path.mkdir(exist_ok=True)
         images_train_dir.mkdir(exist_ok=True, parents=True)
@@ -170,6 +171,7 @@ class Detect:
 
         # Create synthetic images to fill the dataset
         # Create labels for each images generated
+        logger.info("Generating synthetic images...")
         for i in range(1, dataset_dimension + 1):
             collage, label_lines = self._create_collage(
                 images_folder=self._training_items_path,
@@ -190,6 +192,7 @@ class Detect:
                 for line in label_lines:
                     f.write(line + "\n")
 
+        logger.info("Generating yaml configuration file...")
         # Generate the config file for the dataset created
         self._add_or_create_yaml(self._syn_dataset_path)
 
@@ -348,6 +351,7 @@ class Detect:
         prediction_number = 0
         detection_results = []
 
+        logger.info("First training begins.")
         # First training
         self.train(
             yaml_file=current_dataset,
@@ -366,7 +370,9 @@ class Detect:
             / "weights"
             / "best.pt"
         )
+        logger.info("Loading the first model...")
         current_model = YOLO(current_model_path)
+        logger.info(f"Starting prediction number {prediction_number}")
         # First prediction
         for f in range(0, self._n_frames, 50):  # TEMP
             frame_file = self._frame_path / f"{f}.png"
@@ -405,6 +411,7 @@ class Detect:
                             "confidence": float(conf[i]),
                         }
                     )
+        logger.info("Looking for outliers...")
         # Filter detections
         detection_results = self._filter_detections(
             detection_results,
@@ -417,17 +424,19 @@ class Detect:
             / "train_datasets"
             / f"dataset_{prediction_number}"
         )
-
+        logger.info(f"Building the dataset (version {prediction_number})...")
         # Build the dataset
         self._build_dataset(
             detection_results=detection_results,
             dataset_name=f"dataset_{prediction_number}",
         )
+        logger.info("Updating yaml configuration file...")
         # Add the new dataset to the training config file
         self._add_or_create_yaml(train_dataset_path)
 
         # Iterative part to improve the model performace
         for s in range(max_sessions):
+            logger.info(f"Starting a new training session (number {s + 1}")
             new_model_name = f"v{s + 1}"
             self.train(
                 yaml_file=self._yaml_file_path,
@@ -449,6 +458,7 @@ class Detect:
             current_model = YOLO(current_model_path)
             prediction_number += 1
             detection_results = []
+            logger.info(f"Starting prediction number {prediction_number}")
             for f in range(0, self._n_frames, 50):  # TEMP
                 frame_file = self._frame_path / f"{f}.png"
                 prediction = current_model.predict(
@@ -486,11 +496,14 @@ class Detect:
                                 "confidence": float(conf[i]),
                             }
                         )
-
+            logger.info("Looking for outliers...")
             # Filter detections
             detection_results = self._filter_detections(
                 detection_results,
                 prediction_number,
+            )
+            logger.info(
+                f"Building the dataset (version {prediction_number} ..."
             )
             # Build the new dataset
             self._build_dataset(
@@ -506,6 +519,7 @@ class Detect:
                 / "train_datasets"
                 / f"dataset_{prediction_number}"
             )
+            logger.info("Updating yaml configuration file...")
             # Update the dataset config file
             self._add_or_create_yaml(train_dataset_path)
 
@@ -801,8 +815,10 @@ class Detect:
     ) -> None:
         # GUI mode
         if sample_from == "gui":
+            logger.info("Loading Graphic User Interface...")
             # If not specified by the user use the first img as example
             if reference_img_path is None:
+                logger.info("Using first frame as reference img.")
                 reference_img_path = self._frame_path / "0.png"
             # Open the GUI
             root = tk.Tk()
