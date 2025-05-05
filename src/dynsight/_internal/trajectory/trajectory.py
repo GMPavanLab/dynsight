@@ -312,12 +312,17 @@ class Trj:
 
     @classmethod
     def init_from_universe(cls, universe: MDAnalysis.Universe) -> Trj:
-        """Initialize Trj object from MDAnalysis.Universe."""
+        """Initialize Trj object from MDAnalysis.Universe.
+
+        See https://docs.mdanalysis.org/2.9.0/documentation_pages/core/universe.html#MDAnalysis.core.universe.Universe.
+        """
         return Trj(universe)
 
     @classmethod
     def init_from_xyz(cls, traj_file: Path, dt: float) -> Trj:
         """Initialize Trj object from .xyz file.
+
+        See https://docs.mdanalysis.org/2.9.0/documentation_pages/core/universe.html#MDAnalysis.core.universe.Universe.
 
         Parameters:
         dt: the trajectory's time-step.
@@ -327,7 +332,10 @@ class Trj:
 
     @classmethod
     def init_from_xtc(cls, traj_file: Path, topo_file: Path) -> Trj:
-        """Initialize Trj object from .gro and .xtc files."""
+        """Initialize Trj object from .gro and .xtc files.
+
+        See https://docs.mdanalysis.org/2.9.0/documentation_pages/core/universe.html#MDAnalysis.core.universe.Universe.
+        """
         universe = MDAnalysis.Universe(topo_file, traj_file)
         return Trj(universe)
 
@@ -434,6 +442,8 @@ class Trj:
         step: int = 1,
     ) -> Insight:
         """Compute the radial distribution function g(r).
+
+        See https://docs.mdanalysis.org/1.1.1/documentation_pages/analysis/rdf.html.
 
         The returned Insight contains the following meta: distances_range, s1,
         s2, exclusion_block, nbins, norm, start, stop, step.
