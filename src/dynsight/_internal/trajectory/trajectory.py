@@ -53,7 +53,7 @@ class Insight:
             raise ValueError(msg)
 
         return cls(
-            dataset=np.array(data.get("dataset")),
+            dataset=np.array(data.get("dataset"), dtype=np.float64),
             meta=data.get("meta"),
         )
 
@@ -153,7 +153,7 @@ class ClusterInsight:
         if "labels" not in data:
             msg = "'labels' key not found in JSON file."
             raise ValueError(msg)
-        return cls(labels=np.array(data.get("labels")))
+        return cls(labels=np.array(data.get("labels"), dtype=np.int64))
 
 
 @dataclass(frozen=True)
@@ -327,7 +327,7 @@ class Trj:
         universe = MDAnalysis.Universe(topo_file, traj_file)
         return Trj(universe)
 
-    def get_coordinates(self, selection: str) -> NDArray[np.int64]:
+    def get_coordinates(self, selection: str) -> NDArray[np.float64]:
         """Returns the coordinates as an array.
 
         The array has shape (n_frames, n_atoms, n_coordinates).
@@ -452,7 +452,7 @@ class Trj:
         )
         dataset = np.array([bins, rdf])
         attr_dict = {
-            "distances_range=": distances_range,
+            "distances_range": distances_range,
             "s1": s1,
             "s2": s2,
             "exclusion_block": exclusion_block,
