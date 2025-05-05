@@ -81,23 +81,33 @@ class Insight:
             meta={"sp_av_r_cut": r_cut},
         )
 
-    def get_onion(self, delta_t: int) -> OnionInsight:
+    def get_onion(
+        self,
+        delta_t: int,
+        bins: str | int = "auto",
+        number_of_sigmas: float = 2.0,
+    ) -> OnionInsight:
         """Perform onion clustering.
 
-        The returned OnionInsight contains the following meta:
-            * delta_t: the delta_t value used for the clustering.
+        The returned OnionInsight contains the following meta: delta_t, bins,
+        number_of_sigma.
         """
         if self.dataset.ndim == UNIVAR_DIM:
             reshaped_data = dynsight.onion.helpers.reshape_from_nt(
                 self.dataset, delta_t
             )
-            onion_clust = dynsight.onion.OnionUni()
+            onion_clust = dynsight.onion.OnionUni(
+                bins=bins,
+                number_of_sigmas=number_of_sigmas,
+            )
         else:
             reshaped_data = dynsight.onion.helpers.reshape_from_dnt(
                 self.dataset.transpose(2, 0, 1), delta_t
             )
             onion_clust = dynsight.onion.OnionMulti(
-                ndims=self.dataset.ndim - 1
+                ndims=self.dataset.ndim - 1,
+                bins=bins,
+                number_of_sigmas=number_of_sigmas,
             )
 
         onion_clust.fit(reshaped_data)
@@ -106,7 +116,11 @@ class Insight:
             labels=onion_clust.labels_,
             state_list=onion_clust.state_list_,
             reshaped_data=reshaped_data,
-            meta={"delta_t": delta_t},
+            meta={
+                "delta_t": delta_t,
+                "bins": bins,
+                "number_of_sigmas": number_of_sigmas,
+            },
         )
 
 
