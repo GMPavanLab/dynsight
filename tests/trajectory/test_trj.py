@@ -4,6 +4,7 @@ from pathlib import Path
 
 import MDAnalysis
 import numpy as np
+import pytest
 
 from dynsight.trajectory import ClusterInsight, Insight, OnionInsight, Trj
 
@@ -48,3 +49,20 @@ def test_output_files() -> None:
     on_ins = ins_1.get_onion(delta_t=5)
     on_ins.dump_to_json(Path("tests/systems/_tmp.json"))
     _ = OnionInsight.load_from_json(Path("tests/systems/on_ins_test.json"))
+
+    with pytest.raises(
+        ValueError, match="'dataset' key not found in JSON file."
+    ):
+        _ = Insight.load_from_json(Path("tests/systems/empty.json"))
+
+    with pytest.raises(
+        ValueError, match="'labels' key not found in JSON file."
+    ):
+        _ = ClusterInsight.load_from_json(
+            Path("tests/systems/ins_1_test.json")
+        )
+
+    with pytest.raises(
+        ValueError, match="'state_list' key not found in JSON file."
+    ):
+        _ = OnionInsight.load_from_json(Path("tests/systems/cl_ins_test.json"))
