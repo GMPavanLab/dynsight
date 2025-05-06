@@ -349,19 +349,33 @@ class Trj:
             [atoms.positions.copy() for ts in self.universe.trajectory]
         )
 
-    def get_lens(self, r_cut: float) -> Insight:
-        """Compute LENS on the trajectory.
+    def get_coord_number(self, r_cut: float) -> Insight:
+        """Compute coordination number on the trajectory.
 
-        The returned Insight contains the following meta: r_cut, neigh_count.
+        The returned Insight contains the following meta: r_cut.
         """
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
             cutoff=r_cut,
         )
-        lens, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
-        dataset = np.array([lens, nn])
+        _, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
         return Insight(
-            dataset=dataset,
+            dataset=nn,
+            meta={"r_cut": r_cut},
+        )
+
+    def get_lens(self, r_cut: float) -> Insight:
+        """Compute LENS on the trajectory.
+
+        The returned Insight contains the following meta: r_cut.
+        """
+        neigcounts = dynsight.lens.list_neighbours_along_trajectory(
+            input_universe=self.universe,
+            cutoff=r_cut,
+        )
+        lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
+        return Insight(
+            dataset=lens,
             meta={"r_cut": r_cut},
         )
 
