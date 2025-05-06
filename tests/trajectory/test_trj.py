@@ -50,6 +50,7 @@ def test_output_files() -> None:
     on_ins = ins_1.get_onion(delta_t=5)
     on_ins.dump_to_json(files_path / "_tmp.json")
     _ = OnionInsight.load_from_json(files_path / "on_ins_test.json")
+    (files_path / "_tmp.json").unlink()
 
     with pytest.raises(
         ValueError, match="'dataset' key not found in JSON file."
