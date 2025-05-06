@@ -1,8 +1,6 @@
 """Pytest for dynsight.soap.saponify_trajectory."""
 
-import os
 from pathlib import Path
-from typing import Generator
 
 import MDAnalysis
 import numpy as np
@@ -11,16 +9,6 @@ import pytest
 from dynsight.trajectory import Trj
 
 from .case_data import SOAPCaseData
-
-
-@pytest.fixture
-def original_wd() -> Generator[Path, None, None]:
-    original_dir = Path.cwd()
-
-    # Ensure the original working directory is restored after the test
-    yield original_dir
-
-    os.chdir(original_dir)
 
 
 def test_soap(case_data: SOAPCaseData) -> None:
