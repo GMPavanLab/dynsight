@@ -5,7 +5,7 @@ from pathlib import Path
 import MDAnalysis
 import numpy as np
 
-from dynsight.trajectory import ClusterInsight, Insight, Trj
+from dynsight.trajectory import ClusterInsight, Insight, OnionInsight, Trj
 
 
 # Define the actual test
@@ -43,3 +43,8 @@ def test_output_files() -> None:
     cl_ins = ClusterInsight(fake_labels)
     cl_ins.dump_to_json(Path("tests/systems/_tmp.json"))
     _ = ClusterInsight.load_from_json(Path("tests/systems/cl_ins_test.json"))
+
+    # Test dump and load of OnionInsight
+    on_ins = ins_1.get_onion(delta_t=5)
+    on_ins.dump_to_json(Path("tests/systems/_tmp.json"))
+    _ = OnionInsight.load_from_json(Path("tests/systems/on_ins_test.json"))

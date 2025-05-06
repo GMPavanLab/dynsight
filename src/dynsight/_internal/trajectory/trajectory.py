@@ -173,10 +173,14 @@ class OnionInsight(ClusterInsight):
 
     def dump_to_json(self, file_path: Path) -> None:
         """Save the OnionInsight object as .json file."""
-        data = asdict(self)
-        data["labels"] = data["labels"].tolist()
+        data = {
+            "labels": self.labels.tolist(),
+            "reshaped_data": self.reshaped_data.tolist(),
+            "meta": self.meta,
+        }
+
         new_state_list = []
-        for state in data["state_list"]:
+        for state in self.state_list:
             tmp = {}
             for f in fields(state):
                 value = getattr(state, f.name)
@@ -185,8 +189,8 @@ class OnionInsight(ClusterInsight):
                 else:
                     tmp[f.name] = value
             new_state_list.append(tmp)
+
         data["state_list"] = new_state_list
-        data["reshaped_data"] = data["reshaped_data"].tolist()
         with file_path.open("w") as file:
             json.dump(data, file, indent=4)
 
