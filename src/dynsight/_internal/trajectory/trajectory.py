@@ -360,7 +360,7 @@ class Trj:
         )
         _, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
         return Insight(
-            dataset=nn,
+            dataset=nn.astype(np.float64),
             meta={"r_cut": r_cut},
         )
 

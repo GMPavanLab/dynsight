@@ -1,10 +1,11 @@
-"""Pytest for dynsight.trajectory.Trj.init methods."""
+"""Pytest for dynsight.trajectory methods."""
 
 from pathlib import Path
 
 import MDAnalysis
+import numpy as np
 
-from dynsight.trajectory import Trj
+from dynsight.trajectory import ClusterInsight, Insight, Trj
 
 
 # Define the actual test
@@ -31,3 +32,14 @@ def test_output_files() -> None:
     # Test init_from_xtc
     trj_4 = Trj.init_from_xtc(input_file_xtc, input_file_gro)
     assert len(trj_4.universe.trajectory) == n_frames_xtc
+
+    # Test dump and load of Insight
+    ins_1 = trj_1.get_lens(10.0)
+    ins_1.dump_to_json(Path("tests/systems/_tmp.json"))
+    _ = Insight.load_from_json(Path("tests/systems/ins_1_test.json"))
+
+    # Test dump and load of ClusterInsight
+    fake_labels = np.zeros((5, 5), dtype=int)
+    cl_ins = ClusterInsight(fake_labels)
+    cl_ins.dump_to_json(Path("tests/systems/_tmp.json"))
+    _ = ClusterInsight.load_from_json(Path("tests/systems/cl_ins_test.json"))
