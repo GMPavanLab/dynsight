@@ -39,7 +39,9 @@ def test_lens_signals() -> None:
 
     # Run LENS (and nn) calculation for different r_cuts
     for i, r_cut in enumerate(lens_cutoffs):
-        test_array = example_trj.get_lens(r_cut=r_cut).dataset
+        test_lens = example_trj.get_lens(r_cut=r_cut).dataset
+        test_nn = example_trj.get_coord_number(r_cut=r_cut).dataset
+        test_array = [test_lens, test_nn]
 
         check_lens_nn = check_file[f"LENS_{i}"]
 

@@ -173,10 +173,14 @@ class OnionInsight(ClusterInsight):
 
     def dump_to_json(self, file_path: Path) -> None:
         """Save the OnionInsight object as .json file."""
-        data = asdict(self)
-        data["labels"] = data["labels"].tolist()
+        data = {
+            "labels": self.labels.tolist(),
+            "reshaped_data": self.reshaped_data.tolist(),
+            "meta": self.meta,
+        }
+
         new_state_list = []
-        for state in data["state_list"]:
+        for state in self.state_list:
             tmp = {}
             for f in fields(state):
                 value = getattr(state, f.name)
@@ -185,8 +189,8 @@ class OnionInsight(ClusterInsight):
                 else:
                     tmp[f.name] = value
             new_state_list.append(tmp)
+
         data["state_list"] = new_state_list
-        data["reshaped_data"] = data["reshaped_data"].tolist()
         with file_path.open("w") as file:
             json.dump(data, file, indent=4)
 
@@ -349,19 +353,33 @@ class Trj:
             [atoms.positions.copy() for ts in self.universe.trajectory]
         )
 
-    def get_lens(self, r_cut: float) -> Insight:
-        """Compute LENS on the trajectory.
+    def get_coord_number(self, r_cut: float) -> Insight:
+        """Compute coordination number on the trajectory.
 
-        The returned Insight contains the following meta: r_cut, neigh_count.
+        The returned Insight contains the following meta: r_cut.
         """
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
             cutoff=r_cut,
         )
-        lens, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
-        dataset = np.array([lens, nn])
+        _, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
         return Insight(
-            dataset=dataset,
+            dataset=nn.astype(np.float64),
+            meta={"r_cut": r_cut},
+        )
+
+    def get_lens(self, r_cut: float) -> Insight:
+        """Compute LENS on the trajectory.
+
+        The returned Insight contains the following meta: r_cut.
+        """
+        neigcounts = dynsight.lens.list_neighbours_along_trajectory(
+            input_universe=self.universe,
+            cutoff=r_cut,
+        )
+        lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
+        return Insight(
+            dataset=lens,
             meta={"r_cut": r_cut},
         )
 
