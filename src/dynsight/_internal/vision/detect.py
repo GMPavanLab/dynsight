@@ -520,7 +520,7 @@ class Detect:
             # Update the dataset config file
             self._add_or_create_yaml(train_dataset_path)
 
-    def compute_trj(
+    def compute_xyz(
         self,
         detection_folder_path: pathlib.Path,
         output_path: pathlib.Path,
