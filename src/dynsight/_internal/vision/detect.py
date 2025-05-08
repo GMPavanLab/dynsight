@@ -66,38 +66,40 @@ class Detect:
             project_folder:
                 Path to the main project directory.
         """
+        # Main directory for all the project outputs.
         self._project_folder = project_folder
-        """Main directory for all the project outputs."""
 
+        # Directory where store extracted video frames.
         self._frame_path = self._project_folder / "frames"
-        """Directory where store extracted video frames."""
 
+        # Directory path where save the training item crops selected.
         self._training_items_path = self._project_folder / "training_items"
-        """Directory path where save the training item crops selected."""
 
+        # Directory path for the generated synthetic dataset.
         self._syn_dataset_path = self._project_folder / "synthetic_dataset"
-        """Directory path for the generated synthetic dataset."""
 
+        # Directory path where save trained models.
         self._models_path = self._project_folder / "models"
-        """Directory path where save trained models."""
 
+        # Directory path where save prediction outputs.
         self._predictions_path = self._project_folder / "predictions"
-        """Directory path where save prediction outputs."""
 
-        # Define the config file path for the training
+        # Path to the YAML configuration file for dataset training.
         self._yaml_file_path = self._project_folder / "training_options.yaml"
-        """Path to the YAML configuration file for dataset training."""
 
-        # Extract information from the input video
+        # Resolution of the input video (width, height) in pixels.
         self._video_size = input_video.resolution()
-        """Resolution of the input video (width, height) in pixels."""
+        # Total number of frames extracted from the video.
         self._n_frames = input_video.count_frames()
-        """Total number of frames extracted from the video."""
 
         # Check if the video's frame are already present
         # if not -> extract them
         if not self._frame_path.exists():
             input_video.extract_frames(project_folder)
+
+    def get_project_path(self) -> pathlib.Path:
+        """It returns the path of the detection project."""
+        return self._project_folder
 
     def synthesize(
         self,

@@ -29,8 +29,8 @@ class Video:
 
     video_path: pathlib.Path
     """Path to the video file."""
+    # OpenCV video capture object.
     _capture: cv2.VideoCapture = field(init=False, repr=False)
-    """OpenCV video capture object."""
 
     def __post_init__(self) -> None:
         """Load the the video."""
