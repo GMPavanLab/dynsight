@@ -178,6 +178,7 @@ class Detect:
                 width=collage_size[0],
                 height=collage_size[1],
                 max_repeats=collage_max_repeats,
+                random_seed=random_seed,
             )
             subset = assignments[i - 1]
             if subset == "train":
@@ -739,6 +740,7 @@ class Detect:
         images_folder: pathlib.Path,
         width: int,
         height: int,
+        random_seed: int,
         patience: int = 1000,
         max_repeats: int = 1,
     ) -> tuple[Image.Image, list[str]]:
@@ -760,7 +762,7 @@ class Detect:
         total_placement = len(cropped_images) * max_repeats
         placed_count = 0
         cropped_images_array = np.array(cropped_images, dtype=object)
-        rng = np.random.default_rng()
+        rng = np.random.default_rng(seed=random_seed)
         while placed_count < total_placement:
             cropped = rng.choice(cropped_images_array)
             w, h = cropped.size
