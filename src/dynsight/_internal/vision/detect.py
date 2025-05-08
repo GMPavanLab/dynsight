@@ -112,8 +112,10 @@ class Detect:
         Parameters:
             dataset_dimension:
                 Total number of synthetic samples to generate.
-                reference_img_path: Path to the reference image
-                to initialize the GUI. If None, uses the first extracted frame.
+
+            reference_img_path:
+                Path to the reference image to initialize the GUI.
+                If None, uses the first extracted frame.
 
             validation_set_fraction:
                 Fraction of samples to allocate to the validation set.
