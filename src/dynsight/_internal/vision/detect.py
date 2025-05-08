@@ -763,7 +763,7 @@ class Detect:
         placed_count = 0
         cropped_images_array = np.array(cropped_images, dtype=object)
         rng = np.random.default_rng(seed=random_seed)
-        while placed_count < total_placement:
+        for _ in range(total_placement):
             cropped = rng.choice(cropped_images_array)
             w, h = cropped.size
             max_x = width - w
