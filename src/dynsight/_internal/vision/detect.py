@@ -200,12 +200,12 @@ class Detect:
     def train(
         self,
         yaml_file: pathlib.Path,
+        batch_size: int,
+        workers: int,
         initial_model: str | pathlib.Path = "yolo12x.pt",
         training_name: str | None = None,
         training_epochs: int = 100,
         training_patience: int = 100,
-        batch_size: int = 16,
-        workers: int = 8,
         device: int | str | list[int] | None = None,
     ) -> None:
         """Train a YOLO model on the selected dataset.
@@ -297,12 +297,12 @@ class Detect:
     def fit(
         self,
         initial_dataset: pathlib.Path,
+        max_sessions: int,
+        training_epochs: int,
+        training_patience: int,
+        batch_size: int,
+        workers: int,
         initial_model: str | pathlib.Path = "yolo12x.pt",
-        max_sessions: int = 2,
-        training_epochs: int = 2,
-        training_patience: int = 2,
-        batch_size: int = 16,
-        workers: int = 8,
         device: int | str | list[int] | None = None,
         frame_reading_step: int = 1,
     ) -> None:
