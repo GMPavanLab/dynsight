@@ -523,18 +523,18 @@ class Detect:
 
     def compute_xyz(
         self,
-        detection_folder_path: pathlib.Path,
+        prediction_folder_path: pathlib.Path,
         output_path: pathlib.Path,
     ) -> None:
         """Computes and saves the trajectory of detections to xyz file.
 
         Parameters:
-            detection_folder_path:
+            prediction_folder_path:
                 The path to the folder containing detection data files.
             output_path:
                 The path where the resulting trajectory data should be saved.
         """
-        lab_folder = detection_folder_path / "labels"
+        lab_folder = prediction_folder_path / "labels"
         frame_positions = []
         for frame in range(self._n_frames):
             label_file = lab_folder / f"{frame}.txt"
