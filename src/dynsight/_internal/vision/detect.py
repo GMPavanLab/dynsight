@@ -13,7 +13,7 @@ from PIL import Image
 from ultralytics import YOLO
 
 from .vision_gui import VisionGUI
-from .vision_utilities import _find_outliers
+from .vision_utilities import find_outliers
 
 if TYPE_CHECKING:
     from .video_to_frame import Video
@@ -580,7 +580,7 @@ class Detect:
         )
         try:
             out_width = set(
-                _find_outliers(
+                find_outliers(
                     distribution=widths,
                     save_path=outliers_plt_folder,
                     fig_name="width",
@@ -595,7 +595,7 @@ class Detect:
 
         try:
             out_height = set(
-                _find_outliers(
+                find_outliers(
                     distribution=heights,
                     save_path=outliers_plt_folder,
                     fig_name="height",

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 
-def _find_outliers(
+def find_outliers(
     distribution: NDArray[np.float64],
     save_path: pathlib.Path,
     fig_name: str,
