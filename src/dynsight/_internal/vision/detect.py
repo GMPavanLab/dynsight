@@ -64,6 +64,7 @@ class Detect:
         """
         # Main directory for all the project outputs.
         self._project_folder = project_folder
+        self._project_folder.mkdir(parents=True, exist_ok=True)
 
         # Directory where store extracted video frames.
         self._frame_path = self._project_folder / "frames"
