@@ -48,7 +48,7 @@ def parse_args() -> argparse.Namespace:
         help="Number of epochs for each training session.",
     )
     parser.add_argument(
-        "--patiece",
+        "--patience",
         type=int,
         required=False,
         default=10,
@@ -66,10 +66,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--gpu",
-        type=tuple,
-        required=False,
+        nargs="+",
+        type=int,
         default=None,
-        help="ID of the GPU(s) used.",
+        help="IDs of the GPU(s) used.",
     )
     parser.add_argument(
         "--step",
@@ -101,7 +101,8 @@ def main() -> None:
         detection.synthesize()
     if args.train:
         detection.fit(
-            initial_dataset=detection.get_project_path() / "synthetic_dataset",
+            initial_dataset=detection.get_project_path()
+            / "training_options.yaml",
             max_sessions=args.maxcycle,
             training_epochs=args.epochs,
             training_patience=args.patience,
