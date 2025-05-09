@@ -15,6 +15,8 @@ dependencies = [
     "dscribe",
     "tropea-clustering",
     "MDAnalysis",
+    "ultralytics",
+    "PyYAML",
 ]
 # Set by cpctools.
 requires-python = ">=3.8"
@@ -111,5 +113,9 @@ module = [
     'h5py.*',
     'SOAPify.*',
     'deeptime.decomposition.*',
+    'yaml.*',
+    'Pillow.*',
+    'ultralytics.*',
+    'opencv-python.*',
 ]
 ignore_missing_imports = true

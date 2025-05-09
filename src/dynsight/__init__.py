@@ -10,6 +10,7 @@ from dynsight import (
     tica,
     trajectory,
     utilities,
+    vision,
 )
 
 __all__ = [
@@ -22,4 +23,5 @@ __all__ = [
     "tica",
     "trajectory",
     "utilities",
+    "vision",
 ]
