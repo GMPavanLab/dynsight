@@ -113,7 +113,7 @@ def main() -> None:
     if args.predict:
         detection.predict_frames(model_path=args.detect_model)
         detection.compute_xyz(
-            detection_folder_path="prediction",
+            prediction_folder_path=Path("prediction"),
             output_path=Path.cwd(),
         )
 
