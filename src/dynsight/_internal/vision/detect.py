@@ -740,7 +740,7 @@ class Detect:
         images_folder: pathlib.Path,
         width: int,
         height: int,
-        random_seed: int,
+        random_seed: int | None = None,
         patience: int = 1000,
         max_repeats: int = 1,
     ) -> tuple[Image.Image, list[str]]:
