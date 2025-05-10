@@ -67,27 +67,7 @@ def track_xyz(
         msg = f"Input file not found: {input_xyz}"
         raise FileNotFoundError(msg)
 
-    lines = input_xyz.read_text().splitlines()
-
-    data = []
-    frame = -1
-    i = 0
-    dimensions = 3
-    while i < len(lines):
-        if lines[i].strip().isdigit():
-            num_atoms = int(lines[i])
-            frame += 1
-            i += 2  # Skip comment line
-            for j in range(num_atoms):
-                parts = lines[i + j].strip().split()
-                if len(parts) >= dimensions:
-                    x, y, z = map(float, parts[0:3])
-                    data.append({"frame": frame, "x": x, "y": y, "z": z})
-            i += num_atoms
-        else:
-            i += 1
-
-    positions = pd.DataFrame(data)
+    positions = _collect_positions(input_xyz=input_xyz)
 
     if not {"frame", "x", "y", "z"}.issubset(positions.columns):
         msg = "Error in the .xyz format. Each line must be <x> <y> <z>."
@@ -112,3 +92,32 @@ def track_xyz(
                 f.write(f"{pid} {x:.6f} {y:.6f} {z:.6f}\n")
 
     logger.info(f"Linked .xyz file written to: {output_xyz}")
+
+
+def _collect_positions(input_xyz: Path) -> pd.DataFrame:
+    """Read the xyz file and return the positions dataset at each frame."""
+    lines = input_xyz.read_text().splitlines()
+
+    data = []
+    frame = -1
+    row = 0
+    dimensions = 3
+    for _ in range(len(lines)):
+        if row >= len(lines):
+            break
+        if lines[row].strip().isdigit():
+            num_atoms = int(lines[row])
+            frame += 1
+            row += 2  # skip comment line.
+            for a in range(num_atoms):
+                if row + a >= len(lines):
+                    break
+                parts = lines[row + a].strip().split()
+                if len(parts) >= dimensions:
+                    x, y, z = map(float, parts[0:3])
+                    data.append({"frame": frame, "x": x, "y": y, "z": z})
+            row += num_atoms
+        else:
+            row += 1
+
+    return pd.DataFrame(data)
