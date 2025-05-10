@@ -4,21 +4,14 @@ import pandas as pd
 import trackpy as tp
 
 
-def track_xyz(
-    input_xyz: Path,
-    output_xyz: Path,
-    search_range: int = 5,
-    memory: int = 1,
-    adaptive_stop: float = 0.5,
-    adaptive_step: float = 0.95,
-):
-    """Load a .xyz file (positions only), perform particle tracking using trackpy,
-    and write a new .xyz file with particle IDs.
+def track_xyz(input_xyz: Path, output_xyz: Path, search_range=5, memory=0):
+    """Reads a minimalist .xyz file (only positions, no atom labels), tracks particles using trackpy,
+    and writes a new .xyz file with IDs.
 
     Args:
         input_xyz (Path): Path to the input .xyz file.
         output_xyz (Path): Path to the output .xyz file with particle IDs.
-        search_range (float): Max distance allowed for linking particles between frames.
+        search_range (float): Max linking distance between frames.
         memory (int): Max number of frames a particle can disappear and still be linked.
     """
     input_xyz = Path(input_xyz)
@@ -39,8 +32,8 @@ def track_xyz(
             i += 2  # Skip comment line
             for j in range(num_atoms):
                 parts = lines[i + j].strip().split()
-                if len(parts) >= 4:
-                    x, y, z = map(float, parts[1:4])
+                if len(parts) >= 3:
+                    x, y, z = map(float, parts[0:3])
                     data.append({"frame": frame, "x": x, "y": y, "z": z})
             i += num_atoms
         else:
@@ -48,25 +41,24 @@ def track_xyz(
 
     df = pd.DataFrame(data)
 
-    # Perform particle linking
-    linked = tp.link_df(
-        df,
-        search_range=search_range,
-        memory=memory,
-        adaptive_step=adaptive_step,
-        adaptive_stop=adaptive_stop,
-    )
+    # Check for required columns
+    if not {"frame", "x", "y", "z"}.issubset(df.columns):
+        raise ValueError(
+            "Parsed DataFrame does not contain required columns: frame, x, y, z"
+        )
 
-    # Write the output .xyz with IDs
+    # Perform linking
+    linked = tp.link_df(df, search_range=search_range, memory=memory)
+
+    # Write output .xyz
     with output_xyz.open("w") as f:
         for frame_num in sorted(linked["frame"].unique()):
             frame_data = linked[linked["frame"] == frame_num]
             f.write(f"{len(frame_data)}\n")
             f.write(f"Frame {frame_num}\n")
             for _, row in frame_data.iterrows():
-                atom_type = "X"  # Generic atom label
                 f.write(
-                    f"{atom_type} {row['x']:.6f} {row['y']:.6f} {row['z']:.6f} id={int(row['particle'])}\n"
+                    f"{row['x']:.6f} {row['y']:.6f} {row['z']:.6f} id={int(row['particle'])}\n"
                 )
 
     print(f"Linked .xyz file written to: {output_xyz}")
