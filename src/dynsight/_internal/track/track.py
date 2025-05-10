@@ -4,7 +4,14 @@ import pandas as pd
 import trackpy as tp
 
 
-def track_xyz(input_xyz: Path, output_xyz: Path, search_range=5, memory=0):
+def track_xyz(
+    input_xyz: Path,
+    output_xyz: Path,
+    search_range=10,
+    memory=1,
+    adaptive_step: float = 0.5,
+    adaptive_stop: float = 0.95,
+):
     """Reads a minimalist .xyz file (positions only, no atom labels), tracks particles using trackpy,
     and writes a new .xyz file with IDs as the first column.
 
@@ -46,7 +53,13 @@ def track_xyz(input_xyz: Path, output_xyz: Path, search_range=5, memory=0):
             "Parsed DataFrame missing required columns: frame, x, y, z"
         )
 
-    linked = tp.link_df(df, search_range=search_range, memory=memory)
+    linked = tp.link_df(
+        df,
+        search_range=search_range,
+        memory=memory,
+        adaptive_step=adaptive_step,
+        adaptive_stop=adaptive_stop,
+    )
 
     with output_xyz.open("w") as f:
         for frame_num in sorted(linked["frame"].unique()):
