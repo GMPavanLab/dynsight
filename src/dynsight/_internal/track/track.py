@@ -4,7 +4,7 @@ import pandas as pd
 import trackpy as tp
 
 
-def xyz_to_linked_xyz(
+def track_xyz(
     input_xyz: Path,
     output_xyz: Path,
     search_range: int = 5,
