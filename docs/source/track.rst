@@ -3,6 +3,9 @@ track
 
 Code for tracking .xyz trajectories without Particles IDs.
 
+
+Functions
+---------
 .. toctree::
   :maxdepth: 1
 
