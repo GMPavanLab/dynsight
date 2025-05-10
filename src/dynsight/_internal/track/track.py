@@ -4,13 +4,15 @@ import pandas as pd
 import trackpy as tp
 
 
-def track_xyz(input_xyz: Path, output_xyz: Path, search_range=5, memory=0):
-    """Reads a minimalist .xyz file (only positions, no atom labels), tracks particles using trackpy,
-    and writes a new .xyz file with IDs.
+def xyz_to_linked_xyz(
+    input_xyz: Path, output_xyz: Path, search_range=5, memory=0
+):
+    """Reads a minimalist .xyz file (positions only, no atom labels), tracks particles using trackpy,
+    and writes a new .xyz file with IDs as the first column.
 
     Args:
         input_xyz (Path): Path to the input .xyz file.
-        output_xyz (Path): Path to the output .xyz file with particle IDs.
+        output_xyz (Path): Path to the output .xyz file with particle IDs as first column.
         search_range (float): Max linking distance between frames.
         memory (int): Max number of frames a particle can disappear and still be linked.
     """
@@ -41,16 +43,13 @@ def track_xyz(input_xyz: Path, output_xyz: Path, search_range=5, memory=0):
 
     df = pd.DataFrame(data)
 
-    # Check for required columns
     if not {"frame", "x", "y", "z"}.issubset(df.columns):
         raise ValueError(
-            "Parsed DataFrame does not contain required columns: frame, x, y, z"
+            "Parsed DataFrame missing required columns: frame, x, y, z"
         )
 
-    # Perform linking
     linked = tp.link_df(df, search_range=search_range, memory=memory)
 
-    # Write output .xyz
     with output_xyz.open("w") as f:
         for frame_num in sorted(linked["frame"].unique()):
             frame_data = linked[linked["frame"] == frame_num]
@@ -58,7 +57,7 @@ def track_xyz(input_xyz: Path, output_xyz: Path, search_range=5, memory=0):
             f.write(f"Frame {frame_num}\n")
             for _, row in frame_data.iterrows():
                 f.write(
-                    f"{row['x']:.6f} {row['y']:.6f} {row['z']:.6f} id={int(row['particle'])}\n"
+                    f"{int(row['particle'])} {row['x']:.6f} {row['y']:.6f} {row['z']:.6f}\n"
                 )
 
     print(f"Linked .xyz file written to: {output_xyz}")
