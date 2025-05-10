@@ -14,6 +14,7 @@
    tICA <tica>
    onion clustering <onion>
    vision <vision>
+   track <track>
    analysis <analysis>
    data processing <data_processing>
    HDF5er <hdf5er>

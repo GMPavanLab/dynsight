@@ -19,43 +19,46 @@ def track_xyz(
     adaptive_step: float = 0.5,
     adaptive_stop: float = 0.95,
 ) -> None:
-    """Track particles from an xyz file and write a new .xyz with particle IDs.
+    """Track particles from an xyz file and write a new file with particle IDs.
 
     The input .xyz is assumed to contain only raw 3D coordinates
     (no atom labels), and each frame begins with a line indicating the number
     of atoms, followed by a comment line, then a list of positions.
 
-    Example frame block:
-        100
-        Frame 0
-        1.0 2.0 3.0
-        2.1 1.9 3.5
+    Each frame in the input file must follow this structure::
+
+        <number of atoms>
+        comment line
+        <x> <y> <z>
+        <x> <y> <z>
         ...
+        <x> <y> <z>
 
     The output file will have the same structure, but each line will start
     with the tracked particle ID.
 
     Parameters:
-    input_xyz:
-        Path to the input .xyz file containing positions only.
-    output_xyz:
-        Path where the output .xyz file with particle IDs will be saved.
-    search_range:
-        Maximum linking distance between frames.
-    memory:
-        Maximum number of frames during which a particle can vanish and
-        still be tracked.
-    adaptive_step:
-        Step size for adaptive linking.
-    adaptive_stop:
-        Stopping criterion for adaptive linking.
+        input_xyz:
+            Path to the input .xyz file containing positions only.
 
-    Raises:
-    ------
-    FileNotFoundError
-        If the input file does not exist.
-    ValueError
-        If the input format is incorrect or missing required columns.
+        output_xyz:
+            Path where the output .xyz file with particle IDs will be saved.
+
+        search_range:
+            Maximum linking distance between frames.
+
+        memory:
+            Maximum number of frames a particle can vanish and still be
+            re-identified.
+
+        adaptive_step:
+            Factor by which the search range is multiplied to reduce it during
+            adaptive search.
+
+        adaptive_stop
+            Minimum allowable search range during adaptive search. If the
+            search range becomes smaller than this value and ambiguities
+            persist, the linking process is aborted for the problematic region.
     """
     input_xyz = Path(input_xyz)
     output_xyz = Path(output_xyz)
