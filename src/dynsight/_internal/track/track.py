@@ -4,9 +4,7 @@ import pandas as pd
 import trackpy as tp
 
 
-def xyz_to_linked_xyz(
-    input_xyz: Path, output_xyz: Path, search_range=5, memory=0
-):
+def track_xyz(input_xyz: Path, output_xyz: Path, search_range=5, memory=0):
     """Reads a minimalist .xyz file (positions only, no atom labels), tracks particles using trackpy,
     and writes a new .xyz file with IDs as the first column.
 
