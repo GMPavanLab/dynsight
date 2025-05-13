@@ -12,6 +12,11 @@ To get ``dynsight``, you can install it with pip::
     $ pip install dynsight
 
 
+How to contribute
+=================
+
+If you make changes or improvements to the codebase, please open a pull request on our GitHub repository. This allows us to review, discuss, and integrate contributions in a transparent and collaborative manner. Make sure to include a clear description of the changes and link any related issues if applicable. 
+
 Developer Setup
 ===============
 
@@ -42,13 +47,9 @@ If you use ``dynsight`` please cite
     https://github.com/GMPavanLab/dynsight
 
 
-
-Publications
-============
-
-* time-soap: https://doi.org/10.1063/5.0147025
-* lens: https://doi.org/10.1073/pnas.2300565120
-* onion-clustering: https://doi.org/10.1073/pnas.2403771121
+* If you use timeSOAP, please cite https://doi.org/10.1063/5.0147025
+* If you use LENS, please cite: https://doi.org/10.1073/pnas.2300565120
+* If you use onion-clustering, please cite: https://doi.org/10.1073/pnas.2403771121
 
 
 Acknowledgements
