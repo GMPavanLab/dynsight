@@ -42,11 +42,7 @@ There are also examples available in the ``cpctools`` repository
 How To Cite
 ===========
 
-If you use ``dynsight`` please cite
-
-    https://github.com/GMPavanLab/dynsight
-
-
+* If you use ``dynsight`` please cite https://github.com/GMPavanLab/dynsight
 * If you use timeSOAP, please cite https://doi.org/10.1063/5.0147025
 * If you use LENS, please cite: https://doi.org/10.1073/pnas.2300565120
 * If you use onion-clustering, please cite: https://doi.org/10.1073/pnas.2403771121
