@@ -78,6 +78,12 @@ or with conda::
 
   $ conda install -c conda-forge deeptime
 
+
+How to contribute
+-----------------
+
+If you make changes or improvements to the codebase, please open a pull request on our GitHub repository. This allows us to review, discuss, and integrate contributions in a transparent and collaborative manner. Make sure to include a clear description of the changes and link any related issues if applicable. 
+
 Developer Setup
 ...............
 
@@ -98,7 +104,7 @@ Developer Setup
 Overview
 --------
 
-To be written.
+To be written. 
 
 Examples
 --------
@@ -110,6 +116,14 @@ directory of this repository.
 There are also examples available in the ``cpctools`` repository
 `here <https://github.com/GMPavanLab/cpctools/tree/main/Examples>`_.
 
+
+How To Cite
+-----------
+
+* If you use ``dynsight`` please cite https://github.com/GMPavanLab/dynsight
+* If you use timeSOAP, please cite https://doi.org/10.1063/5.0147025
+* If you use LENS, please cite: https://doi.org/10.1073/pnas.2300565120
+* If you use onion-clustering, please cite: https://doi.org/10.1073/pnas.2403771121
 
 
 Acknowledgements
