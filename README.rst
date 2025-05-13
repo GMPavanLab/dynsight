@@ -42,10 +42,18 @@ There are also examples available in the ``cpctools`` repository
 How To Cite
 ===========
 
-* If you use ``dynsight`` please cite https://github.com/GMPavanLab/dynsight
+If you use ``dynsight`` please cite
+
+    https://github.com/GMPavanLab/dynsight
+
+* Most modules also use MDAnalysis, https://www.mdanalysis.org/pages/citations/
+* If you use SOAP, please cite https://doi.org/10.1103/PhysRevB.87.184115 and DScribe https://singroup.github.io/dscribe/latest/citing.html
 * If you use timeSOAP, please cite https://doi.org/10.1063/5.0147025
 * If you use LENS, please cite: https://doi.org/10.1073/pnas.2300565120
 * If you use onion-clustering, please cite: https://doi.org/10.1073/pnas.2403771121
+* If you use tICA, please cite ``deeptime`` https://deeptime-ml.github.io/latest/index.html 
+* If you use ``dynsight.vision``, please cite XXX
+* If you use ``dynsight.track``, please cite XXX
 
 
 Acknowledgements
