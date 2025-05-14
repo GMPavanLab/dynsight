@@ -52,8 +52,8 @@ If you use ``dynsight`` please cite
 * If you use LENS, please cite: https://doi.org/10.1073/pnas.2300565120
 * If you use onion-clustering, please cite: https://doi.org/10.1073/pnas.2403771121
 * If you use tICA, please cite ``deeptime`` https://deeptime-ml.github.io/latest/index.html 
-* If you use ``dynsight.vision``, please cite XXX
-* If you use ``dynsight.track``, please cite XXX
+* If you use ``dynsight.vision``, please cite Ultralytics YOLO https://docs.ultralytics.com/it/models/yolo11/#usage-examples
+* If you use ``dynsight.track``, please cite Trackpy https://soft-matter.github.io/trackpy/dev/introduction.html
 
 
 Acknowledgements
