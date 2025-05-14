@@ -32,17 +32,13 @@
 
   Modules <modules>
 
-============
 Introduction
-============
+------------
 
 | GitHub: https://www.github.com/GMPavanLab/dynsight
 
 
-:mod:`.dynsight` is a Python library aimed at simplifying the analysis of Molecular
-Dynamics simulations.
-
-
+:mod:`.dynsight` is a Python library aimed at simplifying the analysis of Molecular Dynamics simulations.
 
 Previously in `cpctools`_.
 
@@ -104,7 +100,7 @@ Developer Setup
 Overview
 --------
 
-To be written. 
+``dynsight`` is structured to support a wide range of tasks commonly encountered in the analysis of many-body dynamical systems. These tasks include handling trajectory data, computing single-particle descriptors, performing time-series clustering and conducting various auxiliary analyses. To achieve this, dynsight is organized into specialized modules, each addressing a specific aspect of this workflow. 
 
 Examples
 --------

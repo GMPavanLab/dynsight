@@ -18,7 +18,7 @@ How to contribute
 If you make changes or improvements to the codebase, please open a pull request on our GitHub repository. This allows us to review, discuss, and integrate contributions in a transparent and collaborative manner. Make sure to include a clear description of the changes and link any related issues if applicable. 
 
 Developer Setup
-===============
+---------------
 
 1. Install `just`_.
 2. In a new virtual environment run using Python 3.10::
