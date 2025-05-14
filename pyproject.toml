@@ -17,6 +17,8 @@ dependencies = [
     "MDAnalysis",
     "ultralytics",
     "PyYAML",
+    "pandas",
+    "trackpy",
 ]
 # Set by cpctools.
 requires-python = ">=3.8"
@@ -117,5 +119,7 @@ module = [
     'Pillow.*',
     'ultralytics.*',
     'opencv-python.*',
+    'pandas.*',
+    'trackpy.*',
 ]
 ignore_missing_imports = true
