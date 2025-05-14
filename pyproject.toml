@@ -15,7 +15,6 @@ dependencies = [
     "dscribe",
     "tropea-clustering",
     "MDAnalysis",
-    "ultralytics",
     "PyYAML",
 ]
 # Set by cpctools.
