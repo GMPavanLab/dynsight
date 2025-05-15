@@ -11,3 +11,8 @@ examples/analysis_workflow/water_lens.json
 examples/info_gain/trj_*.npy
 tests/systems/coex/.*
 tests/systems/.*
+
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.venv
