@@ -53,9 +53,9 @@ How to contribute
 -----------------
 
 If you make changes or improvements to the codebase, please open a pull request
- on our GitHub repository. This allows us to review, discuss, and integrate
- contributions in a transparent and collaborative manner. Make sure to include
- a clear description of the changes and link any related issues if applicable.
+on our GitHub repository. This allows us to review, discuss, and integrate
+contributions in a transparent and collaborative manner. Make sure to include
+a clear description of the changes and link any related issues if applicable.
 
 
 Developer Setup
