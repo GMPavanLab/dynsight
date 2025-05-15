@@ -28,7 +28,7 @@ To get ``dynsight``, you can install it with pip::
 Optional Dependancies
 .....................
 
-Old versions :mod:`dynsight` used :mod:`cpctools` for SOAP calculations, if
+Old versions `dynsight` used :mod:`cpctools` for SOAP calculations, if
 you are using Python 3.10 and below, you can use :mod:`cpctools` to access
 :mod:`SOAPify` and :mod:`hd5er` using ::
 
