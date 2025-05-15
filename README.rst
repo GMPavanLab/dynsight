@@ -35,7 +35,7 @@ you are using Python 3.10 and below, you can use :mod:`cpctools` to access
   $ pip install cpctools
 
 If you want to use the :mod:`dynsight.tica` module you will need to install the
- deeptime package. This can be done with with pip::
+deeptime package. This can be done with with pip::
 
   $ pip install deeptime
 
