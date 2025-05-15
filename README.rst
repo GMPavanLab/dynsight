@@ -15,7 +15,7 @@ To get ``dynsight``, you can install it with pip::
 How to contribute
 =================
 
-If you make changes or improvements to the codebase, please open a pull request on our GitHub repository. This allows us to review, discuss, and integrate contributions in a transparent and collaborative manner. Make sure to include a clear description of the changes and link any related issues if applicable. 
+If you make changes or improvements to the codebase, please open a pull request on our GitHub repository. This allows us to review, discuss, and integrate contributions in a transparent and collaborative manner. Make sure to include a clear description of the changes and link any related issues if applicable.
 
 Developer Setup
 ---------------
@@ -26,7 +26,7 @@ Developer Setup
     $ just dev
 
 3. Run code checks::
-    
+
     $ just check
 
 .. _`just`: https://github.com/casey/just
@@ -51,7 +51,7 @@ If you use ``dynsight`` please cite
 * If you use timeSOAP, please cite https://doi.org/10.1063/5.0147025
 * If you use LENS, please cite: https://doi.org/10.1073/pnas.2300565120
 * If you use onion-clustering, please cite: https://doi.org/10.1073/pnas.2403771121
-* If you use tICA, please cite ``deeptime`` https://deeptime-ml.github.io/latest/index.html 
+* If you use tICA, please cite ``deeptime`` https://deeptime-ml.github.io/latest/index.html
 * If you use ``dynsight.vision``, please cite Ultralytics YOLO https://docs.ultralytics.com/it/models/yolo11/#usage-examples
 * If you use ``dynsight.track``, please cite Trackpy https://soft-matter.github.io/trackpy/dev/introduction.html
 
@@ -69,4 +69,3 @@ The work was funded by the European Union and ERC under projects DYNAPOL and the
 NextGenerationEU project, CAGEX.
 
 .. figure:: docs/source/_static/EU_image.png
-

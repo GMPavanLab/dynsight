@@ -15,14 +15,13 @@ dependencies = [
     "dscribe",
     "tropea-clustering",
     "MDAnalysis",
-    "ultralytics",
-    "PyYAML",
+    "kaleido==0.2.0",
 ]
 # Set by cpctools.
 requires-python = ">=3.8"
 dynamic = ["version"]
 readme = "README.rst"
-description = "Simplifies analysis of Molecular Dynamics simulations."
+description = "Simplifies analysis of simulation and experimental trajectories."
 
 [project.optional-dependencies]
 dev = [
