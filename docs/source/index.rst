@@ -54,7 +54,7 @@ To get :mod:`.dynsight`, you can install it with pip::
 
 
 Optional Dependancies
-.....................
+---------------------
 
 Old versions :mod:`dynsight` used :mod:`cpctools` for SOAP calculations, if
 you are using Python 3.10 and below, you can use :mod:`cpctools` to access
@@ -87,7 +87,7 @@ a clear description of the changes and link any related issues if applicable.
 
 
 Developer Setup
-...............
+---------------
 
 #. Install `just`_.
 #. In a new virtual environment run::
