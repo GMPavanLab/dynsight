@@ -8,13 +8,17 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 
 import numpy as np
-import yaml
 from PIL import Image
 
 try:
     from ultralytics import YOLO
 except ImportError:
     YOLO = None
+
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 from .vision_gui import VisionGUI
 from .vision_utilities import find_outliers
