@@ -7,7 +7,7 @@
 Overview
 ========
 
-:mod:`.dynsight` is structured to support a wide range of tasks commonly
+``dynsight`` is structured to support a wide range of tasks commonly
 encountered in the analysis of many-body dynamical systems. These tasks
 include handling trajectory data, computing single-particle descriptors,
 performing time-series clustering and conducting various auxiliary analyses.
