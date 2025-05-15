@@ -3,7 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    cv2 = None
 
 if TYPE_CHECKING:
     import pathlib
