@@ -10,7 +10,11 @@ from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 import numpy as np
 import yaml
 from PIL import Image
-from ultralytics import YOLO
+
+try:
+    from ultralytics import YOLO
+except ImportError:
+    YOLO = None
 
 from .vision_gui import VisionGUI
 from .vision_utilities import find_outliers

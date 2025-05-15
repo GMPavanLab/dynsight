@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 try:
     import cv2
 except ImportError:
-    cv2 = None
+    cv2 = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:
     import pathlib
