@@ -10,19 +10,12 @@ maintainers = [
     { name = "Simone Martino", email = "s.martino0898@gmail.com" },
 ]
 
-dependencies = [
-    "numpy",
-    "dscribe",
-    "tropea-clustering",
-    "MDAnalysis",
-    "ultralytics",
-    "PyYAML",
-]
+dependencies = ["numpy", "dscribe", "tropea-clustering", "MDAnalysis"]
 # Set by cpctools.
 requires-python = ">=3.8"
 dynamic = ["version"]
 readme = "README.rst"
-description = "Simplifies analysis of Molecular Dynamics simulations."
+description = "Simplifies analysis of simulation and experimental trajectories."
 
 [project.optional-dependencies]
 dev = [
@@ -117,5 +110,6 @@ module = [
     'Pillow.*',
     'ultralytics.*',
     'opencv-python.*',
+    'cv2.*',
 ]
 ignore_missing_imports = true
