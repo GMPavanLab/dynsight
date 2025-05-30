@@ -23,7 +23,7 @@ UNIVAR_DIM = 2
 class Insight:
     """Contains an analysis perfomed on a trajectory.
 
-    Attributes:
+    Parameters:
         dataset: The values of a some trajectory's descriptor.
         meta: A dictionary containing the relevant parameters.
     """
@@ -128,7 +128,7 @@ class Insight:
 class ClusterInsight:
     """Contains a clustering analysis.
 
-    Attributes:
+    Parameters:
         labels: The labels assigned by the clustering algorithm.
     """
 
@@ -160,7 +160,7 @@ class ClusterInsight:
 class OnionInsight(ClusterInsight):
     """Contains an onion-clustering analysis.
 
-    Attributes:
+    Parameters:
         labels: The labels assigned by the clustering algorithm.
         state_list: List of the onion-clustering Gaussian states.
         reshaped_data: The input data reshaped for onion-clustering.
@@ -303,7 +303,7 @@ class OnionInsight(ClusterInsight):
 class Trj:
     """Contains a trajectory.
 
-    Attributes:
+    Parameters:
         universe: a MDAnalysis.Universe containing the trajectory.
 
     .. warning::
