@@ -123,6 +123,45 @@ class Insight:
             },
         )
 
+    def get_onion_smooth(
+        self,
+        delta_t: int,
+        bins: str | int = "auto",
+        number_of_sigmas: float = 3.0,
+        max_area_overlap: float = 0.8,
+    ) -> OnionSmoothInsight:
+        """Perform smooth onion clustering.
+
+        The returned OnionInsight contains the following meta: delta_t, bins,
+        number_of_sigma, max_area_overlap.
+        """
+        if self.dataset.ndim == UNIVAR_DIM:
+            onion_clust = dynsight.onion.OnionUniSmooth(
+                delta_t=delta_t,
+                bins=bins,
+                number_of_sigmas=number_of_sigmas,
+                max_area_overlap=max_area_overlap,
+            )
+        else:
+            onion_clust = dynsight.onion.OnionMultiSmooth(
+                delta_t=delta_t,
+                bins=bins,
+                number_of_sigmas=number_of_sigmas,
+            )
+
+        onion_clust.fit(self.dataset)
+
+        return OnionSmoothInsight(
+            labels=onion_clust.labels_,
+            state_list=onion_clust.state_list_,
+            meta={
+                "delta_t": delta_t,
+                "bins": bins,
+                "number_of_sigmas": number_of_sigmas,
+                "max_area_overlap": max_area_overlap,
+            },
+        )
+
 
 @dataclass(frozen=True)
 class ClusterInsight:
@@ -295,6 +334,120 @@ class OnionInsight(ClusterInsight):
             file_path,
             self.labels,
             data_insight.dataset.shape[0],
+            frame_list,
+        )
+
+
+@dataclass(frozen=True)
+class OnionSmoothInsight(ClusterInsight):
+    """Contains a smooth onion-clustering analysis.
+
+    Attributes:
+        labels: The labels assigned by the clustering algorithm.
+        state_list: List of the onion-clustering Gaussian states.
+        meta: A dictionary containing the relevant parameters.
+    """
+
+    state_list: list[StateUni] | list[StateMulti]
+    meta: dict[str, Any] = field(default_factory=dict)
+
+    def dump_to_json(self, file_path: Path) -> None:
+        """Save the OnionSmoothInsight object as .json file."""
+        data = {
+            "labels": self.labels.tolist(),
+            "meta": self.meta,
+        }
+
+        new_state_list = []
+        for state in self.state_list:
+            tmp = {}
+            for f in fields(state):
+                value = getattr(state, f.name)
+                if isinstance(value, np.ndarray):
+                    tmp[f.name] = value.tolist()
+                else:
+                    tmp[f.name] = value
+            new_state_list.append(tmp)
+
+        data["state_list"] = new_state_list
+        with file_path.open("w") as file:
+            json.dump(data, file, indent=4)
+
+    @classmethod
+    def load_from_json(cls, file_path: Path) -> OnionSmoothInsight:
+        """Load the OnionSmoothInsight object from .json file.
+
+        Raises:
+            ValueError if the input file does not have a key "state_list".
+        """
+        with file_path.open("r") as file:
+            data = json.load(file)
+        if "state_list" not in data:
+            msg = "'state_list' key not found in JSON file."
+            raise ValueError(msg)
+        return cls(
+            labels=np.array(data.get("labels")),
+            state_list=data.get("state_list"),
+            meta=data.get("meta"),
+        )
+
+    def plot_output(self, file_path: Path, data_insight: Insight) -> None:
+        """Plot the overall onion clustering result."""
+        if data_insight.dataset.ndim == UNIVAR_DIM:
+            dynsight.onion.plot_smooth.plot_output_uni(
+                file_path,
+                data_insight.dataset,
+                self.state_list,
+            )
+        else:
+            dynsight.onion.plot_smooth.plot_output_multi(
+                file_path,
+                data_insight.dataset,
+                self.state_list,
+                self.labels,
+            )
+
+    def plot_one_trj(
+        self,
+        file_path: Path,
+        data_insight: Insight,
+        particle_id: int,
+    ) -> None:
+        """Plot one particle's trajectory colored according to clustering."""
+        if data_insight.dataset.ndim == UNIVAR_DIM:
+            dynsight.onion.plot_smooth.plot_one_trj_uni(
+                file_path,
+                particle_id,
+                data_insight.dataset,
+                self.labels,
+            )
+        else:
+            dynsight.onion.plot_smooth.plot_one_trj_multi(
+                file_path,
+                particle_id,
+                data_insight.dataset,
+                self.labels,
+            )
+
+    def plot_state_populations(
+        self,
+        file_path: Path,
+    ) -> None:
+        """Plot each state's population along the trajectory."""
+        dynsight.onion.plot_smooth.plot_state_populations(
+            file_path,
+            self.labels,
+        )
+
+    def plot_sankey(
+        self,
+        file_path: Path,
+        frame_list: list[int],
+    ) -> None:
+        """Plot the Sankey diagram of the onion clustering."""
+        dynsight.onion.plot_smooth.plot_sankey(
+            file_path,
+            self.labels,
             frame_list,
         )
 
