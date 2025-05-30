@@ -9,6 +9,20 @@ Dynsight acts as an interface to the clustering algorithm implemented at https:/
 Usage
 -----
 
+There are two different implementations of Onion Clustering. The most recent, which is called with these functions and classes:
+
+.. toctree::
+  :maxdepth: 1
+
+  onion_uni_smooth <_autosummary/dynsight.onion.onion_uni_smooth.rst>
+  OnionUniSmooth <_autosummary/dynsight.onion.OnionUniSmooth.rst>
+  onion_multi_smooth <_autosummary/dynsight.onion.onion_multi_smooth.rst>
+  OnionMultiSmooth <_autosummary/dynsight.onion.OnionMultiSmooth.rst>
+
+avoids the signals' segmentation which was present in the original implementation (the one described in the PNAS paper). With this version, the clasters are guaranteed to be stable for at least ∆t frames, bu there is no segmentation of the time-series in consecutive windows. This avoids the excessive growth of unclassified data points when increasing ∆t, and helps to have a more precise estimate of the physical timescales within the time-series.
+
+The original implementation, instead, use the segmentation of the time-series into consecutive windows of length ∆t, which are then clustered individially. It is called with these functions and classes:
+
 .. toctree::
   :maxdepth: 1
 
