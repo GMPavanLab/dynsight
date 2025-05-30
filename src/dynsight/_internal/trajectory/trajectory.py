@@ -167,7 +167,8 @@ class Insight:
         delta_t_min: int = 1,
         delta_t_max: int | None = None,
         delta_t_num: int = 20,
-        fig_path: Path | None = None,
+        fig1_path: Path | None = None,
+        fig2_path: Path | None = None,
         bins: str | int = "auto",
         number_of_sigmas: float = 3.0,
         max_area_overlap: float = 0.8,
@@ -183,6 +184,12 @@ class Insight:
             delta_t_max: Larger value for delta_t_list,
 
             delta_t_num: Number of values in delta_t_list,
+
+            fig1_path: If is not None, the time resolution analysis plot is
+                saved in this location.
+
+            fig2_path: If is not None, the populations fractions plot is
+                saved in this location.
 
             bins: The 'bins' parameter for onion clustering.
 
@@ -224,13 +231,12 @@ class Insight:
                 ]
             )
 
-        if fig_path is not None:
-            tra = np.array([delta_t_list, n_clust, unclass_frac]).T
-            dynsight.onion.plot_smooth.plot_time_res_analysis(
-                fig_path / "time_res_plot.png", tra
-            )
+        tra = np.array([delta_t_list, n_clust, unclass_frac]).T
+        if fig1_path is not None:
+            dynsight.onion.plot_smooth.plot_time_res_analysis(fig1_path, tra)
+        if fig2_path is not None:
             dynsight.onion.plot_smooth.plot_pop_fractions(
-                fig_path / "time_res_plot.png", list_of_pop, tra
+                fig2_path, list_of_pop, tra
             )
 
         return delta_t_list, n_clust, unclass_frac
