@@ -6,7 +6,13 @@ import MDAnalysis
 import numpy as np
 import pytest
 
-from dynsight.trajectory import ClusterInsight, Insight, OnionInsight, Trj
+from dynsight.trajectory import (
+    ClusterInsight,
+    Insight,
+    OnionInsight,
+    OnionSmoothInsight,
+    Trj,
+)
 
 
 # Define the actual test
@@ -51,6 +57,12 @@ def test_output_files() -> None:
     on_ins.dump_to_json(files_path / "_tmp.json")
     _ = OnionInsight.load_from_json(files_path / "on_ins_test.json")
     (files_path / "_tmp.json").unlink()
+    on_ins = ins_1.get_onion_smooth(delta_t=5)
+    on_ins.dump_to_json(files_path / "_tmp.json")
+    _ = OnionSmoothInsight.load_from_json(files_path / "_tmp.json")
+
+    # Test onion analysis
+    _, _, _ = ins_1.get_onion_analysis()
 
     with pytest.raises(
         ValueError, match="'dataset' key not found in JSON file."
