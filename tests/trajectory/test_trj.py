@@ -57,8 +57,8 @@ def test_output_files() -> None:
     on_ins.dump_to_json(files_path / "_tmp.json")
     _ = OnionInsight.load_from_json(files_path / "on_ins_test.json")
     (files_path / "_tmp.json").unlink()
-    on_ins = ins_1.get_onion_smooth(delta_t=5)
-    on_ins.dump_to_json(files_path / "_tmp.json")
+    on_smooth_ins = ins_1.get_onion_smooth(delta_t=5)
+    on_smooth_ins.dump_to_json(files_path / "_tmp.json")
     _ = OnionSmoothInsight.load_from_json(files_path / "_tmp.json")
 
     # Test onion analysis
