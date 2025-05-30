@@ -162,6 +162,76 @@ class Insight:
             },
         )
 
+    def get_onion_analysis(
+        self,
+        delta_t_min: int = 1,
+        delta_t_max: int | None = None,
+        delta_t_num: int = 20,
+        fig_path: Path | None = None,
+        bins: str | int = "auto",
+        number_of_sigmas: float = 3.0,
+        max_area_overlap: float = 0.8,
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+        """Perform the full onion time resolution analysis.
+
+        Parameters:
+            delta_t_min: Smaller value for delta_t_list.
+
+            delta_t_max: Larger value for delta_t_list,
+
+            delta_t_num: Number of values in delta_t_list,
+
+            bins: The 'bins' parameter for onion clustering.
+
+            number_of_sigmas: The 'number_of_sigmas' parameter for onion
+                clustering.
+
+            max_area_overlap: The 'max_area_overlap' parameter for onion
+                clustering.
+
+        Returns:
+            delta_t_list: The list of delta_t used.
+
+            n_clust: The number of clusters at each delta_t.
+
+            unclass_frac: The fraction of unclassified data at each delta_t.
+        """
+        if delta_t_max is None:
+            delta_t_max = self.dataset.shape[1]
+        delta_t_list = np.unique(
+            np.geomspace(delta_t_min, delta_t_max, delta_t_num, dtype=int)
+        )
+        n_clust = np.zeros(delta_t_list.size, dtype=int)
+        unclass_frac = np.zeros(delta_t_list.size)
+        list_of_pop = []
+
+        for i, delta_t in enumerate(delta_t_list):
+            on_cl = self.get_onion_smooth(
+                delta_t,
+                bins,
+                number_of_sigmas,
+                max_area_overlap,
+            )
+            n_clust[i] = len(on_cl.state_list)
+            unclass_frac[i] = np.sum(on_cl.labels == -1) / self.dataset.size
+            list_of_pop.append(
+                [
+                    np.sum(on_cl.labels == i) / self.dataset.size
+                    for i in np.unique(on_cl.labels)
+                ]
+            )
+
+        if fig_path is not None:
+            tra = np.array([delta_t_list, n_clust, unclass_frac]).T
+            dynsight.onion.plot_smooth.plot_time_res_analysis(
+                fig_path / "time_res_plot.png", tra
+            )
+            dynsight.onion.plot_smooth.plot_pop_fractions(
+                fig_path / "time_res_plot.png", list_of_pop, tra
+            )
+
+        return delta_t_list, n_clust, unclass_frac
+
 
 @dataclass(frozen=True)
 class ClusterInsight:
