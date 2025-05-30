@@ -174,6 +174,9 @@ class Insight:
     ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
         """Perform the full onion time resolution analysis.
 
+        Note: this method uses the "onion smooth" functions (see documentation
+        for details).
+
         Parameters:
             delta_t_min: Smaller value for delta_t_list.
 
