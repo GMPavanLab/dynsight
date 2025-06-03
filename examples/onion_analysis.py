@@ -6,7 +6,7 @@ of particles moving in a 2D energy landscape with 4 energy minima.
 Onion clustering is applied initially to the univariate dataset of x
 positions, finding only two clusters.
 
-Then, applying is on the full (x, y) bivariate dataset, all the 4 minima are
+Then, applying it on the full (x, y) bivariate dataset, all the 4 minima are
 found.
 """
 
@@ -87,6 +87,7 @@ def main() -> None:
     data_path = Path("onion_analysis")
 
     # Load or create the input dataset
+    # Here we are using the (x,y) coordinates as the descriptor for the system
     n_atoms = 100
     n_frames = 10000
     file_path = data_path / "data.json"
