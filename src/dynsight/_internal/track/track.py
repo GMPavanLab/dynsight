@@ -4,6 +4,8 @@ from pathlib import Path
 import pandas as pd
 import trackpy as tp
 
+from dynsight.trajectory import Trj
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",
@@ -18,7 +20,7 @@ def track_xyz(
     memory: int = 1,
     adaptive_step: float = 0.5,
     adaptive_stop: float = 0.95,
-) -> None:
+) -> Trj:
     """Track particles from an xyz file and write a new file with particle IDs.
 
     The input .xyz is assumed to contain only raw 3D coordinates
@@ -46,7 +48,7 @@ def track_xyz(
         adaptive_step:
             Factor by which the search range is multiplied to reduce it during
             adaptive search.
-        adaptive_stop
+        adaptive_stop:
             Minimum allowable search range during adaptive search. If the
             search range becomes smaller than this value and ambiguities
             persist, the linking process is aborted for the problematic region.
@@ -83,6 +85,7 @@ def track_xyz(
                 f.write(f"{pid} {x:.6f} {y:.6f} {z:.6f}\n")
 
     logger.info(f"Linked .xyz file written to: {output_xyz}")
+    return Trj.init_from_xyz(traj_file=output_xyz, dt=1)
 
 
 def _collect_positions(input_xyz: Path) -> pd.DataFrame:
