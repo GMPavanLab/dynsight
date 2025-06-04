@@ -19,9 +19,10 @@ use this tool, please cite them by referring to this link_.
 .. _Ultralytics: https://www.ultralytics.com
 .. _link: https://docs.ultralytics.com/models/yolo11/#citations-and-acknowledgements
 
-
+--------------
 The Vision GUI
-==============
+--------------
+
 The `dynsight.vision` module includes an internal Graphical User Interface (GUI)
 designed to assist users in preparing the training items required for object
 detection. It only requires an *initial guess* of the objects present in
