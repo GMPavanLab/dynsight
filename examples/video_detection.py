@@ -113,9 +113,15 @@ def main() -> None:
         )
     if args.predict:
         detection.predict_frames(model_path=args.detect_model)
+        xyz_trajectory = Path.cwd() / "trajectory.xyz"
         detection.compute_xyz(
             prediction_folder_path=Path("prediction"),
             output_path=Path.cwd(),
+        )
+        tr_xyz_trajectory = Path.cwd() / "tracked_trajectory.xyz"
+        dynsight.track.track_xyz(
+            input_xyz=xyz_trajectory,
+            output_xyz=tr_xyz_trajectory,
         )
 
 

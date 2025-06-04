@@ -110,6 +110,8 @@ module = [
     'Pillow.*',
     'ultralytics.*',
     'opencv-python.*',
+    'pandas.*',
+    'trackpy.*',
     'cv2.*',
 ]
 ignore_missing_imports = true
