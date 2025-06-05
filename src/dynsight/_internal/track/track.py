@@ -21,33 +21,41 @@ def track_xyz(
     adaptive_step: float = 0.5,
     adaptive_stop: float = 0.95,
 ) -> Trj:
-    """Track particles from an xyz file and write a new file with particle IDs.
+    """Track particles from an `.xyz` file and write a new file with IDs.
 
-    The input .xyz is assumed to contain only raw 3D coordinates
+    The input `.xyz` is assumed to contain only raw 3D coordinates
     (no atom labels), and each frame begins with a line indicating the number
     of atoms, followed by a comment line, then a list of positions.
     Each frame in the input file must follow this structure::
+
         <number of atoms>
         comment line
         <x> <y> <z>
         <x> <y> <z>
         ...
         <x> <y> <z>
+
     The output file will have the same structure, but each line will start
     with the tracked particle ID.
+
     Parameters:
         input_xyz:
             Path to the input .xyz file containing positions only.
+
         output_xyz:
             Path where the output .xyz file with particle IDs will be saved.
+
         search_range:
             Maximum linking distance between frames.
+
         memory:
             Maximum number of frames a particle can vanish and still be
             re-identified.
+
         adaptive_step:
             Factor by which the search range is multiplied to reduce it during
             adaptive search.
+
         adaptive_stop:
             Minimum allowable search range during adaptive search. If the
             search range becomes smaller than this value and ambiguities

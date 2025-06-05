@@ -48,3 +48,6 @@ Usage
 
   Video <_autosummary/dynsight.vision.Video.rst>
   Detect <_autosummary/dynsight.vision.Detect.rst>
+
+Once obtained the particle positions, is possible to obtain the trajectories of
+each particle by using the :doc:`track` module.
