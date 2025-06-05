@@ -51,23 +51,32 @@ class VisionGUI:
         self.canvas.grid(row=0, column=0, sticky="nsew")
 
         self.sidebar = tk.Frame(
-            master=self.master, width=150, padx=10, pady=10
+            master=self.master,
+            width=150,
+            padx=10,
+            pady=10,
         )
         self.sidebar.grid(row=0, column=1, sticky="ns")
         self.sidebar.grid_propagate(flag=False)
 
         self.submit_button = tk.Button(
-            self.sidebar, text="Submit", command=self._submit
+            self.sidebar,
+            text="Submit",
+            command=self._submit,
         )
         self.submit_button.pack(pady=10, fill="x")
 
         self.undo_button = tk.Button(
-            self.sidebar, text="Undo", command=self._undo
+            self.sidebar,
+            text="Undo",
+            command=self._undo,
         )
         self.undo_button.pack(pady=10, fill="x")
 
         self.close_button = tk.Button(
-            self.sidebar, text="Close", command=self._close
+            self.sidebar,
+            text="Close",
+            command=self._close,
         )
         self.close_button.pack(pady=10, fill="x")
 
@@ -77,10 +86,22 @@ class VisionGUI:
         self.boxes: list[Box] = []
 
         self.h_line = self.canvas.create_line(
-            0, 0, 0, 0, fill="blue", dash=(2, 2), width=3
+            0,
+            0,
+            0,
+            0,
+            fill="blue",
+            dash=(2, 2),
+            width=3,
         )
         self.v_line = self.canvas.create_line(
-            0, 0, 0, 0, fill="blue", dash=(2, 2), width=3
+            0,
+            0,
+            0,
+            0,
+            fill="blue",
+            dash=(2, 2),
+            width=3,
         )
 
         self.canvas.bind("<Button-1>", self._on_click_press)
@@ -112,22 +133,42 @@ class VisionGUI:
         self.tk_image = ImageTk.PhotoImage(resized)
         self.canvas.delete("all")
         self.canvas_image_id = self.canvas.create_image(
-            0, 0, anchor=tk.NW, image=self.tk_image
+            0,
+            0,
+            anchor=tk.NW,
+            image=self.tk_image,
         )
 
         # Re-draw boxes
         for box in self.boxes:
             x1, y1, x2, y2 = [int(v * self.scale) for v in box.abs_coords]
             box.id = self.canvas.create_rectangle(
-                x1, y1, x2, y2, outline="red", width=3
+                x1,
+                y1,
+                x2,
+                y2,
+                outline="red",
+                width=3,
             )
 
         # Recreate guide lines
         self.h_line = self.canvas.create_line(
-            0, 0, canvas_width, 0, fill="blue", dash=(2, 2), width=3
+            0,
+            0,
+            canvas_width,
+            0,
+            fill="blue",
+            dash=(2, 2),
+            width=3,
         )
         self.v_line = self.canvas.create_line(
-            0, 0, 0, canvas_height, fill="blue", dash=(2, 2), width=3
+            0,
+            0,
+            0,
+            canvas_height,
+            fill="blue",
+            dash=(2, 2),
+            width=3,
         )
 
     def _on_click_press(self, event: tk.Event[Any]) -> None:
@@ -171,13 +212,25 @@ class VisionGUI:
     def _on_mouse_drag(self, event: tk.Event[Any]) -> None:
         sel_x, sel_y = event.x, event.y
         self.canvas.coords(
-            self.current_box, self.start_x, self.start_y, sel_x, sel_y
+            self.current_box,
+            self.start_x,
+            self.start_y,
+            sel_x,
+            sel_y,
         )
         self.canvas.coords(
-            self.h_line, 0, sel_y, self.canvas.winfo_width(), sel_y
+            self.h_line,
+            0,
+            sel_y,
+            self.canvas.winfo_width(),
+            sel_y,
         )
         self.canvas.coords(
-            self.v_line, sel_x, 0, sel_x, self.canvas.winfo_height()
+            self.v_line,
+            sel_x,
+            0,
+            sel_x,
+            self.canvas.winfo_height(),
         )
 
     def _follow_mouse(self, event: tk.Event[Any]) -> None:
