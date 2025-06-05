@@ -6,14 +6,21 @@ import MDAnalysis
 import numpy as np
 import pytest
 
-from dynsight.trajectory import ClusterInsight, Insight, OnionInsight, Trj
+from dynsight.trajectory import (
+    ClusterInsight,
+    Insight,
+    OnionInsight,
+    OnionSmoothInsight,
+    Trj,
+)
 
 
 # Define the actual test
-def test_output_files() -> None:
-    input_file_xyz = Path("tests/systems/2_particles.xyz")
-    input_file_gro = Path("tests/systems/balls_7_nvt.gro")
-    input_file_xtc = Path("tests/systems/balls_7_nvt.xtc")
+def test_output_files(tmp_path: Path) -> None:
+    here = Path(__file__).parent
+    input_file_xyz = Path(here / "../systems/2_particles.xyz")
+    input_file_gro = Path(here / "../systems/balls_7_nvt.gro")
+    input_file_xtc = Path(here / "../systems/balls_7_nvt.xtc")
     universe = MDAnalysis.Universe(input_file_xyz, dt=1)
     n_frames_xyz = 21
     n_frames_xtc = 201
@@ -34,23 +41,29 @@ def test_output_files() -> None:
     trj_4 = Trj.init_from_xtc(input_file_xtc, input_file_gro)
     assert len(trj_4.universe.trajectory) == n_frames_xtc
 
-    files_path = Path("tests/trajectory/files")
+    files_path = Path(here / "files")
     # Test dump and load of Insight
     ins_1 = trj_1.get_lens(10.0)
-    ins_1.dump_to_json(files_path / "_tmp.json")
+    ins_1.dump_to_json(tmp_path / "_tmp.json")
     _ = Insight.load_from_json(files_path / "ins_1_test.json")
 
     # Test dump and load of ClusterInsight
     fake_labels = np.zeros((5, 5), dtype=int)
     cl_ins = ClusterInsight(fake_labels)
-    cl_ins.dump_to_json(files_path / "_tmp.json")
+    cl_ins.dump_to_json(tmp_path / "_tmp.json")
     _ = ClusterInsight.load_from_json(files_path / "cl_ins_test.json")
 
     # Test dump and load of OnionInsight
     on_ins = ins_1.get_onion(delta_t=5)
-    on_ins.dump_to_json(files_path / "_tmp.json")
+    on_ins.dump_to_json(tmp_path / "_tmp.json")
     _ = OnionInsight.load_from_json(files_path / "on_ins_test.json")
-    (files_path / "_tmp.json").unlink()
+    (tmp_path / "_tmp.json").unlink()
+    on_smooth_ins = ins_1.get_onion_smooth(delta_t=5)
+    on_smooth_ins.dump_to_json(tmp_path / "_tmp.json")
+    _ = OnionSmoothInsight.load_from_json(tmp_path / "_tmp.json")
+
+    # Test onion analysis
+    _, _, _ = ins_1.get_onion_analysis()
 
     with pytest.raises(
         ValueError, match="'dataset' key not found in JSON file."

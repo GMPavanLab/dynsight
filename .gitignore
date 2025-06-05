@@ -6,7 +6,7 @@ __pycache__
 /build
 docs/build
 docs/source/_autosummary
-examples/onion_example_files
+examples/onion_analysis/data.json
 examples/analysis_workflow/water_lens.json
 examples/info_gain/trj_*.npy
 tests/systems/coex/.*
