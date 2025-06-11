@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass, field, fields
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from numpy.typing import NDArray
     from tropea_clustering._internal.first_classes import StateMulti, StateUni
 
@@ -537,10 +538,14 @@ class OnionSmoothInsight(ClusterInsight):
         lab_new = self.labels + 2
 
         if self.labels.shape != (n_atoms, n_frames):
-            msg = "Shape mismatch: Trj should be (n_atoms, n_frames)"
+            msg = (
+                f"Shape mismatch: Trj should have {self.labels.shape[0]} "
+                f"atoms, {self.labels.shape[0]} frames, but has {n_atoms} "
+                f"atoms, {n_frames} frames."
+            )
             raise ValueError(msg)
 
-        with Path.open(file_path, "w") as f:
+        with file_path.open("w") as f:
             for i, ts in enumerate(trj.universe.trajectory):
                 f.write(f"{n_atoms}\n")
                 f.write(f"Frame {i}\n")
