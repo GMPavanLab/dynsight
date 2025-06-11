@@ -33,7 +33,7 @@ def main() -> None:
     lens_smooth = lens.spatial_average(trj_lens, r_cut=7.5)
 
     # And we can perform onion-clustering
-    lens_onion = lens_smooth.get_onion(delta_t=10)
+    lens_onion = lens_smooth.get_onion_smooth(delta_t=10)
 
     lens_onion.plot_output(files_path / "tmp_fig1.png", lens_smooth)
     lens_onion.plot_one_trj(
@@ -41,6 +41,7 @@ def main() -> None:
         lens_smooth,
         particle_id=1234,
     )
+    lens_onion.dump_colored_trj(trj_lens, files_path / "colored_trj.xyz")
 
     # Save/load the Insight with all the results
     lens_onion.dump_to_json(files_path / "onion.json")

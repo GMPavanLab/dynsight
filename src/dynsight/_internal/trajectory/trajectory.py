@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass, field, fields
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from numpy.typing import NDArray
     from tropea_clustering._internal.first_classes import StateMulti, StateUni
 
@@ -530,6 +529,25 @@ class OnionSmoothInsight(ClusterInsight):
             self.labels,
             frame_list,
         )
+
+    def dump_colored_trj(self, trj: Trj, file_path: Path) -> None:
+        """Save an .xyz file with the labels as atom types."""
+        n_frames = len(trj.universe.trajectory)
+        n_atoms = len(trj.universe.atoms)
+        lab_new = self.labels + 2
+
+        if self.labels.shape != (n_atoms, n_frames):
+            msg = "Shape mismatch: Trj should be (n_atoms, n_frames)"
+            raise ValueError(msg)
+
+        with Path.open(file_path, "w") as f:
+            for i, ts in enumerate(trj.universe.trajectory):
+                f.write(f"{n_atoms}\n")
+                f.write(f"Frame {i}\n")
+                for atom_idx in range(n_atoms):
+                    label = str(lab_new[atom_idx, i])
+                    x, y, z = ts.positions[atom_idx]
+                    f.write(f"{label} {x:.5f} {y:.5f} {z:.5f}\n")
 
 
 @dataclass(frozen=True)
