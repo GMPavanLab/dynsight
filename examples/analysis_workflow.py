@@ -4,7 +4,7 @@ from pathlib import Path
 
 import MDAnalysis
 
-from dynsight.trajectory import OnionInsight, Trj
+from dynsight.trajectory import Insight, OnionInsight, Trj
 
 
 def main() -> None:
@@ -15,28 +15,36 @@ def main() -> None:
     universe = MDAnalysis.Universe(
         files_path / "oxygens.gro", files_path / "oxygens.xtc"
     )
-    water_trj = Trj(universe)
+    trj = Trj(universe)
 
     # We want, for instance, compute LENS on this trajectory
     # From here, we work with an Insight, containing data computed from a Trj
-    water_lens = water_trj.get_lens(r_cut=7.5)
+    lens_file = files_path / "lens.json"
+    if lens_file.exists():
+        lens = Insight.load_from_json(files_path / "lens.json")
+    else:
+        lens = trj.get_lens(r_cut=7.5)
+        lens.dump_to_json(lens_file)
 
     # We can do spatial average on the computed LENS
-    water_smooth = water_lens.spatial_average(water_trj, r_cut=7.5)
+    trj_lens = trj.get_slice(
+        start=1, stop=len(trj.universe.trajectory), step=1
+    )
+    lens_smooth = lens.spatial_average(trj_lens, r_cut=7.5)
 
     # And we can perform onion-clustering
-    water_onion = water_smooth.get_onion(delta_t=10)
+    lens_onion = lens_smooth.get_onion(delta_t=10)
 
-    water_onion.plot_output(files_path / "tmp_fig1.png", water_smooth)
-    water_onion.plot_one_trj(
+    lens_onion.plot_output(files_path / "tmp_fig1.png", lens_smooth)
+    lens_onion.plot_one_trj(
         files_path / "tmp_fig2.png",
-        water_smooth,
+        lens_smooth,
         particle_id=1234,
     )
 
     # Save/load the Insight with all the results
-    water_onion.dump_to_json(files_path / "water_lens.json")
-    _ = OnionInsight.load_from_json(files_path / "water_lens.json")
+    lens_onion.dump_to_json(files_path / "onion.json")
+    _ = OnionInsight.load_from_json(files_path / "onion.json")
 
 
 if __name__ == "__main__":

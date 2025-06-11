@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from tropea_clustering._internal.first_classes import StateMulti, StateUni
 
 import MDAnalysis
+from MDAnalysis.coordinates.memory import MemoryReader
 
 import dynsight
 
@@ -587,12 +588,19 @@ class Trj:
 
     def get_slice(self, start: int, stop: int, step: int) -> Trj:
         """Returns a Trj with a subset of frames."""
-        sliced_uni = self.universe.transfer_to_memory(
-            start=start,
-            stop=stop,
-            step=step,
-        )
-        return Trj(universe=sliced_uni)
+        n_atoms = self.universe.atoms.n_atoms
+
+        # Get array of positions from all but the last frame
+        frame_indices = list(range(start, stop, step))
+        coords = np.empty((len(frame_indices), n_atoms, 3), dtype=np.float32)
+        for i, ts in enumerate(self.universe.trajectory[start:stop:step]):
+            coords[i] = ts.positions
+
+        mem_reader = MemoryReader(coords, order="fac")
+        u_new = MDAnalysis.Universe(topology=self.universe._topology)  # noqa: SLF001
+        u_new.trajectory = mem_reader
+
+        return Trj(u_new)
 
     def get_coord_number(self, r_cut: float) -> Insight:
         """Compute coordination number on the trajectory.

@@ -42,7 +42,7 @@ def test_lens_signals() -> None:
         test_lens = example_trj.get_lens(r_cut=r_cut).dataset
         test_lens = np.array(
             [np.concatenate(([0.0], tmp)) for tmp in test_lens]
-        ) # the inner LENS function has always 0.0 as first frame
+        )  # the inner LENS function has always 0.0 as first frame
         test_nn = example_trj.get_coord_number(r_cut=r_cut).dataset
         test_array = [test_lens, test_nn]
 
