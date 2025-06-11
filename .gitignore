@@ -7,7 +7,8 @@ __pycache__
 docs/build
 docs/source/_autosummary
 examples/onion_analysis/data.json
-examples/analysis_workflow/water_lens.json
+examples/analysis_workflow/lens.json
+examples/analysis_workflow/onion.json
 examples/info_gain/trj_*.npy
 tests/systems/coex/.*
 tests/systems/.*
