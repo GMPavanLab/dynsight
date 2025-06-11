@@ -585,6 +585,15 @@ class Trj:
             [atoms.positions.copy() for ts in self.universe.trajectory]
         )
 
+    def get_slice(self, start: int, stop: int, step: int) -> Trj:
+        """Returns a Trj with a subset of frames."""
+        sliced_uni = self.universe.transfer_to_memory(
+            start=start,
+            stop=stop,
+            step=step,
+        )
+        return Trj(universe=sliced_uni)
+
     def get_coord_number(self, r_cut: float) -> Insight:
         """Compute coordination number on the trajectory.
 
@@ -611,7 +620,7 @@ class Trj:
         )
         lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
         return Insight(
-            dataset=lens,
+            dataset=lens[:, 1:],
             meta={"r_cut": r_cut},
         )
 
