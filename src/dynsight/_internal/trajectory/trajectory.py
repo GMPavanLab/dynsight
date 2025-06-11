@@ -532,7 +532,7 @@ class OnionSmoothInsight(ClusterInsight):
         )
 
     def dump_colored_trj(self, trj: Trj, file_path: Path) -> None:
-        """Save an .xyz file with the labels as atom types."""
+        """Save an .xyz file with the clustering labels for each atom."""
         n_frames = len(trj.universe.trajectory)
         n_atoms = len(trj.universe.atoms)
         lab_new = self.labels + 2
@@ -552,7 +552,10 @@ class OnionSmoothInsight(ClusterInsight):
                 for atom_idx in range(n_atoms):
                     label = str(lab_new[atom_idx, i])
                     x, y, z = ts.positions[atom_idx]
-                    f.write(f"{label} {x:.5f} {y:.5f} {z:.5f}\n")
+                    f.write(
+                        f"{trj.universe.atoms[atom_idx].name} {x:.5f}"
+                        f" {y:.5f} {z:.5f} {label}\n"
+                    )
 
 
 @dataclass(frozen=True)
