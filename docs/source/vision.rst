@@ -5,7 +5,7 @@ Code that contains useful tools to obtain trajectories from video files.
 The extraction is possible thanks to the optimization of a Convolutional Neural
 Network (CNN) model training to
 detect specific objects in the video. Once the positions are recovered, a
-tracking algorithm links each object with its own identity number.
+tracking algorithm (:doc:`track`) links each object with its own identity number.
 
 .. figure:: _static/vision/vision_scheme.jpeg
    :alt: Schematic representation of a typical dynsight.vision application.
