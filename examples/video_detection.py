@@ -119,10 +119,13 @@ def main() -> None:
             output_path=Path.cwd(),
         )
         tr_xyz_trajectory = Path.cwd() / "tracked_trajectory.xyz"
-        dynsight.track.track_xyz(
+        trj = dynsight.track.track_xyz(
             input_xyz=xyz_trajectory,
             output_xyz=tr_xyz_trajectory,
         )
+        # Usage example of the trj object after tracking.
+        lens_descriptor = trj.get_lens(r_cut=5)
+        lens_descriptor.dump_to_json(output_project)
 
 
 if __name__ == "__main__":
