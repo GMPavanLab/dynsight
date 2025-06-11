@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from pathlib import Path
 
@@ -19,14 +21,14 @@ def track_xyz(
     search_range: float = 10,
     memory: int = 1,
     adaptive_step: float = 0.5,
-    adaptive_stop: float = 0.95,
+    adaptive_stop: None | float = 0.95,
 ) -> Trj:
     """Track particles from an `.xyz` file and write a new file with IDs.
 
     The input `.xyz` is assumed to contain only raw 3D coordinates
-    (no atom labels), and each frame begins with a line indicating the number
-    of atoms, followed by a comment line, then a list of positions.
-    Each frame in the input file must follow this structure::
+    (without atom labels/identity), and each frame begins with a line
+    indicating the number of atoms, followed by a comment line, then a list of
+    positions. Each frame in the input file must follow this structure::
 
         <number of atoms>
         comment line
@@ -46,20 +48,24 @@ def track_xyz(
             Path where the output .xyz file with particle IDs will be saved.
 
         search_range:
-            Maximum linking distance between frames.
+            The maximum allowable displacement of objects between frames for
+            them to be considered the same particle.
 
         memory:
-            Maximum number of frames a particle can vanish and still be
-            re-identified.
-
-        adaptive_step:
-            Factor by which the search range is multiplied to reduce it during
-            adaptive search.
+            The maximum number of frames during which an object can vanish,
+            then reppear nearby, and be considered the same particle.
 
         adaptive_stop:
-            Minimum allowable search range during adaptive search. If the
-            search range becomes smaller than this value and ambiguities
-            persist, the linking process is aborted for the problematic region.
+            If not `None`, when encountering a region with too many candidate
+            links (subnet), retry by progressively reducing `search_range`
+            until the subnet is solvable. If `search_range` becomes less or
+            equal than the `adaptive_stop`, give up and raise a
+            `SubnetOversizeException`.
+
+        adaptive_step:
+            Factor by which the `search_range` is multiplied to reduce it
+            during adaptive search. Effective only if `adaptive_stop` is not
+            `None`.
     """
     input_xyz = Path(input_xyz)
     output_xyz = Path(output_xyz)
