@@ -543,7 +543,9 @@ class OnionSmoothInsight(ClusterInsight):
 
     def dump_colored_trj(self, trj: Trj, file_path: Path) -> None:
         """Save an .xyz file with the clustering labels for each atom."""
-        n_frames = len(trj.universe.trajectory)
+        trajslice = slice(None) if trj.trajslice is None else trj.trajslice
+
+        n_frames = len(trj.universe.trajectory[trajslice])
         n_atoms = len(trj.universe.atoms)
         lab_new = self.labels + 2
 
@@ -556,7 +558,7 @@ class OnionSmoothInsight(ClusterInsight):
             raise ValueError(msg)
 
         with file_path.open("w") as f:
-            for i, ts in enumerate(trj.universe.trajectory):
+            for i, ts in enumerate(trj.universe.trajectory[trajslice]):
                 f.write(f"{n_atoms}\n")
                 f.write(f"Frame {i}\n")
                 for atom_idx in range(n_atoms):
@@ -582,6 +584,7 @@ class Trj:
     """
 
     universe: MDAnalysis.Universe = field()
+    trajslice: slice | None = None
 
     @classmethod
     def init_from_universe(cls, universe: MDAnalysis.Universe) -> Trj:
@@ -618,12 +621,27 @@ class Trj:
         The array has shape (n_frames, n_atoms, n_coordinates).
         """
         atoms = self.universe.select_atoms(selection)
+        trajslice = slice(None) if self.trajslice is None else self.trajslice
+
         return np.array(
-            [atoms.positions.copy() for ts in self.universe.trajectory]
+            [
+                atoms.positions.copy()
+                for ts in self.universe.trajectory[trajslice]
+            ]
         )
 
+    def with_slice(self, trajslice: slice | None) -> Trj:
+        """Returns a Trj with a different frames' slice."""
+        return Trj(self.universe, trajslice=trajslice)
+
     def get_slice(self, start: int, stop: int, step: int) -> Trj:
-        """Returns a Trj with a subset of frames."""
+        """Returns a Trj with a subset of frames.
+
+        .. warning::
+
+            This function could fill up the memory in case of large
+            trajectories and it's deprecated. Use Trj.with_slice() instead.
+        """
         n_atoms = self.universe.atoms.n_atoms
 
         # Get array of positions from all but the last frame
@@ -653,7 +671,9 @@ class Trj:
             meta={"r_cut": r_cut},
         )
 
-    def get_lens(self, r_cut: float) -> Insight:
+    def get_lens(
+        self, r_cut: float, trajslice: slice | None = None
+    ) -> Insight:
         """Compute LENS on the trajectory.
 
         The returned Insight contains the following meta: r_cut.
@@ -661,6 +681,7 @@ class Trj:
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
             cutoff=r_cut,
+            trajslice=trajslice,
         )
         lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
         return Insight(

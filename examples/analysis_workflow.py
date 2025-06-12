@@ -27,9 +27,7 @@ def main() -> None:
         lens.dump_to_json(lens_file)
 
     # We can do spatial average on the computed LENS
-    trj_lens = trj.get_slice(
-        start=1, stop=len(trj.universe.trajectory), step=1
-    )
+    trj_lens = trj.with_slice(slice(1, None, 1))
     lens_smooth = lens.spatial_average(trj_lens, r_cut=7.5)
 
     # And we can perform onion-clustering
