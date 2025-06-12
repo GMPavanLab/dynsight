@@ -21,7 +21,8 @@ def test_output_files() -> None:
             random_walk[i][j] = x_pos
 
     # Test the self-correlation function
-    t_corr, std_dev = dynsight.analysis.self_time_correlation(random_walk)
+    walk_insight = dynsight.trajectory.Insight(random_walk)
+    t_corr, std_dev = walk_insight.get_time_correlation()
 
     exp_t_corr = np.load("tests/analysis/tcorr/t_corr.npy")
     exp_std_dev = np.load("tests/analysis/tcorr/std_dev.npy")
