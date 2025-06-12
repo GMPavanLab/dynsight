@@ -711,6 +711,7 @@ class Trj:
             soap_respectpbc=respect_pbc,
             centers=centers,
             n_core=n_core,
+            trajslice=self.trajslice,
         )
         attr_dict = {
             "r_cut": r_cut,
@@ -757,17 +758,15 @@ class Trj:
         exclusion_block: list[int] | None = None,
         nbins: int = 200,
         norm: Literal["rdf", "density", "none"] = "rdf",
-        start: int | None = None,
-        stop: int | None = None,
-        step: int = 1,
     ) -> Insight:
         """Compute the radial distribution function g(r).
 
         See https://docs.mdanalysis.org/1.1.1/documentation_pages/analysis/rdf.html.
 
         The returned Insight contains the following meta: distances_range, s1,
-        s2, exclusion_block, nbins, norm, start, stop, step.
+        s2, exclusion_block, nbins, norm.
         """
+        trajslice = slice(None) if self.trajslice is None else self.trajslice
         bins, rdf = dynsight.analysis.compute_rdf(
             universe=self.universe,
             distances_range=distances_range,
@@ -776,9 +775,9 @@ class Trj:
             exclusion_block=exclusion_block,
             nbins=nbins,
             norm=norm,
-            start=start,
-            stop=stop,
-            step=step,
+            start=trajslice.start,
+            stop=trajslice.stop,
+            step=trajslice.step,
         )
         dataset = np.array([bins, rdf])
         attr_dict = {
@@ -788,8 +787,5 @@ class Trj:
             "exclusion_block": exclusion_block,
             "nbins": nbins,
             "norm": norm,
-            "start": start,
-            "stop": stop,
-            "step": step,
         }
         return Insight(dataset=dataset, meta=attr_dict)
