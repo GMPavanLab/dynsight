@@ -60,7 +60,7 @@ class Insight:
 
     def spatial_average(
         self,
-        trajectory: Trj,
+        trj: Trj,
         r_cut: float,
         selection: str = "all",
         num_processes: int = 1,
@@ -71,10 +71,11 @@ class Insight:
         selection.
         """
         averaged_dataset = dynsight.analysis.spatialaverage(
-            universe=trajectory.universe,
+            universe=trj.universe,
             descriptor_array=self.dataset,
             selection=selection,
             cutoff=r_cut,
+            trajslice=trj.trajslice,
             num_processes=num_processes,
         )
         return Insight(
