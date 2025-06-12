@@ -18,14 +18,14 @@ array: NDArray[np.float64]
 
 
 def initworker(
-    shared_arr_: NDArray[np.float64],
-    shape_: int,
-    dtype_: tuple[float, Any],
+    shared_arr: NDArray[np.float64],
+    shape: int,
+    dtype: tuple[float, Any],
 ) -> None:
     # The use of global statement is necessary for the correct functioning
     # of the code. Ruff error PLW0603 is therefore ignored.
     global array  # noqa: PLW0603
-    array = np.frombuffer(shared_arr_, dtype=dtype_).reshape(shape_)
+    array = np.frombuffer(shared_arr, dtype=dtype).reshape(shape)
 
 
 def processframe(
@@ -180,7 +180,7 @@ def spatialaverage(
     elif descriptor_array.ndim == three_dim:
         is_vector = True
     else:
-        msg = "INVALID ARRAY SHAPE"
+        msg = "descriptor_array must have ndim == 2 or ndim == 3."
         raise ValueError(msg)
 
     pool = Pool(
