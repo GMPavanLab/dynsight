@@ -665,6 +665,7 @@ class Trj:
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
             cutoff=r_cut,
+            trajslice=self.trajslice,
         )
         _, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
         return Insight(
@@ -672,9 +673,7 @@ class Trj:
             meta={"r_cut": r_cut},
         )
 
-    def get_lens(
-        self, r_cut: float, trajslice: slice | None = None
-    ) -> Insight:
+    def get_lens(self, r_cut: float) -> Insight:
         """Compute LENS on the trajectory.
 
         The returned Insight contains the following meta: r_cut.
@@ -682,7 +681,7 @@ class Trj:
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
             cutoff=r_cut,
-            trajslice=trajslice,
+            trajslice=self.trajslice,
         )
         lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
         return Insight(
