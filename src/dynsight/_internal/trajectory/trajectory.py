@@ -82,6 +82,16 @@ class Insight:
             meta={"sp_av_r_cut": r_cut, "selection": selection},
         )
 
+    def get_time_correlation(
+        self,
+        max_delay: int | None = None,
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        """Self time correlation function of the time-series signal."""
+        return dynsight.analysis.self_time_correlation(
+            self.dataset,
+            max_delay,
+        )
+
     def get_onion(
         self,
         delta_t: int,

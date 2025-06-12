@@ -22,8 +22,6 @@ def self_time_correlation(
     Returns the self-TCF averaged over all the particles, normalized so that
     the value at t = 0 is equal to 1.
 
-    * Author: Matteo Becchi
-
     Parameters:
         data:
             Array of shape (n_particles, n_frames).
@@ -62,8 +60,9 @@ def self_time_correlation(
 
     """
     n_part, n_frames = data.shape
+    data2 = data.copy()
     # Subtract the mean for each particle
-    data = data - np.mean(data, axis=1, keepdims=True)
+    data2 = data2 - np.mean(data2, axis=1, keepdims=True)
 
     if max_delay is None:
         max_delay = n_frames
@@ -79,7 +78,7 @@ def self_time_correlation(
                 tmp[:valid_t],
                 tmp[t_prime : valid_t + t_prime],
             )
-            for tmp in data
+            for tmp in data2
         ]
         correlation[t_prime] = np.mean(corr_sum) / valid_t
         correlation_error[t_prime] = np.std(corr_sum) / (
@@ -104,8 +103,6 @@ def cross_time_correlation(
     element [i][t] is the value of some quantity for particle i at time t.
     For each particles pair, computes the cross time correlation function
     (cross-TCF). Returns the cross-TCF averaged over all the particles pairs.
-
-    * Author: Matteo Becchi
 
     Parameters:
         data:
