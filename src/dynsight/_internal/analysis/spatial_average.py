@@ -3,69 +3,73 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    import MDAnalysis
+    from MDAnalysis import Universe
+    from MDAnalysis.core.groups import AtomGroup
     from numpy.typing import NDArray
 
 import ctypes
+from collections import defaultdict
 from multiprocessing import Array, Pool
 
 import numpy as np
-from MDAnalysis.analysis.distances import distance_array
+from MDAnalysis.lib.nsgrid import FastNS
 
 array: NDArray[np.float64]
 
 
 def initworker(
-    shared_array: NDArray[np.float64],
+    shared_arr: NDArray[np.float64],
     shape: int,
     dtype: tuple[float, Any],
 ) -> None:
     # The use of global statement is necessary for the correct functioning
     # of the code. Ruff error PLW0603 is therefore ignored.
     global array  # noqa: PLW0603
-    array = np.frombuffer(shared_array, dtype=dtype).reshape(shape)
+    array = np.frombuffer(shared_arr, dtype=dtype).reshape(shape)
 
 
 def processframe(
-    args: tuple[MDAnalysis.Universe, MDAnalysis.AtomGroup, float, int, bool],
+    args: tuple[Universe, AtomGroup, float, int, int, bool],
 ) -> tuple[int, NDArray[np.float64]]:
-    universe, selection, cutoff, frame, is_vector = args
-    universe.trajectory[frame]
-    distances = distance_array(
-        reference=selection.positions,
-        configuration=selection.positions,
-        box=universe.dimensions,
-    )
-    atom_id = np.argsort(distances, axis=1)
-    nn = np.sum(distances < cutoff, axis=1)
+    universe, selection, cutoff, traj_frame, result_index, is_vector = args
 
-    rows = np.arange(distances.shape[0])
-    sp_dict = {row: atom_id[row, : nn[row]] for row in rows}
+    universe.trajectory[traj_frame]
+    positions = selection.positions
+    box = universe.trajectory.ts.dimensions
 
+    ns = FastNS(cutoff, positions, box=box)
+    pairs = ns.self_search().get_pairs()
+
+    neighbor_dict = defaultdict(list)
+    for i, j in pairs:
+        neighbor_dict[i].append(j)
+        neighbor_dict[j].append(i)
+
+    n_atoms = len(selection)
     if is_vector:
-        sp_array_frame = np.zeros((array.shape[0], array.shape[2]))
-        for key, value in sp_dict.items():
-            if len(value) == 0:
-                continue
-            sp_array_frame[key, :] = np.mean(array[value, frame, :], axis=0)
-        return frame, sp_array_frame
+        n_features = array.shape[2]
+        sp_array_frame1 = np.zeros((n_atoms, n_features), dtype=array.dtype)
+        for key in range(n_atoms):
+            neighbors = neighbor_dict[key] + [key]
+            sp_array_frame1[key] = np.mean(
+                array[neighbors, result_index, :], axis=0
+            )
+        return result_index, sp_array_frame1
+    sp_array_frame2 = np.zeros(n_atoms, dtype=array.dtype)
+    for key in range(n_atoms):
+        neighbors = neighbor_dict[key] + [key]
+        sp_array_frame2[key] = np.mean(array[neighbors, result_index])
 
-    sp_array_frame_1 = np.zeros(array.shape[0])
-    for key, value in sp_dict.items():
-        if len(value) == 0:
-            continue
-        sp_array_frame_1[key] = np.mean(array[value, frame])
-
-    return frame, sp_array_frame_1
+    return result_index, sp_array_frame2
 
 
 def spatialaverage(
-    universe: MDAnalysis.Universe,
+    universe: Universe,
     descriptor_array: NDArray[np.float64],
     selection: str,
     cutoff: float,
-    traj_cut: int = 0,
-    num_processes: int = 4,
+    trajslice: slice | None = None,
+    num_processes: int = 1,
 ) -> NDArray[np.float64]:
     """Compute spatially averaged descriptor values over neighboring particles.
 
@@ -142,11 +146,11 @@ def spatialaverage(
             descriptor = np.load('descriptor_array.npy')
 
             averaged_values = spatialaverage(
-                                universe=u,
-                                descriptor_array=descriptor,
-                                selection='name CA',
-                                cutoff=5.0,
-                                num_processes=8)
+                universe=u,
+                descriptor_array=descriptor,
+                selection='name CA',
+                cutoff=5.0,
+                num_processes=8)
 
         This example computes the spatial averages of the descriptor values
         for atoms selected as `CA` atoms, within a cutoff of 5.0 units, using 8
@@ -155,6 +159,8 @@ def spatialaverage(
         to set up the Universe.
     """
     selection = universe.select_atoms(selection)
+    if trajslice is None:
+        trajslice = slice(None)
 
     shape = descriptor_array.shape
     dtype = descriptor_array.dtype
@@ -165,35 +171,30 @@ def spatialaverage(
     shared_array_np = np.frombuffer(shared_array, dtype=dtype).reshape(shape)  # type: ignore[call-overload]
 
     np.copyto(shared_array_np, descriptor_array)
+
     two_dim = 2
     three_dim = 3
+    sp_array = np.zeros(descriptor_array.shape)
     if descriptor_array.ndim == two_dim:
-        sp_array_2 = np.zeros(
-            (descriptor_array.shape[0], descriptor_array.shape[1])
-        )
         is_vector = False
     elif descriptor_array.ndim == three_dim:
-        sp_array_3 = np.zeros(
-            (
-                descriptor_array.shape[0],
-                descriptor_array.shape[1],
-                descriptor_array.shape[2],
-            )
-        )
         is_vector = True
     else:
-        error_string = "INVALID ARRAY SHAPE"
-        raise ValueError(error_string)
+        msg = "descriptor_array must have ndim == 2 or ndim == 3."
+        raise ValueError(msg)
 
-    num_frames = len(universe.trajectory) - traj_cut
     pool = Pool(
         processes=num_processes,
         initializer=initworker,
         initargs=(shared_array, shape, dtype),
     )
+
+    frame_indices = list(
+        range(*trajslice.indices(universe.trajectory.n_frames))
+    )
     args = [
-        (universe, selection, cutoff, frame, is_vector)
-        for frame in range(num_frames)
+        (universe, selection, cutoff, traj_frame, i, is_vector)
+        for i, traj_frame in enumerate(frame_indices)
     ]
     results = pool.map(processframe, args)
     pool.close()
@@ -201,9 +202,9 @@ def spatialaverage(
 
     if is_vector:
         for frame, sp_array_frame in results:
-            sp_array_3[:, frame, :] = sp_array_frame
-        return sp_array_3
+            sp_array[:, frame, :] = sp_array_frame
+    else:
+        for frame, sp_array_frame in results:
+            sp_array[:, frame] = sp_array_frame
 
-    for frame, sp_array_frame in results:
-        sp_array_2[:, frame] = sp_array_frame
-    return sp_array_2
+    return sp_array

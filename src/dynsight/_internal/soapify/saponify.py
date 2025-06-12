@@ -22,6 +22,7 @@ def saponify_trajectory(
     soap_respectpbc: bool = True,
     n_core: int = 1,
     centers: str = "all",
+    trajslice: slice | None = None,
 ) -> NDArray[np.float64]:
     """Calculate the SOAP fingerprints for each atom in a MDA universe.
 
@@ -53,6 +54,8 @@ def saponify_trajectory(
             (option passed to the desired SOAP engine). Defaults to True.
         n_core:
             Number of core used for parallel processing. Default to 1.
+        trajslice:
+            The slice of the trajectory to consider. Defaults to slice(None).
 
     Returns:
         The SOAP spectra for all the particles and frames. np.ndarray of shape
@@ -83,6 +86,8 @@ def saponify_trajectory(
             assert np.isclose(
                 np.sum(soap[0]), 8627.847941030795, atol=1e-6, rtol=1e-3)
     """
+    if trajslice is None:
+        trajslice = slice(None)
     sel = universe.select_atoms(selection)
     centers_list_id = sel.select_atoms(centers).indices.tolist()
     centers_list = [
@@ -98,7 +103,7 @@ def saponify_trajectory(
         periodic=soap_respectpbc,
     )
     traj = []
-    for t_s in universe.trajectory:
+    for t_s in universe.trajectory[trajslice]:
         pos = sel.atoms.positions
         symbols = sel.atoms.types
         box = t_s.dimensions

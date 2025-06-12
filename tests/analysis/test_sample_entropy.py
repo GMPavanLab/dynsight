@@ -5,8 +5,6 @@ import pytest
 
 import dynsight
 
-THRESHOLD = 1e-6
-
 
 # Define the actual test
 def test_output_files() -> None:

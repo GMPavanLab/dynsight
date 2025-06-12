@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from tropea_clustering._internal.first_classes import StateMulti, StateUni
 
 import MDAnalysis
+from MDAnalysis.coordinates.memory import MemoryReader
 
 import dynsight
 
@@ -59,7 +60,7 @@ class Insight:
 
     def spatial_average(
         self,
-        trajectory: Trj,
+        trj: Trj,
         r_cut: float,
         selection: str = "all",
         num_processes: int = 1,
@@ -70,15 +71,26 @@ class Insight:
         selection.
         """
         averaged_dataset = dynsight.analysis.spatialaverage(
-            universe=trajectory.universe,
+            universe=trj.universe,
             descriptor_array=self.dataset,
             selection=selection,
             cutoff=r_cut,
+            trajslice=trj.trajslice,
             num_processes=num_processes,
         )
         return Insight(
             dataset=averaged_dataset,
             meta={"sp_av_r_cut": r_cut, "selection": selection},
+        )
+
+    def get_time_correlation(
+        self,
+        max_delay: int | None = None,
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        """Self time correlation function of the time-series signal."""
+        return dynsight.analysis.self_time_correlation(
+            self.dataset,
+            max_delay,
         )
 
     def get_onion(
@@ -530,6 +542,34 @@ class OnionSmoothInsight(ClusterInsight):
             frame_list,
         )
 
+    def dump_colored_trj(self, trj: Trj, file_path: Path) -> None:
+        """Save an .xyz file with the clustering labels for each atom."""
+        trajslice = slice(None) if trj.trajslice is None else trj.trajslice
+
+        n_frames = len(trj.universe.trajectory[trajslice])
+        n_atoms = len(trj.universe.atoms)
+        lab_new = self.labels + 2
+
+        if self.labels.shape != (n_atoms, n_frames):
+            msg = (
+                f"Shape mismatch: Trj should have {self.labels.shape[0]} "
+                f"atoms, {self.labels.shape[0]} frames, but has {n_atoms} "
+                f"atoms, {n_frames} frames."
+            )
+            raise ValueError(msg)
+
+        with file_path.open("w") as f:
+            for i, ts in enumerate(trj.universe.trajectory[trajslice]):
+                f.write(f"{n_atoms}\n")
+                f.write(f"Frame {i}\n")
+                for atom_idx in range(n_atoms):
+                    label = str(lab_new[atom_idx, i])
+                    x, y, z = ts.positions[atom_idx]
+                    f.write(
+                        f"{trj.universe.atoms[atom_idx].name} {x:.5f}"
+                        f" {y:.5f} {z:.5f} {label}\n"
+                    )
+
 
 @dataclass(frozen=True)
 class Trj:
@@ -545,6 +585,7 @@ class Trj:
     """
 
     universe: MDAnalysis.Universe = field()
+    trajslice: slice | None = None
 
     @classmethod
     def init_from_universe(cls, universe: MDAnalysis.Universe) -> Trj:
@@ -581,9 +622,40 @@ class Trj:
         The array has shape (n_frames, n_atoms, n_coordinates).
         """
         atoms = self.universe.select_atoms(selection)
+        trajslice = slice(None) if self.trajslice is None else self.trajslice
+
         return np.array(
-            [atoms.positions.copy() for ts in self.universe.trajectory]
+            [
+                atoms.positions.copy()
+                for ts in self.universe.trajectory[trajslice]
+            ]
         )
+
+    def with_slice(self, trajslice: slice | None) -> Trj:
+        """Returns a Trj with a different frames' slice."""
+        return Trj(self.universe, trajslice=trajslice)
+
+    def get_slice(self, start: int, stop: int, step: int) -> Trj:
+        """Returns a Trj with a subset of frames.
+
+        .. warning::
+
+            This function could fill up the memory in case of large
+            trajectories and it's deprecated. Use Trj.with_slice() instead.
+        """
+        n_atoms = self.universe.atoms.n_atoms
+
+        # Get array of positions from all but the last frame
+        frame_indices = list(range(start, stop, step))
+        coords = np.empty((len(frame_indices), n_atoms, 3), dtype=np.float32)
+        for i, ts in enumerate(self.universe.trajectory[start:stop:step]):
+            coords[i] = ts.positions
+
+        mem_reader = MemoryReader(coords, order="fac")
+        u_new = MDAnalysis.Universe(topology=self.universe._topology)  # noqa: SLF001
+        u_new.trajectory = mem_reader
+
+        return Trj(u_new)
 
     def get_coord_number(self, r_cut: float) -> Insight:
         """Compute coordination number on the trajectory.
@@ -593,6 +665,7 @@ class Trj:
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
             cutoff=r_cut,
+            trajslice=self.trajslice,
         )
         _, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
         return Insight(
@@ -608,10 +681,11 @@ class Trj:
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
             cutoff=r_cut,
+            trajslice=self.trajslice,
         )
         lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
         return Insight(
-            dataset=lens,
+            dataset=lens[:, 1:],
             meta={"r_cut": r_cut},
         )
 
@@ -637,6 +711,7 @@ class Trj:
             soap_respectpbc=respect_pbc,
             centers=centers,
             n_core=n_core,
+            trajslice=self.trajslice,
         )
         attr_dict = {
             "r_cut": r_cut,
@@ -683,17 +758,15 @@ class Trj:
         exclusion_block: list[int] | None = None,
         nbins: int = 200,
         norm: Literal["rdf", "density", "none"] = "rdf",
-        start: int | None = None,
-        stop: int | None = None,
-        step: int = 1,
     ) -> Insight:
         """Compute the radial distribution function g(r).
 
         See https://docs.mdanalysis.org/1.1.1/documentation_pages/analysis/rdf.html.
 
         The returned Insight contains the following meta: distances_range, s1,
-        s2, exclusion_block, nbins, norm, start, stop, step.
+        s2, exclusion_block, nbins, norm.
         """
+        trajslice = slice(None) if self.trajslice is None else self.trajslice
         bins, rdf = dynsight.analysis.compute_rdf(
             universe=self.universe,
             distances_range=distances_range,
@@ -702,9 +775,9 @@ class Trj:
             exclusion_block=exclusion_block,
             nbins=nbins,
             norm=norm,
-            start=start,
-            stop=stop,
-            step=step,
+            start=trajslice.start,
+            stop=trajslice.stop,
+            step=trajslice.step,
         )
         dataset = np.array([bins, rdf])
         attr_dict = {
@@ -714,8 +787,5 @@ class Trj:
             "exclusion_block": exclusion_block,
             "nbins": nbins,
             "norm": norm,
-            "start": start,
-            "stop": stop,
-            "step": step,
         }
         return Insight(dataset=dataset, meta=attr_dict)
