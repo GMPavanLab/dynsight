@@ -10,7 +10,7 @@ docs:
 
 # Do a dev install.
 dev:
-  pip install -e '.[dev]'
+  pip install -e '.[dev, track]'
 
 # Run code checks.
 check:

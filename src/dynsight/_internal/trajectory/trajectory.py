@@ -24,7 +24,7 @@ UNIVAR_DIM = 2
 class Insight:
     """Contains an analysis perfomed on a trajectory.
 
-    Attributes:
+    Parameters:
         dataset: The values of a some trajectory's descriptor.
         meta: A dictionary containing the relevant parameters.
     """
@@ -258,7 +258,7 @@ class Insight:
 class ClusterInsight:
     """Contains a clustering analysis.
 
-    Attributes:
+    Parameters:
         labels: The labels assigned by the clustering algorithm.
     """
 
@@ -290,7 +290,7 @@ class ClusterInsight:
 class OnionInsight(ClusterInsight):
     """Contains an onion-clustering analysis.
 
-    Attributes:
+    Parameters:
         labels: The labels assigned by the clustering algorithm.
         state_list: List of the onion-clustering Gaussian states.
         reshaped_data: The input data reshaped for onion-clustering.
@@ -575,7 +575,7 @@ class OnionSmoothInsight(ClusterInsight):
 class Trj:
     """Contains a trajectory.
 
-    Attributes:
+    Parameters:
         universe: a MDAnalysis.Universe containing the trajectory.
 
     .. warning::
@@ -695,6 +695,7 @@ class Trj:
         n_max: int,
         l_max: int,
         respect_pbc: bool = True,
+        selection: str = "all",
         centers: str = "all",
         n_core: int = 1,
     ) -> Insight:
@@ -709,6 +710,7 @@ class Trj:
             soapnmax=n_max,
             soaplmax=l_max,
             soap_respectpbc=respect_pbc,
+            selection=selection,
             centers=centers,
             n_core=n_core,
             trajslice=self.trajslice,
@@ -718,6 +720,7 @@ class Trj:
             "n_max": n_max,
             "l_max": l_max,
             "respect_pbc": respect_pbc,
+            "selection": selection,
             "centers": centers,
         }
         return Insight(dataset=soap, meta=attr_dict)

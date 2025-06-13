@@ -30,6 +30,7 @@ dev = [
     "furo",
     "numba",
 ]
+track = ["trackpy", "pandas"]
 
 [project.urls]
 github = "https://github.com/GMPavanLab/dynsight"
@@ -110,6 +111,8 @@ module = [
     'Pillow.*',
     'ultralytics.*',
     'opencv-python.*',
+    'pandas.*',
+    'trackpy.*',
     'cv2.*',
 ]
 ignore_missing_imports = true
