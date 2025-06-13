@@ -20,8 +20,8 @@ def track_xyz(
     output_xyz: Path,
     search_range: float = 10,
     memory: int = 1,
-    adaptive_step: float = 0.5,
     adaptive_stop: None | float = 0.95,
+    adaptive_step: None | float = 0.5,
 ) -> Trj:
     """Track particles from an `.xyz` file and write a new file with IDs.
 
@@ -67,6 +67,13 @@ def track_xyz(
             during adaptive search. Effective only if `adaptive_stop` is not
             `None`.
     """
+    if adaptive_stop is None and adaptive_step is not None:
+        msg = "adaptive_step is set but adaptive_stop is None."
+        raise ValueError(msg)
+    if adaptive_stop is not None and adaptive_step is None:
+        msg = "adaptive_stop is set but adaptive_step is None."
+        raise ValueError(msg)
+
     input_xyz = Path(input_xyz)
     output_xyz = Path(output_xyz)
 
