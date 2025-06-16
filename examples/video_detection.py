@@ -126,6 +126,12 @@ def main() -> None:
         # Usage example of the trj object after tracking.
         lens_descriptor = trj.get_lens(r_cut=5)
         lens_descriptor.dump_to_json(output_project)
+        # Compute clustering
+        onion_lens = lens_descriptor.get_onion(delta_t=2)
+        onion_lens.plot_output(
+            file_path=args.output,
+            data_insight=lens_descriptor,
+        )
 
 
 if __name__ == "__main__":
