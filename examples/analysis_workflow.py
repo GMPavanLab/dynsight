@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-import MDAnalysis
-
 from dynsight.trajectory import Insight, OnionInsight, Trj
 
 
@@ -12,11 +10,9 @@ def main() -> None:
     files_path = Path("analysis_workflow")
 
     # Create a Trj object
-    universe = MDAnalysis.Universe(
-        files_path / "oxygens.gro", files_path / "oxygens.xtc"
+    trj = Trj.init_from_xtc(
+        files_path / "oxygens.xtc", files_path / "oxygens.gro"
     )
-    trj = Trj(universe)
-    n_frames = len(trj.universe.trajectory)
 
     # We want, for instance, compute LENS on this trajectory
     # From here, we work with an Insight, containing data computed from a Trj
@@ -28,7 +24,7 @@ def main() -> None:
         lens.dump_to_json(lens_file)
 
     # We can do spatial average on the computed LENS
-    trj_lens = trj.with_slice(slice(1, n_frames, 1))
+    trj_lens = trj.with_slice(slice(0, -1, 1))
     lens_smooth = lens.spatial_average(trj_lens, r_cut=7.5, num_processes=6)
 
     # And we can perform onion-clustering
