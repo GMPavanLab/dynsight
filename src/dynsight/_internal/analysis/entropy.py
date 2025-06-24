@@ -122,10 +122,10 @@ def compute_shannon_multi(
 
             assert np.isclose(data_entropy, 0.8837924363474094)
     """
-    n_points, n_dims = data.shape
     if data.size == 0:
         msg = "data is empty"
         raise ValueError(msg)
+    n_points, n_dims = data.shape
     if n_dims != len(data_ranges) or n_dims != len(n_bins):
         msg = "Mismatch between data dimensions, data_ranges, and n_bins"
         raise ValueError(msg)
