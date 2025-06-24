@@ -33,7 +33,8 @@ coexistence trajectory stored in the ``example/`` folder.
 
     files_path = Path("dynsight/examples/analysis_workflow")
     trj = Trj.init_from_xtc(
-        files_path / "oxygens.xtc", files_path / "oxygens.gro",
+        traj_file=files_path / "oxygens.xtc",
+        topo_file=files_path / "oxygens.gro",
     )
 
 Now ``trj`` contains the trajectory, and using the methods of the
@@ -42,8 +43,8 @@ this trajectory. For instance, let's say we want to compute LENS:
 
 .. code-block:: python
 
-    lens_file = files_path / "lens.json"
     lens = trj.get_lens(r_cut=7.5)
+    lens_file = files_path / "lens.json"
     lens.dump_to_json(lens_file)
 
 The method :class:`.trajectory.Trj.get_lens()` returns a
@@ -59,7 +60,9 @@ analysis. For instance, one can perform spatial averaging of the LENS values:
 .. code-block:: python
     
     trj_lens = trj.with_slice(slice(0, -1, 1))
-    lens_smooth = lens.spatial_average(trj_lens, r_cut=7.5, num_processes=6)
+    lens_smooth = lens.spatial_average(
+        trj=trj_lens, r_cut=7.5, num_processes=6
+    )
 
 Notice that, since LENS is computed for all the frames but the last one, we
 use a sliced trajectory, which we get with the ``Trj.with_slice()`` method. 
@@ -71,13 +74,19 @@ instance the :class:`Insight.get_onion_smooth()` method:
     
     lens_onion = lens_smooth.get_onion_smooth(delta_t=10)
 
-    lens_onion.plot_output(files_path / "tmp_fig1.png", lens_smooth)
+    lens_onion.plot_output(
+        file_path=files_path / "tmp_fig1.png",
+        data_insight=lens_smooth,
+    )
     lens_onion.plot_one_trj(
-        files_path / "tmp_fig2.png",
-        lens_smooth,
+        file_path=files_path / "tmp_fig2.png",
+        data_insight=lens_smooth,
         particle_id=1234,
     )
-    lens_onion.dump_colored_trj(trj_lens, files_path / "colored_trj.xyz")
+    lens_onion.dump_colored_trj(
+        trj=trj_lens,
+        file_path=files_path / "colored_trj.xyz",
+    )
 
 ``lens_onion`` is an :class:`.trajectory.OnionSmoothInsight` object,
 which stores the clustering output, and offers several methods to visualize
