@@ -22,7 +22,7 @@ Example
 
 The first step is usually to create a :class:`Trj` object from some trajectory
 file (.xtc, .gro). In this example, we are using the water/ice coexistence
-trajectory stored in the ``example/``folder.
+trajectory stored in the ``example/`` folder.
 
 .. code-block:: python
 
