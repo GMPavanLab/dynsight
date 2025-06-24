@@ -1,3 +1,5 @@
+"""Compute LENS for each atom in a trajectory."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -13,19 +15,23 @@ from MDAnalysis.lib.NeighborSearch import AtomNeighborSearch
 def list_neighbours_along_trajectory(
     input_universe: Universe,
     cutoff: float,
+    selection: str = "all",
     trajslice: slice | None = None,
 ) -> list[list[AtomGroup]]:
     """Produce a per-frame list of the neighbors, atom by atom.
 
     * Original author: Martina Crippa
-    * Maintainer: Matteo Becchi
 
     Parameters:
-        input_universe (Universe):
+        input_universe:
             The universe, or the atom group containing the trajectory.
-        cutoff (float):
+        cutoff:
             The maximum neighbor distance.
-        trajslice (slice, optional):
+        selection:
+            Selection of atoms taken from the Universe for the computation.
+            More information concerning the selection language can be found
+            `here <https://userguide.mdanalysis.org/stable/selections.html>`_
+        trajslice:
             The slice of the trajectory to consider. Defaults to slice(None).
 
     Returns:
@@ -65,13 +71,14 @@ def list_neighbours_along_trajectory(
     if trajslice is None:
         trajslice = slice(None)
     neigh_list_per_frame = []
+    selected_atoms = input_universe.select_atoms(selection)
     for _ in input_universe.universe.trajectory[trajslice]:
         neigh_search = AtomNeighborSearch(
             input_universe.atoms, box=input_universe.dimensions
         )
 
         neigh_list_per_atom = [
-            neigh_search.search(atom, cutoff) for atom in input_universe.atoms
+            neigh_search.search(atom, cutoff) for atom in selected_atoms
         ]
         neigh_list_per_frame.append([at.ix for at in neigh_list_per_atom])
     return neigh_list_per_frame
