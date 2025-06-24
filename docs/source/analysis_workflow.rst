@@ -5,24 +5,26 @@ The ``dynsight.trajectory`` module provides a unified set of tools that
 streamline the analysis of many-body trajectories, offering a consistent and
 user-friendly interface across most analysis tasks. 
 
-This is achieved through two main classes, :class:`Trj` and :class:`Insight`.
+This is achieved through two main classes, :class:`.trajectory.Trj` and
+:class:`.trajectory.Insight`.
 
-The :class:`Trj` class is an object that contains a trajectory, meaning the
-coordinates of a set of particles over a series of frames. 
+The :class:`.trajectory.Trj` class is an object that contains a trajectory,
+meaning the coordinates of a set of particles over a series of frames. 
 
-The :class:`Insight` class is an object that stores some useful information
-computed on a trajectory, in the form of a dataset containing some physical 
-observable computed for all the particles along the trajectory. 
+The :class:`.trajectory.Insight` class is an object that stores some useful
+information computed on a trajectory, in the form of a dataset containing some
+physical observable computed for all the particles along the trajectory. 
 
-Some additional classes, under the general name of :class:`ClusteringInsight`, 
-contain the result of clustering procedures performed on the Insight datasets. 
+Some additional classes, under the general name of 
+:class:`.trajectory.ClusterInsight`, contain the result of clustering
+procedures performed on the Insight datasets. 
 
 Example
 -------
 
-The first step is usually to create a :class:`Trj` object from some trajectory
-file (.xtc, .gro). In this example, we are using the water/ice coexistence
-trajectory stored in the ``example/`` folder.
+The first step is usually to create a :class:`.trajectory.Trj` object from
+some trajectory file (.xtc, .gro). In this example, we are using the water/ice
+coexistence trajectory stored in the ``example/`` folder.
 
 .. code-block:: python
 
@@ -34,9 +36,9 @@ trajectory stored in the ``example/`` folder.
         files_path / "oxygens.xtc", files_path / "oxygens.gro",
     )
 
-Now ``trj`` contains the trajectory, and using the methods of the :class:`Trj` 
-class we can perform all the dynsight analyses on this trajectory. For 
-instance, let's say we want to compute LENS:
+Now ``trj`` contains the trajectory, and using the methods of the
+:class:`.trajectory.Trj` class we can perform all the dynsight analyses on
+this trajectory. For instance, let's say we want to compute LENS:
 
 .. code-block:: python
 
@@ -44,15 +46,15 @@ instance, let's say we want to compute LENS:
     lens = trj.get_lens(r_cut=7.5)
     lens.dump_to_json(lens_file)
 
-The method ``Trj.get_lens()`` returns an :class:`Insight` object,
-which in its ``.dataset`` attribute contains the LENS values computed on the
-``trj`` trajectory. Moreover, its ``.meta`` attribute stores all the 
-parameters relevant to this descriptor computation (in this case, the value of 
-the cutoff radius used, ``r_cut``). 
-The :class:`Insight` object can be easily saved as a .json file. 
+The method :class:`.trajectory.Trj.get_lens()` returns a
+:class:`.trajectory.Insight` object, which in its ``.dataset`` attribute
+contains the LENS values computed on the ``trj`` trajectory. Moreover, its
+``.meta`` attribute stores all the parameters relevant to this descriptor
+computation (in this case, the value of the cutoff radius used, ``r_cut``).
+The :class:`.trajectory.Insight` object can be easily saved as a .json file.
 
-The :class:`Insight` class offers its own methods for further analysis. For
-instance, one can perform spatial averaging of the LENS values: 
+The :class:`.trajectory.Insight` class offers its own methods for further
+analysis. For instance, one can perform spatial averaging of the LENS values:
 
 .. code-block:: python
     
@@ -62,8 +64,8 @@ instance, one can perform spatial averaging of the LENS values:
 Notice that, since LENS is computed for all the frames but the last one, we
 use a sliced trajectory, which we get with the ``Trj.with_slice()`` method. 
 
-Finally, we can perform clustering on the ``Insight.dataset``, using for
-instance the ``Insight.get_onion_smooth()`` method: 
+Finally, we can perform clustering on the ``lens_smooth.dataset``, using for
+instance the :class:`Insight.get_onion_smooth()` method: 
 
 .. code-block:: python
     
@@ -77,8 +79,9 @@ instance the ``Insight.get_onion_smooth()`` method:
     )
     lens_onion.dump_colored_trj(trj_lens, files_path / "colored_trj.xyz")
 
-``lens_onion`` is an :class:`OnionSmoothInsight` object, which stores the 
-clustering output, and offers several methods to visualize the results. 
+``lens_onion`` is an :class:`.trajectory.OnionSmoothInsight` object,
+which stores the clustering output, and offers several methods to visualize
+the results. 
 
 Read the documentation to find out the complete set of objects and tools
 offered by the dynsight.trajectory module. 
