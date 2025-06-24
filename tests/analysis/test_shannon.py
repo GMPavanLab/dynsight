@@ -23,7 +23,7 @@ def data(rng: np.random.Generator) -> NDArray[np.float64]:
 
 @pytest.fixture
 def data_2d(rng: np.random.Generator) -> NDArray[np.float64]:
-    """Random (1000x2) array."""
+    """Random (100x2) array."""
     return rng.random((100, 2))
 
 
