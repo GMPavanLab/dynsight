@@ -5,12 +5,12 @@ The ``dynsight.trajectory`` module provides a unified set of tools that
 streamline the analysis of many-body trajectories, offering a consistent and
 user-friendly interface across most analysis tasks. 
 
-This is achieved trhoug two main classes, :class:`Trj` and :class:`Insight`. 
+This is achieved through two main classes, :class:`Trj` and :class:`Insight`.
 
-The :class:`Trj` class is an object that contains a trajectory, meaning, the
-coordinates of a set of particles along a series of frames. 
+The :class:`Trj` class is an object that contains a trajectory, meaning the
+coordinates of a set of particles over a series of frames. 
 
-The :class:`Insight` class is an object that contains some useful information 
+The :class:`Insight` class is an object that stores some useful information
 computed on a trajectory, in the form of a dataset containing some physical 
 observable computed for all the particles along the trajectory. 
 
@@ -49,7 +49,7 @@ which in its ``.dataset`` attribute contains the LENS values computed on the
 ``trj`` trajectory. Moreover, its ``.meta`` attribute stores all the 
 parameters relevant to this descriptor computation (in this case, the value of 
 the cutoff radius used, ``r_cut``). 
-The :class:`Insight` can be easily saved as a .json file. 
+The :class:`Insight` object can be easily saved as a .json file. 
 
 The :class:`Insight` class offers its own methods for further analysis. For
 instance, one can perform spatial averaging of the LENS values: 
@@ -59,8 +59,8 @@ instance, one can perform spatial averaging of the LENS values:
     trj_lens = trj.with_slice(slice(0, -1, 1))
     lens_smooth = lens.spatial_average(trj_lens, r_cut=7.5, num_processes=6)
 
-Notice that, being LENS computed for all the frames but the last one, we needed
-to use a sliced trajectory, which we get with the ``Trj.with_slice()`` method. 
+Notice that, since LENS is computed for all the frames but the last one, we
+use a sliced trajectory, which we get with the ``Trj.with_slice()`` method. 
 
 Finally, we can perform clustering on the ``Insight.dataset``, using for
 instance the ``Insight.get_onion_smooth()`` method: 
@@ -78,8 +78,7 @@ instance the ``Insight.get_onion_smooth()`` method:
     lens_onion.dump_colored_trj(trj_lens, files_path / "colored_trj.xyz")
 
 ``lens_onion`` is an :class:`OnionSmoothInsight` object, which stores the 
-clustering output, and offers a series of methods for plotting the clustering
-results. 
+clustering output, and offers several methods to visualize the results. 
 
-Read the docummentation to find out the complete set of objects and tools
+Read the documentation to find out the complete set of objects and tools
 offered by the dynsight.trajectory module. 
