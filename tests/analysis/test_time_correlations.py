@@ -1,40 +1,69 @@
-"""Pytest for dynsight.analysis.time_correlations."""
+"""Tests for dynsight.analysis.time_correlations."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
+import pytest
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 import dynsight
 
+# ---------------- Fixtures ----------------
 
-# Define the actual test
-def test_output_files() -> None:
-    rng = np.random.default_rng(12345)
 
-    # Generate random walks
-    n_part = 5
-    n_frames = 100
-    random_walk = np.zeros((n_part, n_frames))
+@pytest.fixture
+def rng() -> np.random.Generator:
+    """Seeded RNG for reproducibility."""
+    return np.random.default_rng(12345)
+
+
+@pytest.fixture
+def walk(rng: np.random.Generator) -> NDArray[np.float64]:
+    """Generate a simple random walk (5 particles, 100 frames)."""
+    n_part, n_frames = 5, 100
+    walk = np.zeros((n_part, n_frames), dtype=np.float64)
     x_pos = 0.0
     for i in range(n_part):
         for j in range(n_frames):
-            displ = rng.random(1)
-            x_pos += displ[0]
-            random_walk[i][j] = x_pos
+            x_pos += rng.random()
+            walk[i, j] = x_pos
+    return walk
 
-    # Test the self-correlation function
-    walk_insight = dynsight.trajectory.Insight(random_walk)
-    t_corr, std_dev = walk_insight.get_time_correlation()
 
-    exp_t_corr = np.load("tests/analysis/tcorr/t_corr.npy")
-    exp_std_dev = np.load("tests/analysis/tcorr/std_dev.npy")
+@pytest.fixture
+def ref_data() -> dict[str, NDArray[np.float64]]:
+    """Load expected correlation data."""
+    base = Path("tests/analysis/tcorr")
+    return {
+        "auto_corr": np.load(base / "t_corr.npy"),
+        "auto_std": np.load(base / "std_dev.npy"),
+        "cross_corr": np.load(base / "c_corr.npy"),
+        "cross_std": np.load(base / "ctd_dev.npy"),
+    }
 
-    assert np.allclose(t_corr, exp_t_corr)
-    assert np.allclose(std_dev, exp_std_dev)
 
-    # Test the cross-correlation function
-    t_corr, std_dev = dynsight.analysis.cross_time_correlation(random_walk)
+# ---------------- Tests ----------------
 
-    exp_t_corr = np.load("tests/analysis/tcorr/c_corr.npy")
-    exp_std_dev = np.load("tests/analysis/tcorr/ctd_dev.npy")
 
-    assert np.allclose(t_corr, exp_t_corr)
-    assert np.allclose(std_dev, exp_std_dev)
+def test_auto_corr(
+    walk: NDArray[np.float64], ref_data: dict[str, NDArray[np.float64]]
+) -> None:
+    """Check self-correlation against reference."""
+    insight = dynsight.trajectory.Insight(walk)
+    corr, std = insight.get_time_correlation()
+    assert np.allclose(corr, ref_data["auto_corr"])
+    assert np.allclose(std, ref_data["auto_std"])
+
+
+def test_cross_corr(
+    walk: NDArray[np.float64], ref_data: dict[str, NDArray[np.float64]]
+) -> None:
+    """Check cross-correlation against reference."""
+    corr, std = dynsight.analysis.cross_time_correlation(walk)
+    assert np.allclose(corr, ref_data["cross_corr"])
+    assert np.allclose(std, ref_data["cross_std"])
