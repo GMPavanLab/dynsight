@@ -20,23 +20,19 @@ contain the result of clustering procedures performed on the Insight datasets.
 Example
 -------
 
-The first step is usually to create a :class:`Trj` object from some
-trajectory. This is done using an ``MDAnalysis.Universe``. In this example, we 
-are using the water/ice coexistence trajectory stored in the ``example/``
-folder.
+The first step is usually to create a :class:`Trj` object from some trajectory
+file (.xtc, .gro). In this example, we are using the water/ice coexistence
+trajectory stored in the ``example/``folder.
 
 .. code-block:: python
 
     from pathlib import Path
-    from MDAnalysis import Universe
     from dynsight.trajectory import Trj
 
     files_path = Path("dynsight/examples/analysis_workflow")
-
-    universe = Universe(
-        files_path / "oxygens.gro", files_path / "oxygens.xtc"
+    trj = Trj.init_from_xtc(
+        files_path / "oxygens.xtc", files_path / "oxygens.gro",
     )
-    trj = Trj(universe)
 
 Now ``trj`` contains the trajectory, and using the methods of the :class:`Trj` 
 class we can perform all the dynsight analyses on this trajectory. For 
