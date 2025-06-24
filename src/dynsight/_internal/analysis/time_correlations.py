@@ -56,8 +56,7 @@ def self_time_correlation(
         .. testcode:: tcf-test
             :hide:
 
-            assert time_corr[1] == 0.005519088806189553
-
+            assert np.isclose(time_corr[1], 0.005519088806189553)
     """
     n_part, n_frames = data.shape
     data2 = data.copy()
@@ -138,8 +137,7 @@ def cross_time_correlation(
         .. testcode:: tcf-test
             :hide:
 
-            assert time_corr[0] == 0.0002474572311281272
-
+            assert np.isclose(time_corr[0], 0.0002474572311281272)
     """
     n_part, n_frames = data.shape
 
