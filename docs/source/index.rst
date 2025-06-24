@@ -18,6 +18,7 @@
   :maxdepth: 2
   :caption: Examples:
 
+  Typical analysis workflow <analysis_workflow>
   Information gain <info_gain>
   Sample Entropy <sample_entropy>
 
