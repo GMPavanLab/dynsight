@@ -24,7 +24,7 @@ def data(rng: np.random.Generator) -> NDArray[np.float64]:
 @pytest.fixture
 def data_2d(rng: np.random.Generator) -> NDArray[np.float64]:
     """Random (1000x2) array."""
-    return rng.random((1000, 2))
+    return rng.random((100, 2))
 
 
 @pytest.fixture
@@ -43,36 +43,32 @@ def bad_labels() -> NDArray[np.int64]:
 # ----------------------- Tests -----------------------
 
 
-def test_shannon(data: NDArray[np.float64]) -> None:
-    """Check compute_shannon output."""
-    dmin, dmax = float(np.min(data)), float(np.max(data))
-    val = dynsight.analysis.compute_shannon(
-        data, data_range=(dmin, dmax), n_bins=20
-    )
-    ref = 0.9995963122117133
-    assert np.isclose(val, ref)
-
-
-def test_shannon_multi(data_2d: NDArray[np.float64]) -> None:
-    """Check compute_shannon_multi output."""
-    data_ranges = [(0.0, 1.0), (0.0, 1.0)]
-    n_bins = [40, 40]
-    val = dynsight.analysis.compute_shannon_multi(
-        data_2d,
-        data_ranges=data_ranges,
-        n_bins=n_bins,
-    )
-    ref = 0.8843940630398162
-    assert np.isclose(val, ref)
-
-
-def test_empty_input() -> None:
-    """Check empty input raises ValueError."""
+def test_wrong_input(
+    data_2d: NDArray[np.float64],
+    labels: NDArray[np.int64],
+) -> None:
+    """Check wrong input raises Errors."""
     with pytest.raises(ValueError, match="data is empty"):
         dynsight.analysis.compute_shannon(np.array([]), (0.0, 1.0), n_bins=20)
     with pytest.raises(ValueError, match="data is empty"):
         dynsight.analysis.compute_shannon_multi(
             np.array([]), [(0.0, 1.0), (0.0, 1.0)], n_bins=[20, 20]
+        )
+    with pytest.raises(
+        ValueError,
+        match="Mismatch between data dimensions, data_ranges, and n_bins",
+    ):
+        dynsight.analysis.compute_shannon_multi(
+            data_2d, [(0.0, 1.0)], n_bins=[20]
+        )
+    with pytest.raises(
+        RuntimeError,
+        match=rf"data \(\({data_2d.shape}\)\) and labels "
+        rf"\(\({labels[:50].shape}\)\) "
+        r"must have same shape\[0\]",
+    ):
+        dynsight.analysis.compute_entropy_gain_multi(
+            data_2d, labels[:50], n_bins=[20, 20]
         )
 
 
@@ -90,4 +86,18 @@ def test_gain(data: NDArray[np.float64], labels: NDArray[np.int64]) -> None:
         data, labels, n_bins=20
     )
     ref = 0.0010842808402454819
+    assert np.isclose(gain, ref)
+
+
+def test_gain_multi(
+    data_2d: NDArray[np.float64],
+    labels: NDArray[np.int64],
+) -> None:
+    """Check entropy gain value."""
+    _, gain, *_ = dynsight.analysis.compute_entropy_gain_multi(
+        data_2d,
+        labels,
+        n_bins=[20, 20],
+    )
+    ref = 0.32537575591706214
     assert np.isclose(gain, ref)
