@@ -657,36 +657,42 @@ class Trj:
 
         return Trj(u_new)
 
-    def get_coord_number(self, r_cut: float) -> Insight:
+    def get_coord_number(
+        self,
+        r_cut: float,
+        selection: str = "all",
+    ) -> Insight:
         """Compute coordination number on the trajectory.
 
-        The returned Insight contains the following meta: r_cut.
+        The returned Insight contains the following meta: r_cut, selection.
         """
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
             cutoff=r_cut,
+            selection=selection,
             trajslice=self.trajslice,
         )
         _, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
         return Insight(
             dataset=nn.astype(np.float64),
-            meta={"r_cut": r_cut},
+            meta={"r_cut": r_cut, "selection": selection},
         )
 
-    def get_lens(self, r_cut: float) -> Insight:
+    def get_lens(self, r_cut: float, selection: str = "all") -> Insight:
         """Compute LENS on the trajectory.
 
-        The returned Insight contains the following meta: r_cut.
+        The returned Insight contains the following meta: r_cut, selection.
         """
         neigcounts = dynsight.lens.list_neighbours_along_trajectory(
             input_universe=self.universe,
             cutoff=r_cut,
+            selection=selection,
             trajslice=self.trajslice,
         )
         lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
         return Insight(
             dataset=lens[:, 1:],
-            meta={"r_cut": r_cut},
+            meta={"r_cut": r_cut, "selection": selection},
         )
 
     def get_soap(

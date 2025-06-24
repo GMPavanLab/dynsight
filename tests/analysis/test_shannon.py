@@ -2,54 +2,102 @@
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 
 import dynsight
 
+# ----------------------- Fixtures -----------------------
 
-# Define the actual test
-def test_output_files() -> None:
+
+@pytest.fixture
+def rng() -> np.random.Generator:
+    """Shared RNG for reproducible results."""
+    return np.random.default_rng(12345)
+
+
+@pytest.fixture
+def data(rng: np.random.Generator) -> NDArray[np.float64]:
+    """Random (100x100) array."""
+    return rng.random((100, 100))
+
+
+@pytest.fixture
+def data_2d(rng: np.random.Generator) -> NDArray[np.float64]:
+    """Random (100x2) array."""
+    return rng.random((100, 2))
+
+
+@pytest.fixture
+def labels(rng: np.random.Generator) -> NDArray[np.int64]:
+    """Valid integer labels for 100 samples."""
+    return rng.integers(0, 5, (100,), dtype=np.int64)
+
+
+@pytest.fixture
+def bad_labels() -> NDArray[np.int64]:
+    """Mismatched label shape."""
     rng = np.random.default_rng(12345)
+    return rng.integers(0, 5, (200, 50), dtype=np.int64)
 
-    data_shape = (100, 100)
-    random_data = rng.random(data_shape)
-    random_labels = rng.integers(0, 5, (100,))
-    wrong_labels = rng.integers(0, 5, (200, 50))
 
-    # Test the use of the function computing entropy
-    # This is necessary because of type checking:
-    data_min = float(np.min(random_data))
-    data_max = float(np.max(random_data))
-    data_entropy = dynsight.analysis.compute_shannon(
-        random_data,
-        data_range=(data_min, data_max),
-        n_bins=20,
-    )
+# ----------------------- Tests -----------------------
 
-    expected_entropy = 0.9995963122117133004
 
-    if isinstance(data_entropy, float):
-        assert np.isclose(data_entropy, expected_entropy)
-
-    # Test the case of empty dataset
+def test_wrong_input(
+    data_2d: NDArray[np.float64],
+    labels: NDArray[np.int64],
+) -> None:
+    """Check wrong input raises Errors."""
     with pytest.raises(ValueError, match="data is empty"):
-        _ = dynsight.analysis.compute_shannon(np.array([]), (0.0, 1.0), 20)
-
-    # Test the case where labels have the wrong shape
-    with pytest.raises(RuntimeError):
-        _ = dynsight.analysis.compute_entropy_gain(
-            random_data,
-            wrong_labels,
-            n_bins=20,
+        dynsight.analysis.compute_shannon(np.array([]), (0.0, 1.0), n_bins=20)
+    with pytest.raises(ValueError, match="data is empty"):
+        dynsight.analysis.compute_shannon_multi(
+            np.array([]), [(0.0, 1.0), (0.0, 1.0)], n_bins=[20, 20]
+        )
+    with pytest.raises(
+        ValueError,
+        match="Mismatch between data dimensions, data_ranges, and n_bins",
+    ):
+        dynsight.analysis.compute_shannon_multi(
+            data_2d, [(0.0, 1.0)], n_bins=[20]
+        )
+    with pytest.raises(
+        RuntimeError,
+        match=rf"data \(\({data_2d.shape}\)\) and labels "
+        rf"\(\({labels[:50].shape}\)\) "
+        r"must have same shape\[0\]",
+    ):
+        dynsight.analysis.compute_entropy_gain_multi(
+            data_2d, labels[:50], n_bins=[20, 20]
         )
 
-    # Test the case where it works
-    _, clustering_gain, *_ = dynsight.analysis.compute_entropy_gain(
-        random_data,
-        random_labels,
-        n_bins=20,
+
+def test_bad_shape(
+    data: NDArray[np.float64], bad_labels: NDArray[np.int64]
+) -> None:
+    """Bad label shape should raise RuntimeError."""
+    with pytest.raises(RuntimeError):
+        dynsight.analysis.compute_entropy_gain(data, bad_labels, n_bins=20)
+
+
+def test_gain(data: NDArray[np.float64], labels: NDArray[np.int64]) -> None:
+    """Check entropy gain value."""
+    _, gain, *_ = dynsight.analysis.compute_entropy_gain(
+        data, labels, n_bins=20
     )
+    ref = 0.0010842808402454819
+    assert np.isclose(gain, ref)
 
-    expected_gain = 0.0010842808402454819
 
-    if isinstance(clustering_gain, float):
-        assert np.isclose(clustering_gain, expected_gain)
+def test_gain_multi(
+    data_2d: NDArray[np.float64],
+    labels: NDArray[np.int64],
+) -> None:
+    """Check entropy gain value."""
+    _, gain, *_ = dynsight.analysis.compute_entropy_gain_multi(
+        data_2d,
+        labels,
+        n_bins=[20, 20],
+    )
+    ref = 0.32537575591706214
+    assert np.isclose(gain, ref)

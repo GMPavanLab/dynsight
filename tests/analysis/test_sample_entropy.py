@@ -2,38 +2,52 @@
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 
 import dynsight
 
+# ----------------------- Fixtures -----------------------
 
-# Define the actual test
-def test_output_files() -> None:
+
+@pytest.fixture
+def random_data() -> NDArray[np.float64]:
+    """Provides a reproducible random time series."""
     rng = np.random.default_rng(12345)
+    return rng.random(100)
 
-    random_data = rng.random(100)
-    r_fact = float(0.5 * np.std(random_data))
 
-    # Test the case where time-series are too short
+@pytest.fixture
+def r_fact(random_data: NDArray[np.float64]) -> float:
+    """Computes the r_factor as half the standard deviation."""
+    return float(0.5 * np.std(random_data))
+
+
+def test_too_short(
+    random_data: NDArray[np.float64],
+    r_fact: float,
+) -> None:
+    """Test that short time-series raise a ValueError."""
     with pytest.raises(ValueError, match="Time-series too short"):
-        _ = dynsight.analysis.sample_entropy(
+        dynsight.analysis.sample_entropy(
             random_data,
             r_factor=r_fact,
             m_par=105,
         )
 
-    # Test the case where distance threshold is too small
+
+# ----------------------- Tests -----------------------
+
+
+def test_too_small_rfact(random_data: NDArray[np.float64]) -> None:
+    """Test that a too small r_factor raises a RuntimeError."""
     with pytest.raises(RuntimeError, match="No matching sequences found."):
-        _ = dynsight.analysis.sample_entropy(
-            random_data,
-            r_factor=0.0,
-        )
+        dynsight.analysis.sample_entropy(random_data, r_factor=0.0)
 
-    # Test the use of the function computing entropy
-    data_sample_entropy = dynsight.analysis.sample_entropy(
-        random_data,
-        r_factor=r_fact,
-    )
 
-    expected_entropy = 1.3062516534463542
-    if isinstance(data_sample_entropy, float):
-        assert np.isclose(data_sample_entropy, expected_entropy)
+def test_sample_entropy(
+    random_data: NDArray[np.float64], r_fact: float
+) -> None:
+    """Test that the computed sample entropy matches the expected value."""
+    result = dynsight.analysis.sample_entropy(random_data, r_factor=r_fact)
+    expected = 1.3062516534463542
+    assert np.isclose(result, expected)
