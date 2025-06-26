@@ -700,8 +700,9 @@ class Trj:
         r_cut: float,
         n_max: int,
         l_max: int,
-        respect_pbc: bool = True,
+        selection: str = "all",
         centers: str = "all",
+        respect_pbc: bool = True,
         n_core: int = 1,
     ) -> Insight:
         """Compute SOAP on the trajectory.
@@ -714,6 +715,7 @@ class Trj:
             soaprcut=r_cut,
             soapnmax=n_max,
             soaplmax=l_max,
+            selection=selection,
             soap_respectpbc=respect_pbc,
             centers=centers,
             n_core=n_core,
@@ -724,6 +726,7 @@ class Trj:
             "n_max": n_max,
             "l_max": l_max,
             "respect_pbc": respect_pbc,
+            "selection": selection,
             "centers": centers,
         }
         return Insight(dataset=soap, meta=attr_dict)
@@ -733,8 +736,9 @@ class Trj:
         r_cut: float,
         n_max: int,
         l_max: int,
-        respect_pbc: bool = True,
+        selection: str = "all",
         centers: str = "all",
+        respect_pbc: bool = True,
         delay: int = 1,
         n_core: int = 1,
     ) -> Insight:
@@ -748,6 +752,7 @@ class Trj:
             n_max=n_max,
             l_max=l_max,
             respect_pbc=respect_pbc,
+            selection=selection,
             centers=centers,
             n_core=n_core,
         )
