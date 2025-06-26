@@ -93,6 +93,16 @@ class Insight:
             max_delay,
         )
 
+    def get_angular_velocity(self, delay: int) -> Insight:
+        """Computes the angular displacement of a vectorial descriptor."""
+        if self.dataset.ndim != UNIVAR_DIM + 1:
+            msg = "dataset.ndim != 3."
+            raise ValueError(msg)
+        theta = dynsight.soap.timesoap(self.dataset, delay=delay)
+        attr_dict = self.meta.copy()
+        attr_dict.update({"delay": delay})
+        return Insight(dataset=theta, meta=attr_dict)
+
     def get_onion(
         self,
         delta_t: int,
@@ -708,7 +718,7 @@ class Trj:
         """Compute SOAP on the trajectory.
 
         The returned Insight contains the following meta: r_cut, n_max, l_max,
-        respect_pbc, centers.
+        respect_pbc, centers, selection.
         """
         soap = dynsight.soap.saponify_trajectory(
             self.universe,
@@ -745,7 +755,9 @@ class Trj:
         """Compute timeSOAP on the trajectory.
 
         The returned Insight contains the following meta: r_cut, n_max, l_max,
-        respect_pbc, centers, delay.
+        respect_pbc, centers, selection, delay.
+
+        If return_soap = True, returns also an Insight with the SOAP dataset.
         """
         soap = self.get_soap(
             r_cut=r_cut,
@@ -756,10 +768,7 @@ class Trj:
             centers=centers,
             n_core=n_core,
         )
-        tsoap = dynsight.soap.timesoap(soap.dataset, delay=delay)
-        attr_dict = soap.meta.copy()
-        attr_dict.update({"delay": delay})
-        return Insight(dataset=tsoap, meta=attr_dict)
+        return soap.get_angular_velocity(delay=delay)
 
     def get_rdf(
         self,
