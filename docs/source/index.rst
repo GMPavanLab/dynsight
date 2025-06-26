@@ -9,6 +9,7 @@
    tICA <tica>
    onion clustering <onion>
    vision <vision>
+   track <track>
    analysis <analysis>
    data processing <data_processing>
    HDF5er <hdf5er>
@@ -75,7 +76,7 @@ or with conda::
 If you want to use the :mod:`dynsight.vision` and :mod:`dynsight.track` modules
 you will need to install a series of packages. This can be done with with pip::
 
-  $ pip install ultralytics PyYAML
+  $ pip install ultralytics PyYAML pandas trackpy
 
 
 How to contribute
