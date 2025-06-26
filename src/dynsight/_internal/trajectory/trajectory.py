@@ -9,6 +9,7 @@ import numpy as np
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from MDAnalysis import AtomGroup
     from numpy.typing import NDArray
     from tropea_clustering._internal.first_classes import StateMulti, StateUni
 
@@ -65,7 +66,7 @@ class Insight:
         selection: str = "all",
         num_processes: int = 1,
     ) -> Insight:
-        """Average the descripotor over the neighboring particles.
+        """Average the descriptor over the neighboring particles.
 
         The returned Insight contains the following meta: sp_av_r_cut,
         selection.
@@ -94,7 +95,11 @@ class Insight:
         )
 
     def get_angular_velocity(self, delay: int) -> Insight:
-        """Computes the angular displacement of a vectorial descriptor."""
+        """Computes the angular displacement of a vectorial descriptor.
+
+        Raises:
+            ValueError if the dataset does not have the right dimensions.
+        """
         if self.dataset.ndim != UNIVAR_DIM + 1:
             msg = "dataset.ndim != 3."
             raise ValueError(msg)
@@ -671,36 +676,52 @@ class Trj:
         self,
         r_cut: float,
         selection: str = "all",
-    ) -> Insight:
+        neigcounts: list[list[AtomGroup]] | None = None,
+    ) -> tuple[list[list[AtomGroup]], Insight]:
         """Compute coordination number on the trajectory.
 
-        The returned Insight contains the following meta: r_cut, selection.
+        Returns:
+            neighcounts: a list[list[AtomGroup]], it can be used to speed up
+                subsequent descriptors' computations.
+            An Insight containing the number of neighbors. It has the following
+                meta: r_cut, selection.
         """
-        neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-            input_universe=self.universe,
-            cutoff=r_cut,
-            selection=selection,
-            trajslice=self.trajslice,
-        )
+        if neigcounts is None:
+            neigcounts = dynsight.lens.list_neighbours_along_trajectory(
+                input_universe=self.universe,
+                cutoff=r_cut,
+                selection=selection,
+                trajslice=self.trajslice,
+            )
         _, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
-        return Insight(
+        return neigcounts, Insight(
             dataset=nn.astype(np.float64),
             meta={"r_cut": r_cut, "selection": selection},
         )
 
-    def get_lens(self, r_cut: float, selection: str = "all") -> Insight:
+    def get_lens(
+        self,
+        r_cut: float,
+        selection: str = "all",
+        neigcounts: list[list[AtomGroup]] | None = None,
+    ) -> tuple[list[list[AtomGroup]], Insight]:
         """Compute LENS on the trajectory.
 
-        The returned Insight contains the following meta: r_cut, selection.
+        Returns:
+            neighcounts: a list[list[AtomGroup]], it can be used to speed up
+                subsequent descriptors' computations.
+            An Insight containing LENS. It has the following meta: r_cut,
+                selection.
         """
-        neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-            input_universe=self.universe,
-            cutoff=r_cut,
-            selection=selection,
-            trajslice=self.trajslice,
-        )
+        if neigcounts is None:
+            neigcounts = dynsight.lens.list_neighbours_along_trajectory(
+                input_universe=self.universe,
+                cutoff=r_cut,
+                selection=selection,
+                trajslice=self.trajslice,
+            )
         lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
-        return Insight(
+        return neigcounts, Insight(
             dataset=lens[:, 1:],
             meta={"r_cut": r_cut, "selection": selection},
         )
@@ -740,35 +761,6 @@ class Trj:
             "centers": centers,
         }
         return Insight(dataset=soap, meta=attr_dict)
-
-    def get_timesoap(
-        self,
-        r_cut: float,
-        n_max: int,
-        l_max: int,
-        selection: str = "all",
-        centers: str = "all",
-        respect_pbc: bool = True,
-        delay: int = 1,
-        n_core: int = 1,
-    ) -> Insight:
-        """Compute timeSOAP on the trajectory.
-
-        The returned Insight contains the following meta: r_cut, n_max, l_max,
-        respect_pbc, centers, selection, delay.
-
-        If return_soap = True, returns also an Insight with the SOAP dataset.
-        """
-        soap = self.get_soap(
-            r_cut=r_cut,
-            n_max=n_max,
-            l_max=l_max,
-            respect_pbc=respect_pbc,
-            selection=selection,
-            centers=centers,
-            n_core=n_core,
-        )
-        return soap.get_angular_velocity(delay=delay)
 
     def get_rdf(
         self,

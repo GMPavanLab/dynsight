@@ -21,7 +21,7 @@ def main() -> None:
     if lens_file.exists():
         lens = Insight.load_from_json(lens_file)
     else:
-        lens = trj.get_lens(r_cut=7.5)
+        _, lens = trj.get_lens(r_cut=7.5)
         lens.dump_to_json(lens_file)
 
     # We can do spatial average on the computed LENS
