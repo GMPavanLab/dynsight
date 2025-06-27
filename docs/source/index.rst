@@ -75,7 +75,17 @@ or with conda::
 If you want to use the :mod:`dynsight.vision` and :mod:`dynsight.track` modules
 you will need to install a series of packages. This can be done with with pip::
 
-  $ pip install ultralytics PyYAML
+  $ pip install ultralytics
+
+.. caution::
+  Recommended python versions declared by ``ultralytics`` are 3.8 to 3.12.
+  Other versions may cause errors.
+
+.. tip::
+    ``PyTorch`` is required for the ``ultralytics`` package and its
+    requirements vary by operating system and CUDA/ROCm requirements, so
+    install ``PyTorch`` first may avoid compatibility issues. Follow the
+    instructions at this `link <https://pytorch.org/get-started/locally/>`_
 
 
 How to contribute
