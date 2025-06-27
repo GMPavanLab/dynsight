@@ -43,7 +43,7 @@ this trajectory. For instance, let's say we want to compute LENS:
 
 .. code-block:: python
 
-    lens = trj.get_lens(r_cut=7.5)
+    _, lens = trj.get_lens(r_cut=7.5)
     lens_file = files_path / "lens.json"
     lens.dump_to_json(lens_file)
 

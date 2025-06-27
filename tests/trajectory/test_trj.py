@@ -67,7 +67,7 @@ def test_insight(
 ) -> None:
     """Test Insight methods."""
     trj = Trj(universe)
-    insight = trj.get_lens(10.0)
+    _, insight = trj.get_lens(10.0)
 
     # Insight dump/load
     json_file = tmp_path / "insight.json"
@@ -107,7 +107,7 @@ def test_insight(
 def test_onion_analysis(universe: MDAnalysis.Universe) -> None:
     """Test the onion clustering complete analysis tool."""
     trj = Trj(universe)
-    insight = trj.get_lens(10.0)
+    _, insight = trj.get_lens(10.0)
     result = insight.get_onion_analysis()
     assert result is not None
 

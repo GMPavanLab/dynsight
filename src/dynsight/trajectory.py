@@ -1,10 +1,14 @@
 """trajectory package."""
 
-from dynsight._internal.trajectory.trajectory import (
+from dynsight._internal.trajectory.cluster_insight import (
     ClusterInsight,
-    Insight,
     OnionInsight,
     OnionSmoothInsight,
+)
+from dynsight._internal.trajectory.insight import (
+    Insight,
+)
+from dynsight._internal.trajectory.trajectory import (
     Trj,
 )
 
