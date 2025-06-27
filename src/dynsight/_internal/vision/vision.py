@@ -3,8 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ultralytics import YOLO
-from importlib import metadata
-from calendar import EPOCH
 
 if TYPE_CHECKING:
     from pathlib import Path
