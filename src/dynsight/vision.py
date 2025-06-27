@@ -1,13 +1,9 @@
 """Vision package."""
 
-from dynsight._internal.vision.detect import (
-    Detect,
-)
-from dynsight._internal.vision.video_to_frame import (
-    Video,
+from dynsight._internal.vision.vision import (
+    VisionInstance,
 )
 
 __all__ = [
-    "Detect",
-    "Video",
+    "VisionInstance",
 ]
