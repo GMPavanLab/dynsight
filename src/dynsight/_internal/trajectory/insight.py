@@ -92,7 +92,7 @@ class Insight:
             max_delay,
         )
 
-    def get_angular_velocity(self, delay: int) -> Insight:
+    def get_angular_velocity(self, delay: int = 1) -> Insight:
         """Computes the angular displacement of a vectorial descriptor.
 
         Raises:
