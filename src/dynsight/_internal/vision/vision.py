@@ -227,11 +227,15 @@ class VisionInstance:
         iterations: int = 15,
         epochs: int = 50,
         imgsz: int | tuple[int, int] = 640,
+        batch_size: int = 16,
     ) -> dict[str, float]:
         """Tune hyperparameters for the model.
 
         Optimize the CNN hyperparameters by leveraging the Ultralytics YOLO
         `genetic algorithm <https://docs.ultralytics.com/guides/hyperparameter-tuning/>`_.
+        It returns a dictionary of the best hyperparameters, which can be
+        directly used as input to the hyperparameters parameter in the train
+        method.
 
         Parameters:
             iterations:
@@ -245,7 +249,12 @@ class VisionInstance:
             imgsz:
                 Defines the image size for inference. Can be a single integer
                 for square resizing or a tuple. Proper sizing can improve
-                detection accuracy and processingspeed.
+                detection accuracy and processing speed.
+
+            batch_size:
+                Batch size, with three modes: set as an integer (batch=16),
+                auto mode for 60% GPU memory utilization (batch=-1), or auto
+                mode with specified utilization fraction (batch=0.70).
         """
         if self.training_data_yaml is None:
             msg = "Training dataset has not been set."
@@ -259,6 +268,7 @@ class VisionInstance:
             name="results",
             device=self.device,
             imgsz=imgsz,
+            batch=batch_size,
         )
 
     def train(
