@@ -1,11 +1,20 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import logging
+from typing import TYPE_CHECKING, Callable
 
+import torch
 from ultralytics import YOLO
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+
+logger = logging.getLogger(__name__)
 
 # Defaults hyperparameters dictionary.
 default_hyperparams = {
@@ -32,7 +41,7 @@ default_hyperparams = {
     "mosaic": 1,
     "mixup": 0.0,
     "cutmix": 0.0,
-    "copy_paste": 0.0
+    "copy_paste": 0.0,
 }
 
 
@@ -46,8 +55,10 @@ class VisionInstance:
         This class is still in development and may not work as expected.
 
     """
+
     def __init__(
-        self, source: str | Path,
+        self,
+        source: str | Path,
         output_path: Path,
         model: str | Path = "yolo12n.pt",
         device: str | None = None,
@@ -88,12 +99,14 @@ class VisionInstance:
 
         self.model = YOLO(model)
         self.source = source
-        self.device = device
+        self.device = self._normalize_device_string(device)
         self.workers = workers
 
         self.opt_results: dict[str, float] | None = None
         self.prediction_results = None
         self.training_results = None
+
+        self._check_device()
 
     def set_training_dataset(self, training_data_yaml: Path) -> None:
         """Set the training dataset for the model training.
@@ -212,11 +225,12 @@ class VisionInstance:
             max_det=max_det,
         )
 
-    def tune_hyperparams(self,
-        title:str,
-        epochs:int=50,
-        iterations:int=15,
-    )-> dict[str, float]:
+    def tune_hyperparams(
+        self,
+        title: str,
+        epochs: int = 50,
+        iterations: int = 15,
+    ) -> dict[str, float]:
         """Tune hyperparameters for the model.
 
         temporary.
@@ -231,18 +245,20 @@ class VisionInstance:
             iterations=iterations,
             project=self.output_path,
             name=title,
-            device=self.device)
+            device=self.device,
+        )
 
         return self.opt_results
 
-    def train(self,
+    def train(
+        self,
         title: str,
         hyperparams: dict[str, float] | None = None,
         epochs: int = 100,
         batch_size: int = 16,
         patience: int = 20,
         imgsz: int | tuple[int, int] = 640,
-        ) -> None:
+    ) -> None:
         """Train a custom model using a training dataset.
 
         This function trains a custom model using a training dataset. Dataset
@@ -334,5 +350,102 @@ class VisionInstance:
             project=self.output_path,
             patience=patience,
             device=self.device,
-            **full_params
+            **full_params,
         )
+
+    def _normalize_device_string(self, device: str | None) -> str:
+        """Normalize device string to match Ultralytics expectations."""
+        if device is None:
+            return "0" if torch.cuda.is_available() else "cpu"
+
+        device = str(device).lower()
+
+        if device in {"cpu", "mps", "cuda"}:
+            return device
+
+        # Allow "cuda:0" -> "0", "cuda:0,1" -> "0,1"
+        if device.startswith("cuda:"):
+            return device.replace("cuda:", "")
+
+        # Allow "0", "0,1", etc.
+        if all(part.strip().isdigit() for part in device.split(",")):
+            return device
+        msg = f"Unsupported device string: '{device}'"
+        raise ValueError(msg)
+
+    def _check_device(self) -> None:
+        """Verify and validate the selected device for compatibility."""
+        self.device = self._normalize_device_string(self.device)
+
+        def _device_error(msg: str) -> None:
+            raise RuntimeError(msg)
+
+        try:
+            if self.device == "cpu":
+                self._check_cpu_device()
+            elif self.device == "mps":
+                self._check_mps_device(_device_error)
+            elif self.device == "cuda":
+                self._check_single_cuda_device(_device_error)
+            elif all(
+                part.strip().isdigit()
+                for part in self.device.split(",")
+            ):
+                self._check_multi_cuda_devices(_device_error)
+            else:
+                _device_error(f"Unsupported device string: '{self.device}'")
+        except (ValueError, RuntimeError, IndexError, OSError) as e:
+            _device_error(str(e))
+
+
+    def _check_cpu_device(self) -> None:
+        logger.info("Using CPU.")
+
+
+    def _check_mps_device(
+        self, _device_error: Callable[[str], None]
+    ) -> None:
+        if not (
+            hasattr(torch.backends, "mps")
+            and torch.backends.mps.is_available()
+        ):
+            _device_error("MPS device requested but not available.")
+        logger.info("Using Apple MPS backend.")
+
+
+    def _check_single_cuda_device(
+        self, _device_error: Callable[[str], None]
+    ) -> None:
+        if not torch.cuda.is_available():
+            _device_error("CUDA requested but not available.")
+        name = torch.cuda.get_device_name(0)
+        backend = "ROCm" if torch.version.hip else "CUDA"
+        mem_free, mem_total = torch.cuda.mem_get_info(0)
+        logger.info(f"Using GPU 0: {name} [{backend}]")
+        logger.info(
+            "Memory: %.1f MB free / %.1f MB total",
+            mem_free / 1024**2,
+            mem_total / 1024**2,
+        )
+        _ = torch.tensor([0.0]).to("cuda:0")
+
+
+    def _check_multi_cuda_devices(
+        self, _device_error: Callable[[str], None]
+    ) -> None:
+        gpus = [int(d) for d in self.device.split(",")]
+        for idx in gpus:
+            if idx >= torch.cuda.device_count():
+                _device_error(
+                    f"Requested GPU index {idx}, but only "
+                    f"{torch.cuda.device_count()} available."
+                )
+            name = torch.cuda.get_device_name(idx)
+            mem_free, mem_total = torch.cuda.mem_get_info(idx)
+            logger.info(f"Using GPU {idx}: {name}")
+            logger.info(
+                "Memory: %.1f MB free / %.1f MB total",
+                mem_free / 1024**2,
+                mem_total / 1024**2,
+            )
+        _ = torch.tensor([0.0]).to(f"cuda:{gpus[0]}")
