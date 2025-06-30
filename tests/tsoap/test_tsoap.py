@@ -20,12 +20,13 @@ def test_tsoap(case_data: TimeSOAPCaseData) -> None:
 
     example_trj = Trj(universe)
 
-    test_tsoap = example_trj.get_timesoap(
+    test_soap = example_trj.get_soap(
         r_cut=case_data.r_c,
         n_max=4,
         l_max=4,
-        delay=case_data.delay,
     )
+
+    test_tsoap = test_soap.get_angular_velocity(delay=case_data.delay)
 
     if not expected_tsoap.exists():
         np.save(expected_tsoap, test_tsoap.dataset)
