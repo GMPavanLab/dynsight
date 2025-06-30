@@ -234,7 +234,17 @@ class VisionInstance:
     ) -> dict[str, float]:
         """Tune hyperparameters for the model.
 
-        temporary.
+        Parameters:
+            title:
+                The name of the tuning session.
+            epochs:
+                The number of epochs to train for each iteration.
+            iterations:
+                The number of searching iterations.
+            imgsz:
+                Defines the image size for inference. Can be a single integer
+                for square resizing or a tuple. Proper sizing can improve
+                inference speed and accuracy.
         """
         if self.training_data_yaml is None:
             msg = "Training dataset has not been set."
