@@ -91,6 +91,7 @@ class VisionInstance:
         self.device = device
         self.workers = workers
 
+        self.opt_results: dict[str, float] | None = None
         self.prediction_results = None
         self.training_results = None
 
@@ -215,7 +216,7 @@ class VisionInstance:
         title:str,
         epochs:int=50,
         iterations:int=15,
-    )-> None:
+    )-> dict[str, float]:
         """Tune hyperparameters for the model.
 
         temporary.
@@ -224,13 +225,15 @@ class VisionInstance:
             msg = "Training dataset has not been set."
             raise ValueError(msg)
 
-        self.model.tune(
+        self.opt_results = self.model.tune(
             data=self.training_data_yaml,
             epochs=epochs,
             iterations=iterations,
             project=self.output_path,
             name=title,
             device=self.device)
+
+        return self.opt_results
 
     def train(self,
         title: str,
