@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Callable
 import torch
 from ultralytics import YOLO
 
-if TYPE_CHECKING:
-    from pathlib import Path
+
+from pathlib import Path
 
 logging.basicConfig(
     level=logging.INFO,
@@ -94,7 +94,7 @@ class VisionInstance:
                 useful in multi-GPU setups. (only for training sessions).
 
         """
-        self.output_path: Path = output_path
+        self.output_path = Path(output_path)
         self.training_data_yaml: Path | None = None
 
         self.model = YOLO(model)
@@ -102,7 +102,6 @@ class VisionInstance:
         self.device = self._normalize_device_string(device)
         self.workers = workers
 
-        self.opt_results: dict[str, float] | None = None
         self.prediction_results = None
         self.training_results = None
 
@@ -227,40 +226,42 @@ class VisionInstance:
 
     def tune_hyperparams(
         self,
-        title: str,
-        epochs: int = 50,
         iterations: int = 15,
+        epochs: int = 50,
         imgsz: int | tuple[int, int] = 640,
     ) -> dict[str, float]:
         """Tune hyperparameters for the model.
 
+        Optimize the CNN hyperparameters by leveraging the Ultralytics YOLO
+        `genetic algorithm <https://docs.ultralytics.com/guides/hyperparameter-tuning/>`_.
+
         Parameters:
-            title:
-                The name of the tuning session.
+            iterations:
+                The number of exploring iterations. The higher the number, the
+                more accurate the results will be, but the longer the training
+                will take.
+
             epochs:
                 The number of epochs to train for each iteration.
-            iterations:
-                The number of searching iterations.
+
             imgsz:
                 Defines the image size for inference. Can be a single integer
                 for square resizing or a tuple. Proper sizing can improve
-                inference speed and accuracy.
+                detection accuracy and processingspeed.
         """
         if self.training_data_yaml is None:
             msg = "Training dataset has not been set."
             raise ValueError(msg)
 
-        self.opt_results = self.model.tune(
+        return self.model.tune(
             data=self.training_data_yaml,
             epochs=epochs,
             iterations=iterations,
-            project=self.output_path,
-            name=title,
+            project=self.output_path / "tuning",
+            name="results",
             device=self.device,
             imgsz=imgsz,
         )
-
-        return self.opt_results
 
     def train(
         self,
