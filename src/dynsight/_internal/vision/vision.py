@@ -230,6 +230,7 @@ class VisionInstance:
         title: str,
         epochs: int = 50,
         iterations: int = 15,
+        imgsz: int | tuple[int, int] = 640,
     ) -> dict[str, float]:
         """Tune hyperparameters for the model.
 
@@ -246,6 +247,7 @@ class VisionInstance:
             project=self.output_path,
             name=title,
             device=self.device,
+            imgsz=imgsz,
         )
 
         return self.opt_results
