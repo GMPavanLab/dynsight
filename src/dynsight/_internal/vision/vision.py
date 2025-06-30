@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable
+from pathlib import Path
+from typing import Callable
 
 import torch
 from ultralytics import YOLO
-
-
-from pathlib import Path
 
 logging.basicConfig(
     level=logging.INFO,
