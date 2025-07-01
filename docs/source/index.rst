@@ -16,6 +16,13 @@
 .. toctree::
   :hidden:
   :maxdepth: 2
+  :caption: Recipes:
+
+  Descriptors from a Trj <descr_from_trj>
+
+.. toctree::
+  :hidden:
+  :maxdepth: 2
   :caption: Examples:
 
   Typical analysis workflow <analysis_workflow>
