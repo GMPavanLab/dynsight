@@ -76,7 +76,11 @@ def load_or_compute_soap(
     n_core: int = 1,
     soap_path: Path | None = None,
 ) -> Insight:
-    """Load SOAP descriptors from file if available, otherwise compute it.
+    """Load or compute SOAP.
+
+    If a valid path to a .json file with a SOAP Insight is provided, that
+    Insight is loaded and returned. Otherwise, the Insight is computed from
+    the Trj.
 
     Returns:
         Insight object containing SOAP descriptors.
