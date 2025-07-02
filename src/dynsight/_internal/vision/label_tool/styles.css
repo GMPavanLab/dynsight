@@ -1,0 +1,83 @@
+* {
+    user-select: none;
+}
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    height: 100vh;
+}
+.sidebar {
+    width: 250px;
+    background: #f4f4f4;
+    border-right: 1px solid #ccc;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+}
+.top-bar {
+    padding: 10px 20px;
+    border-bottom: 1px solid #ccc;
+    background: #fafafa;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.image-container {
+    flex: 1;
+    position: relative;
+    background: #eee;
+    overflow: hidden;
+}
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    user-drag: none;
+    pointer-events: none;
+}
+.bounding-box {
+    position: absolute;
+    pointer-events: none;
+}
+.label-tag {
+    position: absolute;
+    top: -20px;
+    left: 0;
+    color: white;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 3px;
+    pointer-events: none;
+}
+.label-item {
+    background: #e0e0e0;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.label-item.active {
+    outline: 2px solid #2196f3;
+}
+.upload-btn,
+.nav-btn {
+    margin-top: 5px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+input[type="text"] {
+    width: 100%;
+    padding: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
