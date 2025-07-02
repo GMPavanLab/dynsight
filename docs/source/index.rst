@@ -19,6 +19,7 @@
   :caption: Recipes:
 
   Descriptors from a Trj <descr_from_trj>
+  Dimensionality reduction methods <soap_dim_red>
 
 .. toctree::
   :hidden:
