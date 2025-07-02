@@ -15,6 +15,8 @@ const prevImageBtn = document.getElementById("prevImage");
 const verticalLine = document.getElementById("verticalLine");
 const horizontalLine = document.getElementById("horizontalLine");
 
+const overlay = document.getElementById("overlay");
+
 verticalLine.style.display = "none";
 horizontalLine.style.display = "none";
 
@@ -88,7 +90,7 @@ function loadImage(index) {
 }
 
 function clearBoxes() {
-  document.querySelectorAll(".bounding-box").forEach((el) => el.remove());
+  overlay.innerHTML = "";
 }
 
 function addBoxFromData(data) {
@@ -102,19 +104,23 @@ function addBoxFromData(data) {
   box.style.backgroundColor = labelColors[data.label]
     .replace("hsl", "hsla")
     .replace(")", ", 0.1)");
+
   const tag = document.createElement("div");
   tag.className = "label-tag";
   tag.textContent = data.label;
   tag.style.backgroundColor = labelColors[data.label];
   box.appendChild(tag);
-  imageContainer.appendChild(box);
+
+  overlay.appendChild(box);
 }
 
 imageContainer.onmousedown = (e) => {
   if (!currentLabel || !images[currentIndex]) return;
-  const rect = imageContainer.getBoundingClientRect();
+
+  const rect = imageDisplay.getBoundingClientRect();
   startX = e.clientX - rect.left;
   startY = e.clientY - rect.top;
+
   box = document.createElement("div");
   box.className = "bounding-box";
   box.style.left = `${startX}px`;
@@ -123,41 +129,55 @@ imageContainer.onmousedown = (e) => {
   box.style.backgroundColor = labelColors[currentLabel]
     .replace("hsl", "hsla")
     .replace(")", ", 0.1)");
+
   const tag = document.createElement("div");
   tag.className = "label-tag";
   tag.textContent = currentLabel;
   tag.style.backgroundColor = labelColors[currentLabel];
   box.appendChild(tag);
-  imageContainer.appendChild(box);
+
+  overlay.appendChild(box);
   isDrawing = true;
 };
 
 imageContainer.onmousemove = (e) => {
-  const rect = imageContainer.getBoundingClientRect();
-  const currX = e.clientX - rect.left;
-  const currY = e.clientY - rect.top;
+  const imgRect = imageDisplay.getBoundingClientRect();
+  const containerRect = imageContainer.getBoundingClientRect();
 
-  verticalLine.style.left = `${currX}px`;
-  horizontalLine.style.top = `${currY}px`;
+  const currX = e.clientX - imgRect.left;
+  const currY = e.clientY - imgRect.top;
+
+  verticalLine.style.left = `${e.clientX - containerRect.left}px`;
+  horizontalLine.style.top = `${e.clientY - containerRect.top}px`;
 
   if (!isDrawing || !box) return;
+
   box.style.left = `${Math.min(currX, startX)}px`;
   box.style.top = `${Math.min(currY, startY)}px`;
   box.style.width = `${Math.abs(currX - startX)}px`;
   box.style.height = `${Math.abs(currY - startY)}px`;
 };
 
-imageContainer.onmouseup = () => {
+imageContainer.onmouseup = (e) => {
   if (!isDrawing || !box) return;
-  const rect = box.getBoundingClientRect();
+
   const imgRect = imageDisplay.getBoundingClientRect();
+  const endX = e.clientX - imgRect.left;
+  const endY = e.clientY - imgRect.top;
+
+  const left = Math.min(startX, endX);
+  const top = Math.min(startY, endY);
+  const width = Math.abs(endX - startX);
+  const height = Math.abs(endY - startY);
+
   annotations[images[currentIndex].name].push({
     label: currentLabel,
-    left: rect.left - imgRect.left,
-    top: rect.top - imgRect.top,
-    width: rect.width,
-    height: rect.height,
+    left,
+    top,
+    width,
+    height,
   });
+
   box = null;
   isDrawing = false;
 };

@@ -36,14 +36,7 @@ body {
     overflow: hidden;
     cursor: crosshair;
 }
-.image-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
-    user-drag: none;
-    pointer-events: none;
-}
+
 .bounding-box {
     position: absolute;
     pointer-events: none;
@@ -113,4 +106,33 @@ input[type="text"] {
         transparent 5px,
         transparent 10px
     );
+}
+#imageWrapper {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#imageDisplay {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    pointer-events: none;
+    user-drag: none;
+}
+
+#overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* le box possono ricevere eventi solo se necessario */
+}
+
+.bounding-box {
+    position: absolute;
+    pointer-events: auto;
+    box-sizing: border-box;
 }
