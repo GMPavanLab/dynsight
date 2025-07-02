@@ -12,6 +12,21 @@ const exportBtn = document.getElementById("exportYolo");
 const exportAllBtn = document.getElementById("exportAll");
 const nextImageBtn = document.getElementById("nextImage");
 const prevImageBtn = document.getElementById("prevImage");
+const verticalLine = document.getElementById("verticalLine");
+const horizontalLine = document.getElementById("horizontalLine");
+
+verticalLine.style.display = "none";
+horizontalLine.style.display = "none";
+
+imageContainer.onmouseenter = () => {
+  verticalLine.style.display = "block";
+  horizontalLine.style.display = "block";
+};
+
+imageContainer.onmouseleave = () => {
+  verticalLine.style.display = "none";
+  horizontalLine.style.display = "none";
+};
 
 let currentLabel = null;
 const labelColors = {};
@@ -118,10 +133,14 @@ imageContainer.onmousedown = (e) => {
 };
 
 imageContainer.onmousemove = (e) => {
-  if (!isDrawing || !box) return;
   const rect = imageContainer.getBoundingClientRect();
   const currX = e.clientX - rect.left;
   const currY = e.clientY - rect.top;
+
+  verticalLine.style.left = `${currX}px`;
+  horizontalLine.style.top = `${currY}px`;
+
+  if (!isDrawing || !box) return;
   box.style.left = `${Math.min(currX, startX)}px`;
   box.style.top = `${Math.min(currY, startY)}px`;
   box.style.width = `${Math.abs(currX - startX)}px`;

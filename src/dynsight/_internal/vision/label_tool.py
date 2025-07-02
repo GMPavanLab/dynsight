@@ -1,6 +1,5 @@
 import functools
 import logging
-import socket
 import threading
 import webbrowser
 from http.server import SimpleHTTPRequestHandler

@@ -19,13 +19,27 @@
                 <input type="file" id="imageInput" accept="image/*" multiple />
                 <button class="nav-btn" id="prevImage">&larr; Prev</button>
                 <button class="nav-btn" id="nextImage">Next &rarr;</button>
-                <button id="clearLast">Clear Previous</button>
-                <button id="clearAll">Clear All</button>
-                <button id="exportYolo">Export label (YOLO)</button>
-                <button id="exportAll">Export dataset (YOLO)</button>
+                <button id="clearLast" class="nav-btn">Clear Previous</button>
+                <button id="clearAll" class="nav-btn">Clear All</button>
+                <button id="exportYolo" class="nav-btn">
+                    Export label (YOLO)
+                </button>
+                <button id="exportAll" class="nav-btn">
+                    Export dataset (YOLO)
+                </button>
             </div>
             <div class="image-container" id="imageContainer">
                 <img id="imageDisplay" src="" alt="" />
+                <div id="verticalLine" class="crosshair-line"></div>
+                <div id="horizontalLine" class="crosshair-line"></div>
+                <div
+                    id="crosshair-horizontal"
+                    class="crosshair-line horizontal"
+                ></div>
+                <div
+                    id="crosshair-vertical"
+                    class="crosshair-line vertical"
+                ></div>
             </div>
         </div>
 
