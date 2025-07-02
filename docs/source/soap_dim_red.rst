@@ -40,9 +40,12 @@ on the algorithm here https://scikit-learn.org/stable/modules/generated/sklearn.
 This function takes as input a :class:`.trajectory.Trj` and all the relevant
 parameters, and performs the PCA of the corresponding SOAP dataset.
 
+``n_components`` is the number of PCs that the function stores in the output.
+
 .. testcode:: recipe2-test
 
     from pathlib import Path
+    import dynsight
     from dynsight.trajectory import Trj, Insight
     from sklearn.decomposition import PCA
 
@@ -82,7 +85,9 @@ parameters, and performs the PCA of the corresponding SOAP dataset.
             pca = PCA(n_components=n_components)
             transformed_soap = pca.fit_transform(reshaped_soap)
             pca_ds = transformed_soap.reshape(n_atom, n_frames, -1)
-            soap_pca = Insight(pca_ds)
+
+            meta = soap.meta.copy()
+            soap_pca = Insight(pca_ds, meta=meta)
 
             if pca_path is not None:
                 soap_pca.dump_to_json(pca_path)
@@ -98,6 +103,86 @@ parameters, and performs the PCA of the corresponding SOAP dataset.
         n_components=1,
     )
 
+The output :class:`.trajectory.Insight` stores the SOAP information in its
+"meta" attribute.
+
+Time-lagged Independent Component Analysis (TICA)
+-------------------------------------------------
+
+More details on the algorithm here https://deeptime-ml.github.io/latest/notebooks/tica.html.
+
+This function takes as input a :class:`.trajectory.Trj` and all the relevant
+parameters, and performs the TICA of the corresponding SOAP dataset.
+
+``lag_time`` is the time lag used to perform TICA.
+``tica_dim`` is the number of TICs that the function stores in the output.
+
+.. testcode:: recipe2-test
+
+    from pathlib import Path
+    from dynsight.trajectory import Trj, Insight
+
+    def compute_soap_tica(
+        trj: Trj,
+        r_cut: float,
+        n_max: int,
+        l_max: int,
+        lag_time: int,
+        tica_dim: int,
+        soap_path: Path | None = None,
+        tica_path: Path | None = None,
+        selection: str = "all",
+        centers: str = "all",
+        respect_pbc: bool = True,
+        n_core: int = 1,
+    ) -> Insight:
+        if tica_path is not None and tica_path.exists():
+            soap_pca = Insight.load_from_json(tica_path)
+        else:
+            if soap_path is not None and soap_path.exists():
+                soap = Insight.load_from_json(soap_path)
+            else:
+                soap = trj.get_soap(
+                    r_cut=r_cut,
+                    n_max=n_max,
+                    l_max=l_max,
+                    selection=selection,
+                    centers=centers,
+                    respect_pbc=respect_pbc,
+                    n_core=n_core,
+                )
+                if soap_path is not None:
+                    soap.dump_to_json(soap_path)
+
+            rel_times, _, tica_ds = dynsight.tica.many_body_tica(
+                soap.dataset,
+                lag_time=lag_time,
+                tica_dim=tica_dim,
+            )
+
+            meta = soap.meta.copy()
+            meta.update({"lag_time": lag_time})
+            meta.update({"rel_times": rel_times})
+            soap_tica = Insight(tica_ds, meta=meta)
+
+            if tica_path is not None:
+                soap_tica.dump_to_json(tica_path)
+
+        return soap_tica
+
+    # Example of how to use
+    soap_tic1 = compute_soap_tica(
+        trj=trj,
+        r_cut=10.0,
+        n_max=4,
+        l_max=4,
+        lag_time=10,
+        tica_dim=1,
+    )
+
+The output :class:`.trajectory.Insight` stores the SOAP information in its
+"meta" attribute, together with the ``lag_time`` parameter and ``rel_times``, 
+the relaxation times of the computed TICs.
 
 
 Other
@@ -118,3 +203,4 @@ trajectory (removing the last frame). The easiest way to do this is:
     :hide:
 
     assert soap_pc1.dataset.shape == (7, 201, 1)
+    assert soap_tic1.dataset.shape == (7, 201, 1)
