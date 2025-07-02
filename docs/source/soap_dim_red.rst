@@ -139,7 +139,7 @@ parameters, and performs the TICA of the corresponding SOAP dataset.
         respect_pbc: bool = True,
         n_core: int = 1,
     ) -> Insight:
-        if tica_path is not None and tica_path.exists():
+        if tica_path and tica_path.exists():
             return Insight.load_from_json(tica_path)
 
         soap = load_or_compute_soap(
@@ -220,7 +220,7 @@ parameters, and computes the corresponding timeSOAP dataset.
         respect_pbc: bool = True,
         n_core: int = 1,
     ) -> Insight:
-        if tsoap_path is not None and tsoap_path.exists():
+        if tsoap_path and tsoap_path.exists():
             return Insight.load_from_json(tsoap_path)
 
         soap = load_or_compute_soap(
