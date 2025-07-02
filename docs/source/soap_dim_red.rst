@@ -45,7 +45,7 @@ parameters, and performs the PCA of the corresponding SOAP dataset.
 .. testcode:: recipe2-test
 
     from pathlib import Path
-    import dynsight
+    from dynsight.utilities import load_or_compute_soap
     from dynsight.trajectory import Trj, Insight
     from sklearn.decomposition import PCA
 
@@ -62,35 +62,31 @@ parameters, and performs the PCA of the corresponding SOAP dataset.
         respect_pbc: bool = True,
         n_core: int = 1,
     ) -> Insight:
-        if pca_path is not None and pca_path.exists():
-            soap_pca = Insight.load_from_json(pca_path)
-        else:
-            if soap_path is not None and soap_path.exists():
-                soap = Insight.load_from_json(soap_path)
-            else:
-                soap = trj.get_soap(
-                    r_cut=r_cut,
-                    n_max=n_max,
-                    l_max=l_max,
-                    selection=selection,
-                    centers=centers,
-                    respect_pbc=respect_pbc,
-                    n_core=n_core,
-                )
-                if soap_path is not None:
-                    soap.dump_to_json(soap_path)
+        if pca_path and pca_path.exists():
+            return Insight.load_from_json(pca_path)
 
-            n_atom, n_frames, n_dims = soap.dataset.shape
-            reshaped_soap = soap.dataset.reshape(n_atom * n_frames, n_dims)
-            pca = PCA(n_components=n_components)
-            transformed_soap = pca.fit_transform(reshaped_soap)
-            pca_ds = transformed_soap.reshape(n_atom, n_frames, -1)
+        soap = load_or_compute_soap(
+            trj=trj,
+            r_cut=r_cut,
+            n_max=n_max,
+            l_max=l_max,
+            selection=selection,
+            centers=centers,
+            respect_pbc=respect_pbc,
+            n_core=n_core,
+            soap_path=soap_path,
+        )
 
-            meta = soap.meta.copy()
-            soap_pca = Insight(pca_ds, meta=meta)
+        n_atom, n_frames, n_dims = soap.dataset.shape
+        reshaped_soap = soap.dataset.reshape(n_atom * n_frames, n_dims)
+        pca = PCA(n_components=n_components)
+        transformed_soap = pca.fit_transform(reshaped_soap)
+        pca_ds = transformed_soap.reshape(n_atom, n_frames, -1)
 
-            if pca_path is not None:
-                soap_pca.dump_to_json(pca_path)
+        soap_pca = Insight(pca_ds, meta=soap.meta.copy())
+
+        if pca_path:
+            soap_pca.dump_to_json(pca_path)
 
         return soap_pca
 
@@ -125,6 +121,7 @@ parameters, and performs the TICA of the corresponding SOAP dataset.
 .. testcode:: recipe2-test
 
     from pathlib import Path
+    import dynsight
     from dynsight.trajectory import Trj, Insight
 
     def compute_soap_tica(
@@ -142,36 +139,35 @@ parameters, and performs the TICA of the corresponding SOAP dataset.
         n_core: int = 1,
     ) -> Insight:
         if tica_path is not None and tica_path.exists():
-            soap_tica = Insight.load_from_json(tica_path)
-        else:
-            if soap_path is not None and soap_path.exists():
-                soap = Insight.load_from_json(soap_path)
-            else:
-                soap = trj.get_soap(
-                    r_cut=r_cut,
-                    n_max=n_max,
-                    l_max=l_max,
-                    selection=selection,
-                    centers=centers,
-                    respect_pbc=respect_pbc,
-                    n_core=n_core,
-                )
-                if soap_path is not None:
-                    soap.dump_to_json(soap_path)
+            return Insight.load_from_json(tica_path)
 
-            rel_times, _, tica_ds = dynsight.tica.many_body_tica(
-                soap.dataset,
-                lag_time=lag_time,
-                tica_dim=tica_dim,
-            )
+        soap = load_or_compute_soap(
+            trj=trj,
+            r_cut=r_cut,
+            n_max=n_max,
+            l_max=l_max,
+            selection=selection,
+            centers=centers,
+            respect_pbc=respect_pbc,
+            n_core=n_core,
+            soap_path=soap_path,
+        )
 
-            meta = soap.meta.copy()
-            meta.update({"lag_time": lag_time})
-            meta.update({"rel_times": rel_times})
-            soap_tica = Insight(tica_ds, meta=meta)
+        rel_times, _, tica_ds = dynsight.tica.many_body_tica(
+            soap.dataset,
+            lag_time=lag_time,
+            tica_dim=tica_dim,
+        )
 
-            if tica_path is not None:
-                soap_tica.dump_to_json(tica_path)
+        meta = soap.meta.copy()
+        meta.update({
+            "lag_time": lag_time,
+            "rel_times": rel_times,
+        })
+        soap_tica = Insight(tica_ds, meta=meta)
+
+        if tica_path:
+            soap_tica.dump_to_json(tica_path)
 
         return soap_tica
 
@@ -224,27 +220,24 @@ parameters, and computes the corresponding timeSOAP dataset.
         n_core: int = 1,
     ) -> Insight:
         if tsoap_path is not None and tsoap_path.exists():
-            tsoap = Insight.load_from_json(tsoap_path)
-        else:
-            if soap_path is not None and soap_path.exists():
-                soap = Insight.load_from_json(soap_path)
-            else:
-                soap = trj.get_soap(
-                    r_cut=r_cut,
-                    n_max=n_max,
-                    l_max=l_max,
-                    selection=selection,
-                    centers=centers,
-                    respect_pbc=respect_pbc,
-                    n_core=n_core,
-                )
-                if soap_path is not None:
-                    soap.dump_to_json(soap_path)
+            return Insight.load_from_json(tsoap_path)
 
-            tsoap = soap.get_angular_velocity(delay=delay)
+        soap = load_or_compute_soap(
+            trj=trj,
+            r_cut=r_cut,
+            n_max=n_max,
+            l_max=l_max,
+            selection=selection,
+            centers=centers,
+            respect_pbc=respect_pbc,
+            n_core=n_core,
+            soap_path=soap_path,
+        )
 
-            if tsoap_path is not None:
-                tsoap.dump_to_json(tsoap_path)
+        tsoap = soap.get_angular_velocity(delay=delay)
+
+        if tsoap_path:
+            tsoap.dump_to_json(tsoap_path)
 
         return tsoap
 
