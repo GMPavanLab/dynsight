@@ -109,7 +109,12 @@ The output :class:`.trajectory.Insight` stores the SOAP information in its
 Time-lagged Independent Component Analysis (TICA)
 -------------------------------------------------
 
-More details on the algorithm here https://deeptime-ml.github.io/latest/notebooks/tica.html.
+More details on the algorithm here:
+
+.. toctree::
+  :maxdepth: 1
+
+  many_body_tica <_autosummary/dynsight.tica.many_body_tica>
 
 This function takes as input a :class:`.trajectory.Trj` and all the relevant
 parameters, and performs the TICA of the corresponding SOAP dataset.
@@ -137,7 +142,7 @@ parameters, and performs the TICA of the corresponding SOAP dataset.
         n_core: int = 1,
     ) -> Insight:
         if tica_path is not None and tica_path.exists():
-            soap_pca = Insight.load_from_json(tica_path)
+            soap_tica = Insight.load_from_json(tica_path)
         else:
             if soap_path is not None and soap_path.exists():
                 soap = Insight.load_from_json(soap_path)
@@ -185,8 +190,74 @@ The output :class:`.trajectory.Insight` stores the SOAP information in its
 the relaxation times of the computed TICs.
 
 
-Other
------
+timeSOAP (tSOAP)
+----------------
+
+More details on the algorithm here:
+
+.. toctree::
+  :maxdepth: 1
+
+  timesoap <_autosummary/dynsight.soap.timesoap>
+
+This function takes as input a :class:`.trajectory.Trj` and all the relevant
+parameters, and computes the corresponding timeSOAP dataset.
+
+``delay`` is the time lag used to perform timeSOAP.
+
+.. testcode:: recipe2-test
+
+    from pathlib import Path
+    from dynsight.trajectory import Trj, Insight
+
+    def compute_timesoap(
+        trj: Trj,
+        r_cut: float,
+        n_max: int,
+        l_max: int,
+        delay: int = 1,
+        soap_path: Path | None = None,
+        tsoap_path: Path | None = None,
+        selection: str = "all",
+        centers: str = "all",
+        respect_pbc: bool = True,
+        n_core: int = 1,
+    ) -> Insight:
+        if tsoap_path is not None and tsoap_path.exists():
+            tsoap = Insight.load_from_json(tsoap_path)
+        else:
+            if soap_path is not None and soap_path.exists():
+                soap = Insight.load_from_json(soap_path)
+            else:
+                soap = trj.get_soap(
+                    r_cut=r_cut,
+                    n_max=n_max,
+                    l_max=l_max,
+                    selection=selection,
+                    centers=centers,
+                    respect_pbc=respect_pbc,
+                    n_core=n_core,
+                )
+                if soap_path is not None:
+                    soap.dump_to_json(soap_path)
+
+            tsoap = soap.get_angular_velocity(delay=delay)
+
+            if tsoap_path is not None:
+                tsoap.dump_to_json(tsoap_path)
+
+        return tsoap
+
+    # Example of how to use
+    tsoap = compute_timesoap(
+        trj=trj,
+        r_cut=10.0,
+        n_max=4,
+        l_max=4,
+    )
+
+The output :class:`.trajectory.Insight` stores the SOAP information in its
+"meta" attribute, together with the ``delay`` parameter.
 
 Notice that, differently from SOAP - which is computed for every frame, tSOAP
 is computed for every pair of frames. Thus, the tSOAP dataset has shape 
@@ -204,3 +275,4 @@ trajectory (removing the last frame). The easiest way to do this is:
 
     assert soap_pc1.dataset.shape == (7, 201, 1)
     assert soap_tic1.dataset.shape == (7, 201, 1)
+    assert tsoap.dataset.shape == (7, 200)
