@@ -15,6 +15,7 @@ import MDAnalysis
 from MDAnalysis.coordinates.memory import MemoryReader
 
 import dynsight
+from dynsight.logs import logger
 from dynsight.trajectory import Insight
 
 UNIVAR_DIM = 2
@@ -42,6 +43,7 @@ class Trj:
 
         See https://docs.mdanalysis.org/2.9.0/documentation_pages/core/universe.html#MDAnalysis.core.universe.Universe.
         """
+        logger.log("Created Trj from MDAnalysis.Universe.")
         return Trj(universe)
 
     @classmethod

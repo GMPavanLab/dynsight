@@ -8,6 +8,7 @@ import MDAnalysis
 import numpy as np
 import pytest
 
+from dynsight.logs import logger
 from dynsight.trajectory import (
     ClusterInsight,
     Insight,
@@ -53,6 +54,7 @@ def test_trj_inits(
     assert len(trj_1.universe.trajectory) == n_frames_xyz
 
     trj_2 = Trj.init_from_universe(universe)
+    logger.get()
     assert len(trj_2.universe.trajectory) == n_frames_xyz
 
     trj_3 = Trj.init_from_xyz(file_paths["xyz"], dt=1)
