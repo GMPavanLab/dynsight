@@ -24,11 +24,7 @@ Let's start by creating a :class:`.trajectory.Trj` and computing LENS:
         topo_file=files_path / "balls_7_nvt.gro",
     )
 
-    _, lens = trj.get_lens(
-        r_cut=10.0,               # cutoff radius for neighbors list
-        selection="all",         # compute on a selection of particles
-        neigcounts=neigcounts,   # no need to compute it again
-    )
+    _, lens = trj.get_lens(r_cut=10.0)
 
 
 
