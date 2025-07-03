@@ -10,7 +10,7 @@ maintainers = [
     { name = "Simone Martino", email = "s.martino0898@gmail.com" },
 ]
 
-dependencies = ["numpy", "dscribe", "tropea-clustering", "MDAnalysis"]
+dependencies = ["numpy", "dscribe", "tropea-clustering", "MDAnalysis", "deeptime"]
 # Set by cpctools.
 requires-python = ">=3.8"
 dynamic = ["version"]
@@ -111,5 +111,6 @@ module = [
     'ultralytics.*',
     'opencv-python.*',
     'cv2.*',
+    'deeptime.*',
 ]
 ignore_missing_imports = true
