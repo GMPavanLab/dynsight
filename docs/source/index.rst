@@ -20,6 +20,7 @@
 
   Descriptors from a Trj <descr_from_trj>
   Dimensionality reduction methods <soap_dim_red>
+  Information gain analysis <tmp_info_gain>
 
 .. toctree::
   :hidden:
