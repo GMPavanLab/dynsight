@@ -16,6 +16,15 @@
 .. toctree::
   :hidden:
   :maxdepth: 2
+  :caption: Recipes:
+
+  Descriptors from a Trj <descr_from_trj>
+  Dimensionality reduction methods <soap_dim_red>
+  Information gain analysis <tmp_info_gain>
+
+.. toctree::
+  :hidden:
+  :maxdepth: 2
   :caption: Examples:
 
   Typical analysis workflow <analysis_workflow>
@@ -62,15 +71,6 @@ you are using Python 3.10 and below, you can use :mod:`cpctools` to access
 :mod:`SOAPify` and :mod:`hd5er` using ::
 
   $ pip install cpctools
-
-If you want to use the :mod:`dynsight.tica` module you will need to install the
-deeptime package. This can be done with with pip::
-
-  $ pip install deeptime
-
-or with conda::
-
-  $ conda install -c conda-forge deeptime
 
 If you want to use the :mod:`dynsight.vision` and :mod:`dynsight.track` modules
 you will need to install a series of packages. This can be done with with pip::
