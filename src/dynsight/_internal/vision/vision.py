@@ -409,8 +409,7 @@ class VisionInstance:
             elif self.device == "cuda":
                 self._check_single_cuda_device(_device_error)
             elif all(
-                part.strip().isdigit()
-                for part in self.device.split(",")
+                part.strip().isdigit() for part in self.device.split(",")
             ):
                 self._check_multi_cuda_devices(_device_error)
             else:
@@ -418,21 +417,16 @@ class VisionInstance:
         except (ValueError, RuntimeError, IndexError, OSError) as e:
             _device_error(str(e))
 
-
     def _check_cpu_device(self) -> None:
         logger.info("Using CPU.")
 
-
-    def _check_mps_device(
-        self, _device_error: Callable[[str], None]
-    ) -> None:
+    def _check_mps_device(self, _device_error: Callable[[str], None]) -> None:
         if not (
             hasattr(torch.backends, "mps")
             and torch.backends.mps.is_available()
         ):
             _device_error("MPS device requested but not available.")
         logger.info("Using Apple MPS backend.")
-
 
     def _check_single_cuda_device(
         self, _device_error: Callable[[str], None]
@@ -449,7 +443,6 @@ class VisionInstance:
             mem_total / 1024**2,
         )
         _ = torch.tensor([0.0]).to("cuda:0")
-
 
     def _check_multi_cuda_devices(
         self, _device_error: Callable[[str], None]

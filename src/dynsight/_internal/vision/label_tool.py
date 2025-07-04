@@ -8,11 +8,12 @@ from socketserver import TCPServer
 
 logger = logging.getLogger(__name__)
 
+
 class HTTPRequestHandler(SimpleHTTPRequestHandler):
     def log_message(self, fmt: str, *args: object) -> None:
         pass
 
-    def do_POST(self) -> None: # noqa: N802
+    def do_POST(self) -> None:  # noqa: N802
         if self.path == "/shutdown":
             self.send_response(200)
             self.end_headers()
@@ -21,8 +22,10 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
         else:
             self.send_error(404)
 
+
 class ReusableTCPServer(TCPServer):
     allow_reuse_address = True
+
 
 def label_tool(port: int = 8888) -> None:
     web_dir = Path(__file__).parent / "label_tool"
