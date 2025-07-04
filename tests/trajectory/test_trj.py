@@ -54,7 +54,6 @@ def test_trj_inits(
     assert len(trj_1.universe.trajectory) == n_frames_xyz
 
     trj_2 = Trj.init_from_universe(universe)
-    logger.get()
     assert len(trj_2.universe.trajectory) == n_frames_xyz
 
     trj_3 = Trj.init_from_xyz(file_paths["xyz"], dt=1)
@@ -62,6 +61,8 @@ def test_trj_inits(
 
     trj_4 = Trj.init_from_xtc(file_paths["xtc"], file_paths["gro"])
     assert len(trj_4.universe.trajectory) == n_frames_xtc
+
+    logger.get()
 
 
 def test_insight(
@@ -105,6 +106,8 @@ def test_insight(
     loaded_onion_smooth = OnionSmoothInsight.load_from_json(onion_smooth_json)
     assert loaded_onion_smooth is not None
 
+    logger.get()
+
 
 def test_onion_analysis(universe: MDAnalysis.Universe) -> None:
     """Test the onion clustering complete analysis tool."""
@@ -134,3 +137,5 @@ def test_insight_load_errors(file_paths: dict[str, Path]) -> None:
         _ = OnionInsight.load_from_json(
             file_paths["files_dir"] / "cl_ins_test.json"
         )
+
+    logger.get()
