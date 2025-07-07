@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 import torch
+import yaml
 from ultralytics import YOLO
+
+if TYPE_CHECKING:
+    from ultralytics.engine.results import Results
 
 logging.basicConfig(
     level=logging.INFO,
@@ -100,7 +104,7 @@ class VisionInstance:
         self.device = self._normalize_device_string(device)
         self.workers = workers
 
-        self.prediction_results = None
+        self.prediction_results: list[Results] | None = None
         self.training_results = None
 
         self._check_device()
@@ -221,6 +225,82 @@ class VisionInstance:
             imgsz=imgsz,
             max_det=max_det,
         )
+
+    def create_dataset_from_predictions(
+        self,
+        dataset_name: str,
+        train_split: float = 0.8,
+        load_dataset: bool = True
+    ) -> None:
+        """Create a YOLO training dataset from ``predict`` results.
+
+        Parameters:
+            dataset_name:
+                Name of the dataset that will be created.
+
+            train_split:
+                Fraction of images to use for the training set, the remaining
+                fraction will be used for the validation set.
+
+            load_dataset:
+                Directly load the dataset for the next training sessions.
+        """
+        if self.prediction_results is None:
+            msg = "No prediction results available."
+            raise ValueError(msg)
+
+        dataset_path = self.output_path / dataset_name
+        images_train = dataset_path / "images" / "train"
+        images_val = dataset_path / "images" / "val"
+        labels_train = dataset_path / "labels" / "train"
+        labels_val = dataset_path / "labels" / "val"
+
+        images_train.mkdir(parents=True, exist_ok=True)
+        images_val.mkdir(parents=True, exist_ok=True)
+        labels_train.mkdir(parents=True, exist_ok=True)
+        labels_val.mkdir(parents=True, exist_ok=True)
+
+        names = self.prediction_results[0].names
+
+        sorted_results = sorted(self.prediction_results, key=lambda r: r.path)
+
+        num_train = int(len(sorted_results) * train_split)
+
+        for idx, result in enumerate(sorted_results):
+            src = Path(result.path)
+            subset = "train" if idx < num_train else "val"
+            img_dst = dataset_path / "images" / subset / src.name
+            lbl_dst = dataset_path / "labels" / subset / (src.stem + ".txt")
+
+            img_dst.write_bytes(src.read_bytes())
+
+            boxes = result.boxes
+            if boxes is None:
+                lbl_dst.write_text("")
+                continue
+
+            xywhn = boxes.xywhn
+            classes = boxes.cls
+            with lbl_dst.open("w") as f:
+                for xywh, cls in zip(xywhn, classes):
+                    f.write(
+                        f"{int(cls)} {xywh[0]:.6f} {xywh[1]:.6f} "
+                        f"{xywh[2]:.6f} {xywh[3]:.6f}\n"
+                    )
+
+        dataset_yaml = dataset_path / "dataset.yaml"
+        yaml_content = {
+            "path": str(dataset_path.resolve()),
+            "train": "images/train",
+            "val": "images/val",
+            "nc": len(names),
+            "names": [names[i] for i in range(len(names))],
+        }
+        with dataset_yaml.open("w") as f:
+            yaml.safe_dump(yaml_content, f)
+
+        if load_dataset:
+            self.training_data_yaml = dataset_yaml
 
     def tune_hyperparams(
         self,
