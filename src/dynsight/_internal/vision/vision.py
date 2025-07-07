@@ -456,7 +456,7 @@ class VisionInstance:
 
     def export_prediction_to_xyz(
         self, file_name: Path, class_filter: list[int] | None = None
-    ) -> None:
+    ) -> Path:
         """Export prediction results into a single ``.xyz`` file.
 
         Each frame of the resulting ``.xyz`` corresponds to one of the
@@ -469,6 +469,9 @@ class VisionInstance:
             class_filter:
                 Limit exported detections to the specified class IDs. If
                 ``None`` all detected objects will be exported.
+
+        Returns:
+            Path to the exported ``.xyz`` file.
         """
         if self.prediction_results is None:
             msg = "No prediction results available."
@@ -499,6 +502,7 @@ class VisionInstance:
                 f.write("x y z\n")
                 for line in coords:
                     f.write(f"{line}\n")
+        return file_path
 
     def _normalize_device_string(self, device: str | None) -> str:
         """Normalize device string to match Ultralytics expectations."""
