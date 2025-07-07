@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 
 import dynsight
+from dynsight.logs import logger
 
 UNIVAR_DIM = 2
 
@@ -36,6 +37,7 @@ class ClusterInsight:
         data["labels"] = data["labels"].tolist()
         with file_path.open("w") as file:
             json.dump(data, file, indent=4)
+        logger.log(f"ClusterInsight saved to {file_path}.")
 
     @classmethod
     def load_from_json(cls, file_path: Path) -> ClusterInsight:
@@ -49,6 +51,8 @@ class ClusterInsight:
         if "labels" not in data:
             msg = "'labels' key not found in JSON file."
             raise ValueError(msg)
+
+        logger.log(f"ClusterInsight loaded from {file_path}.")
         return cls(labels=np.array(data.get("labels"), dtype=np.int64))
 
 
@@ -89,6 +93,7 @@ class OnionInsight(ClusterInsight):
         data["state_list"] = new_state_list
         with file_path.open("w") as file:
             json.dump(data, file, indent=4)
+        logger.log(f"OnionInsight saved to {file_path}.")
 
     @classmethod
     def load_from_json(cls, file_path: Path) -> OnionInsight:
@@ -102,6 +107,8 @@ class OnionInsight(ClusterInsight):
         if "state_list" not in data:
             msg = "'state_list' key not found in JSON file."
             raise ValueError(msg)
+
+        logger.log(f"OnionInsight loaded from {file_path}.")
         return cls(
             labels=np.array(data.get("labels")),
             state_list=data.get("state_list"),
@@ -126,6 +133,8 @@ class OnionInsight(ClusterInsight):
                 self.labels,
                 self.meta["delta_t"],
             )
+        attr_dict = {"file_path": file_path}
+        logger.log(f"plot_output() with args {attr_dict}.")
 
     def plot_one_trj(
         self,
@@ -151,6 +160,9 @@ class OnionInsight(ClusterInsight):
                 self.labels,
             )
 
+        attr_dict = {"file_path": file_path, "particle_id": particle_id}
+        logger.log(f"plot_one_trj() with args {attr_dict}.")
+
     def plot_medoids(self, file_path: Path, data_insight: Insight) -> None:
         """Plot the average sequence of each onion cluster."""
         if data_insight.dataset.ndim == UNIVAR_DIM:
@@ -166,6 +178,8 @@ class OnionInsight(ClusterInsight):
                 data_insight.dataset,
                 self.labels,
             )
+        attr_dict = {"file_path": file_path}
+        logger.log(f"plot_medoids() with args {attr_dict}.")
 
     def plot_state_populations(
         self,
@@ -179,6 +193,8 @@ class OnionInsight(ClusterInsight):
             self.meta["delta_t"],
             self.labels,
         )
+        attr_dict = {"file_path": file_path}
+        logger.log(f"plot_state_populations() with args {attr_dict}.")
 
     def plot_sankey(
         self,
@@ -193,6 +209,9 @@ class OnionInsight(ClusterInsight):
             data_insight.dataset.shape[0],
             frame_list,
         )
+
+        attr_dict = {"file_path": file_path, "frame_list": frame_list}
+        logger.log(f"plot_state_populations() with args {attr_dict}.")
 
 
 @dataclass(frozen=True)
@@ -229,6 +248,7 @@ class OnionSmoothInsight(ClusterInsight):
         data["state_list"] = new_state_list
         with file_path.open("w") as file:
             json.dump(data, file, indent=4)
+        logger.log(f"OnionSmoothInsight saved to {file_path}.")
 
     @classmethod
     def load_from_json(cls, file_path: Path) -> OnionSmoothInsight:
@@ -242,6 +262,8 @@ class OnionSmoothInsight(ClusterInsight):
         if "state_list" not in data:
             msg = "'state_list' key not found in JSON file."
             raise ValueError(msg)
+
+        logger.log(f"OnionSmoothInsight loaded from {file_path}.")
         return cls(
             labels=np.array(data.get("labels")),
             state_list=data.get("state_list"),
@@ -263,6 +285,8 @@ class OnionSmoothInsight(ClusterInsight):
                 self.state_list,
                 self.labels,
             )
+        attr_dict = {"file_path": file_path}
+        logger.log(f"plot_output() with args {attr_dict}.")
 
     def plot_one_trj(
         self,
@@ -285,6 +309,8 @@ class OnionSmoothInsight(ClusterInsight):
                 data_insight.dataset,
                 self.labels,
             )
+        attr_dict = {"file_path": file_path, "particle_id": particle_id}
+        logger.log(f"plot_one_trj() with args {attr_dict}.")
 
     def plot_state_populations(
         self,
@@ -295,6 +321,8 @@ class OnionSmoothInsight(ClusterInsight):
             file_path,
             self.labels,
         )
+        attr_dict = {"file_path": file_path}
+        logger.log(f"plot_state_populations() with args {attr_dict}.")
 
     def plot_sankey(
         self,
@@ -307,6 +335,8 @@ class OnionSmoothInsight(ClusterInsight):
             self.labels,
             frame_list,
         )
+        attr_dict = {"file_path": file_path, "frame_list": frame_list}
+        logger.log(f"plot_state_populations() with args {attr_dict}.")
 
     def dump_colored_trj(self, trj: Trj, file_path: Path) -> None:
         """Save an .xyz file with the clustering labels for each atom."""
@@ -335,3 +365,4 @@ class OnionSmoothInsight(ClusterInsight):
                         f"{trj.universe.atoms[atom_idx].name} {x:.5f}"
                         f" {y:.5f} {z:.5f} {label}\n"
                     )
+        logger.log(f"Colored trj saved to {file_path}.")
