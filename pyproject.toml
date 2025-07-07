@@ -111,5 +111,7 @@ module = [
     'ultralytics.*',
     'opencv-python.*',
     'cv2.*',
+    'pandas.*',
+    'trackpy.*',
 ]
 ignore_missing_imports = true
