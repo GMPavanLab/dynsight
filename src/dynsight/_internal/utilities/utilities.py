@@ -85,7 +85,7 @@ def load_or_compute_soap(
     Returns:
         Insight object containing SOAP descriptors.
     """
-    if soap_path and soap_path.exists():
+    if soap_path is not None and soap_path.exists():
         return Insight.load_from_json(soap_path)
 
     soap = trj.get_soap(
@@ -98,7 +98,7 @@ def load_or_compute_soap(
         n_core=n_core,
     )
 
-    if soap_path:
+    if soap_path is not None:
         soap.dump_to_json(soap_path)
 
     return soap

@@ -63,7 +63,7 @@ parameters, and performs the PCA of the corresponding SOAP dataset.
         respect_pbc: bool = True,
         n_core: int = 1,
     ) -> Insight:
-        if pca_path and pca_path.exists():
+        if pca_path is not None and pca_path.exists():
             return Insight.load_from_json(pca_path)
 
         soap = load_or_compute_soap(
@@ -86,7 +86,7 @@ parameters, and performs the PCA of the corresponding SOAP dataset.
 
         soap_pca = Insight(pca_ds, meta=soap.meta.copy())
 
-        if pca_path:
+        if pca_path is not None:
             soap_pca.dump_to_json(pca_path)
 
         return soap_pca
@@ -139,7 +139,7 @@ parameters, and performs the TICA of the corresponding SOAP dataset.
         respect_pbc: bool = True,
         n_core: int = 1,
     ) -> Insight:
-        if tica_path and tica_path.exists():
+        if tica_path is not None and tica_path.exists():
             return Insight.load_from_json(tica_path)
 
         soap = load_or_compute_soap(
@@ -167,7 +167,7 @@ parameters, and performs the TICA of the corresponding SOAP dataset.
         })
         soap_tica = Insight(tica_ds, meta=meta)
 
-        if tica_path:
+        if tica_path is not None:
             soap_tica.dump_to_json(tica_path)
 
         return soap_tica
@@ -220,7 +220,7 @@ parameters, and computes the corresponding timeSOAP dataset.
         respect_pbc: bool = True,
         n_core: int = 1,
     ) -> Insight:
-        if tsoap_path and tsoap_path.exists():
+        if tsoap_path is not None and tsoap_path.exists():
             return Insight.load_from_json(tsoap_path)
 
         soap = load_or_compute_soap(
@@ -237,7 +237,7 @@ parameters, and computes the corresponding timeSOAP dataset.
 
         tsoap = soap.get_angular_velocity(delay=delay)
 
-        if tsoap_path:
+        if tsoap_path is not None:
             tsoap.dump_to_json(tsoap_path)
 
         return tsoap
