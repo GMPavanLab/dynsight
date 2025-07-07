@@ -74,10 +74,11 @@ class Trj:
 
         The array has shape (n_frames, n_atoms, n_coordinates).
         """
-        logger.log(f"Extracted coordinates array for {selection} atoms.")
         atoms = self.universe.select_atoms(selection)
         trajslice = slice(None) if self.trajslice is None else self.trajslice
 
+        attr_dict = {"selection": selection}
+        logger.log(f"Extracted coordinates array with args {attr_dict}.")
         return np.array(
             [
                 atoms.positions.copy()
@@ -87,7 +88,8 @@ class Trj:
 
     def with_slice(self, trajslice: slice | None) -> Trj:
         """Returns a Trj with a different frames' slice."""
-        logger.log(f"Created a sliced Trj with {trajslice}.")
+        attr_dict = {"trajslice": trajslice}
+        logger.log(f"Created a sliced Trj with args {attr_dict}.")
         return Trj(self.universe, trajslice=trajslice)
 
     def get_slice(self, start: int, stop: int, step: int) -> Trj:
@@ -110,7 +112,8 @@ class Trj:
         u_new = MDAnalysis.Universe(topology=self.universe._topology)  # noqa: SLF001
         u_new.trajectory = mem_reader
 
-        logger.log(f"Created a sliced Trj with ({start}, {stop}, {step}).")
+        attr_dict = {"start": start, "stop": stop, "step": step}
+        logger.log(f"Created a sliced Trj with args {attr_dict}.")
         return Trj(u_new)
 
     def get_coord_number(
@@ -135,13 +138,12 @@ class Trj:
                 trajslice=self.trajslice,
             )
         _, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
-        logger.log(
-            f"Computed coord_number using cutoff {r_cut} for "
-            f"{selection} atoms."
-        )
+
+        attr_dict = {"r_cut": r_cut, "selection": selection}
+        logger.log(f"Computed coord_number using args {attr_dict}.")
         return neigcounts, Insight(
             dataset=nn.astype(np.float64),
-            meta={"r_cut": r_cut, "selection": selection},
+            meta=attr_dict,
         )
 
     def get_lens(
@@ -166,12 +168,13 @@ class Trj:
                 trajslice=self.trajslice,
             )
         lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
-        logger.log(
-            f"Computed LENS using cutoff {r_cut} for {selection} atoms."
-        )
+
+        attr_dict = {"r_cut": r_cut, "selection": selection}
+        logger.log(f"Computed LENS using args {attr_dict}.")
+
         return neigcounts, Insight(
             dataset=lens[:, 1:],
-            meta={"r_cut": r_cut, "selection": selection},
+            meta=attr_dict,
         )
 
     def get_soap(
@@ -208,7 +211,7 @@ class Trj:
             "selection": selection,
             "centers": centers,
         }
-        logger.log(f"Computed SOAP with parameters {attr_dict}.")
+        logger.log(f"Computed SOAP with args {attr_dict}.")
         return Insight(dataset=soap, meta=attr_dict)
 
     def get_rdf(
@@ -249,5 +252,5 @@ class Trj:
             "nbins": nbins,
             "norm": norm,
         }
-        logger.log(f"Computed g(r) with parameters {attr_dict}.")
+        logger.log(f"Computed g(r) with args {attr_dict}.")
         return Insight(dataset=dataset, meta=attr_dict)

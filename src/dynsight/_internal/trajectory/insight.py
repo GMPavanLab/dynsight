@@ -93,8 +93,9 @@ class Insight:
         max_delay: int | None = None,
     ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         """Self time correlation function of the time-series signal."""
+        attr_dict = {"max_delay": max_delay}
         logger.log(
-            f"Computed time corrleation function with max_delay = {max_delay}."
+            f"Computed time corrleation function with args {attr_dict}."
         )
         return dynsight.analysis.self_time_correlation(
             self.dataset,
@@ -114,7 +115,7 @@ class Insight:
         attr_dict = self.meta.copy()
         attr_dict.update({"delay": delay})
 
-        logger.log(f"Computed angular velocity with delay {delay}.")
+        logger.log(f"Computed angular velocity with args {attr_dict}.")
         return Insight(dataset=theta, meta=attr_dict)
 
     def get_onion(
@@ -279,10 +280,18 @@ class Insight:
                 fig2_path, list_of_pop, tra
             )
 
+        attr_dict = {
+            "delta_t_min": delta_t_min,
+            "delta_t_max": delta_t_max,
+            "delta_t_num": delta_t_num,
+            "fig1_path": fig1_path,
+            "fig2_path": fig2_path,
+            "bins": bins,
+            "number_of_sigmas": number_of_sigmas,
+            "max_area_overlap": max_area_overlap,
+        }
+
         logger.log(
-            f"Performed full onion clustering analysis with args "
-            f"{delta_t_min}, {delta_t_max}, {delta_t_num}, "
-            f"{fig1_path}, {fig2_path}, {bins}, {number_of_sigmas}, "
-            f"{max_area_overlap}."
+            f"Performed full onion clustering analysis with args {attr_dict}."
         )
         return delta_t_list, n_clust, unclass_frac
