@@ -230,7 +230,7 @@ class VisionInstance:
         self,
         dataset_name: str,
         train_split: float = 0.8,
-        load_dataset: bool = True
+        load_dataset: bool = True,
     ) -> None:
         """Create a YOLO training dataset from ``predict`` results.
 
@@ -453,6 +453,52 @@ class VisionInstance:
             device=self.device,
             **full_params,
         )
+
+    def export_prediction_to_xyz(
+        self, file_name: Path, class_filter: list[int] | None = None
+    ) -> None:
+        """Export prediction results into a single ``.xyz`` file.
+
+        Each frame of the resulting ``.xyz`` corresponds to one of the
+        images/frames present in the source and used in the ``predict`` method.
+
+        Parameters:
+            file_name:
+                File name for the ``.xyz`` file.
+
+            class_filter:
+                Limit exported detections to the specified class IDs. If
+                ``None`` all detected objects will be exported.
+        """
+        if self.prediction_results is None:
+            msg = "No prediction results available."
+            raise ValueError(msg)
+
+        sorted_results = sorted(self.prediction_results, key=lambda r: r.path)
+        file_path = self.output_path / file_name
+
+        with file_path.open("w") as f:
+            for result in sorted_results:
+                boxes = result.boxes
+
+                coords: list[str] = []
+                if boxes is not None:
+                    xyxy = boxes.xyxy.cpu().numpy()
+                    classes = boxes.cls.cpu().numpy().astype(int)
+                    for (x1, y1, x2, y2), cls_id in zip(xyxy, classes):
+                        if (
+                            class_filter is not None
+                            and cls_id not in class_filter
+                        ):
+                            continue
+                        cx = (x1 + x2) / 2
+                        cy = (y1 + y2) / 2
+                        coords.append(f"{cx:.6f} {cy:.6f} 0.0")
+
+                f.write(f"{len(coords)}\n")
+                f.write("x y z\n")
+                for line in coords:
+                    f.write(f"{line}\n")
 
     def _normalize_device_string(self, device: str | None) -> str:
         """Normalize device string to match Ultralytics expectations."""
