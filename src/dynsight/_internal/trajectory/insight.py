@@ -52,6 +52,7 @@ class Insight:
 
         if "dataset" not in data:
             msg = "'dataset' key not found in JSON file."
+            logger.log(msg)
             raise ValueError(msg)
 
         logger.log(f"Insight loaded from {file_path}.")
@@ -110,6 +111,7 @@ class Insight:
         """
         if self.dataset.ndim != UNIVAR_DIM + 1:
             msg = "dataset.ndim != 3."
+            logger.log(msg)
             raise ValueError(msg)
         theta = dynsight.soap.timesoap(self.dataset, delay=delay)
         attr_dict = self.meta.copy()

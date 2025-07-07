@@ -50,6 +50,7 @@ class ClusterInsight:
             data = json.load(file)
         if "labels" not in data:
             msg = "'labels' key not found in JSON file."
+            logger.log(msg)
             raise ValueError(msg)
 
         logger.log(f"ClusterInsight loaded from {file_path}.")
@@ -106,6 +107,7 @@ class OnionInsight(ClusterInsight):
             data = json.load(file)
         if "state_list" not in data:
             msg = "'state_list' key not found in JSON file."
+            logger.log(msg)
             raise ValueError(msg)
 
         logger.log(f"OnionInsight loaded from {file_path}.")
@@ -261,6 +263,7 @@ class OnionSmoothInsight(ClusterInsight):
             data = json.load(file)
         if "state_list" not in data:
             msg = "'state_list' key not found in JSON file."
+            logger.log(msg)
             raise ValueError(msg)
 
         logger.log(f"OnionSmoothInsight loaded from {file_path}.")
@@ -352,6 +355,7 @@ class OnionSmoothInsight(ClusterInsight):
                 f"atoms, {self.labels.shape[0]} frames, but has {n_atoms} "
                 f"atoms, {n_frames} frames."
             )
+            logger.log(msg)
             raise ValueError(msg)
 
         with file_path.open("w") as f:
