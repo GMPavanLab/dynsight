@@ -192,8 +192,12 @@ imageContainer.onmousemove = (e) => {
   const currX = (e.clientX - imgRect.left) / zoomLevel;
   const currY = (e.clientY - imgRect.top) / zoomLevel;
 
-  verticalLine.style.left = `${e.clientX - containerRect.left}px`;
-  horizontalLine.style.top = `${e.clientY - containerRect.top}px`;
+  verticalLine.style.left = `${
+    e.clientX - containerRect.left + imageContainer.scrollLeft
+  }px`;
+  horizontalLine.style.top = `${
+    e.clientY - containerRect.top + imageContainer.scrollTop
+  }px`;
 
   if (!isDrawing || !box) return;
 
