@@ -13,6 +13,7 @@ body {
     border-right: 1px solid #ccc;
     padding: 20px;
     box-sizing: border-box;
+    flex-shrink: 0;
 }
 .main {
     flex: 1;
@@ -28,12 +29,13 @@ body {
     gap: 10px;
     align-items: center;
     flex-wrap: wrap;
+    flex-shrink: 0;
 }
 .image-container {
     flex: 1;
     position: relative;
     background: #eee;
-    overflow: hidden;
+    overflow: auto;
     cursor: crosshair;
 }
 

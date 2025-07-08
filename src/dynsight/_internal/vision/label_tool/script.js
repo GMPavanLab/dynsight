@@ -18,9 +18,8 @@ const horizontalLine = document.getElementById("horizontalLine");
 const zoomSlider = document.getElementById("zoomSlider");
 
 let zoomLevel = 1;
-let panX = 0;
-let isPanning = false;
-let panStart = 0;
+let naturalWidth = 0;
+let naturalHeight = 0;
 
 const overlay = document.getElementById("overlay");
 
@@ -35,10 +34,6 @@ imageContainer.onmouseenter = () => {
 imageContainer.onmouseleave = () => {
   verticalLine.style.display = "none";
   horizontalLine.style.display = "none";
-  if (isPanning) {
-    isPanning = false;
-    imageContainer.style.cursor = "crosshair";
-  }
 };
 
 let currentLabel = null;
@@ -98,16 +93,17 @@ function loadImage(index) {
     const ih = imageDisplay.naturalHeight;
     imageDisplay.style.width = `${iw}px`;
     imageDisplay.style.height = `${ih}px`;
-    imageWrapper.style.width = `${iw}px`;
-    imageWrapper.style.height = `${ih}px`;
-    overlay.style.width = `${iw}px`;
-    overlay.style.height = `${ih}px`;
-    zoomLevel = 1;
-    panX = 0;
-    zoomSlider.value = 100;
+    naturalWidth = iw;
+    naturalHeight = ih;
+    zoomLevel = Math.min(
+      imageContainer.clientWidth / iw,
+      imageContainer.clientHeight / ih,
+      1,
+    );
+    zoomSlider.value = zoomLevel * 100;
+    updateTransform();
     const name = images[index].name;
     if (!annotations[name]) annotations[name] = [];
-    updateTransform();
     clearBoxes();
     annotations[name].forEach(addBoxFromData);
   };
@@ -117,6 +113,8 @@ function loadImage(index) {
 zoomSlider.oninput = (e) => {
   zoomLevel = e.target.value / 100;
   updateTransform();
+  clearBoxes();
+  annotations[images[currentIndex].name].forEach(addBoxFromData);
 };
 
 function clearBoxes() {
@@ -124,16 +122,23 @@ function clearBoxes() {
 }
 
 function updateTransform() {
-  imageWrapper.style.transform = `translateX(${panX}px) scale(${zoomLevel})`;
+  const w = naturalWidth * zoomLevel;
+  const h = naturalHeight * zoomLevel;
+  imageDisplay.style.width = `${w}px`;
+  imageDisplay.style.height = `${h}px`;
+  imageWrapper.style.width = `${w}px`;
+  imageWrapper.style.height = `${h}px`;
+  overlay.style.width = `${w}px`;
+  overlay.style.height = `${h}px`;
 }
 
 function addBoxFromData(data) {
   const box = document.createElement("div");
   box.className = "bounding-box";
-  box.style.left = `${data.left}px`;
-  box.style.top = `${data.top}px`;
-  box.style.width = `${data.width}px`;
-  box.style.height = `${data.height}px`;
+  box.style.left = `${data.left * zoomLevel}px`;
+  box.style.top = `${data.top * zoomLevel}px`;
+  box.style.width = `${data.width * zoomLevel}px`;
+  box.style.height = `${data.height * zoomLevel}px`;
   box.style.border = `2px dashed ${labelColors[data.label]}`;
   box.style.backgroundColor = labelColors[data.label]
     .replace("hsl", "hsla")
@@ -150,10 +155,6 @@ function addBoxFromData(data) {
 
 imageContainer.onmousedown = (e) => {
   if (e.button !== 0) {
-    isPanning = true;
-    panStart = e.clientX;
-    imageContainer.style.cursor = "grabbing";
-    e.preventDefault();
     return;
   }
 
@@ -165,8 +166,8 @@ imageContainer.onmousedown = (e) => {
 
   box = document.createElement("div");
   box.className = "bounding-box";
-  box.style.left = `${startX}px`;
-  box.style.top = `${startY}px`;
+  box.style.left = `${startX * zoomLevel}px`;
+  box.style.top = `${startY * zoomLevel}px`;
   box.style.border = `2px dashed ${labelColors[currentLabel]}`;
   box.style.backgroundColor = labelColors[currentLabel]
     .replace("hsl", "hsla")
@@ -192,29 +193,15 @@ imageContainer.onmousemove = (e) => {
   verticalLine.style.left = `${e.clientX - containerRect.left}px`;
   horizontalLine.style.top = `${e.clientY - containerRect.top}px`;
 
-  if (isPanning) {
-    const dx = e.clientX - panStart;
-    panStart = e.clientX;
-    panX += dx;
-    updateTransform();
-    return;
-  }
-
   if (!isDrawing || !box) return;
 
-  box.style.left = `${Math.min(currX, startX)}px`;
-  box.style.top = `${Math.min(currY, startY)}px`;
-  box.style.width = `${Math.abs(currX - startX)}px`;
-  box.style.height = `${Math.abs(currY - startY)}px`;
+  box.style.left = `${Math.min(currX, startX) * zoomLevel}px`;
+  box.style.top = `${Math.min(currY, startY) * zoomLevel}px`;
+  box.style.width = `${Math.abs(currX - startX) * zoomLevel}px`;
+  box.style.height = `${Math.abs(currY - startY) * zoomLevel}px`;
 };
 
 imageContainer.onmouseup = (e) => {
-  if (isPanning) {
-    isPanning = false;
-    imageContainer.style.cursor = "crosshair";
-    return;
-  }
-
   if (!isDrawing || !box) return;
 
   const imgRect = imageDisplay.getBoundingClientRect();
