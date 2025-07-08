@@ -18,6 +18,7 @@ const horizontalLine = document.getElementById("horizontalLine");
 const zoomSlider = document.getElementById("zoomSlider");
 
 let zoomLevel = 1;
+let baseZoom = 1;
 let naturalWidth = 0;
 let naturalHeight = 0;
 
@@ -95,12 +96,13 @@ function loadImage(index) {
     imageDisplay.style.height = `${ih}px`;
     naturalWidth = iw;
     naturalHeight = ih;
-    zoomLevel = Math.min(
+    baseZoom = Math.min(
       imageContainer.clientWidth / iw,
       imageContainer.clientHeight / ih,
       1,
     );
-    zoomSlider.value = zoomLevel * 100;
+    zoomLevel = baseZoom;
+    zoomSlider.value = 100;
     updateTransform();
     const name = images[index].name;
     if (!annotations[name]) annotations[name] = [];
@@ -111,7 +113,7 @@ function loadImage(index) {
 }
 
 zoomSlider.oninput = (e) => {
-  zoomLevel = e.target.value / 100;
+  zoomLevel = (e.target.value / 100) * baseZoom;
   updateTransform();
   clearBoxes();
   annotations[images[currentIndex].name].forEach(addBoxFromData);
