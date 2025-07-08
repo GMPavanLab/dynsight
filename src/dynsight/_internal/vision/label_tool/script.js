@@ -3,6 +3,7 @@
 const imageInput = document.getElementById("imageInput");
 const imageDisplay = document.getElementById("imageDisplay");
 const imageContainer = document.getElementById("imageContainer");
+const imageWrapper = document.getElementById("imageWrapper");
 const labelList = document.getElementById("labelList");
 const addLabelBtn = document.getElementById("addLabelBtn");
 const newLabelInput = document.getElementById("newLabelInput");
@@ -14,6 +15,12 @@ const nextImageBtn = document.getElementById("nextImage");
 const prevImageBtn = document.getElementById("prevImage");
 const verticalLine = document.getElementById("verticalLine");
 const horizontalLine = document.getElementById("horizontalLine");
+const zoomSlider = document.getElementById("zoomSlider");
+
+let zoomLevel = 1;
+let panX = 0;
+let isPanning = false;
+let panStart = 0;
 
 const overlay = document.getElementById("overlay");
 
@@ -28,6 +35,10 @@ imageContainer.onmouseenter = () => {
 imageContainer.onmouseleave = () => {
   verticalLine.style.display = "none";
   horizontalLine.style.display = "none";
+  if (isPanning) {
+    isPanning = false;
+    imageContainer.style.cursor = "crosshair";
+  }
 };
 
 let currentLabel = null;
@@ -82,15 +93,38 @@ imageInput.onchange = (e) => {
 function loadImage(index) {
   if (!images[index]) return;
   const url = URL.createObjectURL(images[index]);
+  imageDisplay.onload = () => {
+    const iw = imageDisplay.naturalWidth;
+    const ih = imageDisplay.naturalHeight;
+    imageDisplay.style.width = `${iw}px`;
+    imageDisplay.style.height = `${ih}px`;
+    imageWrapper.style.width = `${iw}px`;
+    imageWrapper.style.height = `${ih}px`;
+    overlay.style.width = `${iw}px`;
+    overlay.style.height = `${ih}px`;
+    zoomLevel = 1;
+    panX = 0;
+    zoomSlider.value = 100;
+    const name = images[index].name;
+    if (!annotations[name]) annotations[name] = [];
+    updateTransform();
+    clearBoxes();
+    annotations[name].forEach(addBoxFromData);
+  };
   imageDisplay.src = url;
-  clearBoxes();
-  const name = images[index].name;
-  if (annotations[name]) annotations[name].forEach(addBoxFromData);
-  else annotations[name] = [];
 }
+
+zoomSlider.oninput = (e) => {
+  zoomLevel = e.target.value / 100;
+  updateTransform();
+};
 
 function clearBoxes() {
   overlay.innerHTML = "";
+}
+
+function updateTransform() {
+  imageWrapper.style.transform = `translateX(${panX}px) scale(${zoomLevel})`;
 }
 
 function addBoxFromData(data) {
@@ -115,11 +149,19 @@ function addBoxFromData(data) {
 }
 
 imageContainer.onmousedown = (e) => {
+  if (e.button !== 0) {
+    isPanning = true;
+    panStart = e.clientX;
+    imageContainer.style.cursor = "grabbing";
+    e.preventDefault();
+    return;
+  }
+
   if (!currentLabel || !images[currentIndex]) return;
 
   const rect = imageDisplay.getBoundingClientRect();
-  startX = e.clientX - rect.left;
-  startY = e.clientY - rect.top;
+  startX = (e.clientX - rect.left) / zoomLevel;
+  startY = (e.clientY - rect.top) / zoomLevel;
 
   box = document.createElement("div");
   box.className = "bounding-box";
@@ -144,11 +186,19 @@ imageContainer.onmousemove = (e) => {
   const imgRect = imageDisplay.getBoundingClientRect();
   const containerRect = imageContainer.getBoundingClientRect();
 
-  const currX = e.clientX - imgRect.left;
-  const currY = e.clientY - imgRect.top;
+  const currX = (e.clientX - imgRect.left) / zoomLevel;
+  const currY = (e.clientY - imgRect.top) / zoomLevel;
 
   verticalLine.style.left = `${e.clientX - containerRect.left}px`;
   horizontalLine.style.top = `${e.clientY - containerRect.top}px`;
+
+  if (isPanning) {
+    const dx = e.clientX - panStart;
+    panStart = e.clientX;
+    panX += dx;
+    updateTransform();
+    return;
+  }
 
   if (!isDrawing || !box) return;
 
@@ -159,11 +209,17 @@ imageContainer.onmousemove = (e) => {
 };
 
 imageContainer.onmouseup = (e) => {
+  if (isPanning) {
+    isPanning = false;
+    imageContainer.style.cursor = "crosshair";
+    return;
+  }
+
   if (!isDrawing || !box) return;
 
   const imgRect = imageDisplay.getBoundingClientRect();
-  const endX = e.clientX - imgRect.left;
-  const endY = e.clientY - imgRect.top;
+  const endX = (e.clientX - imgRect.left) / zoomLevel;
+  const endY = (e.clientY - imgRect.top) / zoomLevel;
 
   const left = Math.min(startX, endX);
   const top = Math.min(startY, endY);
@@ -213,7 +269,6 @@ nextImageBtn.onclick = () => {
 exportBtn.onclick = () => {
   const img = images[currentIndex];
   if (!img) return;
-  const imgRect = imageDisplay.getBoundingClientRect();
   const iw = imageDisplay.naturalWidth;
   const ih = imageDisplay.naturalHeight;
   const annots = annotations[img.name] || [];
@@ -222,13 +277,11 @@ exportBtn.onclick = () => {
   let txt = "";
   annots.forEach((obj) => {
     if (!(obj.label in labelMap)) labelMap[obj.label] = nextId++;
-    const x = (obj.left / imgRect.width) * iw;
-    const y = (obj.top / imgRect.height) * ih;
-    const w = (obj.width / imgRect.width) * iw;
-    const h = (obj.height / imgRect.height) * ih;
-    const cx = (x + w / 2) / iw;
-    const cy = (y + h / 2) / ih;
-    txt += `${labelMap[obj.label]} ${cx.toFixed(6)} ${cy.toFixed(6)} ${(w / iw).toFixed(6)} ${(h / ih).toFixed(6)}\n`;
+    const cx = (obj.left + obj.width / 2) / iw;
+    const cy = (obj.top + obj.height / 2) / ih;
+    const w = obj.width / iw;
+    const h = obj.height / ih;
+    txt += `${labelMap[obj.label]} ${cx.toFixed(6)} ${cy.toFixed(6)} ${w.toFixed(6)} ${h.toFixed(6)}\n`;
   });
   const blob = new Blob([txt], { type: "text/plain" });
   const a = document.createElement("a");
@@ -258,18 +311,15 @@ exportAllBtn.onclick = async () => {
     await new Promise((resolve) => (img.onload = resolve));
     const iw = img.naturalWidth;
     const ih = img.naturalHeight;
-    const rect = imageDisplay.getBoundingClientRect();
     const annots = annotations[name] || [];
     let txt = "";
     annots.forEach((obj) => {
       if (!(obj.label in labelMap)) labelMap[obj.label] = nextId++;
-      const x = (obj.left / rect.width) * iw;
-      const y = (obj.top / rect.height) * ih;
-      const w = (obj.width / rect.width) * iw;
-      const h = (obj.height / rect.height) * ih;
-      const cx = (x + w / 2) / iw;
-      const cy = (y + h / 2) / ih;
-      txt += `${labelMap[obj.label]} ${cx.toFixed(6)} ${cy.toFixed(6)} ${(w / iw).toFixed(6)} ${(h / ih).toFixed(6)}\n`;
+      const cx = (obj.left + obj.width / 2) / iw;
+      const cy = (obj.top + obj.height / 2) / ih;
+      const w = obj.width / iw;
+      const h = obj.height / ih;
+      txt += `${labelMap[obj.label]} ${cx.toFixed(6)} ${cy.toFixed(6)} ${w.toFixed(6)} ${h.toFixed(6)}\n`;
     });
     const labelFileName = name.replace(/\.[^/.]+$/, "") + ".txt";
     lblFolder.file(labelFileName, txt);

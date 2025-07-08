@@ -27,8 +27,16 @@
                 <button id="exportAll" class="nav-btn">
                     Export dataset (YOLO)
                 </button>
+                <label for="zoomSlider">Zoom</label>
+                <input
+                    type="range"
+                    id="zoomSlider"
+                    min="10"
+                    max="200"
+                    value="100"
+                />
             </div>
-            <div class="image-container" id="imageContainer">
+            <div class="image-container" id="imageContainer" oncontextmenu="return false;">
                 <div id="imageWrapper">
                     <img id="imageDisplay" src="" alt="" />
                     <div id="overlay"></div>
