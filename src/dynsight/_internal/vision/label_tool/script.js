@@ -166,6 +166,17 @@ imageContainer.onmousedown = (e) => {
   startX = (e.clientX - rect.left) / zoomLevel;
   startY = (e.clientY - rect.top) / zoomLevel;
 
+  // Ignore clicks started outside the image boundaries
+  if (
+    startX < 0 ||
+    startY < 0 ||
+    startX > naturalWidth ||
+    startY > naturalHeight
+  ) {
+    isDrawing = false;
+    return;
+  }
+
   box = document.createElement("div");
   box.className = "bounding-box";
   box.style.left = `${startX * zoomLevel}px`;
@@ -191,6 +202,8 @@ imageContainer.onmousemove = (e) => {
 
   const currX = (e.clientX - imgRect.left) / zoomLevel;
   const currY = (e.clientY - imgRect.top) / zoomLevel;
+  const clampedX = Math.max(0, Math.min(naturalWidth, currX));
+  const clampedY = Math.max(0, Math.min(naturalHeight, currY));
 
   verticalLine.style.left = `${
     e.clientX - containerRect.left + imageContainer.scrollLeft
@@ -201,10 +214,10 @@ imageContainer.onmousemove = (e) => {
 
   if (!isDrawing || !box) return;
 
-  box.style.left = `${Math.min(currX, startX) * zoomLevel}px`;
-  box.style.top = `${Math.min(currY, startY) * zoomLevel}px`;
-  box.style.width = `${Math.abs(currX - startX) * zoomLevel}px`;
-  box.style.height = `${Math.abs(currY - startY) * zoomLevel}px`;
+  box.style.left = `${Math.min(clampedX, startX) * zoomLevel}px`;
+  box.style.top = `${Math.min(clampedY, startY) * zoomLevel}px`;
+  box.style.width = `${Math.abs(clampedX - startX) * zoomLevel}px`;
+  box.style.height = `${Math.abs(clampedY - startY) * zoomLevel}px`;
 };
 
 imageContainer.onmouseup = (e) => {
@@ -213,11 +226,13 @@ imageContainer.onmouseup = (e) => {
   const imgRect = imageDisplay.getBoundingClientRect();
   const endX = (e.clientX - imgRect.left) / zoomLevel;
   const endY = (e.clientY - imgRect.top) / zoomLevel;
+  const clampedX = Math.max(0, Math.min(naturalWidth, endX));
+  const clampedY = Math.max(0, Math.min(naturalHeight, endY));
 
-  const left = Math.min(startX, endX);
-  const top = Math.min(startY, endY);
-  const width = Math.abs(endX - startX);
-  const height = Math.abs(endY - startY);
+  const left = Math.min(startX, clampedX);
+  const top = Math.min(startY, clampedY);
+  const width = Math.abs(clampedX - startX);
+  const height = Math.abs(clampedY - startY);
 
   annotations[images[currentIndex].name].push({
     label: currentLabel,
