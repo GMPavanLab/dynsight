@@ -1,7 +1,7 @@
 Information gain analysis
 =========================
 
-For the theoretical aspects of this work, see INSERT REF.
+For the theoretical aspects of this work, see https://doi.org/10.48550/arXiv.2504.12990.
 
 This recipe explains how to compute the information gain through clustering 
 analysis. We use a syntetic dataset containing a signal that oscillates
@@ -44,7 +44,7 @@ contain:
 * the number of identified clusters - shape (delta_t_list.size,);
 * the population fraction of each cluster - shape (delta_t_list.size, n_clust);
 * the information gain - shape (delta_t_list.size,);
-* the Shannon entropy of each cluster - shape (delta_t_list.size, n_clust)
+* the Shannon entropy of each cluster - shape (delta_t_list.size, n_clust).
 
 Additionally, the (float) dataset Shannon entropy h_0 is returned.
 
@@ -129,8 +129,6 @@ the following function. Be aware that this could require some tweaking to ensure
 that clusters identified at different ∆t are matched in the way the user want
 them to.
 
-DESCRIBE THE FIGURE
-
 .. testcode:: recipe3-test
 
     from pathlib import Path
@@ -193,6 +191,19 @@ DESCRIBE THE FIGURE
         Path("./source/_static/info_plot.png"),
     )
 
+The figure obtained (see below) shows, for each value of ∆t:
+
+* The initial information (1 - H) of the entire dataset: dashed line;
+* The information after clustering: solid line;
+* The information gained through clustering ∆I: gray area;
+* The Shannon entropy of each of the discovered clusters: colored bands.
+
+In this case, 2 states are correctly identified for ∆t <= 100 (green and orange),
+with an information gain of around 0.2.
+For ∆t > 100 all the data points remain unclassified (blue), and the information
+gain goes to 0.
+
+.. image:: _static/info_plot.png
 
 .. testcode:: recipe3-test
     :hide:
