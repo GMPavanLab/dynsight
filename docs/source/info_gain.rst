@@ -49,9 +49,6 @@ Additionally, the (float) dataset Shannon entropy h_0 is returned.
     import dynsight
     from dynsight.trajectory import Insight
 
-    n_atoms, n_frames = lens.dataset.shape
-    delta_t_list = np.unique(np.geomspace(1, n_frames, 10, dtype=int))
-
     def info_gain_with_onion(
         delta_t_list: np.ndarray | list[int],
         data: Insight,
@@ -111,6 +108,10 @@ Additionally, the (float) dataset Shannon entropy h_0 is returned.
         cl_entr = np.array(clusters_entr)
 
         return n_clusters, cl_frac, info_gain, cl_entr, h_0
+
+    # Example usage
+    _, n_frames = lens.dataset.shape
+    delta_t_list = np.unique(np.geomspace(1, n_frames, 10, dtype=int))
 
     n_cl, cl_frac, info_gain, cl_entr, h_0 = info_gain_with_onion(
         delta_t_list,
@@ -175,9 +176,9 @@ DESCRIBE THE FIGURE
         ax.set_xscale("log")
 
         fig.savefig(file_path, dpi=600)
-        plt.show()
         plt.close()
 
+    # Example usage
     plot_info_results(
         delta_t_list,
         cl_frac,
