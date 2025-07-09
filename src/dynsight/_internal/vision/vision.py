@@ -453,6 +453,7 @@ class VisionInstance:
             device=self.device,
             **full_params,
         )
+        self.model = YOLO(self.output_path / title / "weights" / "best.pt")
 
     def export_prediction_to_xyz(
         self, file_name: Path, class_filter: list[int] | None = None
