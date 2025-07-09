@@ -340,6 +340,16 @@ exportAllBtn.onclick = async () => {
   URL.revokeObjectURL(a.href);
 };
 
-window.addEventListener("unload", () => {
-  navigator.sendBeacon("/shutdown");
+let navigatingAway = false;
+document.addEventListener("click", (e) => {
+  const link = e.target.closest("a");
+  if (link && link.href) {
+    navigatingAway = true;
+  }
+});
+
+window.addEventListener("pagehide", () => {
+  if (!navigatingAway) {
+    navigator.sendBeacon("/shutdown");
+  }
 });
