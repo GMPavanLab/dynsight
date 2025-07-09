@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from dynsight.trajectory import Trj
 
 import dynsight
+from dynsight.logs import logger
 from dynsight.trajectory import OnionInsight, OnionSmoothInsight
 
 UNIVAR_DIM = 2
@@ -37,6 +38,7 @@ class Insight:
         data["dataset"] = data["dataset"].tolist()
         with file_path.open("w") as file:
             json.dump(data, file, indent=4)
+        logger.log(f"Insight saved to {file_path}.")
 
     @classmethod
     def load_from_json(cls, file_path: Path) -> Insight:
@@ -50,8 +52,10 @@ class Insight:
 
         if "dataset" not in data:
             msg = "'dataset' key not found in JSON file."
+            logger.log(msg)
             raise ValueError(msg)
 
+        logger.log(f"Insight loaded from {file_path}.")
         return cls(
             dataset=np.array(data.get("dataset"), dtype=np.float64),
             meta=data.get("meta"),
@@ -77,9 +81,12 @@ class Insight:
             trajslice=trj.trajslice,
             num_processes=num_processes,
         )
+        attr_dict = {"sp_av_r_cut": r_cut, "selection": selection}
+
+        logger.log(f"Computed spatial average with args {attr_dict}.")
         return Insight(
             dataset=averaged_dataset,
-            meta={"sp_av_r_cut": r_cut, "selection": selection},
+            meta=attr_dict,
         )
 
     def get_time_correlation(
@@ -87,6 +94,10 @@ class Insight:
         max_delay: int | None = None,
     ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         """Self time correlation function of the time-series signal."""
+        attr_dict = {"max_delay": max_delay}
+        logger.log(
+            f"Computed time corrleation function with args {attr_dict}."
+        )
         return dynsight.analysis.self_time_correlation(
             self.dataset,
             max_delay,
@@ -100,10 +111,13 @@ class Insight:
         """
         if self.dataset.ndim != UNIVAR_DIM + 1:
             msg = "dataset.ndim != 3."
+            logger.log(msg)
             raise ValueError(msg)
         theta = dynsight.soap.timesoap(self.dataset, delay=delay)
         attr_dict = self.meta.copy()
         attr_dict.update({"delay": delay})
+
+        logger.log(f"Computed angular velocity with args {attr_dict}.")
         return Insight(dataset=theta, meta=attr_dict)
 
     def get_onion(
@@ -136,16 +150,18 @@ class Insight:
             )
 
         onion_clust.fit(reshaped_data)
+        attr_dict = {
+            "delta_t": delta_t,
+            "bins": bins,
+            "number_of_sigmas": number_of_sigmas,
+        }
 
+        logger.log(f"Performed onion clustering with args {attr_dict}.")
         return OnionInsight(
             labels=onion_clust.labels_,
             state_list=onion_clust.state_list_,
             reshaped_data=reshaped_data,
-            meta={
-                "delta_t": delta_t,
-                "bins": bins,
-                "number_of_sigmas": number_of_sigmas,
-            },
+            meta=attr_dict,
         )
 
     def get_onion_smooth(
@@ -175,16 +191,18 @@ class Insight:
             )
 
         onion_clust.fit(self.dataset)
+        attr_dict = {
+            "delta_t": delta_t,
+            "bins": bins,
+            "number_of_sigmas": number_of_sigmas,
+            "max_area_overlap": max_area_overlap,
+        }
 
+        logger.log(f"Performed onion clustering smooth with args {attr_dict}.")
         return OnionSmoothInsight(
             labels=onion_clust.labels_,
             state_list=onion_clust.state_list_,
-            meta={
-                "delta_t": delta_t,
-                "bins": bins,
-                "number_of_sigmas": number_of_sigmas,
-                "max_area_overlap": max_area_overlap,
-            },
+            meta=attr_dict,
         )
 
     def get_onion_analysis(
@@ -264,4 +282,18 @@ class Insight:
                 fig2_path, list_of_pop, tra
             )
 
+        attr_dict = {
+            "delta_t_min": delta_t_min,
+            "delta_t_max": delta_t_max,
+            "delta_t_num": delta_t_num,
+            "fig1_path": fig1_path,
+            "fig2_path": fig2_path,
+            "bins": bins,
+            "number_of_sigmas": number_of_sigmas,
+            "max_area_overlap": max_area_overlap,
+        }
+
+        logger.log(
+            f"Performed full onion clustering analysis with args {attr_dict}."
+        )
         return delta_t_list, n_clust, unclass_frac

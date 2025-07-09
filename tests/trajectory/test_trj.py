@@ -8,6 +8,7 @@ import MDAnalysis
 import numpy as np
 import pytest
 
+from dynsight.logs import logger
 from dynsight.trajectory import (
     ClusterInsight,
     Insight,
@@ -15,6 +16,8 @@ from dynsight.trajectory import (
     OnionSmoothInsight,
     Trj,
 )
+
+TRJ_SHAPE = (2, 21)
 
 # ---------------- Fixtures ----------------
 
@@ -61,6 +64,10 @@ def test_trj_inits(
     trj_4 = Trj.init_from_xtc(file_paths["xtc"], file_paths["gro"])
     assert len(trj_4.universe.trajectory) == n_frames_xtc
 
+    assert trj_1.n_atoms, trj_1.n_frames == TRJ_SHAPE
+
+    logger.get()
+
 
 def test_insight(
     tmp_path: Path, file_paths: dict[str, Path], universe: MDAnalysis.Universe
@@ -103,6 +110,8 @@ def test_insight(
     loaded_onion_smooth = OnionSmoothInsight.load_from_json(onion_smooth_json)
     assert loaded_onion_smooth is not None
 
+    logger.get()
+
 
 def test_onion_analysis(universe: MDAnalysis.Universe) -> None:
     """Test the onion clustering complete analysis tool."""
@@ -132,3 +141,5 @@ def test_insight_load_errors(file_paths: dict[str, Path]) -> None:
         _ = OnionInsight.load_from_json(
             file_paths["files_dir"] / "cl_ins_test.json"
         )
+
+    logger.get()
