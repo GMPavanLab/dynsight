@@ -3,6 +3,7 @@
    :caption: dynsight
    :maxdepth: 2
 
+   trajectory <trajectory>
    SOAP <soap>
    timeSOAP <time_soap>
    LENS <lens>
