@@ -17,6 +17,8 @@ from dynsight.trajectory import (
     Trj,
 )
 
+TRJ_SHAPE = (2, 21)
+
 # ---------------- Fixtures ----------------
 
 
@@ -61,6 +63,8 @@ def test_trj_inits(
 
     trj_4 = Trj.init_from_xtc(file_paths["xtc"], file_paths["gro"])
     assert len(trj_4.universe.trajectory) == n_frames_xtc
+
+    assert trj_1.n_atoms, trj_1.n_frames == TRJ_SHAPE
 
     logger.get()
 

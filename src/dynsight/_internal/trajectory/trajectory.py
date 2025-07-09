@@ -36,6 +36,17 @@ class Trj:
 
     universe: MDAnalysis.Universe = field()
     trajslice: slice | None = None
+    n_atoms: int = field(init=False)
+    n_frames: int = field(init=False)
+
+    def __post_init__(self) -> None:
+        n_atoms = len(self.universe.atoms)
+        if self.trajslice is None:
+            n_frames = len(self.universe.trajectory)
+        else:
+            n_frames = sum(1 for _ in self.universe.trajectory[self.trajslice])
+        object.__setattr__(self, "n_atoms", n_atoms)
+        object.__setattr__(self, "n_frames", n_frames)
 
     @classmethod
     def init_from_universe(cls, universe: MDAnalysis.Universe) -> Trj:
