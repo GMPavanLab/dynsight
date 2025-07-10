@@ -29,6 +29,10 @@ dev = [
     "twine",
     "furo",
     "numba",
+    "pandas",
+    "PyYAML",
+    "trackpy",
+    "ultralytics",
 ]
 
 [project.urls]
