@@ -10,6 +10,7 @@ from ultralytics import YOLO
 
 if TYPE_CHECKING:
     from ultralytics.engine.results import Results
+    from ultralytics.utils.metrics import DetMetrics
 
 logging.basicConfig(
     level=logging.INFO,
@@ -105,7 +106,7 @@ class VisionInstance:
         self.workers = workers
 
         self.prediction_results: list[Results] | None = None
-        self.training_results = None
+        self.training_results: DetMetrics | None = None
 
         self._check_device()
 
@@ -340,7 +341,7 @@ class VisionInstance:
             msg = "Training dataset has not been set."
             raise ValueError(msg)
 
-        return self.model.tune(
+        self.model.tune(
             data=self.training_data_yaml,
             epochs=epochs,
             iterations=iterations,
@@ -350,6 +351,14 @@ class VisionInstance:
             imgsz=imgsz,
             batch=batch_size,
         )
+        yaml_path = (
+            self.output_path
+            / "tuning"
+            / "results"
+            / "best_hyperparameters.yaml"
+        )
+        with yaml_path.open("r") as f:
+            return yaml.safe_load(f)
 
     def train(
         self,
