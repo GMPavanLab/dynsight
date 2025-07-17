@@ -112,5 +112,6 @@ module = [
     'opencv-python.*',
     'cv2.*',
     'deeptime.*',
+    'sklearn.decomposition.*'
 ]
 ignore_missing_imports = true
