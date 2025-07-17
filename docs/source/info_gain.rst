@@ -138,7 +138,8 @@ Additionally, the (float) dataset Shannon entropy is returned.
 A default visualization of the results of this analysis can be obtained with
 the following function. Be aware that this could require some tweaking to ensure
 that clusters identified at different ∆t are matched in the way the user want
-them to.
+them to, expecially when different number of clusters are found for different ∆t
+values.
 
 .. testcode:: recipe3-test
 

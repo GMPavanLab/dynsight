@@ -12,7 +12,7 @@ which allows for the computation of all the descriptors implemented in ``dynsigh
 These descriptors, as well as the output of subsequent analyses, are stored in
 :class:`.trajectory.Insight` or :class:`.trajectory.ClusterInsight` objects.
 
-We reccomand the users, when possible, to write code using this module.
+We recommend the users, when possible, to write code using this module.
 
 Complete examples can be found in the recipes section of this documentation. 
 
