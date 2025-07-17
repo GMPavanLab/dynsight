@@ -267,6 +267,10 @@ trajectory (removing the last frame). The easiest way to do this is:
     trajslice = slice(0, -1, 1)
     shorter_trj = trj.with_slice(trajslice=trajslice)
 
+.. raw:: html
+
+    <a class="btn-download" href="../_static/recipes/soap_dim_red.py" download>⬇️ Download Python Script</a>
+
 .. testcode:: recipe2-test
     :hide:
 

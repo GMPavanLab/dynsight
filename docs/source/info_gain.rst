@@ -31,6 +31,8 @@ Let's start by creating a the synthetic dataset:
 
 .. testcode:: recipe3-test
 
+    rng = np.random.default_rng(1234)
+
     # Parameters
     n_atoms = 10
     num_blocks = 10
@@ -38,12 +40,15 @@ Let's start by creating a the synthetic dataset:
     sigma = 0.1
 
     # Generate the array
-    tmp_data = []
-    for _ in range(n_atoms):
-        tmp_data.append(np.concatenate([
-            np.random.normal(loc=(i % 2), scale=sigma, size=block_size)
-            for i in range(num_blocks)
-        ]))
+    tmp_data = [
+        np.concatenate(
+            [
+                rng.normal(loc=(i % 2), scale=sigma, size=block_size)
+                for i in range(num_blocks)
+            ]
+        )
+        for _ in range(n_atoms)
+    ]
     data = np.array(tmp_data)
 
 
@@ -87,9 +92,7 @@ Additionally, the (float) dataset Shannon entropy is returned.
             )
 
             n_clusters[i] = len(state_list)
-            tmp_frac = [0.0]
-            for state in state_list:
-                tmp_frac.append(state.perc)
+            tmp_frac = [0.0] + [state.perc for state in state_list]
             tmp_frac[0] = 1.0 - np.sum(tmp_frac)
             clusters_frac.append(tmp_frac)
 
@@ -158,7 +161,7 @@ values.
         for i, st_fr in enumerate(frac):
             s_list.append(st_fr * entr[i])
         s_cumul = [s_list[0]]
-        for i, tmp_s in enumerate(s_list[1:]):
+        for _, tmp_s in enumerate(s_list[1:]):
             s_cumul.append(s_cumul[-1] + tmp_s)
 
         fig, ax = plt.subplots()
@@ -216,7 +219,12 @@ gain goes to 0.
 
 .. image:: _static/info_plot.png
 
+
+.. raw:: html
+
+    <a class="btn-download" href="../_static/recipes/info_gain.py" download>⬇️ Download Python Script</a>
+
 .. testcode:: recipe3-test
     :hide:
 
-    assert np.isclose(info_gain[0], 0.1899727144974609)
+    assert np.isclose(info_gain[0], 0.19043795503255656)
