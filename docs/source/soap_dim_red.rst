@@ -9,12 +9,14 @@ descriptors are always stored in an :class:`.trajectory.Insight` variable.
 All the functions take as optional parameters one or more file paths; if these
 paths are passed, the function, before computing some quantity from scratch,
 tries to load it from file, in case it has already been previously computed
-and saved. For SOAP, whic is required in all the examples, we use a function
+and saved. For SOAP, which is required in all the examples, we use a function
 from dynsight.utilities.
 
-Please remember that the SOAP dataset can be very large, due to the high
-dimensionality, thus calculations can be expensive, and saving to/loading from
-file quite slow.
+.. warning::
+
+    Please consider that the SOAP dataset can be very large, due to the high
+    dimensionality, thus calculations can be expensive, and saving to/loading 
+    from file quite slow.
 
 .. warning::
 

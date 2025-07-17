@@ -16,9 +16,11 @@ SOAP
 Computing SOAP for every particle and frame of the trajectory is easy, since
 it's directly calculated by the :class:`.trajectory.Trj.get_soap()` method.
 
-Please consider that the SOAP dataset can be very large, due to the high
-dimensionality, thus calculations can be expensive, and saving to/loading from
-file quite slow.
+.. warning::
+
+    Please consider that the SOAP dataset can be very large, due to the high
+    dimensionality, thus calculations can be expensive, and saving to/loading 
+    from file quite slow.
 
 .. testcode:: recipe1-test
 
