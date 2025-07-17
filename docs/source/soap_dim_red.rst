@@ -24,13 +24,20 @@ from dynsight.utilities.
     repo. To use it elsewhere, you have to change the ``Path`` variables
     accordingly.
 
-Let's start by creating a :class:`.trajectory.Trj` object to use as a
-starting point for the examples:
+First of all, we import all the packages and objects we'll need:
 
 .. testcode:: recipe2-test
 
     from pathlib import Path
-    from dynsight.trajectory import Trj
+    import dynsight
+    from dynsight.trajectory import Trj, Insight
+    from dynsight.utilities import load_or_compute_soap
+    from sklearn.decomposition import PCA
+
+Let's start by creating a :class:`.trajectory.Trj` object to use as a
+starting point for the examples:
+
+.. testcode:: recipe2-test
 
     # Loading an example trajectory
     files_path = Path("../tests/systems/")
@@ -52,11 +59,6 @@ parameters, and performs the PCA of the corresponding SOAP dataset.
 ``n_components`` is the number of PCs that the function stores in the output.
 
 .. testcode:: recipe2-test
-
-    from pathlib import Path
-    from dynsight.utilities import load_or_compute_soap
-    from dynsight.trajectory import Trj, Insight
-    from sklearn.decomposition import PCA
 
     def compute_soap_pca(
         trj: Trj,
@@ -128,10 +130,6 @@ parameters, and performs the TICA of the corresponding SOAP dataset.
 ``tica_dim`` is the number of TICs that the function stores in the output.
 
 .. testcode:: recipe2-test
-
-    from pathlib import Path
-    import dynsight
-    from dynsight.trajectory import Trj, Insight
 
     def compute_soap_tica(
         trj: Trj,
@@ -211,9 +209,6 @@ parameters, and computes the corresponding timeSOAP dataset.
 ``delay`` is the time lag used to perform timeSOAP.
 
 .. testcode:: recipe2-test
-
-    from pathlib import Path
-    from dynsight.trajectory import Trj, Insight
 
     def compute_timesoap(
         trj: Trj,

@@ -16,11 +16,20 @@ using onion 2.0.0 ("onion smooth").
     repo. To use it elsewhere, you have to change the ``Path`` variables
     accordingly.
 
-Let's start by creating a the synthetic dataset:
+First of all, we import all the packages and objects we'll need:
 
 .. testcode:: recipe3-test
 
+    from pathlib import Path
     import numpy as np
+    import dynsight
+    from dynsight.trajectory import Insight
+    import matplotlib.pyplot as plt
+
+
+Let's start by creating a the synthetic dataset:
+
+.. testcode:: recipe3-test
 
     # Parameters
     n_atoms = 10
@@ -55,10 +64,6 @@ contain:
 Additionally, the (float) dataset Shannon entropy h_0 is returned.
 
 .. testcode:: recipe3-test
-
-    import numpy as np
-    import dynsight
-    from dynsight.trajectory import Insight
 
     def info_gain_with_onion(
         delta_t_list: np.ndarray | list[int],
@@ -136,9 +141,6 @@ that clusters identified at different ∆t are matched in the way the user want
 them to.
 
 .. testcode:: recipe3-test
-
-    from pathlib import Path
-    import matplotlib.pyplot as plt
 
     def plot_info_results(
         delta_t_list: np.ndarray | list[int],

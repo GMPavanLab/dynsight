@@ -10,6 +10,13 @@ This recipe explains how to compute descriptors directly from a
     repo. To use it elsewhere, you have to change the ``Path`` variables
     accordingly.
 
+First of all, we import all the packages and objects we'll need:
+
+.. testcode:: recipe1-test
+
+    from pathlib import Path
+    from dynsight.trajectory import Trj
+
 SOAP
 ----
 
@@ -23,9 +30,6 @@ it's directly calculated by the :class:`.trajectory.Trj.get_soap()` method.
     from file quite slow.
 
 .. testcode:: recipe1-test
-
-    from pathlib import Path
-    from dynsight.trajectory import Trj
 
     # Loading an example trajectory
     files_path = Path("../tests/systems/")
@@ -56,9 +60,6 @@ optional parameter, so that when computing both quantities the second
 calculation can be sped up significantly.
 
 .. testcode:: recipe1-test
-
-    from pathlib import Path
-    from dynsight.trajectory import Trj
 
     # Loading an example trajectory
     files_path = Path("../tests/systems/")
