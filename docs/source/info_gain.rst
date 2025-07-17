@@ -10,6 +10,12 @@ range of time resolutions ∆t. The information gain and the Shannon entropy of
 the environments is computed for each value of ∆t. The analysis is implemented 
 using onion 2.0.0 ("onion smooth").
 
+.. warning::
+
+    This code works when run from the ``/docs`` directory of the ``dynsight`` 
+    repo. To use it elsewhere, you have to change the ``Path`` variables
+    accordingly.
+
 Let's start by creating a the synthetic dataset:
 
 .. testcode:: recipe3-test

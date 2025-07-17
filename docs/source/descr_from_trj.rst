@@ -4,6 +4,12 @@ Descriptors from a :class:`.trajectory.Trj`
 This recipe explains how to compute descriptors directly from a 
 :class:`.trajectory.Trj` object. 
 
+.. warning::
+
+    This code works when run from the ``/docs`` directory of the ``dynsight`` 
+    repo. To use it elsewhere, you have to change the ``Path`` variables
+    accordingly.
+
 SOAP
 ----
 
@@ -63,7 +69,7 @@ calculation can be sped up significantly.
     neigcounts, n_neig = trj.get_coord_number(
         r_cut=2.0,          # cutoff radius for neighbors list
         selection="all",    # compute on a selection of particles
-        neigcounts=None,   # it will be computed and returned
+        neigcounts=None,    # it will be computed and returned
     )
 
     # Now for LENS we already have neigcounts

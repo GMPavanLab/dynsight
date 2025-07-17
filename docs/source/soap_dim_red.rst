@@ -16,6 +16,12 @@ Please remember that the SOAP dataset can be very large, due to the high
 dimensionality, thus calculations can be expensive, and saving to/loading from
 file quite slow.
 
+.. warning::
+
+    This code works when run from the ``/docs`` directory of the ``dynsight`` 
+    repo. To use it elsewhere, you have to change the ``Path`` variables
+    accordingly.
+
 Let's start by creating a :class:`.trajectory.Trj` object to use as a
 starting point for the examples:
 
