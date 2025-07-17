@@ -17,20 +17,20 @@
 .. toctree::
   :hidden:
   :maxdepth: 2
-  :caption: Recipes:
-
-  Descriptors from a Trj <descr_from_trj>
-  Dimensionality reduction methods <soap_dim_red>
-  Information gain analysis <info_gain>
-
-.. toctree::
-  :hidden:
-  :maxdepth: 2
   :caption: Examples:
 
   Typical analysis workflow <example_analysis_workflow>
   Information gain <example_info_gain>
   Sample Entropy <example_sample_entropy>
+
+.. toctree::
+  :hidden:
+  :maxdepth: 2
+  :caption: Recipes:
+
+  Descriptors from a Trj <descr_from_trj>
+  Dimensionality reduction methods <soap_dim_red>
+  Information gain analysis <info_gain>
 
 .. toctree::
   :hidden:

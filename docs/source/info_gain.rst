@@ -61,7 +61,7 @@ contain:
 * the information gain - shape (delta_t_list.size,);
 * the Shannon entropy of each cluster - shape (delta_t_list.size, n_clust).
 
-Additionally, the (float) dataset Shannon entropy h_0 is returned.
+Additionally, the (float) dataset Shannon entropy is returned.
 
 .. testcode:: recipe3-test
 

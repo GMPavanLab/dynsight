@@ -1,13 +1,13 @@
 trajectory
 ==========
 
-This module offers an object-oriented implementation of the dynsight
+This module offers an object-oriented implementation of the ``dynsight``
 utilities, to facilitate the workflow of any analysis.
 Moreover, the ``trajectory`` classes make it easier to save and share results,
 and have a built-in logging module.
 
 The :class:`.trajectory.Trj` class is a container for a MDAnalysis.Universe,
-which allows for the computation of all the descriptors implemented in dynsight.
+which allows for the computation of all the descriptors implemented in ``dynsight``.
 
 These descriptors, as well as the output of subsequent analyses, are stored in
 :class:`.trajectory.Insight` or :class:`.trajectory.ClusterInsight` objects.
