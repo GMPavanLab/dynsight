@@ -1,1 +1,0 @@
-"""Copiable code for recipes."""

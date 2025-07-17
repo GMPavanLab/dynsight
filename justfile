@@ -26,7 +26,7 @@ check:
   ( set -x; ruff format --check . )
 
   echo
-  ( set -x; mypy . --exclude 'docs/build' )
+  ( set -x; mypy . )
 
   echo
   ( set -x; pytest --cov=src --cov-report term-missing )
