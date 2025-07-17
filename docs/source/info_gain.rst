@@ -4,7 +4,7 @@ Information gain analysis
 For the theoretical aspects of this work, see https://doi.org/10.48550/arXiv.2504.12990.
 
 This recipe explains how to compute the information gain through clustering 
-analysis. We use a syntetic dataset containing a signal that oscillates
+analysis. We use a synthetic dataset containing a signal that oscillates
 between 0 and 1, with Gaussian noise. Onion clustering is run on a broad
 range of time resolutions ∆t. The information gain and the Shannon entropy of
 the environments is computed for each value of ∆t. The analysis is implemented 
@@ -47,13 +47,13 @@ Let's start by creating a the synthetic dataset:
     data = np.array(tmp_data)
 
 
-The following functions take as input the dataset, and a list of values
-of time resolutions ∆t, and for each of these perform Onion clustering, and
-compute the information gain achieved through clustering with that ∆t. 
+The following function takes as input the dataset, and a list of values
+of time resolutions ∆t, and for each of these it performs Onion clustering, and
+computes the information gain achieved through clustering with that ∆t. 
 
 Notice that, for now, this only works with univariate datasets.
 
-The function's output is a tuple of np.ndarray, which for each value of ∆t
+The function's output is a tuple of ``np.ndarray``, which for each value of ∆t
 contain:
 
 * the number of identified clusters - shape (delta_t_list.size,);
