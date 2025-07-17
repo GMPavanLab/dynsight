@@ -51,7 +51,9 @@ The following function takes as input the dataset, and a list of values
 of time resolutions ∆t, and for each of these it performs Onion clustering, and
 computes the information gain achieved through clustering with that ∆t. 
 
-Notice that, for now, this only works with univariate datasets.
+.. warning::
+
+    For now, this only works with univariate datasets.
 
 The function's output is a tuple of ``np.ndarray``, which for each value of ∆t
 contain:
