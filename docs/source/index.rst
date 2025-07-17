@@ -78,6 +78,13 @@ you will need to install a series of packages. This can be done with with pip::
 
   $ pip install ultralytics PyYAML
 
+How to get started
+------------------
+
+We suggest you give a read to the ``dynsight.trajectory`` module documentation,
+which offers a compact and easy way of using most of the ``dynsight`` tools. 
+Also, the documentation offers some copiable Recipes and Examples for the most
+common analyses.
 
 How to contribute
 -----------------
