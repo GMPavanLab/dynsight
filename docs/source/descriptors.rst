@@ -15,3 +15,17 @@ This module allows to perform tICA on trajectories from many-body systems, where
 
 This module uses the TICA class from the deeptime.decomposition package (see the `documentation page <https://deeptime-ml.github.io/latest/notebooks/tica.html>`_).
 :mod:`deeptime` requires numpy <= 2.1. 
+
+
+Velocity alignment
+------------------
+
+.. toctree::
+  :maxdepth: 1
+
+  velocity_alignment <_autosummary/dynsight.descriptors.velocity_alignment>
+
+Computes the average velocity alignment between the central particle and the
+neighboring ones. The alignment is computed as the cosine between the velocities.
+Thus, the output is a number between 1 (perfect alignment) and -1 (perfect
+anti-alignment).
