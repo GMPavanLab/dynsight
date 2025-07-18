@@ -15,6 +15,7 @@ import MDAnalysis
 from MDAnalysis.coordinates.memory import MemoryReader
 
 import dynsight
+from dynsight.logs import logger
 from dynsight.trajectory import Insight
 
 UNIVAR_DIM = 2
@@ -35,6 +36,17 @@ class Trj:
 
     universe: MDAnalysis.Universe = field()
     trajslice: slice | None = None
+    n_atoms: int = field(init=False)
+    n_frames: int = field(init=False)
+
+    def __post_init__(self) -> None:
+        n_atoms = len(self.universe.atoms)
+        if self.trajslice is None:
+            n_frames = len(self.universe.trajectory)
+        else:
+            n_frames = sum(1 for _ in self.universe.trajectory[self.trajslice])
+        object.__setattr__(self, "n_atoms", n_atoms)
+        object.__setattr__(self, "n_frames", n_frames)
 
     @classmethod
     def init_from_universe(cls, universe: MDAnalysis.Universe) -> Trj:
@@ -42,6 +54,7 @@ class Trj:
 
         See https://docs.mdanalysis.org/2.9.0/documentation_pages/core/universe.html#MDAnalysis.core.universe.Universe.
         """
+        logger.log("Created Trj from MDAnalysis.Universe.")
         return Trj(universe)
 
     @classmethod
@@ -53,6 +66,7 @@ class Trj:
         Parameters:
         dt: the trajectory's time-step.
         """
+        logger.log(f"Created Trj from {traj_file} with dt = {dt}.")
         universe = MDAnalysis.Universe(traj_file, dt=dt)
         return Trj(universe)
 
@@ -62,6 +76,7 @@ class Trj:
 
         See https://docs.mdanalysis.org/2.9.0/documentation_pages/core/universe.html#MDAnalysis.core.universe.Universe.
         """
+        logger.log(f"Created Trj from {traj_file}, {topo_file}.")
         universe = MDAnalysis.Universe(topo_file, traj_file)
         return Trj(universe)
 
@@ -73,6 +88,8 @@ class Trj:
         atoms = self.universe.select_atoms(selection)
         trajslice = slice(None) if self.trajslice is None else self.trajslice
 
+        attr_dict = {"selection": selection}
+        logger.log(f"Extracted coordinates array with args {attr_dict}.")
         return np.array(
             [
                 atoms.positions.copy()
@@ -82,6 +99,8 @@ class Trj:
 
     def with_slice(self, trajslice: slice | None) -> Trj:
         """Returns a Trj with a different frames' slice."""
+        attr_dict = {"trajslice": trajslice}
+        logger.log(f"Created a sliced Trj with args {attr_dict}.")
         return Trj(self.universe, trajslice=trajslice)
 
     def get_slice(self, start: int, stop: int, step: int) -> Trj:
@@ -104,6 +123,8 @@ class Trj:
         u_new = MDAnalysis.Universe(topology=self.universe._topology)  # noqa: SLF001
         u_new.trajectory = mem_reader
 
+        attr_dict = {"start": start, "stop": stop, "step": step}
+        logger.log(f"Created a sliced Trj with args {attr_dict}.")
         return Trj(u_new)
 
     def get_coord_number(
@@ -128,9 +149,12 @@ class Trj:
                 trajslice=self.trajslice,
             )
         _, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
+
+        attr_dict = {"r_cut": r_cut, "selection": selection}
+        logger.log(f"Computed coord_number using args {attr_dict}.")
         return neigcounts, Insight(
             dataset=nn.astype(np.float64),
-            meta={"r_cut": r_cut, "selection": selection},
+            meta=attr_dict,
         )
 
     def get_lens(
@@ -155,9 +179,13 @@ class Trj:
                 trajslice=self.trajslice,
             )
         lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
+
+        attr_dict = {"r_cut": r_cut, "selection": selection}
+        logger.log(f"Computed LENS using args {attr_dict}.")
+
         return neigcounts, Insight(
             dataset=lens[:, 1:],
-            meta={"r_cut": r_cut, "selection": selection},
+            meta=attr_dict,
         )
 
     def get_soap(
@@ -194,6 +222,7 @@ class Trj:
             "selection": selection,
             "centers": centers,
         }
+        logger.log(f"Computed SOAP with args {attr_dict}.")
         return Insight(dataset=soap, meta=attr_dict)
 
     def get_rdf(
@@ -234,4 +263,5 @@ class Trj:
             "nbins": nbins,
             "norm": norm,
         }
+        logger.log(f"Computed g(r) with args {attr_dict}.")
         return Insight(dataset=dataset, meta=attr_dict)

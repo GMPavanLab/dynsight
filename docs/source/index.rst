@@ -3,6 +3,7 @@
    :caption: dynsight
    :maxdepth: 2
 
+   trajectory <trajectory>
    SOAP <soap>
    timeSOAP <time_soap>
    LENS <lens>
@@ -18,9 +19,18 @@
   :maxdepth: 2
   :caption: Examples:
 
-  Typical analysis workflow <analysis_workflow>
-  Information gain <info_gain>
-  Sample Entropy <sample_entropy>
+  Typical analysis workflow <example_analysis_workflow>
+  Information gain <example_info_gain>
+  Sample Entropy <example_sample_entropy>
+
+.. toctree::
+  :hidden:
+  :maxdepth: 2
+  :caption: Recipes:
+
+  Descriptors from a Trj <descr_from_trj>
+  Dimensionality reduction methods <soap_dim_red>
+  Information gain analysis <info_gain>
 
 .. toctree::
   :hidden:
@@ -63,20 +73,18 @@ you are using Python 3.10 and below, you can use :mod:`cpctools` to access
 
   $ pip install cpctools
 
-If you want to use the :mod:`dynsight.tica` module you will need to install the
-deeptime package. This can be done with with pip::
-
-  $ pip install deeptime
-
-or with conda::
-
-  $ conda install -c conda-forge deeptime
-
 If you want to use the :mod:`dynsight.vision` and :mod:`dynsight.track` modules
 you will need to install a series of packages. This can be done with with pip::
 
   $ pip install ultralytics PyYAML
 
+How to get started
+------------------
+
+We suggest you give a read to the ``dynsight.trajectory`` module documentation,
+which offers a compact and easy way of using most of the ``dynsight`` tools. 
+Also, the documentation offers some copiable Recipes and Examples for the most
+common analyses.
 
 How to contribute
 -----------------

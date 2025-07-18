@@ -10,7 +10,7 @@ maintainers = [
     { name = "Simone Martino", email = "s.martino0898@gmail.com" },
 ]
 
-dependencies = ["numpy", "dscribe", "tropea-clustering", "MDAnalysis"]
+dependencies = ["numpy", "dscribe", "tropea-clustering", "MDAnalysis", "deeptime"]
 # Set by cpctools.
 requires-python = ">=3.8"
 dynamic = ["version"]
@@ -92,6 +92,7 @@ check_untyped_defs = true
 disallow_untyped_decorators = true
 warn_unreachable = true
 disallow_any_generics = true
+exclude = 'docs/build/html/_static'
 
 [[tool.mypy.overrides]]
 module = [
@@ -111,5 +112,7 @@ module = [
     'ultralytics.*',
     'opencv-python.*',
     'cv2.*',
+    'deeptime.*',
+    'sklearn.decomposition.*'
 ]
 ignore_missing_imports = true
