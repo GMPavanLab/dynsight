@@ -26,7 +26,7 @@ def velocity_alignment(
         coords: shape (n_frames, n_atoms, n_dims), the particles' traj.
 
         velocities: shape (n_frames - 1, n_atoms, n_dims), the particles'
-            velocities. If not passed, velocities are computed as dispacements.
+            velocities. If is None, velocities are computed as dispacements.
 
     Returns:
         NDArray[np.float64]:
