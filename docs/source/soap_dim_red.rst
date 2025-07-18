@@ -121,7 +121,7 @@ More details on the algorithm here:
 .. toctree::
   :maxdepth: 1
 
-  many_body_tica <_autosummary/dynsight.tica.many_body_tica>
+  many_body_tica <_autosummary/dynsight.descriptors.many_body_tica>
 
 This function takes as input a :class:`.trajectory.Trj` and all the relevant
 parameters, and performs the TICA of the corresponding SOAP dataset.
@@ -160,7 +160,7 @@ parameters, and performs the TICA of the corresponding SOAP dataset.
             soap_path=soap_path,
         )
 
-        rel_times, _, tica_ds = dynsight.tica.many_body_tica(
+        rel_times, _, tica_ds = dynsight.descriptors.many_body_tica(
             soap.dataset,
             lag_time=lag_time,
             tica_dim=tica_dim,

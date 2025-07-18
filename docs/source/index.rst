@@ -7,7 +7,7 @@
    SOAP <soap>
    timeSOAP <time_soap>
    LENS <lens>
-   tICA <tica>
+   descriptors <descriptors>
    onion clustering <onion>
    vision <vision>
    analysis <analysis>
