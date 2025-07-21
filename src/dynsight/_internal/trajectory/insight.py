@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, field
-from typing import TYPE_CHECKING, Any
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -33,32 +33,56 @@ class Insight:
     meta: dict[str, Any] = field(default_factory=dict)
 
     def dump_to_json(self, file_path: Path) -> None:
-        """Save the Insight object as .json file."""
-        data = asdict(self)
-        data["dataset"] = data["dataset"].tolist()
+        """Save the Insight to a JSON file and  .npy file."""
+        # Save dataset as .npy
+        npy_path = file_path.with_suffix(".npy")
+        np.save(npy_path, self.dataset)
+
+        # Prepare JSON data
+        json_data = {
+            "dataset_file": npy_path.name,
+            "meta": self.meta,
+        }
+
         with file_path.open("w") as file:
-            json.dump(data, file, indent=4)
-        logger.log(f"Insight saved to {file_path}.")
+            json.dump(json_data, file, indent=4)
+        logger.log(f"Insight saved to {file_path} and dataset to {npy_path}.")
 
     @classmethod
-    def load_from_json(cls, file_path: Path) -> Insight:
+    def load_from_json(
+        cls,
+        file_path: Path,
+        mmap_mode: Literal["r", "r+", "w+", "c"] | None = None,
+    ) -> Insight:
         """Load the Insight object from .json file.
 
+        Args:
+            file_path: Path to the .json file.
+            mmap_mode: If given, used as np.load(..., mmap_mode=mmap_mode) for
+                memory mapping.
+
         Raises:
-            ValueError if the input file does not have a key "dataset".
+            ValueError: if required keys are missing.
         """
         with file_path.open("r") as file:
             data = json.load(file)
 
-        if "dataset" not in data:
-            msg = "'dataset' key not found in JSON file."
+        dataset_file = data.get("dataset_file")
+        if not dataset_file:
+            msg = "'dataset_file' key not found in JSON file."
             logger.log(msg)
             raise ValueError(msg)
 
-        logger.log(f"Insight loaded from {file_path}.")
+        dataset_path = file_path.with_name(dataset_file)
+        dataset = np.load(dataset_path, mmap_mode=mmap_mode)
+
+        logger.log(
+            f"Insight loaded from {file_path}, dataset from {dataset_path}."
+        )
+
         return cls(
-            dataset=np.array(data.get("dataset"), dtype=np.float64),
-            meta=data.get("meta"),
+            dataset=dataset,
+            meta=data.get("meta", {}),
         )
 
     def spatial_average(

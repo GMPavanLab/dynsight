@@ -124,7 +124,7 @@ def test_onion_analysis(universe: MDAnalysis.Universe) -> None:
 def test_insight_load_errors(file_paths: dict[str, Path]) -> None:
     """Test insight load errors."""
     with pytest.raises(
-        ValueError, match="'dataset' key not found in JSON file."
+        ValueError, match="'dataset_file' key not found in JSON file."
     ):
         _ = Insight.load_from_json(file_paths["files_dir"] / "empty.json")
 
