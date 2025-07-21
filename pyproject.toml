@@ -39,6 +39,9 @@ dev = [
 github = "https://github.com/GMPavanLab/dynsight"
 documentation = "https://dynsight.readthedocs.io/en/latest/"
 
+[project.scripts]
+label_tool = "dynsight.vision:label_tool"
+
 [tool.setuptools_scm]
 
 [tool.ruff]
