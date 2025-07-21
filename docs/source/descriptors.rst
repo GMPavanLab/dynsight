@@ -29,3 +29,15 @@ Computes the average velocity alignment between the central particle and the
 neighboring ones. The alignment is computed as the cosine between the velocities.
 Thus, the output is a number between 1 (perfect alignment) and -1 (perfect
 anti-alignment).
+
+Orinetational order parameter
+-----------------------------
+
+.. toctree::
+  :maxdepth: 1
+
+  orientational_order_param <_autosummary/dynsight.descriptors.orientational_order_param>
+
+Computes orientational order parameter for the neighbors of each atom in the
+trajectory. The output is a real number between 0 and 1, where 1 corresponds
+to a perfect order, and 0 to completely random positions.
