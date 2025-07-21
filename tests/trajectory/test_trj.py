@@ -129,14 +129,14 @@ def test_insight_load_errors(file_paths: dict[str, Path]) -> None:
         _ = Insight.load_from_json(file_paths["files_dir"] / "empty.json")
 
     with pytest.raises(
-        ValueError, match="'labels' key not found in JSON file."
+        ValueError, match="'labels_file' key not found in JSON file."
     ):
         _ = ClusterInsight.load_from_json(
             file_paths["files_dir"] / "ins_1_test.json"
         )
 
     with pytest.raises(
-        ValueError, match="'state_list' key not found in JSON file."
+        ValueError, match="'reshaped_data_file' key not found in JSON file."
     ):
         _ = OnionInsight.load_from_json(
             file_paths["files_dir"] / "cl_ins_test.json"
