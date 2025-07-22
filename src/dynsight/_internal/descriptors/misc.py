@@ -53,20 +53,14 @@ def orientational_order_param(
         .. testcode:: psi-test
 
             import numpy as np
-            import MDAnalysis
-            from dynsight.lens import list_neighbours_along_trajectory
+            from dynsight.trajectory import Trj
             from dynsight.descriptors import orientational_order_param
 
-            univ = MDAnalysis.Universe(path / "trajectory.xyz")
-
-            cutoff = 3.0
-            neig_counts = list_neighbours_along_trajectory(
-                input_universe=univ,
-                cutoff=cutoff,
-            )
+            trj = Trj.init_from_xyz(path / "trajectory.xyz", dt=1.0)
+            neig_counts, _ = trj.get_coord_number(r_cut=3.0)
 
             psi = orientational_order_param(
-                universe=univ,
+                universe=trj.universe,
                 neigh_list_per_frame=neig_counts,
             )
 
@@ -134,20 +128,14 @@ def velocity_alignment(
         .. testcode:: phi-test
 
             import numpy as np
-            import MDAnalysis
-            from dynsight.lens import list_neighbours_along_trajectory
+            from dynsight.trajectory import Trj
             from dynsight.descriptors import velocity_alignment
 
-            univ = MDAnalysis.Universe(path / "trajectory.xyz")
-            cutoff = 3.0
-
-            neig_counts = list_neighbours_along_trajectory(
-                input_universe=univ,
-                cutoff=cutoff,
-            )
+            trj = Trj.init_from_xyz(path / "trajectory.xyz", dt=1.0)
+            neig_counts, _ = trj.get_coord_number(r_cut=3.0)
 
             phi = velocity_alignment(
-                universe=univ,
+                universe=trj.universe,
                 neigh_list_per_frame=neig_counts,
             )
 
