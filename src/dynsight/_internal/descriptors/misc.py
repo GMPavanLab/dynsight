@@ -67,7 +67,7 @@ def orientational_order_param(
         .. testcode:: psi-test
             :hide:
 
-            assert np.isclose(psi[0][0], 0.15978705190172277)
+            assert np.isclose(psi[0][0], 0.06086992844939232)
 
     """
     n_atoms = universe.atoms.n_atoms
@@ -83,12 +83,7 @@ def orientational_order_param(
             neighbors = neigh_list_per_frame[t][i]
             for j in neighbors:
                 x, y = frame[j] - atom_i
-                if x != 0:
-                    theta = np.arctan(y / x)
-                    if x < 0.0:
-                        theta += np.pi
-                else:
-                    theta = np.pi / 2
+                theta = np.mod(np.arctan2(y, x), 2 * np.pi)
                 tmp += np.exp(1j * order * theta)
 
             if len(neighbors) > 0:
