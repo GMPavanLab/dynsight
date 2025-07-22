@@ -1,6 +1,13 @@
 Descriptors
 ===========
 
+.. toctree::
+  :maxdepth: 1
+
+   SOAP <soap>
+   timeSOAP <time_soap>
+   LENS <lens>
+
 tICA
 ----
 

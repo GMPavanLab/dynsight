@@ -3,13 +3,10 @@
    :caption: dynsight
    :maxdepth: 2
 
+   vision <vision>
    trajectory <trajectory>
-   SOAP <soap>
-   timeSOAP <time_soap>
-   LENS <lens>
    descriptors <descriptors>
    onion clustering <onion>
-   vision <vision>
    analysis <analysis>
    data processing <data_processing>
    HDF5er <hdf5er>
