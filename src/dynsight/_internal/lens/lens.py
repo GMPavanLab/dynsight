@@ -86,6 +86,7 @@ def list_neighbours_along_trajectory(
 
 def neighbour_change_in_time(
     neigh_list_per_frame: list[list[AtomGroup]],
+    delay: int = 1,
 ) -> tuple[
     NDArray[np.float64],
     NDArray[np.int64],
@@ -95,24 +96,25 @@ def neighbour_change_in_time(
     """Return, listed per atom, the LENS values at each frame.
 
     * Original author: Martina Crippa
-    * Mantainer: Matteo Becchi
 
     Parameters:
         neigh_list_per_frame:
             A frame-by-frame list of the neighbors of each atom, output
-            of :func:`listNeighboursAlongTrajectory`.
+            of :func:`listNeighboursAlongTrajecøtory`.
+
+        delay:
+            The delay between frames on which LENS is computed. Default is 1.
 
     Returns:
-        tuple:
-            A tuple of the following elements:
-                - lensArray: The calculated LENS parameter.
-                    It's a numpy.array of shape (n_particles, n_frames - 1)
-                - numberOfNeighs: The count of neighbors per frame.
-                    It's a numpy.array of shape (n_particles, n_frames)
-                - lensNumerators: The numerators used for calculating LENS.
-                    It's a numpy.array of shape (n_particles, n_frames - 1)
-                - lensDenominators: The denominators used for calculating LENS.
-                    It's a numpy.array of shape (n_particles, n_frames - 1)
+        A tuple of the following elements:
+            - lens_array: The calculated LENS parameter.
+                It's a numpy.array of shape (n_particles, n_frames - 1)
+            - number_of_neighs: The count of neighbors per frame.
+                It's a numpy.array of shape (n_particles, n_frames)
+            - lens_numerators: The numerators used for calculating LENS.
+                It's a numpy.array of shape (n_particles, n_frames - 1)
+            - lens_denominators: The denominators used for calculating LENS.
+                It's a numpy.array of shape (n_particles, n_frames - 1)
 
     Example:
 
@@ -146,40 +148,39 @@ def neighbour_change_in_time(
         All supported input file formats by MDAnalysis can be used
         to set up the Universe.
     """
-    nat = np.asarray(neigh_list_per_frame, dtype=object).shape[1]
-    nframes = np.asarray(neigh_list_per_frame, dtype=object).shape[0]
-    # this is the number of common NN between frames
-    lensarray = np.zeros((nat, nframes))
-    # this is the number of NN at that frame
-    numberofneighs = np.zeros((nat, nframes), dtype=int)
-    # this is the numerator of LENS
-    lensnumerators = np.zeros((nat, nframes))
-    # this is the denominator of lens
-    lensdenominators = np.zeros((nat, nframes))
+    n_atoms = np.asarray(neigh_list_per_frame, dtype=object).shape[1]
+    n_frames = np.asarray(neigh_list_per_frame, dtype=object).shape[0]
+
+    lens_array = np.zeros((n_atoms, n_frames))  # The LENS values
+    number_of_neighs = np.zeros((n_atoms, n_frames), dtype=int)  # The NN
+    lens_numerators = np.zeros((n_atoms, n_frames))  # LENS numerator
+    lens_denominators = np.zeros((n_atoms, n_frames))  # LENS denominator
+
     # each nnlist contains also the atom that generates them,
     # so 0 nn is a 1 element list
-    for atom_id in range(nat):
-        numberofneighs[atom_id, 0] = (
+    for atom_id in range(n_atoms):
+        number_of_neighs[atom_id, 0] = (
             neigh_list_per_frame[0][atom_id].shape[0] - 1
         )
         # let's calculate the numerators and the denominators
-        for frame in range(1, nframes):
-            numberofneighs[atom_id, frame] = (
+        for frame in range(delay, n_frames - delay + 1):
+            number_of_neighs[atom_id, frame] = (
                 neigh_list_per_frame[frame][atom_id].shape[0] - 1
             )
-            lensdenominators[atom_id, frame] = (
+            lens_denominators[atom_id, frame] = (
                 neigh_list_per_frame[frame][atom_id].shape[0]
-                + neigh_list_per_frame[frame - 1][atom_id].shape[0]
+                + neigh_list_per_frame[frame - delay][atom_id].shape[0]
                 - 2
             )
-            lensnumerators[atom_id, frame] = np.setxor1d(
+            lens_numerators[atom_id, frame] = np.setxor1d(
                 neigh_list_per_frame[frame][atom_id],
-                neigh_list_per_frame[frame - 1][atom_id],
+                neigh_list_per_frame[frame - delay][atom_id],
             ).shape[0]
 
-    den_not_0 = lensdenominators != 0
-    # lens
-    lensarray[den_not_0] = (
-        lensnumerators[den_not_0] / lensdenominators[den_not_0]
+    den_not_0 = lens_denominators != 0
+
+    lens_array[den_not_0] = (
+        lens_numerators[den_not_0] / lens_denominators[den_not_0]
     )
-    return lensarray, numberofneighs, lensnumerators, lensdenominators
+
+    return lens_array, number_of_neighs, lens_numerators, lens_denominators

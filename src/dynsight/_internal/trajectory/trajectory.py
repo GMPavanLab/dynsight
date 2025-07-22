@@ -130,6 +130,7 @@ class Trj:
     def get_coord_number(
         self,
         r_cut: float,
+        delay: int = 1,
         selection: str = "all",
         neigcounts: list[list[AtomGroup]] | None = None,
     ) -> tuple[list[list[AtomGroup]], Insight]:
@@ -148,9 +149,12 @@ class Trj:
                 selection=selection,
                 trajslice=self.trajslice,
             )
-        _, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
+        _, nn, *_ = dynsight.lens.neighbour_change_in_time(
+            neigh_list_per_frame=neigcounts,
+            delay=delay,
+        )
 
-        attr_dict = {"r_cut": r_cut, "selection": selection}
+        attr_dict = {"r_cut": r_cut, "delay": delay, "selection": selection}
         logger.log(f"Computed coord_number using args {attr_dict}.")
         return neigcounts, Insight(
             dataset=nn.astype(np.float64),
@@ -160,6 +164,7 @@ class Trj:
     def get_lens(
         self,
         r_cut: float,
+        delay: int = 1,
         selection: str = "all",
         neigcounts: list[list[AtomGroup]] | None = None,
     ) -> tuple[list[list[AtomGroup]], Insight]:
@@ -178,9 +183,12 @@ class Trj:
                 selection=selection,
                 trajslice=self.trajslice,
             )
-        lens, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
+        lens, *_ = dynsight.lens.neighbour_change_in_time(
+            neigh_list_per_frame=neigcounts,
+            delay=delay,
+        )
 
-        attr_dict = {"r_cut": r_cut, "selection": selection}
+        attr_dict = {"r_cut": r_cut, "delay": delay, "selection": selection}
         logger.log(f"Computed LENS using args {attr_dict}.")
 
         return neigcounts, Insight(
