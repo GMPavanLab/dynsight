@@ -67,22 +67,21 @@ def orientational_order_param(
         .. testcode:: psi-test
             :hide:
 
-            assert np.isclose(psi[0][0], 0.095872301262402)
+            assert np.isclose(psi[0][0], 0.15978705190172277)
 
     """
-    n_frames = len(universe.trajectory)
     n_atoms = universe.atoms.n_atoms
-
-    coords = np.empty((n_frames, n_atoms, 2), dtype=float)
-    for t, _ in enumerate(universe.trajectory):
-        coords[t] = universe.atoms.positions[..., :2]
+    n_frames = len(universe.trajectory)
 
     psi = np.zeros((n_atoms, n_frames))
 
-    for t, frame in enumerate(coords):
+    for t, _ in enumerate(universe.trajectory):
+        frame = universe.atoms.positions[:, :2].copy()
+
         for i, atom_i in enumerate(frame):
             tmp = 0.0
-            for j in neigh_list_per_frame[t][i]:
+            neighbors = neigh_list_per_frame[t][i]
+            for j in neighbors:
                 x, y = frame[j] - atom_i
                 if x != 0:
                     theta = np.arctan(y / x)
@@ -91,8 +90,10 @@ def orientational_order_param(
                 else:
                     theta = np.pi / 2
                 tmp += np.exp(1j * order * theta)
-            if len(neigh_list_per_frame) > 0:
-                tmp /= len(neigh_list_per_frame)
+
+            if len(neighbors) > 0:
+                tmp /= len(neighbors)
+
             psi[i][t] = np.abs(tmp)
 
     return psi
