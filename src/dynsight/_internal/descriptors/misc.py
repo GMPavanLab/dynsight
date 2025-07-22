@@ -142,27 +142,32 @@ def velocity_alignment(
         .. testcode:: phi-test
             :hide:
 
-            assert np.isclose(phi[0][1], 0.15532779089361093)
+            assert np.isclose(phi[0][1], 0.4948548674583435)
 
     """
-    n_frames = len(universe.trajectory)
     n_atoms = universe.atoms.n_atoms
-
-    coords = np.empty((n_frames, n_atoms, 3), dtype=float)
-    for t, _ in enumerate(universe.trajectory):
-        coords[t] = universe.atoms.positions
+    n_frames = len(universe.trajectory)
 
     phi = np.zeros((n_atoms, n_frames - 1))
 
-    vel = coords[1:,] - coords[:-1,] if velocities is None else velocities
+    r_0 = None
 
-    for t, frame in enumerate(vel):
-        for i, atom_i in enumerate(frame):
+    for t, _ in enumerate(universe.trajectory):
+        r_1 = universe.atoms.positions.copy()
+
+        if t == 0:
+            r_0 = r_1
+            continue
+
+        frame_vel = (r_1 - r_0) if velocities is None else velocities[t - 1]
+
+        for i, atom_i in enumerate(frame_vel):
             tmp = 0.0
-            for j in neigh_list_per_frame[t][i]:
-                tmp += 1 - cosine(atom_i, frame[j])
-            if len(neigh_list_per_frame) > 0:
-                tmp /= len(neigh_list_per_frame)
-            phi[i][t] = tmp
+            neighbors = neigh_list_per_frame[t - 1][i]
+            for j in neighbors:
+                tmp += 1 - cosine(atom_i, frame_vel[j])
+            if len(neighbors) > 0:
+                tmp /= len(neighbors)
+            phi[i, t - 1] = tmp
 
     return phi
