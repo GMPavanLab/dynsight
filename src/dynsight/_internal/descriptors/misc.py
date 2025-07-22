@@ -40,8 +40,7 @@ def orientational_order_param(
             is 6, corresponding to the hexatic order parameter.
 
     Returns:
-        NDArray[np.float64]:
-            An array of shape (n_atoms, n_frames), with the values of psi.
+        An array of shape (n_atoms, n_frames), with the values of psi.
 
     Example:
 
@@ -75,6 +74,7 @@ def orientational_order_param(
             :hide:
 
             assert np.isclose(psi[0][0], 0.095872301262402)
+
     """
     n_frames = len(universe.trajectory)
     n_atoms = universe.atoms.n_atoms
@@ -121,8 +121,7 @@ def velocity_alignment(
             velocities. If is None, velocities are computed as dispacements.
 
     Returns:
-        NDArray[np.float64]:
-            An array of shape (n_atoms, n_frames - 1), with the values of phi.
+        An array of shape (n_atoms, n_frames - 1), with the values of phi.
 
     Example:
 
@@ -156,6 +155,7 @@ def velocity_alignment(
             :hide:
 
             assert np.isclose(phi[0][1], 0.15532779089361093)
+
     """
     n_frames = len(universe.trajectory)
     n_atoms = universe.atoms.n_atoms

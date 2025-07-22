@@ -7,7 +7,7 @@ The ``analysis`` modulus contains functions for miscellaneous analyses on many-b
 Entropy
 -------
 
-The ``analysis`` module offers a variety of function for entropy- and
+The ``analysis`` module offers a variety of functions for entropy- and
 information-based calculations. 
 
 .. toctree::

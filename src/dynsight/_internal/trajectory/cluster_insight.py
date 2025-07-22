@@ -55,8 +55,9 @@ class ClusterInsight:
     ) -> ClusterInsight:
         """Load the ClusterInsight object from JSON and associated .npy file.
 
-        Args:
+        Parameters:
             file_path: Path to the .json file.
+
             mmap_mode: If given, used as np.load(..., mmap_mode=mmap_mode) for
                 memory mapping.
 
@@ -144,8 +145,9 @@ class OnionInsight(ClusterInsight):
     ) -> OnionInsight:
         """Load the OnionInsight object from JSON and .npy files.
 
-        Args:
+        Parameters:
             file_path: Path to the .json file.
+
             mmap_mode: If given, used as np.load(..., mmap_mode=mmap_mode) for
                 memory mapping.
 
@@ -331,8 +333,9 @@ class OnionSmoothInsight(ClusterInsight):
     ) -> OnionSmoothInsight:
         """Load the OnionSmoothInsight from JSON and associated .npy file.
 
-        Args:
+        Parameters:
             file_path: Path to the .json file.
+
             mmap_mode: If given, used as np.load(..., mmap_mode=mmap_mode) for
                 memory mapping.
 

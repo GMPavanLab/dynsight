@@ -32,9 +32,7 @@ def compute_shannon(
             The number of bins with which the data histogram must be computed.
 
     Returns:
-        float:
-            entropy:
-                The value of the normalized Shannon entropy of the dataset.
+        The value of the normalized Shannon entropy of the dataset.
 
     Example:
 
@@ -57,6 +55,7 @@ def compute_shannon(
             :hide:
 
             assert np.isclose(data_entropy, 0.9993954419344714)
+
     """
     if data.size == 0:
         msg = "data is empty"
@@ -88,8 +87,7 @@ def compute_kl_entropy(data: NDArray[np.float64], n_neigh: int = 1) -> float:
             The number of neighbors considered in the KL estimator.
 
     Returns:
-        float:
-            The Shannon differential entropy of the dataset, in bits.
+        The Shannon differential entropy of the dataset, in bits.
 
     Example:
 
@@ -134,8 +132,7 @@ def compute_negentropy(data: NDArray[np.float64]) -> float:
             The dataset for which the entropy is to be computed.
 
     Returns:
-        float:
-            The negentropy of the dataset, in bits.
+        The negentropy of the dataset, in bits.
 
 
     Example:
@@ -154,6 +151,7 @@ def compute_negentropy(data: NDArray[np.float64]) -> float:
             :hide:
 
             assert np.isclose(negentropy, 0.2609932580146541)
+
     """
     data = data.flatten()
     rng = np.random.default_rng(seed=1234)
@@ -189,9 +187,7 @@ def compute_shannon_multi(
             dimension.
 
     Returns:
-        float:
-            entropy:
-                The value of the normalized Shannon entropy of the dataset.
+        The value of the normalized Shannon entropy of the dataset.
 
     Example:
 
@@ -215,6 +211,7 @@ def compute_shannon_multi(
             :hide:
 
             assert np.isclose(data_entropy, 0.8837924363474094)
+
     """
     if data.size == 0:
         msg = "data is empty"
@@ -251,11 +248,10 @@ def compute_entropy_gain(
             Default is 20.
 
     Returns:
-        tuple[float, float, float, float]
-            * The absolute information gain :math:`H_0 - H_{clust}`
-            * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
-            * The Shannon entropy of the initial data :math:`H_0`
-            * The shannon entropy of the clustered data :math:`H_{clust}`
+        * The absolute information gain :math:`H_0 - H_{clust}`
+        * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
+        * The Shannon entropy of the initial data :math:`H_0`
+        * The shannon entropy of the clustered data :math:`H_{clust}`
 
     Example:
 
@@ -278,6 +274,7 @@ def compute_entropy_gain(
             :hide:
 
             assert np.isclose(entropy_gain, 0.0010065005804883983)
+
     """
     if data.shape[0] != labels.shape[0]:
         msg = (
@@ -340,11 +337,10 @@ def compute_entropy_gain_multi(
             one for each dimension.
 
     Returns:
-        tuple[float, float, float, float]
-            * The absolute information gain :math:`H_0 - H_{clust}`
-            * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
-            * The Shannon entropy of the initial data :math:`H_0`
-            * The shannon entropy of the clustered data :math:`H_{clust}`
+        * The absolute information gain :math:`H_0 - H_{clust}`
+        * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
+        * The Shannon entropy of the initial data :math:`H_0`
+        * The shannon entropy of the clustered data :math:`H_{clust}`
 
     Example:
 
@@ -368,6 +364,7 @@ def compute_entropy_gain_multi(
             :hide:
 
             assert np.isclose(entropy_gain, 0.13171418273750357)
+
     """
     if data.shape[0] != labels.shape[0]:
         msg = (
@@ -432,8 +429,7 @@ def sample_entropy(
             The m parameter (length of the considered overlapping windows).
 
     Returns:
-        float
-            Sample entropy of the input time-series.
+        Sample entropy of the input time-series.
 
     Example:
 
@@ -456,6 +452,7 @@ def sample_entropy(
             :hide:
 
             assert np.isclose(sampen, 1.6094379124341003)
+
     """
     n_sum = len(time_series) - m_par
 

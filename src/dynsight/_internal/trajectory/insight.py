@@ -56,8 +56,9 @@ class Insight:
     ) -> Insight:
         """Load the Insight object from .json file.
 
-        Args:
+        Parameters:
             file_path: Path to the .json file.
+
             mmap_mode: If given, used as np.load(..., mmap_mode=mmap_mode) for
                 memory mapping.
 
