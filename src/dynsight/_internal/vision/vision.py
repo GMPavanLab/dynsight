@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Callable
 
 import torch
 import yaml
+from PIL import Image
 from ultralytics import YOLO
 
 if TYPE_CHECKING:
@@ -269,9 +270,11 @@ class VisionInstance:
 
         video_exts = {".mp4", ".avi", ".mov", ".mkv", ".webm"}
         is_video = False
-        if isinstance(self.source, (str, Path)):
-            if Path(self.source).suffix.lower() in video_exts:
-                is_video = True
+        if (
+            isinstance(self.source, (str, Path))
+            and Path(self.source).suffix.lower() in video_exts
+        ):
+            is_video = True
 
         for idx, result in enumerate(sorted_results):
             src = Path(result.path)
@@ -279,16 +282,20 @@ class VisionInstance:
             if is_video:
                 frame_name = f"{src.stem}_{idx:06d}.jpg"
                 img_dst = dataset_path / "images" / subset / frame_name
-                lbl_dst = dataset_path / "labels" / subset / (
-                    Path(frame_name).stem + ".txt"
+                lbl_dst = (
+                    dataset_path
+                    / "labels"
+                    / subset
+                    / (Path(frame_name).stem + ".txt")
                 )
-                from PIL import Image
 
                 img = Image.fromarray(result.orig_img[..., ::-1])
                 img.save(img_dst)
             else:
                 img_dst = dataset_path / "images" / subset / src.name
-                lbl_dst = dataset_path / "labels" / subset / (src.stem + ".txt")
+                lbl_dst = (
+                    dataset_path / "labels" / subset / (src.stem + ".txt")
+                )
 
                 img_dst.write_bytes(src.read_bytes())
 
