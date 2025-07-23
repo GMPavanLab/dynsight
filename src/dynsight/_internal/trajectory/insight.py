@@ -36,7 +36,7 @@ class Insight:
         """Save the Insight to a JSON file and  .npy file."""
         # Save dataset as .npy
         npy_path = file_path.with_suffix(".npy")
-        np.save(npy_path, self.dataset)
+        np.save(npy_path, self.dataset.astype(np.float64))
 
         # Prepare JSON data
         json_data = {

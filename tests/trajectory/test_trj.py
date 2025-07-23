@@ -69,6 +69,28 @@ def test_trj_inits(
     logger.get()
 
 
+def test_trj_to_insight(file_paths: dict[str, Path]) -> None:
+    """Test computation methods for Trj class."""
+    trj = Trj.init_from_xtc(file_paths["xtc"], file_paths["gro"])
+
+    neigcounts, n_c = trj.get_coord_number(r_cut=3.0)
+    _, lens = trj.get_lens(r_cut=3.0, neigcounts=neigcounts)
+    soap = trj.get_soap(r_cut=3.0, n_max=8, l_max=8)
+    _, psi = trj.get_orientational_op(r_cut=3.0, neigcounts=neigcounts)
+
+    test_n_c = Insight.load_from_json(file_paths["files_dir"] / "n_c.json")
+    test_lens = Insight.load_from_json(file_paths["files_dir"] / "lens.json")
+    test_soap = Insight.load_from_json(file_paths["files_dir"] / "soap.json")
+    test_psi = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
+
+    assert np.allclose(test_n_c.dataset, n_c.dataset)
+    assert np.allclose(test_lens.dataset, lens.dataset)
+    assert np.allclose(test_soap.dataset, soap.dataset)
+    assert np.allclose(test_psi.dataset, psi.dataset)
+
+    logger.get()
+
+
 def test_insight(
     tmp_path: Path, file_paths: dict[str, Path], universe: MDAnalysis.Universe
 ) -> None:
