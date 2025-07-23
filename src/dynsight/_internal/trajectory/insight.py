@@ -145,6 +145,36 @@ class Insight:
         logger.log(f"Computed angular velocity with args {attr_dict}.")
         return Insight(dataset=theta, meta=attr_dict)
 
+    def get_tica(
+        self,
+        lag_time: int,
+        tica_dim: int,
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64], Insight]:
+        """Perform tICA on trajectories from a many-body system.
+
+        The attributes "lag_time" and "tica_dim" are added to the meta.
+
+        Raises:
+            ValueError if the dataset does not have the right dimensions.
+        """
+        if self.dataset.ndim != UNIVAR_DIM + 1:
+            msg = "dataset.ndim != 3."
+            logger.log(msg)
+            raise ValueError(msg)
+
+        relax_times, coeffs, tica = dynsight.descriptors.many_body_tica(
+            self.dataset,
+            lag_time=lag_time,
+            tica_dim=tica_dim,
+        )
+
+        attr_dict = self.meta.copy()
+        attr_dict.update({"lag_time": lag_time, "tica_dim": tica_dim})
+
+        logger.log(f"Computed many-body tICA with args {attr_dict}.")
+
+        return relax_times, coeffs, Insight(dataset=tica, meta=attr_dict)
+
     def get_onion(
         self,
         delta_t: int,
