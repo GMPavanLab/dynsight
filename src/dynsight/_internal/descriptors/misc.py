@@ -159,9 +159,11 @@ def velocity_alignment(
 
         for i, atom_i in enumerate(frame_vel):
             tmp = 0.0
-            neighbors = neigh_list_per_frame[t - 1][i]
-            for j in neighbors:
-                tmp += 1 - cosine(atom_i, frame_vel[j])
+            if np.any(atom_i != 0.0):
+                neighbors = neigh_list_per_frame[t - 1][i]
+                for j in neighbors:
+                    if np.any(frame_vel[j] != 0.0):
+                        tmp += 1 - cosine(atom_i, frame_vel[j])
             if len(neighbors) > 0:
                 tmp /= len(neighbors)
             phi[i, t - 1] = tmp
