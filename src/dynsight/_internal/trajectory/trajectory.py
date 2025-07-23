@@ -272,6 +272,43 @@ class Trj:
             meta=attr_dict,
         )
 
+    def get_velocity_alignment(
+        self,
+        r_cut: float,
+        selection: str = "all",
+        neigcounts: list[list[AtomGroup]] | None = None,
+    ) -> tuple[list[list[AtomGroup]], Insight]:
+        """Compute the average velocity alignment.
+
+        Returns:
+            neighcounts: a list[list[AtomGroup]], it can be used to speed up
+                subsequent descriptors' computations.
+            An Insight containing the average velocities alignment. It has
+                the following meta: r_cut, selection.
+        """
+        if neigcounts is None:
+            neigcounts = dynsight.lens.list_neighbours_along_trajectory(
+                input_universe=self.universe,
+                cutoff=r_cut,
+                selection=selection,
+                trajslice=self.trajslice,
+            )
+        phi = dynsight.descriptors.velocity_alignment(
+            self.universe,
+            neigh_list_per_frame=neigcounts,
+        )
+
+        attr_dict = {"r_cut": r_cut, "selection": selection}
+
+        logger.log(
+            f"Computed average velocity alignment using args {attr_dict}."
+        )
+
+        return neigcounts, Insight(
+            dataset=phi,
+            meta=attr_dict,
+        )
+
     def get_rdf(
         self,
         distances_range: list[float],

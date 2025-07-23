@@ -77,16 +77,19 @@ def test_trj_to_insight(file_paths: dict[str, Path]) -> None:
     _, lens = trj.get_lens(r_cut=3.0, neigcounts=neigcounts)
     soap = trj.get_soap(r_cut=3.0, n_max=8, l_max=8)
     _, psi = trj.get_orientational_op(r_cut=3.0, neigcounts=neigcounts)
+    _, phi = trj.get_velocity_alignment(r_cut=3.0, neigcounts=neigcounts)
 
     test_n_c = Insight.load_from_json(file_paths["files_dir"] / "n_c.json")
     test_lens = Insight.load_from_json(file_paths["files_dir"] / "lens.json")
     test_soap = Insight.load_from_json(file_paths["files_dir"] / "soap.json")
     test_psi = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
+    test_phi = Insight.load_from_json(file_paths["files_dir"] / "phi.json")
 
     assert np.allclose(test_n_c.dataset, n_c.dataset)
     assert np.allclose(test_lens.dataset, lens.dataset)
     assert np.allclose(test_soap.dataset, soap.dataset)
     assert np.allclose(test_psi.dataset, psi.dataset)
+    assert np.allclose(test_phi.dataset, phi.dataset)
 
     logger.get()
 
