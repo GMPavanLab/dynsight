@@ -93,12 +93,15 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
     assert np.allclose(test_phi.dataset, phi.dataset)
     assert np.allclose(test_tica.dataset, tica.dataset)
 
-    # psi and tsoap fail pytest for no apparent reason
+    # Note: for some reason, get_orientational_op() and get_angular_velocity()
+    # have larger numerical variations that the other descriptors.
     _, psi = trj.get_orientational_op(r_cut=r_cut, neigcounts=neigcounts)
     test_psi = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
     assert_allclose(test_psi.dataset, psi.dataset, rtol=1e-3, atol=1e-6)
 
-    _ = soap.get_angular_velocity()
+    tsoap = soap.get_angular_velocity()
+    test_tsoap = Insight.load_from_json(file_paths["files_dir"] / "tsoap.json")
+    assert_allclose(test_tsoap.dataset, tsoap.dataset, rtol=1e-3, atol=1e-6)
 
     logger.get()
 
