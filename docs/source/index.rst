@@ -1,10 +1,15 @@
 .. toctree::
    :hidden:
+   :maxdepth: 1
+
+   How to get started <trajectory>
+
+.. toctree::
+   :hidden:
    :caption: dynsight
    :maxdepth: 2
 
    vision <vision>
-   trajectory <trajectory>
    descriptors <descriptors>
    onion clustering <onion>
    analysis <analysis>
