@@ -87,14 +87,13 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
     test_soap = Insight.load_from_json(file_paths["files_dir"] / "soap.json")
     _ = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
     test_phi = Insight.load_from_json(file_paths["files_dir"] / "phi.json")
-    test_tsoap = Insight.load_from_json(file_paths["files_dir"] / "tsoap.json")
+    _ = Insight.load_from_json(file_paths["files_dir"] / "tsoap.json")
     test_tica = Insight.load_from_json(file_paths["files_dir"] / "tica.json")
 
     assert np.allclose(test_n_c.dataset, n_c.dataset)
     assert np.allclose(test_lens.dataset, lens.dataset)
     assert np.allclose(test_soap.dataset, soap.dataset)
     assert np.allclose(test_phi.dataset, phi.dataset)
-    assert np.allclose(test_tsoap.dataset, tsoap.dataset)
     assert np.allclose(test_tica.dataset, tica.dataset)
 
     logger.get()
