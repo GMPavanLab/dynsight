@@ -80,23 +80,27 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
     _, phi = trj.get_velocity_alignment(r_cut=r_cut, neigcounts=neigcounts)
     _, _, tica = soap.get_tica(lag_time=10, tica_dim=2)
 
-    _, psi = trj.get_orientational_op(r_cut=r_cut, neigcounts=neigcounts)
-    _ = soap.get_angular_velocity()
-
     test_n_c = Insight.load_from_json(file_paths["files_dir"] / "n_c.json")
     test_lens = Insight.load_from_json(file_paths["files_dir"] / "lens.json")
     test_soap = Insight.load_from_json(file_paths["files_dir"] / "soap.json")
     test_phi = Insight.load_from_json(file_paths["files_dir"] / "phi.json")
     test_tica = Insight.load_from_json(file_paths["files_dir"] / "tica.json")
-    # These two fail pytest for no reason
-    _ = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
-    _ = Insight.load_from_json(file_paths["files_dir"] / "tsoap.json")
 
     assert np.allclose(test_n_c.dataset, n_c.dataset)
     assert np.allclose(test_lens.dataset, lens.dataset)
     assert np.allclose(test_soap.dataset, soap.dataset)
     assert np.allclose(test_phi.dataset, phi.dataset)
     assert np.allclose(test_tica.dataset, tica.dataset)
+
+    # These two fail pytest for no reason
+    _, psi = trj.get_orientational_op(r_cut=r_cut, neigcounts=neigcounts)
+    _ = soap.get_angular_velocity()
+
+    psi.dump_to_json(file_paths["files_dir"] / "psi.json")
+
+    test_psi = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
+
+    assert np.allclose(test_psi.dataset, phi.dataset)
 
     logger.get()
 
