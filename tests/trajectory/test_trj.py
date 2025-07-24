@@ -92,15 +92,13 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
     assert np.allclose(test_phi.dataset, phi.dataset)
     assert np.allclose(test_tica.dataset, tica.dataset)
 
-    # These two fail pytest for no reason
+    # psi and tsoap fail pytest for no apparent reason
     _, psi = trj.get_orientational_op(r_cut=r_cut, neigcounts=neigcounts)
-    _ = soap.get_angular_velocity()
-
     psi.dump_to_json(file_paths["files_dir"] / "psi.json")
-
     test_psi = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
+    assert np.allclose(test_psi.dataset, psi.dataset)
 
-    assert np.allclose(test_psi.dataset, phi.dataset)
+    _ = soap.get_angular_velocity()
 
     logger.get()
 
