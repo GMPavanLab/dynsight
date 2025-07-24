@@ -93,9 +93,9 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
     assert np.allclose(test_n_c.dataset, n_c.dataset)
     assert np.allclose(test_lens.dataset, lens.dataset)
     assert np.allclose(test_soap.dataset, soap.dataset)
+    assert np.allclose(test_psi.dataset, psi.dataset)
 
     if False:
-        assert np.allclose(test_psi.dataset, psi.dataset)
         assert np.allclose(test_phi.dataset, phi.dataset)
         assert np.allclose(test_tsoap.dataset, tsoap.dataset)
         assert np.allclose(test_tica.dataset, tica.dataset)
