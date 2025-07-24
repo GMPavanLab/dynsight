@@ -7,6 +7,7 @@ from pathlib import Path
 import MDAnalysis
 import numpy as np
 import pytest
+from numpy.testing import assert_allclose
 
 from dynsight.logs import logger
 from dynsight.trajectory import (
@@ -95,7 +96,7 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
     # psi and tsoap fail pytest for no apparent reason
     _, psi = trj.get_orientational_op(r_cut=r_cut, neigcounts=neigcounts)
     test_psi = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
-    assert np.allclose(test_psi.dataset, psi.dataset)
+    assert_allclose(test_psi.dataset, psi.dataset)
 
     _ = soap.get_angular_velocity()
 
