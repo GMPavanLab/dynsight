@@ -57,10 +57,11 @@ class Insight:
         """Load the Insight object from .json file.
 
         Parameters:
-            file_path: Path to the .json file.
-
-            mmap_mode: If given, used as np.load(..., mmap_mode=mmap_mode) for
-                memory mapping.
+            file_path:
+                Path to the .json file.
+            mmap_mode:
+                If given, used as np.load(..., mmap_mode=mmap_mode) for memory
+                mapping.
 
         Raises:
             ValueError: if required keys are missing.
@@ -277,32 +278,30 @@ class Insight:
         for details).
 
         Parameters:
-            delta_t_min: Smaller value for delta_t_list.
-
-            delta_t_max: Larger value for delta_t_list,
-
-            delta_t_num: Number of values in delta_t_list,
-
-            fig1_path: If is not None, the time resolution analysis plot is
-                saved in this location.
-
-            fig2_path: If is not None, the populations fractions plot is
-                saved in this location.
-
-            bins: The 'bins' parameter for onion clustering.
-
-            number_of_sigmas: The 'number_of_sigmas' parameter for onion
-                clustering.
-
-            max_area_overlap: The 'max_area_overlap' parameter for onion
-                clustering.
+            delta_t_min:
+                Smaller value for delta_t_list.
+            delta_t_max:
+                Larger value for delta_t_list.
+            delta_t_num:
+                Number of values in delta_t_list.
+            fig1_path:
+                If is not None, the time resolution analysis plot is saved in
+                this location.
+            fig2_path:
+                If is not None, the populations fractions plot is saved in
+                this location.
+            bins:
+                The 'bins' parameter for onion clustering.
+            number_of_sigmas:
+                The 'number_of_sigmas' parameter for onion clustering.
+            max_area_overlap:
+                The 'max_area_overlap' parameter for onion clustering.
 
         Returns:
-            delta_t_list: The list of delta_t used.
-
-            n_clust: The number of clusters at each delta_t.
-
-            unclass_frac: The fraction of unclassified data at each delta_t.
+            tuple:
+                * delta_t_list: The list of ∆t used.
+                * n_clust: The number of clusters at each ∆t.
+                * unclass_frac: The fraction of unclassified data at each ∆t.
         """
         if delta_t_max is None:
             delta_t_max = self.dataset.shape[1]

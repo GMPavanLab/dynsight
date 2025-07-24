@@ -56,10 +56,11 @@ class ClusterInsight:
         """Load the ClusterInsight object from JSON and associated .npy file.
 
         Parameters:
-            file_path: Path to the .json file.
-
-            mmap_mode: If given, used as np.load(..., mmap_mode=mmap_mode) for
-                memory mapping.
+            file_path:
+                Path to the .json file.
+            mmap_mode:
+                If given, used as np.load(..., mmap_mode=mmap_mode) for memory
+                mapping.
 
         Raises:
             ValueError: if required keys are missing.
@@ -146,10 +147,11 @@ class OnionInsight(ClusterInsight):
         """Load the OnionInsight object from JSON and .npy files.
 
         Parameters:
-            file_path: Path to the .json file.
-
-            mmap_mode: If given, used as np.load(..., mmap_mode=mmap_mode) for
-                memory mapping.
+            file_path:
+                Path to the .json file.
+            mmap_mode:
+                If given, used as np.load(..., mmap_mode=mmap_mode) for memory
+                mapping.
 
         Raises:
             ValueError: if required keys are missing.
@@ -334,10 +336,11 @@ class OnionSmoothInsight(ClusterInsight):
         """Load the OnionSmoothInsight from JSON and associated .npy file.
 
         Parameters:
-            file_path: Path to the .json file.
-
-            mmap_mode: If given, used as np.load(..., mmap_mode=mmap_mode) for
-                memory mapping.
+            file_path:
+                Path to the .json file.
+            mmap_mode:
+                If given, used as np.load(..., mmap_mode=mmap_mode) for memory
+                mapping.
 
         Raises:
             ValueError: if required keys are missing.

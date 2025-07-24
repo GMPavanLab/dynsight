@@ -64,7 +64,8 @@ class Trj:
         See https://docs.mdanalysis.org/2.9.0/documentation_pages/core/universe.html#MDAnalysis.core.universe.Universe.
 
         Parameters:
-        dt: the trajectory's time-step.
+            dt:
+                the trajectory's time-step.
         """
         logger.log(f"Created Trj from {traj_file} with dt = {dt}.")
         universe = MDAnalysis.Universe(traj_file, dt=dt)
@@ -137,10 +138,11 @@ class Trj:
         """Compute coordination number on the trajectory.
 
         Returns:
-            neighcounts: a list[list[AtomGroup]], it can be used to speed up
-                subsequent descriptors' computations.
-            An Insight containing the number of neighbors. It has the following
-                meta: r_cut, selection.
+            tuple:
+                * neighcounts: a list[list[AtomGroup]], it can be used to
+                    speed up subsequent descriptors' computations.
+                * An Insight containing the number of neighbors. It has the
+                    following meta: r_cut, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
@@ -171,10 +173,11 @@ class Trj:
         """Compute LENS on the trajectory.
 
         Returns:
-            neighcounts: a list[list[AtomGroup]], it can be used to speed up
-                subsequent descriptors' computations.
-            An Insight containing LENS. It has the following meta: r_cut,
-                selection.
+            tuple:
+                * neighcounts: a list[list[AtomGroup]], it can be used to
+                    speed up subsequent descriptors' computations.
+                * An Insight containing LENS. It has the following meta:
+                    r_cut, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
@@ -243,10 +246,11 @@ class Trj:
         """Compute the magnitude of the orientational order parameter.
 
         Returns:
-            neighcounts: a list[list[AtomGroup]], it can be used to speed up
-                subsequent descriptors' computations.
-            An Insight containing the orientational order parameter. It has
-                the following meta: r_cut, order, selection.
+            tuple:
+                * neighcounts: a list[list[AtomGroup]], it can be used to
+                    speed up subsequent descriptors' computations.
+                * An Insight containing the orientational order parameter.
+                    It has the following meta: r_cut, order, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
@@ -281,10 +285,11 @@ class Trj:
         """Compute the average velocity alignment.
 
         Returns:
-            neighcounts: a list[list[AtomGroup]], it can be used to speed up
-                subsequent descriptors' computations.
-            An Insight containing the average velocities alignment. It has
-                the following meta: r_cut, selection.
+            tuple:
+                * neighcounts: a list[list[AtomGroup]], it can be used to
+                    speed up subsequent descriptors' computations.
+                * An Insight containing the average velocities alignment.
+                    It has the following meta: r_cut, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
@@ -323,8 +328,9 @@ class Trj:
         See https://docs.mdanalysis.org/1.1.1/documentation_pages/analysis/rdf.html.
 
         Returns:
-            * A list of values of the interparticle distance r
-            * The corresponding list of values of g(r)
+            tuple:
+                * A list of values of the interparticle distance r
+                * The corresponding list of values of g(r)
         """
         trajslice = slice(None) if self.trajslice is None else self.trajslice
         bins, rdf = dynsight.analysis.compute_rdf(
