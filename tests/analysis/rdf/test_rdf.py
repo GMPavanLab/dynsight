@@ -29,7 +29,7 @@ def test_compute_rdf(case_data: RDFCaseData) -> None:
         s2=selection,
         distances_range=[0.0, 5.0],
         norm=case_data.norm,
-    ).dataset
+    )
 
     if not expected_bins.exists() or not expected_rdf.exists():
         np.save(expected_bins, test_bins)

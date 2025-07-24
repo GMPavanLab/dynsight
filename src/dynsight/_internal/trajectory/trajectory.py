@@ -317,13 +317,14 @@ class Trj:
         exclusion_block: list[int] | None = None,
         nbins: int = 200,
         norm: Literal["rdf", "density", "none"] = "rdf",
-    ) -> Insight:
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         """Compute the radial distribution function g(r).
 
         See https://docs.mdanalysis.org/1.1.1/documentation_pages/analysis/rdf.html.
 
-        The returned Insight contains the following meta: distances_range, s1,
-        s2, exclusion_block, nbins, norm.
+        Returns:
+            * A list of values of the interparticle distance r
+            * The corresponding list of values of g(r)
         """
         trajslice = slice(None) if self.trajslice is None else self.trajslice
         bins, rdf = dynsight.analysis.compute_rdf(
@@ -338,7 +339,6 @@ class Trj:
             stop=trajslice.stop,
             step=trajslice.step,
         )
-        dataset = np.array([bins, rdf])
         attr_dict = {
             "distances_range": distances_range,
             "s1": s1,
@@ -348,4 +348,4 @@ class Trj:
             "norm": norm,
         }
         logger.log(f"Computed g(r) with args {attr_dict}.")
-        return Insight(dataset=dataset, meta=attr_dict)
+        return bins, rdf
