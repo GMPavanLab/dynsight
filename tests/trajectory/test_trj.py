@@ -85,7 +85,7 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
     test_n_c = Insight.load_from_json(file_paths["files_dir"] / "n_c.json")
     test_lens = Insight.load_from_json(file_paths["files_dir"] / "lens.json")
     test_soap = Insight.load_from_json(file_paths["files_dir"] / "soap.json")
-    test_psi = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
+    _ = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
     test_phi = Insight.load_from_json(file_paths["files_dir"] / "phi.json")
     test_tsoap = Insight.load_from_json(file_paths["files_dir"] / "tsoap.json")
     test_tica = Insight.load_from_json(file_paths["files_dir"] / "tica.json")
