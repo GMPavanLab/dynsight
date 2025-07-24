@@ -94,7 +94,6 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
 
     # psi and tsoap fail pytest for no apparent reason
     _, psi = trj.get_orientational_op(r_cut=r_cut, neigcounts=neigcounts)
-    psi.dump_to_json(file_paths["files_dir"] / "psi.json")
     test_psi = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
     assert np.allclose(test_psi.dataset, psi.dataset)
 
