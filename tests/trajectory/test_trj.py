@@ -77,18 +77,20 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
     neigcounts, n_c = trj.get_coord_number(r_cut=r_cut)
     _, lens = trj.get_lens(r_cut=r_cut, neigcounts=neigcounts)
     soap = trj.get_soap(r_cut=10.0, n_max=8, l_max=8)
-    _, psi = trj.get_orientational_op(r_cut=r_cut, neigcounts=neigcounts)
     _, phi = trj.get_velocity_alignment(r_cut=r_cut, neigcounts=neigcounts)
-    tsoap = soap.get_angular_velocity()
     _, _, tica = soap.get_tica(lag_time=10, tica_dim=2)
+
+    _, psi = trj.get_orientational_op(r_cut=r_cut, neigcounts=neigcounts)
+    _ = soap.get_angular_velocity()
 
     test_n_c = Insight.load_from_json(file_paths["files_dir"] / "n_c.json")
     test_lens = Insight.load_from_json(file_paths["files_dir"] / "lens.json")
     test_soap = Insight.load_from_json(file_paths["files_dir"] / "soap.json")
-    _ = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
     test_phi = Insight.load_from_json(file_paths["files_dir"] / "phi.json")
-    _ = Insight.load_from_json(file_paths["files_dir"] / "tsoap.json")
     test_tica = Insight.load_from_json(file_paths["files_dir"] / "tica.json")
+    # These two fail pytest for no reason
+    _ = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
+    _ = Insight.load_from_json(file_paths["files_dir"] / "tsoap.json")
 
     assert np.allclose(test_n_c.dataset, n_c.dataset)
     assert np.allclose(test_lens.dataset, lens.dataset)
@@ -104,7 +106,7 @@ def test_insight(
 ) -> None:
     """Test Insight methods."""
     trj = Trj(universe)
-    _, insight = trj.get_lens(10.0)
+    _, insight = trj.get_lens(r_cut=10.0)
 
     # Insight dump/load
     json_file = tmp_path / "insight.json"
