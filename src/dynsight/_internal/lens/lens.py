@@ -106,7 +106,7 @@ def neighbour_change_in_time(
             The delay between frames on which LENS is computed. Default is 1.
 
     Returns:
-        A tuple of the following elements:
+        tuple:
             - lens_array: The calculated LENS parameter.
                 It's a numpy.array of shape (n_particles, n_frames - 1)
             - number_of_neighs: The count of neighbors per frame.
