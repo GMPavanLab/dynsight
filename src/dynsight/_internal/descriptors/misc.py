@@ -139,7 +139,7 @@ def velocity_alignment(
         .. testcode:: phi-test
             :hide:
 
-            assert np.isclose(phi[0][1], 0.4948548674583435)
+            assert np.isclose(phi[0][0], 0.38268664479255676)
 
     """
     n_atoms = universe.atoms.n_atoms
@@ -163,10 +163,11 @@ def velocity_alignment(
             if np.any(atom_i != 0.0):
                 neighbors = neigh_list_per_frame[t - 1][i]
                 for j in neighbors:
-                    if np.any(frame_vel[j] != 0.0):
+                    if j != i and np.any(frame_vel[j] != 0.0):
                         tmp += 1 - cosine(atom_i, frame_vel[j])
-            if len(neighbors) > 0:
-                tmp /= len(neighbors)
+            if len(neighbors) > 1:
+                tmp /= len(neighbors) - 1
+
             phi[i, t - 1] = tmp
 
     return phi

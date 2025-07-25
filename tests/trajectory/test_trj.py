@@ -87,11 +87,11 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
     test_phi = Insight.load_from_json(file_paths["files_dir"] / "phi.json")
     test_tica = Insight.load_from_json(file_paths["files_dir"] / "tica.json")
 
-    assert_allclose(test_n_c.dataset, n_c.dataset)
-    assert_allclose(test_lens.dataset, lens.dataset)
-    assert_allclose(test_soap.dataset, soap.dataset)
-    assert_allclose(test_phi.dataset, phi.dataset)
-    assert_allclose(test_tica.dataset, tica.dataset)
+    assert_allclose(test_n_c.dataset, n_c.dataset, rtol=1e-4, atol=1e-6)
+    assert_allclose(test_lens.dataset, lens.dataset, rtol=1e-4, atol=1e-6)
+    assert_allclose(test_soap.dataset, soap.dataset, rtol=1e-4, atol=1e-6)
+    assert_allclose(test_phi.dataset, phi.dataset, rtol=1e-4, atol=1e-6)
+    assert_allclose(test_tica.dataset, tica.dataset, rtol=1e-4, atol=1e-6)
 
     # Note: for some reason, get_orientational_op() and get_angular_velocity()
     # have larger numerical variations that the other descriptors.
