@@ -1,0 +1,8 @@
+{
+    "dataset_file": "n_c.npy",
+    "meta": {
+        "r_cut": 10.0,
+        "delay": 1,
+        "selection": "all"
+    }
+}

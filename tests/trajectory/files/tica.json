@@ -1,0 +1,13 @@
+{
+    "dataset_file": "tica.npy",
+    "meta": {
+        "r_cut": 10.0,
+        "n_max": 8,
+        "l_max": 8,
+        "respect_pbc": true,
+        "selection": "all",
+        "centers": "all",
+        "lag_time": 10,
+        "tica_dim": 2
+    }
+}

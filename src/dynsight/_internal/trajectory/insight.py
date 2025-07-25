@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, field
-from typing import TYPE_CHECKING, Any
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -33,32 +33,58 @@ class Insight:
     meta: dict[str, Any] = field(default_factory=dict)
 
     def dump_to_json(self, file_path: Path) -> None:
-        """Save the Insight object as .json file."""
-        data = asdict(self)
-        data["dataset"] = data["dataset"].tolist()
+        """Save the Insight to a JSON file and  .npy file."""
+        # Save dataset as .npy
+        npy_path = file_path.with_suffix(".npy")
+        np.save(npy_path, self.dataset.astype(np.float64))
+
+        # Prepare JSON data
+        json_data = {
+            "dataset_file": npy_path.name,
+            "meta": self.meta,
+        }
+
         with file_path.open("w") as file:
-            json.dump(data, file, indent=4)
-        logger.log(f"Insight saved to {file_path}.")
+            json.dump(json_data, file, indent=4)
+        logger.log(f"Insight saved to {file_path} and dataset to {npy_path}.")
 
     @classmethod
-    def load_from_json(cls, file_path: Path) -> Insight:
+    def load_from_json(
+        cls,
+        file_path: Path,
+        mmap_mode: Literal["r", "r+", "w+", "c"] | None = None,
+    ) -> Insight:
         """Load the Insight object from .json file.
 
+        Parameters:
+            file_path:
+                Path to the .json file.
+            mmap_mode:
+                If given, used as np.load(..., mmap_mode=mmap_mode) for memory
+                mapping.
+
         Raises:
-            ValueError if the input file does not have a key "dataset".
+            ValueError: if required keys are missing.
         """
         with file_path.open("r") as file:
             data = json.load(file)
 
-        if "dataset" not in data:
-            msg = "'dataset' key not found in JSON file."
+        dataset_file = data.get("dataset_file")
+        if not dataset_file:
+            msg = "'dataset_file' key not found in JSON file."
             logger.log(msg)
             raise ValueError(msg)
 
-        logger.log(f"Insight loaded from {file_path}.")
+        dataset_path = file_path.with_name(dataset_file)
+        dataset = np.load(dataset_path, mmap_mode=mmap_mode)
+
+        logger.log(
+            f"Insight loaded from {file_path}, dataset from {dataset_path}."
+        )
+
         return cls(
-            dataset=np.array(data.get("dataset"), dtype=np.float64),
-            meta=data.get("meta"),
+            dataset=dataset,
+            meta=data.get("meta", {}),
         )
 
     def spatial_average(
@@ -119,6 +145,36 @@ class Insight:
 
         logger.log(f"Computed angular velocity with args {attr_dict}.")
         return Insight(dataset=theta, meta=attr_dict)
+
+    def get_tica(
+        self,
+        lag_time: int,
+        tica_dim: int,
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64], Insight]:
+        """Perform tICA on trajectories from a many-body system.
+
+        The attributes "lag_time" and "tica_dim" are added to the meta.
+
+        Raises:
+            ValueError if the dataset does not have the right dimensions.
+        """
+        if self.dataset.ndim != UNIVAR_DIM + 1:
+            msg = "dataset.ndim != 3."
+            logger.log(msg)
+            raise ValueError(msg)
+
+        relax_times, coeffs, tica = dynsight.descriptors.many_body_tica(
+            self.dataset,
+            lag_time=lag_time,
+            tica_dim=tica_dim,
+        )
+
+        attr_dict = self.meta.copy()
+        attr_dict.update({"lag_time": lag_time, "tica_dim": tica_dim})
+
+        logger.log(f"Computed many-body tICA with args {attr_dict}.")
+
+        return relax_times, coeffs, Insight(dataset=tica, meta=attr_dict)
 
     def get_onion(
         self,
@@ -222,32 +278,30 @@ class Insight:
         for details).
 
         Parameters:
-            delta_t_min: Smaller value for delta_t_list.
-
-            delta_t_max: Larger value for delta_t_list,
-
-            delta_t_num: Number of values in delta_t_list,
-
-            fig1_path: If is not None, the time resolution analysis plot is
-                saved in this location.
-
-            fig2_path: If is not None, the populations fractions plot is
-                saved in this location.
-
-            bins: The 'bins' parameter for onion clustering.
-
-            number_of_sigmas: The 'number_of_sigmas' parameter for onion
-                clustering.
-
-            max_area_overlap: The 'max_area_overlap' parameter for onion
-                clustering.
+            delta_t_min:
+                Smaller value for delta_t_list.
+            delta_t_max:
+                Larger value for delta_t_list.
+            delta_t_num:
+                Number of values in delta_t_list.
+            fig1_path:
+                If is not None, the time resolution analysis plot is saved in
+                this location.
+            fig2_path:
+                If is not None, the populations fractions plot is saved in
+                this location.
+            bins:
+                The 'bins' parameter for onion clustering.
+            number_of_sigmas:
+                The 'number_of_sigmas' parameter for onion clustering.
+            max_area_overlap:
+                The 'max_area_overlap' parameter for onion clustering.
 
         Returns:
-            delta_t_list: The list of delta_t used.
-
-            n_clust: The number of clusters at each delta_t.
-
-            unclass_frac: The fraction of unclassified data at each delta_t.
+            tuple:
+                * delta_t_list: The list of ∆t used.
+                * n_clust: The number of clusters at each ∆t.
+                * unclass_frac: The fraction of unclassified data at each ∆t.
         """
         if delta_t_max is None:
             delta_t_max = self.dataset.shape[1]

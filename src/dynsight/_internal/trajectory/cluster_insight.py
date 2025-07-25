@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, field, fields
-from typing import TYPE_CHECKING, Any
+from dataclasses import dataclass, field, fields
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -32,29 +32,57 @@ class ClusterInsight:
     labels: NDArray[np.int64]
 
     def dump_to_json(self, file_path: Path) -> None:
-        """Save the ClusterInsight object as .json file."""
-        data = asdict(self)
-        data["labels"] = data["labels"].tolist()
+        """Save the ClusterInsight to a JSON file and  .npy file."""
+        npy_path = file_path.with_suffix(".npy")
+        np.save(npy_path, self.labels)
+
+        json_data = {
+            "labels_file": npy_path.name,
+        }
+
         with file_path.open("w") as file:
-            json.dump(data, file, indent=4)
-        logger.log(f"ClusterInsight saved to {file_path}.")
+            json.dump(json_data, file, indent=4)
+
+        logger.log(
+            f"ClusterInsight saved to {file_path} and labels to {npy_path}."
+        )
 
     @classmethod
-    def load_from_json(cls, file_path: Path) -> ClusterInsight:
-        """Load the ClusterInsight object from .json file.
+    def load_from_json(
+        cls,
+        file_path: Path,
+        mmap_mode: Literal["r", "r+", "w+", "c"] | None = None,
+    ) -> ClusterInsight:
+        """Load the ClusterInsight object from JSON and associated .npy file.
+
+        Parameters:
+            file_path:
+                Path to the .json file.
+            mmap_mode:
+                If given, used as np.load(..., mmap_mode=mmap_mode) for memory
+                mapping.
 
         Raises:
-            ValueError if the input file does not have a key "labels".
+            ValueError: if required keys are missing.
         """
         with file_path.open("r") as file:
             data = json.load(file)
-        if "labels" not in data:
-            msg = "'labels' key not found in JSON file."
+
+        labels_file = data.get("labels_file")
+        if not labels_file:
+            msg = "'labels_file' key not found in JSON file."
             logger.log(msg)
             raise ValueError(msg)
 
-        logger.log(f"ClusterInsight loaded from {file_path}.")
-        return cls(labels=np.array(data.get("labels"), dtype=np.int64))
+        labels_path = file_path.with_name(labels_file)
+        labels = np.load(labels_path, mmap_mode=mmap_mode)
+
+        logger.log(
+            f"ClusterInsight loaded from {file_path}, "
+            f"labels from {labels_path}."
+        )
+
+        return cls(labels=labels)
 
 
 @dataclass(frozen=True)
@@ -73,49 +101,85 @@ class OnionInsight(ClusterInsight):
     meta: dict[str, Any] = field(default_factory=dict)
 
     def dump_to_json(self, file_path: Path) -> None:
-        """Save the OnionInsight object as .json file."""
+        """Save the OnionInsight to a JSON file and  .npy file."""
+        # File paths
+        base = file_path.with_suffix("")
+        labels_path = base.with_name(base.name + "_labels.npy")
+        reshaped_path = base.with_name(base.name + "_reshaped.npy")
+
+        # Save large arrays
+        np.save(labels_path, self.labels)
+        np.save(reshaped_path, self.reshaped_data)
+
+        # Serialize state_list
+        serialized_states = []
+        for state in self.state_list:
+            state_dict = {}
+            for f in fields(state):
+                val = getattr(state, f.name)
+                state_dict[f.name] = (
+                    val.tolist() if isinstance(val, np.ndarray) else val
+                )
+            serialized_states.append(state_dict)
+
+        # Compose JSON
         data = {
-            "labels": self.labels.tolist(),
-            "reshaped_data": self.reshaped_data.tolist(),
+            "labels_file": labels_path.name,
+            "reshaped_data_file": reshaped_path.name,
+            "state_list": serialized_states,
             "meta": self.meta,
         }
 
-        new_state_list = []
-        for state in self.state_list:
-            tmp = {}
-            for f in fields(state):
-                value = getattr(state, f.name)
-                if isinstance(value, np.ndarray):
-                    tmp[f.name] = value.tolist()
-                else:
-                    tmp[f.name] = value
-            new_state_list.append(tmp)
-
-        data["state_list"] = new_state_list
         with file_path.open("w") as file:
             json.dump(data, file, indent=4)
-        logger.log(f"OnionInsight saved to {file_path}.")
+
+        logger.log(
+            f"OnionInsight saved to {file_path}, labels to {labels_path}, "
+            f"reshaped data to {reshaped_path}."
+        )
 
     @classmethod
-    def load_from_json(cls, file_path: Path) -> OnionInsight:
-        """Load the OnionInsight object from .json file.
+    def load_from_json(
+        cls,
+        file_path: Path,
+        mmap_mode: Literal["r", "r+", "w+", "c"] | None = None,
+    ) -> OnionInsight:
+        """Load the OnionInsight object from JSON and .npy files.
+
+        Parameters:
+            file_path:
+                Path to the .json file.
+            mmap_mode:
+                If given, used as np.load(..., mmap_mode=mmap_mode) for memory
+                mapping.
 
         Raises:
-            ValueError if the input file does not have a key "state_list".
+            ValueError: if required keys are missing.
         """
         with file_path.open("r") as file:
             data = json.load(file)
-        if "state_list" not in data:
-            msg = "'state_list' key not found in JSON file."
-            logger.log(msg)
-            raise ValueError(msg)
+
+        # Validate presence of keys
+        required_keys = ["labels_file", "reshaped_data_file", "state_list"]
+        for key in required_keys:
+            if key not in data:
+                msg = f"'{key}' key not found in JSON file."
+                logger.log(msg)
+                raise ValueError(msg)
+
+        base_dir = file_path.parent
+        labels = np.load(base_dir / data["labels_file"], mmap_mode=mmap_mode)
+        reshaped = np.load(
+            base_dir / data["reshaped_data_file"], mmap_mode=mmap_mode
+        )
 
         logger.log(f"OnionInsight loaded from {file_path}.")
+
         return cls(
-            labels=np.array(data.get("labels")),
-            state_list=data.get("state_list"),
-            reshaped_data=np.array(data.get("reshaped_data")),
-            meta=data.get("meta"),
+            labels=labels,
+            reshaped_data=reshaped,
+            state_list=data["state_list"],
+            meta=data.get("meta", {}),
         )
 
     def plot_output(self, file_path: Path, data_insight: Insight) -> None:
@@ -230,47 +294,77 @@ class OnionSmoothInsight(ClusterInsight):
     meta: dict[str, Any] = field(default_factory=dict)
 
     def dump_to_json(self, file_path: Path) -> None:
-        """Save the OnionSmoothInsight object as .json file."""
+        """Save the OnionSmoothInsight object to JSON and .npy for labels."""
+        base = file_path.with_suffix("")
+        labels_path = base.with_name(base.name + "_labels.npy")
+
+        # Save labels to .npy
+        np.save(labels_path, self.labels)
+
+        # Serialize state_list
+        serialized_states = []
+        for state in self.state_list:
+            state_dict = {}
+            for f in fields(state):
+                val = getattr(state, f.name)
+                state_dict[f.name] = (
+                    val.tolist() if isinstance(val, np.ndarray) else val
+                )
+            serialized_states.append(state_dict)
+
+        # Compose JSON
         data = {
-            "labels": self.labels.tolist(),
+            "labels_file": labels_path.name,
+            "state_list": serialized_states,
             "meta": self.meta,
         }
 
-        new_state_list = []
-        for state in self.state_list:
-            tmp = {}
-            for f in fields(state):
-                value = getattr(state, f.name)
-                if isinstance(value, np.ndarray):
-                    tmp[f.name] = value.tolist()
-                else:
-                    tmp[f.name] = value
-            new_state_list.append(tmp)
-
-        data["state_list"] = new_state_list
         with file_path.open("w") as file:
             json.dump(data, file, indent=4)
-        logger.log(f"OnionSmoothInsight saved to {file_path}.")
+
+        logger.log(
+            f"OnionSmoothInsight saved to {file_path}, "
+            f"labels to {labels_path}."
+        )
 
     @classmethod
-    def load_from_json(cls, file_path: Path) -> OnionSmoothInsight:
-        """Load the OnionSmoothInsight object from .json file.
+    def load_from_json(
+        cls,
+        file_path: Path,
+        mmap_mode: Literal["r", "r+", "w+", "c"] | None = None,
+    ) -> OnionSmoothInsight:
+        """Load the OnionSmoothInsight from JSON and associated .npy file.
+
+        Parameters:
+            file_path:
+                Path to the .json file.
+            mmap_mode:
+                If given, used as np.load(..., mmap_mode=mmap_mode) for memory
+                mapping.
 
         Raises:
-            ValueError if the input file does not have a key "state_list".
+            ValueError: if required keys are missing.
         """
         with file_path.open("r") as file:
             data = json.load(file)
-        if "state_list" not in data:
-            msg = "'state_list' key not found in JSON file."
+
+        if "labels_file" not in data or "state_list" not in data:
+            msg = "'labels_file' or 'state_list' key not found in JSON file."
             logger.log(msg)
             raise ValueError(msg)
 
-        logger.log(f"OnionSmoothInsight loaded from {file_path}.")
+        labels_path = file_path.parent / data["labels_file"]
+        labels = np.load(labels_path, mmap_mode=mmap_mode)
+
+        logger.log(
+            f"OnionSmoothInsight loaded from {file_path}, "
+            f"labels from {labels_path}."
+        )
+
         return cls(
-            labels=np.array(data.get("labels")),
-            state_list=data.get("state_list"),
-            meta=data.get("meta"),
+            labels=labels,
+            state_list=data["state_list"],
+            meta=data.get("meta", {}),
         )
 
     def plot_output(self, file_path: Path, data_insight: Insight) -> None:

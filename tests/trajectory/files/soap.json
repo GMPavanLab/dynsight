@@ -1,0 +1,11 @@
+{
+    "dataset_file": "soap.npy",
+    "meta": {
+        "r_cut": 10.0,
+        "n_max": 8,
+        "l_max": 8,
+        "respect_pbc": true,
+        "selection": "all",
+        "centers": "all"
+    }
+}

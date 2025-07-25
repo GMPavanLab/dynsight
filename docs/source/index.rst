@@ -1,15 +1,17 @@
 .. toctree::
    :hidden:
+   :maxdepth: 1
+
+   How to get started <trajectory>
+
+.. toctree::
+   :hidden:
    :caption: dynsight
    :maxdepth: 2
 
-   trajectory <trajectory>
-   SOAP <soap>
-   timeSOAP <time_soap>
-   LENS <lens>
-   tICA <tica>
-   onion clustering <onion>
    vision <vision>
+   descriptors <descriptors>
+   onion clustering <onion>
    analysis <analysis>
    data processing <data_processing>
    HDF5er <hdf5er>

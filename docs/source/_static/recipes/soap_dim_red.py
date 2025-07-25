@@ -84,7 +84,7 @@ def compute_soap_tica(
         soap_path=soap_path,
     )
 
-    rel_times, _, tica_ds = dynsight.tica.many_body_tica(
+    rel_times, _, tica_ds = dynsight.descriptors.many_body_tica(
         soap.dataset,
         lag_time=lag_time,
         tica_dim=tica_dim,

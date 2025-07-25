@@ -9,6 +9,7 @@ docs/source/_autosummary
 examples/onion_analysis/data.json
 examples/analysis_workflow/lens.json
 examples/analysis_workflow/onion.json
+examples/analysis_workflow/.oxygens.xtc_offsets.*
 examples/analysis_workflow/colored_trj.xyz
 examples/info_gain/trj_*.npy
 tests/systems/coex/.*

@@ -8,10 +8,11 @@ if TYPE_CHECKING:
 import numpy as np
 import numpy.typing as npt
 from scipy.spatial.distance import cdist
+from scipy.special import digamma
 
 
 def compute_shannon(
-    data: npt.NDArray[np.float64],
+    data: NDArray[np.float64],
     data_range: tuple[float, float],
     n_bins: int,
 ) -> float:
@@ -31,9 +32,7 @@ def compute_shannon(
             The number of bins with which the data histogram must be computed.
 
     Returns:
-        float:
-            entropy:
-                The value of the normalized Shannon entropy of the dataset.
+        The value of the normalized Shannon entropy of the dataset.
 
     Example:
 
@@ -56,6 +55,7 @@ def compute_shannon(
             :hide:
 
             assert np.isclose(data_entropy, 0.9993954419344714)
+
     """
     if data.size == 0:
         msg = "data is empty"
@@ -71,8 +71,100 @@ def compute_shannon(
     return entropy
 
 
+def compute_kl_entropy(data: NDArray[np.float64], n_neigh: int = 1) -> float:
+    """Estimate Shannon differential entropy using Kozachenko-Leonenko.
+
+    The Kozachenko-Leonenko k-nearest neighbors method approximates
+    differential entropy based on distances to nearest neighbors
+    in the sample space. It's main advantage is being parameter-free.
+
+    Parameters:
+        data:
+            The dataset for which the entropy is to be computed.
+            Shape (n_data,)
+
+        n_neigh:
+            The number of neighbors considered in the KL estimator.
+
+    Returns:
+        The Shannon differential entropy of the dataset, in bits.
+
+    Example:
+
+        .. testcode:: kl-entropy-test
+
+            import numpy as np
+            from dynsight.analysis import compute_kl_entropy
+
+            np.random.seed(1234)
+            data = np.random.rand(10000)
+
+            data_entropy = compute_kl_entropy(data)
+
+        .. testcode:: kl-entropy-test
+            :hide:
+
+            assert np.isclose(data_entropy, -3.3437736767342194)
+
+    """
+    data = np.sort(data.flatten())
+    n_data = len(data)
+    eps = data[n_neigh:] - data[:-n_neigh]  # n_neigh-th neighbor distances
+    eps = np.clip(eps, 1e-10, None)  # avoid log(0)
+    const = digamma(n_data) - digamma(n_neigh) + 1
+    return const + np.mean(np.log2(eps))
+
+
+def compute_negentropy(data: NDArray[np.float64]) -> float:
+    """Estimate negentropy of a dataset.
+
+    Negentropy is a measure of non-Gaussianity representing the distance
+    from a Gaussian distribution; it's used to quantify the amount of
+    information in a signal, the Gaussian being the less informative
+    distribution for a given variance.
+
+    .. math::
+
+        Neg(X) = H(X_{Gauss}) - H(X)
+
+    Parameters:
+        data:
+            The dataset for which the entropy is to be computed.
+
+    Returns:
+        The negentropy of the dataset, in bits.
+
+
+    Example:
+
+        .. testcode:: negentropy-test
+
+            import numpy as np
+            from dynsight.analysis import compute_negentropy
+
+            np.random.seed(1234)
+            data = np.random.rand(10000)
+
+            negentropy = compute_negentropy(data)
+
+        .. testcode:: negentropy-test
+            :hide:
+
+            assert np.isclose(negentropy, 0.2609932580146541)
+
+    """
+    data = data.flatten()
+    rng = np.random.default_rng(seed=1234)
+    data_norm = (data - np.mean(data)) / np.std(data, ddof=1)
+    sigma = np.std(data_norm, ddof=1)
+    data_gauss = rng.normal(loc=0.0, scale=sigma, size=data.size)
+    h_gauss = compute_kl_entropy(data_gauss)
+    h_data = compute_kl_entropy(data_norm)
+    return h_gauss - h_data
+
+
 def compute_shannon_multi(
-    data: npt.NDArray[np.float64],
+    data: NDArray[np.float64],
     data_ranges: list[tuple[float, float]],
     n_bins: list[int],
 ) -> float:
@@ -95,9 +187,7 @@ def compute_shannon_multi(
             dimension.
 
     Returns:
-        float:
-            entropy:
-                The value of the normalized Shannon entropy of the dataset.
+        The value of the normalized Shannon entropy of the dataset.
 
     Example:
 
@@ -121,6 +211,7 @@ def compute_shannon_multi(
             :hide:
 
             assert np.isclose(data_entropy, 0.8837924363474094)
+
     """
     if data.size == 0:
         msg = "data is empty"
@@ -157,11 +248,10 @@ def compute_entropy_gain(
             Default is 20.
 
     Returns:
-        tuple[float, float, float, float]
-            * The absolute information gain :math:`H_0 - H_{clust}`
-            * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
-            * The Shannon entropy of the initial data :math:`H_0`
-            * The shannon entropy of the clustered data :math:`H_{clust}`
+        * The absolute information gain :math:`H_0 - H_{clust}`
+        * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
+        * The Shannon entropy of the initial data :math:`H_0`
+        * The shannon entropy of the clustered data :math:`H_{clust}`
 
     Example:
 
@@ -184,6 +274,7 @@ def compute_entropy_gain(
             :hide:
 
             assert np.isclose(entropy_gain, 0.0010065005804883983)
+
     """
     if data.shape[0] != labels.shape[0]:
         msg = (
@@ -246,11 +337,10 @@ def compute_entropy_gain_multi(
             one for each dimension.
 
     Returns:
-        tuple[float, float, float, float]
-            * The absolute information gain :math:`H_0 - H_{clust}`
-            * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
-            * The Shannon entropy of the initial data :math:`H_0`
-            * The shannon entropy of the clustered data :math:`H_{clust}`
+        * The absolute information gain :math:`H_0 - H_{clust}`
+        * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
+        * The Shannon entropy of the initial data :math:`H_0`
+        * The shannon entropy of the clustered data :math:`H_{clust}`
 
     Example:
 
@@ -274,6 +364,7 @@ def compute_entropy_gain_multi(
             :hide:
 
             assert np.isclose(entropy_gain, 0.13171418273750357)
+
     """
     if data.shape[0] != labels.shape[0]:
         msg = (
@@ -338,8 +429,7 @@ def sample_entropy(
             The m parameter (length of the considered overlapping windows).
 
     Returns:
-        float
-            Sample entropy of the input time-series.
+        Sample entropy of the input time-series.
 
     Example:
 
@@ -362,6 +452,7 @@ def sample_entropy(
             :hide:
 
             assert np.isclose(sampen, 1.6094379124341003)
+
     """
     n_sum = len(time_series) - m_par
 

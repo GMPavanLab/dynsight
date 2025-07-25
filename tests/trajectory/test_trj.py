@@ -7,6 +7,7 @@ from pathlib import Path
 import MDAnalysis
 import numpy as np
 import pytest
+from numpy.testing import assert_allclose
 
 from dynsight.logs import logger
 from dynsight.trajectory import (
@@ -69,12 +70,48 @@ def test_trj_inits(
     logger.get()
 
 
+def test_get_descriptors(file_paths: dict[str, Path]) -> None:
+    """Test computation methods for Trj and Insight classes."""
+    trj = Trj.init_from_xtc(file_paths["xtc"], file_paths["gro"])
+
+    r_cut = 10.0
+    neigcounts, n_c = trj.get_coord_number(r_cut=r_cut)
+    _, lens = trj.get_lens(r_cut=r_cut, neigcounts=neigcounts)
+    soap = trj.get_soap(r_cut=10.0, n_max=8, l_max=8)
+    _, phi = trj.get_velocity_alignment(r_cut=r_cut, neigcounts=neigcounts)
+    _, _, tica = soap.get_tica(lag_time=10, tica_dim=2)
+
+    test_n_c = Insight.load_from_json(file_paths["files_dir"] / "n_c.json")
+    test_lens = Insight.load_from_json(file_paths["files_dir"] / "lens.json")
+    test_soap = Insight.load_from_json(file_paths["files_dir"] / "soap.json")
+    test_phi = Insight.load_from_json(file_paths["files_dir"] / "phi.json")
+    test_tica = Insight.load_from_json(file_paths["files_dir"] / "tica.json")
+
+    assert_allclose(test_n_c.dataset, n_c.dataset, rtol=1e-4, atol=1e-6)
+    assert_allclose(test_lens.dataset, lens.dataset, rtol=1e-4, atol=1e-6)
+    assert_allclose(test_soap.dataset, soap.dataset, rtol=1e-4, atol=1e-6)
+    assert_allclose(test_phi.dataset, phi.dataset, rtol=1e-4, atol=1e-6)
+    assert_allclose(test_tica.dataset, tica.dataset, rtol=1e-4, atol=1e-6)
+
+    # Note: for some reason, get_orientational_op() and get_angular_velocity()
+    # have larger numerical variations that the other descriptors.
+    _, psi = trj.get_orientational_op(r_cut=r_cut, neigcounts=neigcounts)
+    test_psi = Insight.load_from_json(file_paths["files_dir"] / "psi.json")
+    assert_allclose(test_psi.dataset, psi.dataset, rtol=1e-3, atol=1e-6)
+
+    tsoap = soap.get_angular_velocity()
+    test_tsoap = Insight.load_from_json(file_paths["files_dir"] / "tsoap.json")
+    assert_allclose(test_tsoap.dataset, tsoap.dataset, rtol=1e-3, atol=1e-6)
+
+    logger.get()
+
+
 def test_insight(
     tmp_path: Path, file_paths: dict[str, Path], universe: MDAnalysis.Universe
 ) -> None:
     """Test Insight methods."""
     trj = Trj(universe)
-    _, insight = trj.get_lens(10.0)
+    _, insight = trj.get_lens(r_cut=10.0)
 
     # Insight dump/load
     json_file = tmp_path / "insight.json"
@@ -124,19 +161,19 @@ def test_onion_analysis(universe: MDAnalysis.Universe) -> None:
 def test_insight_load_errors(file_paths: dict[str, Path]) -> None:
     """Test insight load errors."""
     with pytest.raises(
-        ValueError, match="'dataset' key not found in JSON file."
+        ValueError, match="'dataset_file' key not found in JSON file."
     ):
         _ = Insight.load_from_json(file_paths["files_dir"] / "empty.json")
 
     with pytest.raises(
-        ValueError, match="'labels' key not found in JSON file."
+        ValueError, match="'labels_file' key not found in JSON file."
     ):
         _ = ClusterInsight.load_from_json(
             file_paths["files_dir"] / "ins_1_test.json"
         )
 
     with pytest.raises(
-        ValueError, match="'state_list' key not found in JSON file."
+        ValueError, match="'reshaped_data_file' key not found in JSON file."
     ):
         _ = OnionInsight.load_from_json(
             file_paths["files_dir"] / "cl_ins_test.json"
