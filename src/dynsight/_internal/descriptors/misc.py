@@ -95,12 +95,39 @@ def orientational_order_param(
     return psi
 
 
+def _compute_aver_align(
+    neigh_list_t: list[AtomGroup],
+    frame_vel: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Computes the average alignment for all the atoms in a frame."""
+    phi_t = np.zeros(len(frame_vel))
+    for i, atom_i in enumerate(frame_vel):
+        if not np.any(atom_i):  # skip if zero velocity vector
+            continue
+        neighbors = neigh_list_t[i]
+        if len(neighbors) <= 1:
+            continue  # no meaningful averaging if 0 neighbors
+        valid_neighbors = [
+            j for j in neighbors if j != i and np.any(frame_vel[j])
+        ]
+        if not valid_neighbors:
+            continue
+
+        alignments = np.array(
+            [1 - cosine(atom_i, frame_vel[j]) for j in valid_neighbors]
+        )
+        phi_t[i] = np.mean(alignments)
+    return phi_t
+
+
 def velocity_alignment(
     universe: Universe,
     neigh_list_per_frame: list[list[AtomGroup]],
-    velocities: NDArray[np.float64] | None = None,
 ) -> NDArray[np.float64]:
     """Compute average velocity alignment phi.
+
+    If the Universe includes velocities, those are used. Otherwise, the
+    displacements are used.
 
     Parameters:
         universe: contains the coordinates at each frame.
@@ -108,11 +135,9 @@ def velocity_alignment(
         neigh_list_per_frame: A frame-by-frame list of the neighbors of each
             atom, output of :func:`listNeighboursAlongTrajectory`.
 
-        velocities: shape (n_frames - 1, n_atoms, n_dims), the particles'
-            velocities. If is None, velocities are computed as dispacements.
-
     Returns:
-        An array of shape (n_atoms, n_frames - 1), with the values of phi.
+        If the Universe inclused velocities, the output has shape
+        (n_atoms, n_frames), otherwise it has shape (n_atoms, n_frames - 1).
 
     Example:
 
@@ -145,29 +170,29 @@ def velocity_alignment(
     n_atoms = universe.atoms.n_atoms
     n_frames = len(universe.trajectory)
 
-    phi = np.zeros((n_atoms, n_frames - 1))
+    if (
+        hasattr(universe.atoms, "velocities")
+        and universe.atoms.velocities is not None
+    ):  # If the Universe has velocities, use them
+        phi = np.zeros((n_frames, n_atoms))
+        for t, _ in enumerate(universe.trajectory):
+            phi[t] = _compute_aver_align(
+                neigh_list_per_frame[t],
+                frame_vel=universe.atoms.velocities,
+            )
+        return phi.T
 
+    # If the Universe does not has velocities, use the displacements
     r_0 = None
-
+    phi = np.zeros((n_frames - 1, n_atoms))
     for t, _ in enumerate(universe.trajectory):
         r_1 = universe.atoms.positions.copy()
-
         if t == 0:
             r_0 = r_1
             continue
-
-        frame_vel = (r_1 - r_0) if velocities is None else velocities[t - 1]
-
-        for i, atom_i in enumerate(frame_vel):
-            tmp = 0.0
-            if np.any(atom_i != 0.0):
-                neighbors = neigh_list_per_frame[t - 1][i]
-                for j in neighbors:
-                    if j != i and np.any(frame_vel[j] != 0.0):
-                        tmp += 1 - cosine(atom_i, frame_vel[j])
-            if len(neighbors) > 1:
-                tmp /= len(neighbors) - 1
-
-            phi[i, t - 1] = tmp
-
-    return phi
+        frame_vel = r_1 - r_0
+        phi[t - 1] = _compute_aver_align(
+            neigh_list_per_frame[t - 1],
+            frame_vel,
+        )
+    return phi.T
