@@ -111,7 +111,7 @@ def _compute_aver_align(
             j for j in neighbors if j != i and np.any(frame_vel[j])
         ]
         if not valid_neighbors:
-            continue
+            continue  # no self-counting, no neighbors with v = 0.0
 
         alignments = np.array(
             [1 - cosine(atom_i, frame_vel[j]) for j in valid_neighbors]
