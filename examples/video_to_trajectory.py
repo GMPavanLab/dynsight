@@ -15,6 +15,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
+from dynsight.track import track_xyz
 from dynsight.vision import VisionInstance
 
 
@@ -71,6 +72,10 @@ def main() -> None:
             / "dataset.yaml",
         )
         instance.train(title=f"train_{it}")
+    traj_path = instance.export_prediction_to_xyz(
+        file_name=Path("trajectory.xyz")
+    )
+    track_xyz(input_xyz=traj_path, output_xyz=Path("output/tracked_traj.xyz"))
 
 
 if __name__ == "__main__":
