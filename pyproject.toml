@@ -10,7 +10,15 @@ maintainers = [
     { name = "Simone Martino", email = "s.martino0898@gmail.com" },
 ]
 
-dependencies = ["numpy", "dscribe", "tropea-clustering", "MDAnalysis"]
+dependencies = [
+    "numpy",
+    "dscribe",
+    "tropea-clustering",
+    "MDAnalysis",
+    "PyYAML",
+    "trackpy",
+    "ultralytics",
+]
 # Set by cpctools.
 requires-python = ">=3.8"
 dynamic = ["version"]
