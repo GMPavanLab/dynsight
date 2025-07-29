@@ -82,7 +82,6 @@ input[type="text"] {
 input[type="range"] {
     width: 300px;
 }
-/* Crosshair lines used during labeling */
 .crosshair-line {
     position: absolute;
     pointer-events: none;
@@ -136,7 +135,7 @@ input[type="range"] {
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none; /* le box possono ricevere eventi solo se necessario */
+    pointer-events: none;
 }
 
 .bounding-box {
