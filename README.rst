@@ -34,20 +34,18 @@ you are using Python 3.10 and below, you can use ``cpctools`` to access
 
   $ pip install cpctools
 
-If you want to use the ``dynsight.tica`` module you will need to install the
-deeptime package. This can be done with with pip::
-
-  $ pip install deeptime
-
-or with conda::
-
-  $ conda install -c conda-forge deeptime
-
 If you want to use the ``dynsight.vision`` and ``dynsight.track`` modules
 you will need to install a series of packages. This can be done with with pip::
 
   $ pip install ultralytics PyYAML
 
+How to get started
+------------------
+
+We suggest you give a read to the ``dynsight.trajectory`` module documentation,
+which offers a compact and easy way of using most of the ``dynsight`` tools. 
+Also, the documentation offers some copiable Recipes and Examples for the most
+common analyses.
 
 How to contribute
 -----------------

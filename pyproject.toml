@@ -18,7 +18,9 @@ dependencies = [
     "PyYAML",
     "trackpy",
     "ultralytics",
+    "deeptime",
 ]
+
 # Set by cpctools.
 requires-python = ">=3.8"
 dynamic = ["version"]
@@ -107,6 +109,7 @@ check_untyped_defs = true
 disallow_untyped_decorators = true
 warn_unreachable = true
 disallow_any_generics = true
+exclude = 'docs/build/html/_static'
 
 [[tool.mypy.overrides]]
 module = [
@@ -128,5 +131,7 @@ module = [
     'cv2.*',
     'pandas.*',
     'trackpy.*',
+    'deeptime.*',
+    'sklearn.decomposition.*'
 ]
 ignore_missing_imports = true

@@ -1,0 +1,8 @@
+{
+    "dataset_file": "psi.npy",
+    "meta": {
+        "r_cut": 10.0,
+        "order": 6,
+        "selection": "all"
+    }
+}
