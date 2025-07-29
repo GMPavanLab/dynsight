@@ -290,7 +290,17 @@ exportBtn.onclick = () => {
         const cy = (obj.top + obj.height / 2) / ih;
         const w = obj.width / iw;
         const h = obj.height / ih;
-        txt += `${labelMap[obj.label]} ${cx.toFixed(6)} ${cy.toFixed(6)} ${w.toFixed(6)} ${h.toFixed(6)}\n`;
+        txt +=
+            labelMap[obj.label] +
+            " " +
+            cx.toFixed(6) +
+            " " +
+            cy.toFixed(6) +
+            " " +
+            w.toFixed(6) +
+            " " +
+            h.toFixed(6) +
+            "\n";
     });
     const blob = new Blob([txt], { type: "text/plain" });
     const a = document.createElement("a");
@@ -302,18 +312,35 @@ exportBtn.onclick = () => {
 
 exportAllBtn.onclick = async () => {
     if (images.length === 0) {
-        alert("Nessuna immagine caricata.");
+        alert("No images uploaded.");
         return;
     }
+    let trainPercent = parseFloat(
+        prompt("Percentage of images for training?", "80"),
+    );
+    if (
+        Number.isNaN(trainPercent) ||
+        trainPercent <= 0 ||
+        trainPercent >= 100
+    ) {
+        trainPercent = 80;
+    }
+    const numTrain = Math.floor(images.length * (trainPercent / 100));
     const zip = new JSZip();
-    const imgFolder = zip.folder("images");
-    const lblFolder = zip.folder("labels");
+    const imgTrain = zip.folder("images/train");
+    const imgVal = zip.folder("images/val");
+    const lblTrain = zip.folder("labels/train");
+    const lblVal = zip.folder("labels/val");
     const labelMap = {};
     let nextId = 0;
-    for (const image of images) {
+    for (let i = 0; i < images.length; i++) {
+        const image = images[i];
         const name = image.name;
         const imgData = await image.arrayBuffer();
+        const imgFolder = i < numTrain ? imgTrain : imgVal;
+        const lblFolder = i < numTrain ? lblTrain : lblVal;
         imgFolder.file(name, imgData);
+
         const img = new Image();
         const url = URL.createObjectURL(image);
         img.src = url;
@@ -328,11 +355,31 @@ exportAllBtn.onclick = async () => {
             const cy = (obj.top + obj.height / 2) / ih;
             const w = obj.width / iw;
             const h = obj.height / ih;
-            txt += `${labelMap[obj.label]} ${cx.toFixed(6)} ${cy.toFixed(6)} ${w.toFixed(6)} ${h.toFixed(6)}\n`;
+            txt +=
+                labelMap[obj.label] +
+                " " +
+                cx.toFixed(6) +
+                " " +
+                cy.toFixed(6) +
+                " " +
+                w.toFixed(6) +
+                " " +
+                h.toFixed(6) +
+                "\n";
         });
         const labelFileName = name.replace(/\.[^/.]+$/, "") + ".txt";
         lblFolder.file(labelFileName, txt);
     }
+
+    const names = Object.keys(labelMap);
+    const yaml = `path: .
+    train: images/train
+    val: images/val
+    nc: ${names.length}
+    names: [${names.map((n) => `'${n}'`).join(", ")}]
+    `;
+    zip.file("dataset.yaml", yaml);
+
     const content = await zip.generateAsync({ type: "blob" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(content);
@@ -343,16 +390,16 @@ exportAllBtn.onclick = async () => {
 
 synthBtn.onclick = async () => {
     if (images.length === 0) {
-        alert("Nessuna immagine caricata.");
+        alert("No images uploaded.");
         return;
     }
 
     const numImages = parseInt(
-        prompt("Numero di immagini sintetiche da generare?", "10"),
+        prompt("Number of synthetic images to generate?", "10"),
         10,
     );
-    const width = parseInt(prompt("Larghezza delle immagini?", "640"), 10);
-    const height = parseInt(prompt("Altezza delle immagini?", "640"), 10);
+    const width = parseInt(prompt("Image width?", "640"), 10);
+    const height = parseInt(prompt("Image height?", "640"), 10);
 
     if (
         !numImages ||
@@ -362,7 +409,7 @@ synthBtn.onclick = async () => {
         !height ||
         Number.isNaN(height)
     ) {
-        alert("Parametri non validi.");
+        alert("Invalid parameters.");
         return;
     }
 
@@ -378,7 +425,7 @@ synthBtn.onclick = async () => {
     }
 
     if (crops.length === 0) {
-        alert("Nessuna label trovata.");
+        alert("No label found.");
         return;
     }
 
@@ -492,9 +539,12 @@ synthBtn.onclick = async () => {
     }
 
     const names = Object.keys(labelMap);
-    const yaml = `path: .\ntrain: images/train\nval: images/val\nnc: ${names.length}\nnames: [${names
-        .map((n) => `'${n}'`)
-        .join(", ")}]\n`;
+    const yaml = `path: .
+    train: images/train
+    val: images/val
+    nc: ${names.length}
+    names: [${names.map((n) => `'${n}'`).join(", ")}]
+    `;
     zip.file("dataset.yaml", yaml);
 
     const content = await zip.generateAsync({ type: "blob" });
