@@ -13,7 +13,7 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
     def log_message(self, fmt: str, *args: object) -> None:
         pass
 
-    def do_POST(self) -> None:  # noqa: N802
+    def do_POST(self) -> None:
         if self.path == "/shutdown":
             self.send_response(200)
             self.end_headers()
