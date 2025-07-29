@@ -52,12 +52,12 @@ default_hyperparams = {
 class VisionInstance:
     """Class for performing vision tasks using YOLO models.
 
-    It allows to perform object detection, Convolutional Neural Network (CNN)
-    training and tuning, training dataset creation and handling.
+    This class supports object detection, Convolutional Neural Network (CNN)
+    training and fine-tuning, as well as the creation and management of
+    training datasets.
 
     .. caution::
-        This class is still in development and may not work as expected.
-
+        This class is still under development and may not function as intended.
     """
 
     def __init__(
