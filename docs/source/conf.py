@@ -8,6 +8,10 @@
 from __future__ import annotations
 
 import importlib
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
 
 project = "dynsight"
 project_copyright = "2023, Andrew Tarzia"
@@ -53,3 +57,8 @@ exclude_patterns: list[str] = []
 
 html_theme = "furo"
 html_static_path = ["_static"]
+
+
+def setup(app: Sphinx) -> None:
+    """Configure the Sphinx app by adding a custom CSS file."""
+    app.add_css_file("style.css")
