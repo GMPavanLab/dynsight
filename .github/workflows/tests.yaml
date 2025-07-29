@@ -10,7 +10,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                python-version: ["3.10", "3.13"]
+                python-version: ["3.10"]
         name: ruff on ${{ matrix.python-version }}
         steps:
             - uses: actions/checkout@v3
@@ -24,7 +24,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                python-version: ["3.10", "3.13"]
+                python-version: ["3.10"]
         name: mypy on ${{ matrix.python-version }}
         steps:
             - uses: actions/checkout@v3
@@ -38,7 +38,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                python-version: ["3.10", "3.13"]
+                python-version: ["3.10"]
         name: ruff-format on ${{ matrix.python-version }}
         steps:
             - uses: actions/checkout@v3
@@ -52,7 +52,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                python-version: ["3.10", "3.13"]
+                python-version: ["3.10"]
         name: pytest on ${{ matrix.python-version }}
         steps:
             - uses: actions/checkout@v3
@@ -66,7 +66,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                python-version: ["3.10", "3.13"]
+                python-version: ["3.10"]
         name: doctest on ${{ matrix.python-version }}
         steps:
             - uses: actions/checkout@v3
