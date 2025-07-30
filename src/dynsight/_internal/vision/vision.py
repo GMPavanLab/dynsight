@@ -1,3 +1,5 @@
+"""dynsight.vision module for particle detection from media files."""
+
 from __future__ import annotations
 
 import logging
