@@ -52,16 +52,6 @@ default_hyperparams = {
 
 
 class VisionInstance:
-    """Class for performing vision tasks using YOLO models.
-
-    This class supports object detection, Convolutional Neural Network (CNN)
-    training and fine-tuning, as well as the creation and management of
-    training datasets.
-
-    .. caution::
-        This class is still under development and may not function as intended.
-    """
-
     def __init__(
         self,
         source: str | Path,
@@ -70,29 +60,35 @@ class VisionInstance:
         device: str | None = None,
         workers: int = 8,
     ) -> None:
-        """Initialize a Vision instance.
+        """Class for performing computer vision tasks using YOLO models.
 
-        Defines the starting model, the output folder and the devices that will
-        be used for the computation.
+        This class supports object detection, Convolutional Neural Network
+        (CNN) training and fine-tuning, as well as the creation and management
+        of training datasets.
+
+        .. caution::
+            This class is still under development and may not function as
+            intended.
 
         Parameters:
             source:
                 The source of the images or videos to be processed. For the
                 list of the possible sources, we refer the user to the
-                following `table <https://docs.ultralytics.com/modes/predict/#inference-sources>`_.
-                For the list of the supported formats see this second `table <https://docs.ultralytics.com/modes/predict/#images>`_.
+                following `sources table <https://docs.ultralytics.com/modes/predict/#inference-sources>`_.
+                For the list of the supported formats see this `formats table <https://docs.ultralytics.com/modes/predict/#images>`_.
 
             output_path:
-                The path where save the output folder.
+                The path to save the output folder.
 
             model:
-                The path to the YOLO model file. Defaults to "yolo12n.pt". see
+                The path to the YOLO model file. Defaults to "yolo12n.pt". See
                 `here <https://docs.ultralytics.com/models/yolo12/>`_ for more
                 information.
 
             device:
-                Allows users to select between CPU, a specific GPU, or other
-                compute devices for model execution (`cpu`, `cuda:0` or `0`).
+                Allows users to select between cpu, a specific gpu ID or
+                "mps" for MacOS users to perform the calculation
+                ("cuda:0" or "0" for GPUs, "cpu" or "mps" for MacOS).
 
             workers:
                 Number of worker threads for data loading. Influences the speed
@@ -117,7 +113,7 @@ class VisionInstance:
         """Set the training dataset for the model training.
 
         Training dataset are setted through a ``yaml`` file that should have
-        thefollowing structure:
+        the following structure:
 
         .. code-block:: yaml
 
@@ -171,11 +167,11 @@ class VisionInstance:
         imgsz: int | tuple[int, int] = 640,
         max_det: int = 500,
     ) -> None:
-        """Detect objects in the source.
+        """Detect objects within the source.
 
         Parameters:
             prediction_title:
-                The name of the prediction.
+                The name of the prediction session.
 
             augment:
                 Enables test-time augmentation (TTA) for predictions,
@@ -243,7 +239,7 @@ class VisionInstance:
                 Name of the dataset that will be created.
 
             train_split:
-                Fraction of images to use for the training set, the remaining
+                Fraction of images to be used as training set, the remaining
                 fraction will be used for the validation set.
 
             load_dataset:
@@ -347,11 +343,12 @@ class VisionInstance:
         Parameters:
             iterations:
                 The number of exploring iterations. The higher the number, the
-                more accurate the results will be, but the longer the training
-                will take.
+                more accurate the results will be, increasing the computational
+                cost.
 
             epochs:
-                The number of epochs to train for each iteration.
+                The number of epochs to perform for each iteration. Each epoch
+                represents a full pass over the entire dataset.
 
             imgsz:
                 Defines the image size for inference. Can be a single integer
@@ -359,7 +356,7 @@ class VisionInstance:
                 detection accuracy and processing speed.
 
             batch_size:
-                Batch size, with three modes: set as an integer (batch=16),
+                Three modes available: set as an integer (batch=16),
                 auto mode for 60% GPU memory utilization (batch=-1), or auto
                 mode with specified utilization fraction (batch=0.70).
         """
@@ -397,17 +394,18 @@ class VisionInstance:
     ) -> None:
         """Train a custom model using a training dataset.
 
-        This function trains a custom model using a training dataset. Dataset
-        should be set before calling this function with the
+        This function trains a custom model using a training dataset. The
+        dataset should be set before calling this function with the
         ``set_training_data`` method.
 
         Parameters:
             title:
-                The name of the model.
+                The name of the resulting model.
 
             hyperparams:
                 The dictionary that contains all the hyperparameters for the
-                model. The following default ``dict`` is used if not provided:
+                model training. The following default ``dict`` is used if not
+                provided:
 
                 .. code-block:: python
 
@@ -440,15 +438,15 @@ class VisionInstance:
                     }
 
                 Manually customize this ``dict`` to change the training
-                performance or use the ``tune`` method to automatically
-                optimize hyperparameters.
+                performance or use the ``tune_hyperparams`` method to
+                automatically optimize hyperparameters.
 
             epochs:
                 Total number of training epochs. Each epoch represents a full
                 pass over the entire dataset.
 
             batch_size:
-                Batch size, with three modes: set as an integer (batch=16),
+                Three modes available: set as an integer (batch=16),
                 auto mode for 60% GPU memory utilization (batch=-1), or auto
                 mode with specified utilization fraction (batch=0.70).
 
@@ -460,7 +458,7 @@ class VisionInstance:
             imgsz:
                 Defines the image size for inference. Can be a single integer
                 for square resizing or a tuple. Proper sizing can improve
-                detection accuracy and processingspeed.
+                detection accuracy and processing speed.
 
         """
         if self.training_data_yaml is None:
