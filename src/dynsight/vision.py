@@ -1,13 +1,13 @@
 """Vision package."""
 
-from dynsight._internal.vision.detect import (
-    Detect,
+from dynsight._internal.vision.label_tool import (
+    label_tool,
 )
-from dynsight._internal.vision.video_to_frame import (
-    Video,
+from dynsight._internal.vision.vision import (
+    VisionInstance,
 )
 
 __all__ = [
-    "Detect",
-    "Video",
+    "VisionInstance",
+    "label_tool",
 ]

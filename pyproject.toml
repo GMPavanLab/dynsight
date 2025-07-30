@@ -10,7 +10,17 @@ maintainers = [
     { name = "Simone Martino", email = "s.martino0898@gmail.com" },
 ]
 
-dependencies = ["numpy", "dscribe", "tropea-clustering", "MDAnalysis", "deeptime"]
+dependencies = [
+    "numpy",
+    "dscribe",
+    "tropea-clustering",
+    "MDAnalysis",
+    "PyYAML",
+    "trackpy",
+    "ultralytics",
+    "deeptime",
+]
+
 # Set by cpctools.
 requires-python = ">=3.8"
 dynamic = ["version"]
@@ -29,11 +39,18 @@ dev = [
     "twine",
     "furo",
     "numba",
+    "pandas",
+    "PyYAML",
+    "trackpy",
+    "ultralytics",
 ]
 
 [project.urls]
 github = "https://github.com/GMPavanLab/dynsight"
 documentation = "https://dynsight.readthedocs.io/en/latest/"
+
+[project.scripts]
+label_tool = "dynsight.vision:label_tool"
 
 [tool.setuptools_scm]
 
@@ -112,6 +129,8 @@ module = [
     'ultralytics.*',
     'opencv-python.*',
     'cv2.*',
+    'pandas.*',
+    'trackpy.*',
     'deeptime.*',
     'sklearn.decomposition.*'
 ]
