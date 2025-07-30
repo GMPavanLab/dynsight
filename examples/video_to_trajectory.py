@@ -1,7 +1,7 @@
 """Virtualization of a video in order to extract trajectory information.
 
-In this example, we show an example of how to use the dynsight Vision module
-combinedwith the track module to obtain a trajectory file from a video.
+In this example, we show how to use the dynsight ``vision` module
+combined with the track module to obtain a trajectory file from a video.
 
 A very simple video is used to demonstrate the workflow, for this reason the
 default detection model is used. For more complex videos is recommended to
@@ -53,8 +53,8 @@ def main() -> None:
     instance = VisionInstance(
         source=video_path,
         output_path=Path("output"),
-        device="0",
-        workers=8,
+        device="0",  # select GPU id, "cpu" or "mps" for MacOS users.
+        workers=8,  # number of cores used.
     )
     for it in range(n_iterations):
         instance.predict(prediction_title=f"prediction_{it}")

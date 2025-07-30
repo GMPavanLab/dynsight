@@ -1,3 +1,5 @@
+"""dynsight.track module for particle tracking from an .xyz file."""
+
 from __future__ import annotations
 
 import logging

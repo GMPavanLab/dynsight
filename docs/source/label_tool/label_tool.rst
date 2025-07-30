@@ -3,10 +3,10 @@ The Label Tool
 
 The ``dynsight label_tool`` is a simple web application that allows users to
 label images. Picture labelling is a crucial step in many computer vision tasks,
-such as, the creation of initial training dataset to train Convolutional Neural
+such as the creation of initial training dataset to train Convolutional Neural
 Networks (CNNs) model. The current version of `dynsight vision <../_autosummary/dynsight.vision.VisionInstance.html>`_
 exploits the power of the `YOLO models <https://docs.ultralytics.com/models/yolo12/>`_
-for computer vision tasks. So that the ``label_tool`` has been specifically
+for computer vision tasks. Thus, the ``label_tool`` has been specifically
 designed to work with the YOLO dataset format.
 
 .. image:: ../_static/label_tool.png
@@ -43,7 +43,7 @@ automatically appear in your default web browser.
 -------
 The GUI
 -------
-The ``label_tool`` Graphical User Interface is divided by three main panels:
+The ``label_tool`` Graphical User Interface is divided in three main panels:
 
 * **The image panel**: where loaded images appear and labels can be drawn.
 
@@ -61,7 +61,7 @@ label. Once the image is loaded, users can start drawing labels by clicking and
 dragging on the image panel. The label menu panel allows users to create and
 edit labels. Finally, the commands panel provides a set of exporting options:
 
-* **Export label**: Download the single txt file containing the label ``txt`` file in YOLO format for the current image.
+* **Export label**: Download a single ``.txt`` file in YOLO format containing the labels for the current image.
 
 * **Export dataset**: Download a YOLO dataset from the loaded images with the labels and create the initial yaml configuration file to be used in the YOLO training process.
 
