@@ -79,17 +79,17 @@ def orientational_order_param(
         frame = universe.atoms.positions[:, :2].copy()
 
         for i, atom_i in enumerate(frame):
-            tmp = 0.0
             neighbors = neigh_list_per_frame[t][i]
+            if len(neighbors) <= 2:  # noqa: PLR2004
+                # if neighbors are none or just 1, psi = 0
+                continue
+            tmp = 0.0
             for j in neighbors:
                 if j != i:
                     x, y = frame[j] - atom_i
                     theta = np.mod(np.arctan2(y, x), 2 * np.pi)
                     tmp += np.exp(1j * order * theta)
-
-            if len(neighbors) > 1:
-                tmp /= len(neighbors) - 1
-
+            tmp /= len(neighbors) - 1
             psi[i][t] = np.abs(tmp)
 
     return psi
