@@ -1,12 +1,12 @@
 """Virtualization of a video in order to extract trajectory information.
 
-In this example, we show how to use the dynsight ``vision` module
+In this example, we show how to use the dynsight ``vision`` module
 combined with the track module to obtain a trajectory file from a video.
 
 A very simple video is used to demonstrate the workflow, for this reason the
-default detection model is used. For more complex videos is recommended to
-exploit the label_tool to create a synthesized dataset as a starting point to
-train the initial model and then follow the subsequent steps.
+default detection model is used. For more complex videos, it is recommended to
+exploit the ``label_tool`` to create a synthesized dataset as a starting point
+to train the initial model and then follow the subsequent steps.
 """
 
 from __future__ import annotations

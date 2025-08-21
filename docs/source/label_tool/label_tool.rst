@@ -17,7 +17,8 @@ How to Use
 
 The ``label_tool`` application can be executed in 2 main ways:
 
-* As standalone application by typing in your terminal environment:
+* As a standalone application, run the following command in the environment
+  where dynsight is installed:
 
 .. code-block:: bash
 
@@ -43,6 +44,7 @@ automatically appear in your default web browser.
 -------
 The GUI
 -------
+
 The ``label_tool`` Graphical User Interface is divided in three main panels:
 
 * **The image panel**: where loaded images appear and labels can be drawn.
