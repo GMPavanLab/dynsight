@@ -18,7 +18,6 @@ dependencies = [
     "PyYAML",
     "trackpy",
     "ultralytics",
-    "pandas",
     "deeptime",
 ]
 
