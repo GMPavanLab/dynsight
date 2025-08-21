@@ -18,6 +18,7 @@ dependencies = [
     "PyYAML",
     "trackpy",
     "ultralytics",
+    "pandas",
     "deeptime",
 ]
 
@@ -39,10 +40,6 @@ dev = [
     "twine",
     "furo",
     "numba",
-    "pandas",
-    "PyYAML",
-    "trackpy",
-    "ultralytics",
 ]
 
 [project.urls]
@@ -132,6 +129,6 @@ module = [
     'pandas.*',
     'trackpy.*',
     'deeptime.*',
-    'sklearn.decomposition.*'
+    'sklearn.decomposition.*',
 ]
 ignore_missing_imports = true
