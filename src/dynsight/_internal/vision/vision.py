@@ -530,10 +530,10 @@ class VisionInstance:
                             continue
                         cx = (x1 + x2) / 2
                         cy = (y1 + y2) / 2
-                        coords.append(f"{cx:.6f} {cy:.6f} 0.0")
+                        coords.append(f"{cls_id} {cx:.6f} {cy:.6f} 0.0")
 
                 f.write(f"{len(coords)}\n")
-                f.write("x y z\n")
+                f.write("class x y z\n")
                 for line in coords:
                     f.write(f"{line}\n")
         return file_path
