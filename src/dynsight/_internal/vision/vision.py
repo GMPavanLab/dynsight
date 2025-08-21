@@ -6,6 +6,7 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 
+import numpy as np
 import torch
 import yaml
 from PIL import Image
@@ -520,8 +521,17 @@ class VisionInstance:
 
                 coords: list[str] = []
                 if boxes is not None:
-                    xyxy = boxes.xyxy.cpu().numpy()
-                    classes = boxes.cls.cpu().numpy().astype(int)
+                    xyxy_raw = boxes.xyxy
+                    if isinstance(xyxy_raw, torch.Tensor):
+                        xyxy = xyxy_raw.cpu().numpy()
+                    else:
+                        xyxy = np.asarray(xyxy_raw)
+
+                    cls_raw = boxes.cls
+                    if isinstance(cls_raw, torch.Tensor):
+                        classes = cls_raw.cpu().numpy().astype(int)
+                    else:
+                        classes = np.asarray(cls_raw).astype(int)
                     for (x1, y1, x2, y2), cls_id in zip(xyxy, classes):
                         if (
                             class_filter is not None
