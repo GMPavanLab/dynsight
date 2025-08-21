@@ -7,10 +7,8 @@
 }
 @media (min-width: 65em) {
     .content {
-        width: 60em;
         margin-left: auto;
         margin-right: auto;
-        padding-right: 16em;
     }
 }
 @media (min-width: 82em) {
