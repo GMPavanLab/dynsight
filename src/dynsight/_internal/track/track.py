@@ -39,6 +39,15 @@ def track_xyz(
         ...
         <x> <y> <z>
 
+    or::
+
+        <number of objects>
+        comment line
+        <name> <x> <y> <z>
+        <name> <x> <y> <z>
+        ...
+        <name> <x> <y> <z>
+
     The output file will have the same structure, but each line will start
     with the tracked particle ID.
 
@@ -86,7 +95,10 @@ def track_xyz(
     positions = _collect_positions(input_xyz=input_xyz)
 
     if not {"frame", "x", "y", "z"}.issubset(positions.columns):
-        msg = "Error in the .xyz format. Each line must be <x> <y> <z>."
+        msg = (
+            "Error in the .xyz format. Each line must be "
+            "<x> <y> <z> or <name> <x> <y> <z>."
+        )
         raise ValueError(msg)
 
     linked = tp.link_df(
@@ -105,17 +117,30 @@ def track_xyz(
             for _, row in frame_data.iterrows():
                 pid = int(row["particle"])
                 x, y, z = row["x"], row["y"], row["z"]
-                f.write(f"{pid} {x:.6f} {y:.6f} {z:.6f}\n")
+                name = row.get("name")
+                if name is not None and pd.notna(name):
+                    f.write(f"{name} {x:.6f} {y:.6f} {z:.6f} {pid}\n")
+                else:
+                    f.write(f"{x:.6f} {y:.6f} {z:.6f} {pid}\n")
 
     logger.info(f"Linked .xyz file written to: {output_xyz}")
     return Trj.init_from_xyz(traj_file=output_xyz, dt=1)
+
+
+def _is_float(text: str) -> bool:
+    """Return True if *text* can be converted to float."""
+    try:
+        float(text)
+    except ValueError:
+        return False
+    return True
 
 
 def _collect_positions(input_xyz: Path) -> pd.DataFrame:
     """Read the xyz file and return the positions dataset at each frame."""
     lines = input_xyz.read_text().splitlines()
 
-    data = []
+    data: list[dict[str, object]] = []
     frame = -1
     row = 0
     dimensions = 3
@@ -131,8 +156,23 @@ def _collect_positions(input_xyz: Path) -> pd.DataFrame:
                     break
                 parts = lines[row + a].strip().split()
                 if len(parts) >= dimensions:
-                    x, y, z = map(float, parts[0:3])
-                    data.append({"frame": frame, "x": x, "y": y, "z": z})
+                    if len(parts) >= dimensions + 1 and not _is_float(
+                        parts[0]
+                    ):
+                        name = parts[0]
+                        x, y, z = map(float, parts[1:4])
+                        data.append(
+                            {
+                                "frame": frame,
+                                "name": name,
+                                "x": x,
+                                "y": y,
+                                "z": z,
+                            }
+                        )
+                    else:
+                        x, y, z = map(float, parts[0:3])
+                        data.append({"frame": frame, "x": x, "y": y, "z": z})
             row += num_atoms
         else:
             row += 1
