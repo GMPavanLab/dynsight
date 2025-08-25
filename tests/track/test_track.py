@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterator, TextIO
+from typing import TYPE_CHECKING, Iterator, TextIO
 
 import numpy as np
 
 from dynsight.track import track_xyz
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 
 def _iter_xyz_frames(f: TextIO) -> Iterator[list[str]]:
@@ -34,8 +37,8 @@ def _parse_atom_line(line: str) -> tuple[float, float, float, str]:
 
 
 def _coords_by_id_from_xyz(
-    path: str, target_id: int | str, *, strict: bool = False
-) -> np.ndarray:
+    path: Path | str, target_id: int | str, *, strict: bool = False
+) -> NDArray[np.float64]:
     target = str(target_id)
     out: list[tuple[float, float, float]] = []
 
@@ -55,7 +58,6 @@ def _coords_by_id_from_xyz(
         raise ValueError
 
     return np.asarray(out, dtype=float)
-
 
 
 def test_track_xyz(tmp_path: Path) -> None:
