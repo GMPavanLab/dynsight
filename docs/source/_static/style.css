@@ -2,8 +2,8 @@
 .sidebar-drawer,
 .sidebar-container,
 .toc-drawer {
-    width: 16em;
-    min-width: 16em;
+    width: 15em;
+    min-width: 15em;
 }
 @media (min-width: 65em) {
     .content {
