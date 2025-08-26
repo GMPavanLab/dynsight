@@ -13,7 +13,6 @@ def test_track_xyz(tmp_path: Path) -> None:
     filename = original_dir / "../systems/lj_noid.xyz"
     file_with_id = original_dir / "../systems/lj_id.xyz"
     output = tmp_path / "trajectory.xyz"
-    output = "trajectory.xyz"
     track_xyz(input_xyz=filename, output_xyz=output)
     n_atoms = 5
     for _ in range(n_atoms):

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable, Literal
+from typing import Callable, Literal, Mapping, Sequence
 
 import numpy as np
 import numpy.typing as npt
@@ -107,11 +107,11 @@ Col = Literal["name", "x", "y", "z", "ID"]
 
 
 def _entry_from_parts(
-    parts: Iterable[str],
-    cols_order: list[Col],
+    parts: Sequence[str],
+    cols_order: Sequence[Col],
     frame: int,
 ) -> dict[str, object]:
-    converters: dict[Col, callable] = {
+    converters: Mapping[Col, Callable[[str], object]] = {
         "name": str,
         "x": float,
         "y": float,
@@ -126,7 +126,7 @@ def _entry_from_parts(
 
 def read_xyz(
     input_xyz: Path | str,
-    cols_order: list[Col],
+    cols_order: Sequence[Col],
 ) -> pd.DataFrame:
     lines = Path(input_xyz).read_text().splitlines()
     data: list[dict[str, object]] = []
@@ -140,7 +140,7 @@ def read_xyz(
         if token.isdigit():
             n_atoms = int(token)
             frame += 1
-            row += 2
+            row += 2  # skip comment/title line
 
             end = min(row + n_atoms, nlines)
             for i in range(row, end):
