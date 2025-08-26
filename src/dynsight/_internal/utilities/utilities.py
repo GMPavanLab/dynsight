@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from pathlib import Path
+from pathlib import Path
+from typing import Iterable, Literal
 
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 from scipy.signal import find_peaks
 
 from dynsight.trajectory import Insight, Trj
@@ -102,3 +101,56 @@ def load_or_compute_soap(
         soap.dump_to_json(soap_path)
 
     return soap
+
+
+Col = Literal["name", "x", "y", "z", "ID"]
+
+
+def _entry_from_parts(
+    parts: Iterable[str],
+    cols_order: list[Col],
+    frame: int,
+) -> dict[str, object]:
+    converters: dict[Col, callable] = {
+        "name": str,
+        "x": float,
+        "y": float,
+        "z": float,
+        "ID": int,
+    }
+    entry: dict[str, object] = {"frame": frame}
+    for c, col in enumerate(cols_order):
+        entry[col] = converters[col](parts[c])
+    return entry
+
+
+def read_xyz(
+    input_xyz: Path | str,
+    cols_order: list[Col],
+) -> pd.DataFrame:
+    lines = Path(input_xyz).read_text().splitlines()
+    data: list[dict[str, object]] = []
+
+    frame = -1
+    row = 0
+    nlines = len(lines)
+
+    while row < nlines:
+        token = lines[row].strip()
+        if token.isdigit():
+            n_atoms = int(token)
+            frame += 1
+            row += 2
+
+            end = min(row + n_atoms, nlines)
+            for i in range(row, end):
+                parts = lines[i].split()
+                if len(parts) < len(cols_order):
+                    continue
+                data.append(_entry_from_parts(parts, cols_order, frame))
+
+            row += n_atoms
+        else:
+            row += 1
+
+    return pd.DataFrame(data)

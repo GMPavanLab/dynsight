@@ -9,6 +9,7 @@ import pandas as pd
 import trackpy as tp
 
 from dynsight.trajectory import Trj
+from dynsight.utilities import read_xyz
 
 logging.basicConfig(
     level=logging.INFO,
@@ -60,11 +61,12 @@ def track_xyz(
 
         search_range:
             The maximum allowable displacement of objects between frames for
-            them to be considered the same particle.
+            them to be considered the same particle. Units depend on the
+            coordinate system used in the input file.
 
         memory:
             The maximum number of frames during which an object can vanish,
-            then reppear nearby, and be considered the same particle.
+            then re-appear nearby, and be considered the same particle.
 
         adaptive_stop:
             If not `None`, when encountering a region with too many candidate
@@ -92,7 +94,9 @@ def track_xyz(
         msg = f"Input file not found: {input_xyz}"
         raise FileNotFoundError(msg)
 
-    positions = _collect_positions(input_xyz=input_xyz)
+    positions = read_xyz(
+        input_xyz=input_xyz, cols_order=["name", "x", "y", "z"]
+    )
 
     if not {"frame", "x", "y", "z"}.issubset(positions.columns):
         msg = (
@@ -111,7 +115,9 @@ def track_xyz(
 
     with output_xyz.open("w") as f:
         for frame_num in sorted(linked["frame"].unique()):
-            frame_data = linked[linked["frame"] == frame_num]
+            frame_data = linked[linked["frame"] == frame_num].sort_values(
+                "particle"
+            )
             f.write(f"{len(frame_data)}\n")
             f.write(f"Frame {frame_num}\n")
             for _, row in frame_data.iterrows():
@@ -125,15 +131,6 @@ def track_xyz(
 
     logger.info(f"Linked .xyz file written to: {output_xyz}")
     return Trj.init_from_xyz(traj_file=output_xyz, dt=1)
-
-
-def _is_float(text: str) -> bool:
-    """Return True if *text* can be converted to float."""
-    try:
-        float(text)
-    except ValueError:
-        return False
-    return True
 
 
 def _collect_positions(input_xyz: Path) -> pd.DataFrame:
@@ -155,24 +152,27 @@ def _collect_positions(input_xyz: Path) -> pd.DataFrame:
                 if row + a >= len(lines):
                     break
                 parts = lines[row + a].strip().split()
-                if len(parts) >= dimensions:
-                    if len(parts) >= dimensions + 1 and not _is_float(
-                        parts[0]
-                    ):
-                        name = parts[0]
-                        x, y, z = map(float, parts[1:4])
-                        data.append(
-                            {
-                                "frame": frame,
-                                "name": name,
-                                "x": x,
-                                "y": y,
-                                "z": z,
-                            }
-                        )
-                    else:
-                        x, y, z = map(float, parts[0:3])
-                        data.append({"frame": frame, "x": x, "y": y, "z": z})
+                if len(parts) == dimensions:
+                    x, y, z = map(float, parts[0:3])
+                    data.append({"frame": frame, "x": x, "y": y, "z": z})
+                elif len(parts) >= dimensions + 1:
+                    name = parts[0]
+                    x, y, z = map(float, parts[1:4])
+                    data.append(
+                        {
+                            "frame": frame,
+                            "name": name,
+                            "x": x,
+                            "y": y,
+                            "z": z,
+                        }
+                    )
+                else:
+                    msg = (
+                        "Invalid line format, expected 3 or 4 columns, "
+                        f"found {len(parts)}"
+                    )
+                    raise ValueError(msg)
             row += num_atoms
         else:
             row += 1
