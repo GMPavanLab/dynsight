@@ -128,6 +128,25 @@ def read_xyz(
     input_xyz: Path | str,
     cols_order: Sequence[Col],
 ) -> pd.DataFrame:
+    """Read an XYZ trajectory file into a pandas DataFrame.
+
+    The function parses a file in extended XYZ format where each frame begins
+    with a line containing the number of atoms, followed by a comment/title
+    line, and then one line per atom containing at least one of the columns
+    specified in `cols_order`, following the correct order in the file.
+
+    Parameters:
+        input_xyz :
+            Path to the XYZ file to read.
+        cols_order : Sequence[Col]
+            The expected column order for each atom line (e.g.,
+            ["name", "x", "y", "z", "ID"]).
+
+    Returns:
+        A DataFrame containing all parsed atomic entries. Each row corresponds
+        to one atom in one frame, with columns given by `cols_order` plus the
+        current frame indexing.
+    """
     lines = Path(input_xyz).read_text().splitlines()
     data: list[dict[str, object]] = []
 
