@@ -75,7 +75,11 @@ def main() -> None:
     traj_path = instance.export_prediction_to_xyz(
         file_name=Path("trajectory.xyz")
     )
-    track_xyz(input_xyz=traj_path, output_xyz=Path("output/tracked_traj.xyz"))
+    track_xyz(
+        input_xyz=traj_path,
+        output_xyz=Path("output/tracked_traj.xyz"),
+        search_range=10,
+    )
 
 
 if __name__ == "__main__":

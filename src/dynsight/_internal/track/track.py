@@ -161,7 +161,7 @@ def _collect_positions(input_xyz: Path) -> pd.DataFrame:
                 if len(parts) == dimensions:
                     x, y, z = map(float, parts[0:3])
                     data.append({"frame": frame, "x": x, "y": y, "z": z})
-                elif len(parts) >= dimensions + 1:
+                elif len(parts) > dimensions:
                     name = parts[0]
                     x, y, z = map(float, parts[1:4])
                     data.append(
