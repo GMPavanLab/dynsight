@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def track_xyz(
     input_xyz: Path,
     output_xyz: Path,
-    search_range: float = 10,
+    search_range: float,
     memory: int = 1,
     adaptive_stop: None | float = 0.95,
     adaptive_step: None | float = 0.5,
@@ -62,7 +62,13 @@ def track_xyz(
         search_range:
             The maximum allowable displacement of objects between frames for
             them to be considered the same particle. Units depend on the
-            coordinate system used in the input file.
+            coordinate system used in the input file. If the file comes from
+            vision, then the unit is ``pixels``. We do not provide a default
+            parameter here, because fine tuning is required to get good
+            behaviour. We recommend starting with a value around 2-3 times the
+            diameter of the particles. But if you are unsure, start with a
+            value of 10. Additionally, test on a small trajectory to start
+            with.
 
         memory:
             The maximum number of frames during which an object can vanish,
