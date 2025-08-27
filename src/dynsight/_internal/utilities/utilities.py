@@ -138,7 +138,7 @@ def read_xyz(
     Parameters:
         input_xyz :
             Path to the XYZ file to read.
-        cols_order : Sequence[Col]
+        cols_order :
             The expected column order for each atom line (e.g.,
             ["name", "x", "y", "z", "ID"]).
 
