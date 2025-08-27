@@ -10,6 +10,7 @@
    :maxdepth: 2
 
    vision <vision>
+   track <track>
    descriptors <descriptors>
    onion clustering <onion>
    analysis <analysis>
@@ -75,10 +76,6 @@ you are using Python 3.10 and below, you can use :mod:`cpctools` to access
 
   $ pip install cpctools
 
-If you want to use the :mod:`dynsight.vision` and :mod:`dynsight.track` modules
-you will need to install a series of packages. This can be done with with pip::
-
-  $ pip install ultralytics PyYAML
 
 How to get started
 ------------------

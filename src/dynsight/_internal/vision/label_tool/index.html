@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>dynsight labeling tool</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div class="sidebar">
+            <h2>Labels</h2>
+            <input type="text" id="newLabelInput" placeholder="New label..." />
+            <button class="upload-btn" id="addLabelBtn">Add</button>
+            <div class="label-list" id="labelList"></div>
+        </div>
+
+        <div class="main">
+            <div class="top-bar">
+                <input type="file" id="imageInput" accept="image/*" multiple />
+                <button class="nav-btn" id="prevImage">&larr; Prev</button>
+                <button class="nav-btn" id="nextImage">Next &rarr;</button>
+                <button id="clearLast" class="nav-btn">Clear Previous</button>
+                <button id="clearAll" class="nav-btn">Clear All</button>
+                <button id="exportYolo" class="nav-btn">
+                    Export label (YOLO)
+                </button>
+                <button id="exportAll" class="nav-btn">
+                    Export dataset (YOLO)
+                </button>
+                <button id="synthesize" class="nav-btn">
+                    Synthesize dataset
+                </button>
+                <label for="zoomSlider">Zoom</label>
+                <input
+                    type="range"
+                    id="zoomSlider"
+                    min="10"
+                    max="200"
+                    value="100"
+                />
+            </div>
+            <div class="image-container" id="imageContainer" oncontextmenu="return false;">
+                <div id="imageWrapper">
+                    <img id="imageDisplay" src="" alt="" />
+                    <div id="overlay"></div>
+                </div>
+                <div id="verticalLine" class="crosshair-line"></div>
+                <div id="horizontalLine" class="crosshair-line"></div>
+            </div>
+
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>

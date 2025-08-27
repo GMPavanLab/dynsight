@@ -1,0 +1,23 @@
+/*DOCS SIDEBARS AND CENTERING*/
+.sidebar-drawer,
+.sidebar-container,
+.toc-drawer {
+    width: 15em;
+    min-width: 15em;
+}
+@media (min-width: 65em) {
+    .content {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+@media (min-width: 82em) {
+    .page {
+        justify-content: center;
+    }
+    .toc-drawer {
+        position: fixed;
+        right: 0;
+        top: 0;
+    }
+}

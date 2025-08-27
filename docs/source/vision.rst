@@ -10,5 +10,5 @@ Usage
 .. toctree::
   :maxdepth: 1
 
-  Video <_autosummary/dynsight.vision.Video.rst>
-  Detect <_autosummary/dynsight.vision.Detect.rst>
+  label_tool <label_tool/label_tool.rst>
+  VisionInstance <_autosummary/dynsight.vision.VisionInstance.rst>

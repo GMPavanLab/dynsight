@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from pathlib import Path
+from pathlib import Path
+from typing import Callable, Literal, Mapping, Sequence
 
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 from scipy.signal import find_peaks
 
 from dynsight.trajectory import Insight, Trj
@@ -102,3 +101,75 @@ def load_or_compute_soap(
         soap.dump_to_json(soap_path)
 
     return soap
+
+
+Col = Literal["name", "x", "y", "z", "ID"]
+
+
+def _entry_from_parts(
+    parts: Sequence[str],
+    cols_order: Sequence[Col],
+    frame: int,
+) -> dict[str, object]:
+    converters: Mapping[Col, Callable[[str], object]] = {
+        "name": str,
+        "x": float,
+        "y": float,
+        "z": float,
+        "ID": int,
+    }
+    entry: dict[str, object] = {"frame": frame}
+    for c, col in enumerate(cols_order):
+        entry[col] = converters[col](parts[c])
+    return entry
+
+
+def read_xyz(
+    input_xyz: Path | str,
+    cols_order: Sequence[Col],
+) -> pd.DataFrame:
+    """Read an XYZ trajectory file into a pandas DataFrame.
+
+    The function parses a file in extended XYZ format where each frame begins
+    with a line containing the number of atoms, followed by a comment/title
+    line, and then one line per atom containing at least one of the columns
+    specified in `cols_order`, following the correct order in the file.
+
+    Parameters:
+        input_xyz :
+            Path to the XYZ file to read.
+        cols_order :
+            The expected column order for each atom line (e.g.,
+            ["name", "x", "y", "z", "ID"]).
+
+    Returns:
+        A DataFrame containing all parsed atomic entries. Each row corresponds
+        to one atom in one frame, with columns given by `cols_order` plus the
+        current frame indexing.
+    """
+    lines = Path(input_xyz).read_text().splitlines()
+    data: list[dict[str, object]] = []
+
+    frame = -1
+    row = 0
+    nlines = len(lines)
+
+    while row < nlines:
+        token = lines[row].strip()
+        if token.isdigit():
+            n_atoms = int(token)
+            frame += 1
+            row += 2  # skip comment/title line
+
+            end = min(row + n_atoms, nlines)
+            for i in range(row, end):
+                parts = lines[i].split()
+                if len(parts) < len(cols_order):
+                    continue
+                data.append(_entry_from_parts(parts, cols_order, frame))
+
+            row += n_atoms
+        else:
+            row += 1
+
+    return pd.DataFrame(data)
