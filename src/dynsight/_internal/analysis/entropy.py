@@ -216,7 +216,7 @@ def compute_shannon_multi(
     if data.size == 0:
         msg = "data is empty"
         raise ValueError(msg)
-    n_points, n_dims = data.shape
+    _, n_dims = data.shape
     if n_dims != len(data_ranges) or n_dims != len(n_bins):
         msg = "Mismatch between data dimensions, data_ranges, and n_bins"
         raise ValueError(msg)

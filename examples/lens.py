@@ -66,7 +66,7 @@ def main() -> None:
         input_universe=universe,
         cutoff=cutoff,
     )
-    lens, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
+    lens, _nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
 
     fig, axes = plt.subplots(2, sharey=True)
     for i in range(4):

@@ -32,14 +32,14 @@ def main() -> None:
     )
 
     # Computing number of neighbors from scratch
-    neigcounts, n_neig = trj.get_coord_number(
+    neigcounts, _n_neig = trj.get_coord_number(
         r_cut=2.0,  # cutoff radius for neighbors list
         selection="all",  # compute on a selection of particles
         neigcounts=None,  # it will be computed and returned
     )
 
     # Now for LENS we already have neigcounts
-    _, lens = trj.get_lens(
+    _, _lens = trj.get_lens(
         r_cut=2.0,  # cutoff radius for neighbors list
         selection="all",  # compute on a selection of particles
         neigcounts=neigcounts,  # no need to compute it again

@@ -30,7 +30,7 @@ def plot_results(
 
     n_detections = [len(result) for result in instance.prediction_results]
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+    _, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 
     ax1.plot(n_detections, marker="o")
     ax1.set_title("N° Detections in Time")

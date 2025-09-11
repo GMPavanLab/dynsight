@@ -161,7 +161,7 @@ def main() -> None:
     _, n_frames = data.shape
     delta_t_list = np.unique(np.geomspace(2, n_frames, 10, dtype=int))
 
-    n_cl, cl_frac, info_gain, cl_entr, h_0 = info_gain_with_onion(
+    _n_cl, cl_frac, _info_gain, cl_entr, h_0 = info_gain_with_onion(
         delta_t_list,
         data,
     )
