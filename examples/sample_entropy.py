@@ -141,7 +141,7 @@ def main() -> None:
     fractions = []
     for _, delta_t in enumerate(delta_t_list):
         reshaped_data = dynsight.onion.helpers.reshape_from_nt(data, delta_t)
-        state_list, labels = dynsight.onion.onion_uni(reshaped_data)
+        _, labels = dynsight.onion.onion_uni(reshaped_data)
 
         tmp_list = []
         tmp_frac = []

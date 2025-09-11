@@ -40,7 +40,7 @@ def test_too_short(
 
 def test_too_small_rfact(random_data: NDArray[np.float64]) -> None:
     """Test that a too small r_factor raises a RuntimeError."""
-    with pytest.raises(RuntimeError, match="No matching sequences found."):
+    with pytest.raises(RuntimeError, match=r"No matching sequences found."):
         dynsight.analysis.sample_entropy(random_data, r_factor=0.0)
 
 

@@ -161,19 +161,19 @@ def test_onion_analysis(universe: MDAnalysis.Universe) -> None:
 def test_insight_load_errors(file_paths: dict[str, Path]) -> None:
     """Test insight load errors."""
     with pytest.raises(
-        ValueError, match="'dataset_file' key not found in JSON file."
+        ValueError, match=r"'dataset_file' key not found in JSON file."
     ):
         _ = Insight.load_from_json(file_paths["files_dir"] / "empty.json")
 
     with pytest.raises(
-        ValueError, match="'labels_file' key not found in JSON file."
+        ValueError, match=r"'labels_file' key not found in JSON file."
     ):
         _ = ClusterInsight.load_from_json(
             file_paths["files_dir"] / "ins_1_test.json"
         )
 
     with pytest.raises(
-        ValueError, match="'reshaped_data_file' key not found in JSON file."
+        ValueError, match=r"'reshaped_data_file' key not found in JSON file."
     ):
         _ = OnionInsight.load_from_json(
             file_paths["files_dir"] / "cl_ins_test.json"

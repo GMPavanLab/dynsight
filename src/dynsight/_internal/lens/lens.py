@@ -108,13 +108,17 @@ def neighbour_change_in_time(
     Returns:
         tuple:
             - lens_array: The calculated LENS parameter.
-                It's a numpy.array of shape (n_particles, n_frames - 1)
+                It's a np.array of shape (n_particles, n_frames - delay + 1)
             - number_of_neighs: The count of neighbors per frame.
-                It's a numpy.array of shape (n_particles, n_frames)
+                It's a np.array of shape (n_particles, n_frames)
             - lens_numerators: The numerators used for calculating LENS.
-                It's a numpy.array of shape (n_particles, n_frames - 1)
+                It's a np.array of shape (n_particles, n_frames - delay + 1)
             - lens_denominators: The denominators used for calculating LENS.
-                It's a numpy.array of shape (n_particles, n_frames - 1)
+                It's a np.array of shape (n_particles, n_frames - delay + 1)
+
+    Note:
+        The first frame of the output array is identically zero. This is due
+        to compatibility with older code.
 
     Example:
 
@@ -151,10 +155,10 @@ def neighbour_change_in_time(
     n_atoms = np.asarray(neigh_list_per_frame, dtype=object).shape[1]
     n_frames = np.asarray(neigh_list_per_frame, dtype=object).shape[0]
 
-    lens_array = np.zeros((n_atoms, n_frames))  # The LENS values
-    number_of_neighs = np.zeros((n_atoms, n_frames), dtype=int)  # The NN
-    lens_numerators = np.zeros((n_atoms, n_frames))  # LENS numerator
-    lens_denominators = np.zeros((n_atoms, n_frames))  # LENS denominator
+    lens_array = np.zeros((n_atoms, n_frames - delay + 1))
+    number_of_neighs = np.zeros((n_atoms, n_frames), dtype=int)
+    lens_numerators = np.zeros((n_atoms, n_frames - delay + 1))
+    lens_denominators = np.zeros((n_atoms, n_frames - delay + 1))
 
     # each nnlist contains also the atom that generates them,
     # so 0 nn is a 1 element list
