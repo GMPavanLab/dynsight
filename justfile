@@ -12,6 +12,9 @@ docs:
 dev:
   pip install -e '.[dev]'
 
+dev-fresh:
+  pip install --no-cache-dir -e '.[dev]'
+
 # Run code checks.
 check:
   #!/usr/bin/env bash
