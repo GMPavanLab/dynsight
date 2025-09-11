@@ -98,7 +98,7 @@ def main() -> None:
     coord_1d = Insight(coord_2d.dataset[:, :, 0])
 
     # Test onion clustering on a wide range of time resolutions
-    _delta_t_list, _n_clust, _unclass_frac = coord_1d.get_onion_analysis(
+    delta_t_list, n_clust, unclass_frac = coord_1d.get_onion_analysis(
         fig1_path=data_path / "time-res_1d.png",
         fig2_path=data_path / "pop_fracs_1d.png",
     )
@@ -110,7 +110,7 @@ def main() -> None:
     onion_results.plot_state_populations(data_path / "state_pops_1d.png")
 
     # Test onion clustering on a wide range of time resolutions
-    _delta_t_list, _n_clust, _unclass_frac = coord_2d.get_onion_analysis(
+    delta_t_list, n_clust, unclass_frac = coord_2d.get_onion_analysis(
         fig1_path=data_path / "time-res_2d.png",
         fig2_path=data_path / "pop_fracs_2d.png",
     )
