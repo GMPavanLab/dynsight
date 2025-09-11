@@ -446,7 +446,7 @@ class OnionSmoothInsight(ClusterInsight):
         if self.labels.shape != (n_atoms, n_frames):
             msg = (
                 f"Shape mismatch: Trj should have {self.labels.shape[0]} "
-                f"atoms, {self.labels.shape[0]} frames, but has {n_atoms} "
+                f"atoms, {self.labels.shape[1]} frames, but has {n_atoms} "
                 f"atoms, {n_frames} frames."
             )
             logger.log(msg)
