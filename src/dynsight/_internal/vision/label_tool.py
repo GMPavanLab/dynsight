@@ -14,7 +14,7 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
         pass
 
     # do_POST must be uppercase
-    def do_POST(self) -> None:
+    def do_POST(self) -> None:  # noqa: N802
         if self.path == "/shutdown":
             self.send_response(200)
             self.end_headers()

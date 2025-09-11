@@ -97,7 +97,7 @@ def orientational_order_param(
 
 def _compute_aver_align(
     neigh_list_t: list[AtomGroup],
-    frame_vel: NDArray[np.float64],
+    frame_vel: NDArray[np.float64],  # shape (n_atoms, n_dim)
 ) -> NDArray[np.float64]:
     """Computes the average alignment for all the atoms in a frame."""
     phi_t = np.zeros(len(frame_vel))
@@ -114,7 +114,10 @@ def _compute_aver_align(
             continue  # no self-counting, no neighbors with v = 0.0
 
         alignments = np.array(
-            [1 - cosine(atom_i, frame_vel[j]) for j in valid_neighbors]
+            [
+                1 - cosine(np.array(atom_i), frame_vel[j])
+                for j in valid_neighbors
+            ]
         )
         phi_t[i] = np.mean(alignments)
     return phi_t
