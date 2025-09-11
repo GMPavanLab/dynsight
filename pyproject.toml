@@ -94,6 +94,7 @@ convention = "google"
     "RUF059",
 ]
 "docs/source/conf.py" = ["D100", "INP001"]
+"docs/source/_static/recipes/*" = ["RUF059"]
 
 [tool.mypy]
 show_error_codes = true
