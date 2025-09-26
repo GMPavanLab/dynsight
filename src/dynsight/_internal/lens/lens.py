@@ -97,8 +97,12 @@ def list_neighbours_along_trajectory(
     frame_indices = list(
         range(*trajslice.indices(input_universe.trajectory.n_frames))
     )
-
-    if num_processes <= 1:
+    
+    if num_processes < 1:
+        msg="num_processes cannot be negative or zero."
+        raise ValueError(msg)
+    
+    if num_processes == 1:
         neigh_list_per_frame = []
         for traj_frame in frame_indices:
             input_universe.trajectory[traj_frame]
