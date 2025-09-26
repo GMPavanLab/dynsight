@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import numpy as np
 import yaml
@@ -180,12 +181,20 @@ def test_vision_tuning(tmp_path: Path) -> None:
     )
     create_dummy_yolo_dataset(tmp_path)
     instance.set_training_dataset(tmp_path / "data.yaml")
-    hyp = instance.tune_hyperparams(
-        iterations=1,
-        epochs=1,
-        imgsz=100,
-        batch_size=-1,
-    )
+
+    # Disable Ultralytics plot_tune_results
+    # It crashes on empty CSVs with dummy datasets
+    # in newer version of ultralytics package.
+    with patch(
+        "ultralytics.utils.plotting.plot_tune_results", lambda *_, **__: None
+    ):
+        hyp = instance.tune_hyperparams(
+            iterations=1,
+            epochs=1,
+            imgsz=100,
+            batch_size=1,
+        )
+
     assert (
         out_path / "tuning" / "results" / "best_hyperparameters.yaml"
     ).exists()

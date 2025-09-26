@@ -4,6 +4,8 @@ import MDAnalysis
 import numpy as np
 import pytest
 
+from tests.lens.case_data import LENSCaseData
+
 
 def fewframeuniverse(
     trajectory: list[list[list[int]]],
@@ -261,3 +263,24 @@ getuni = {
 )
 def lensfixtures(request: pytest.FixtureRequest) -> MDAnalysis.Universe:
     return getuni[request.param]
+
+
+@pytest.fixture(
+    scope="session",
+    params=(
+        # Case 0: Mono Core
+        lambda name: LENSCaseData(
+            num_processes=1,
+            name=name,
+        ),
+        # Case 1: Multi Core
+        lambda name: LENSCaseData(
+            num_processes=2,
+            name=name,
+        ),
+    ),
+)
+def case_data(request: pytest.FixtureRequest) -> LENSCaseData:
+    return request.param(
+        f"{request.fixturename}{request.param_index}",  # type: ignore [attr-defined]
+    )

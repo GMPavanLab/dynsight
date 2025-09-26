@@ -169,6 +169,7 @@ class Trj:
         delay: int = 1,
         selection: str = "all",
         neigcounts: list[list[AtomGroup]] | None = None,
+        num_processes: int = 1,
     ) -> tuple[list[list[AtomGroup]], Insight]:
         """Compute LENS on the trajectory.
 
@@ -185,6 +186,7 @@ class Trj:
                 cutoff=r_cut,
                 selection=selection,
                 trajslice=self.trajslice,
+                num_processes=num_processes,
             )
         lens, *_ = dynsight.lens.neighbour_change_in_time(
             neigh_list_per_frame=neigcounts,

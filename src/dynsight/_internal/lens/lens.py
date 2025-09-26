@@ -8,8 +8,27 @@ if TYPE_CHECKING:
     from MDAnalysis import AtomGroup, Universe
     from numpy.typing import NDArray
 
+from multiprocessing import Pool
+
 import numpy as np
 from MDAnalysis.lib.NeighborSearch import AtomNeighborSearch
+
+
+def _process_neighbour_frame(
+    args: tuple[Universe, AtomGroup, float, int, int],
+) -> tuple[int, list[NDArray[np.float64]]]:
+    universe, selection, cutoff, traj_frame, result_index = args
+
+    universe.trajectory[traj_frame]
+    neigh_search = AtomNeighborSearch(
+        universe.atoms, box=universe.trajectory.ts.dimensions
+    )
+
+    neigh_list_per_atom = [
+        neigh_search.search(atom, cutoff).ix for atom in selection
+    ]
+
+    return result_index, neigh_list_per_atom
 
 
 def list_neighbours_along_trajectory(
@@ -17,6 +36,7 @@ def list_neighbours_along_trajectory(
     cutoff: float,
     selection: str = "all",
     trajslice: slice | None = None,
+    num_processes: int = 1,
 ) -> list[list[AtomGroup]]:
     """Produce a per-frame list of the neighbors, atom by atom.
 
@@ -33,6 +53,9 @@ def list_neighbours_along_trajectory(
             `here <https://userguide.mdanalysis.org/stable/selections.html>`_
         trajslice:
             The slice of the trajectory to consider. Defaults to slice(None).
+        num_processes:
+            The number of processes to use for parallel computation.
+            **Warning:** Adjust this based on the available cores.
 
     Returns:
         list[list[AtomGroup]]:
@@ -70,18 +93,40 @@ def list_neighbours_along_trajectory(
     """
     if trajslice is None:
         trajslice = slice(None)
-    neigh_list_per_frame = []
     selected_atoms = input_universe.select_atoms(selection)
-    for _ in input_universe.universe.trajectory[trajslice]:
-        neigh_search = AtomNeighborSearch(
-            input_universe.atoms, box=input_universe.dimensions
-        )
+    frame_indices = list(
+        range(*trajslice.indices(input_universe.trajectory.n_frames))
+    )
 
-        neigh_list_per_atom = [
-            neigh_search.search(atom, cutoff) for atom in selected_atoms
-        ]
-        neigh_list_per_frame.append([at.ix for at in neigh_list_per_atom])
-    return neigh_list_per_frame
+    if num_processes < 1:
+        msg = "num_processes cannot be negative or zero."
+        raise ValueError(msg)
+
+    if num_processes == 1:
+        neigh_list_per_frame = []
+        for traj_frame in frame_indices:
+            input_universe.trajectory[traj_frame]
+            neigh_search = AtomNeighborSearch(
+                input_universe.atoms,
+                box=input_universe.trajectory.ts.dimensions,
+            )
+            neigh_list_per_atom = [
+                neigh_search.search(atom, cutoff).ix for atom in selected_atoms
+            ]
+            neigh_list_per_frame.append(neigh_list_per_atom)
+        return neigh_list_per_frame
+
+    args = [
+        (input_universe, selected_atoms, cutoff, frame, i)
+        for i, frame in enumerate(frame_indices)
+    ]
+
+    with Pool(processes=num_processes) as pool:
+        results = pool.map(_process_neighbour_frame, args)
+
+    ordered_results = dict(results)
+
+    return [ordered_results[i] for i in range(len(frame_indices))]
 
 
 def neighbour_change_in_time(
