@@ -81,7 +81,7 @@ How to get started
 ------------------
 
 We suggest you give a read to the ``dynsight.trajectory`` module documentation,
-which offers a compact and easy way of using most of the ``dynsight`` tools. 
+which offers a compact and easy way of using most of the ``dynsight`` tools.
 Also, the documentation offers some copiable Recipes and Examples for the most
 common analyses.
 
@@ -98,9 +98,10 @@ Developer Setup
 ---------------
 
 #. Install `just`_.
+#. Install `uv <https://docs.astral.sh>`_
 #. In a new virtual environment run::
 
-    $ just dev
+    $ just setup
 
 
 #. Run code checks::
