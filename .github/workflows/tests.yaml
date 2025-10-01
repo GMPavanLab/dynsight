@@ -13,13 +13,16 @@ jobs:
                 python-version: ["3.10", "3.13"]
         name: ruff on ${{ matrix.python-version }}
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-python@v4
+            - uses: actions/checkout@v4
+            - uses: astral-sh/setup-uv@v3
               with:
+                  enable-cache: true
                   python-version: ${{ matrix.python-version }}
-                  cache: "pip"
-            - run: pip install -e '.[dev]'
-            - run: ruff check .
+            - uses: actions/setup-python@v5
+              with:
+                  python-version-file: "pyproject.toml"
+            - run: uv sync --all-extras --dev
+            - run: uv run ruff check .
 
     mypy:
         runs-on: ubuntu-latest
@@ -28,13 +31,16 @@ jobs:
                 python-version: ["3.10", "3.13"]
         name: mypy on ${{ matrix.python-version }}
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-python@v4
+            - uses: actions/checkout@v4
+            - uses: astral-sh/setup-uv@v3
               with:
+                  enable-cache: true
                   python-version: ${{ matrix.python-version }}
-                  cache: "pip"
-            - run: pip install -e '.[dev]'
-            - run: mypy .
+            - uses: actions/setup-python@v5
+              with:
+                  python-version-file: "pyproject.toml"
+            - run: uv sync --all-extras --dev
+            - run: uv run mypy .
 
     ruff-format:
         runs-on: ubuntu-latest
@@ -43,13 +49,16 @@ jobs:
                 python-version: ["3.10", "3.13"]
         name: ruff-format on ${{ matrix.python-version }}
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-python@v4
+            - uses: actions/checkout@v4
+            - uses: astral-sh/setup-uv@v3
               with:
+                  enable-cache: true
                   python-version: ${{ matrix.python-version }}
-                  cache: "pip"
-            - run: pip install -e '.[dev]'
-            - run: ruff format --check .
+            - uses: actions/setup-python@v5
+              with:
+                  python-version-file: "pyproject.toml"
+            - run: uv sync --all-extras --dev
+            - run: uv run ruff format --check .
 
     pytest:
         runs-on: ubuntu-latest
@@ -58,13 +67,16 @@ jobs:
                 python-version: ["3.10", "3.13"]
         name: pytest on ${{ matrix.python-version }}
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-python@v4
+            - uses: actions/checkout@v4
+            - uses: astral-sh/setup-uv@v3
               with:
+                  enable-cache: true
                   python-version: ${{ matrix.python-version }}
-                  cache: "pip"
-            - run: pip install -e '.[dev]'
-            - run: pytest --cov=src --cov-report term-missing
+            - uses: actions/setup-python@v5
+              with:
+                  python-version-file: "pyproject.toml"
+            - run: uv sync --all-extras --dev
+            - run: uv run pytest
 
     doctest:
         runs-on: ubuntu-latest
@@ -73,10 +85,13 @@ jobs:
                 python-version: ["3.10", "3.13"]
         name: doctest on ${{ matrix.python-version }}
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-python@v4
+            - uses: actions/checkout@v4
+            - uses: astral-sh/setup-uv@v3
               with:
+                  enable-cache: true
                   python-version: ${{ matrix.python-version }}
-                  cache: "pip"
-            - run: pip install -e '.[dev]'
-            - run: make -C docs doctest
+            - uses: actions/setup-python@v5
+              with:
+                  python-version-file: "pyproject.toml"
+            - run: uv sync --all-extras --dev
+            - run: uv run make -C docs doctest
