@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -15,6 +15,7 @@ def compute_shannon(
     data: NDArray[np.float64],
     data_range: tuple[float, float],
     n_bins: int,
+    units: Literal["bit", "nat", "frac"] = "frac",
 ) -> float:
     """Compute the Shannon entropy of a univariate data distribution.
 
@@ -30,6 +31,10 @@ def compute_shannon(
 
         n_bins:
             The number of bins with which the data histogram must be computed.
+
+        units:
+            The units of measure of the output entropy. If "frac", entropy is
+            normalized between 0 and 1 by dividing by log(n_bins).
 
     Returns:
         The value of the normalized Shannon entropy of the dataset.
@@ -67,11 +72,19 @@ def compute_shannon(
     )
     probs = counts / np.sum(counts)  # Data probabilities are needed
     entropy = -np.sum([p * np.log2(p) for p in probs if p > 0.0])
-    entropy /= np.log2(n_bins)
-    return entropy
+
+    if units == "bit":
+        return entropy
+    if units == "nat":
+        return entropy * np.log(2)
+    return entropy / np.log2(n_bins)
 
 
-def compute_kl_entropy(data: NDArray[np.float64], n_neigh: int = 1) -> float:
+def compute_kl_entropy(
+    data: NDArray[np.float64],
+    n_neigh: int = 1,
+    units: Literal["bit", "nat"] = "bit",
+) -> float:
     """Estimate Shannon differential entropy using Kozachenko-Leonenko.
 
     The Kozachenko-Leonenko k-nearest neighbors method approximates
@@ -85,6 +98,9 @@ def compute_kl_entropy(data: NDArray[np.float64], n_neigh: int = 1) -> float:
 
         n_neigh:
             The number of neighbors considered in the KL estimator.
+
+        units:
+            The units of measure of the output entropy.
 
     Returns:
         The Shannon differential entropy of the dataset, in bits.
@@ -112,7 +128,9 @@ def compute_kl_entropy(data: NDArray[np.float64], n_neigh: int = 1) -> float:
     eps = data[n_neigh:] - data[:-n_neigh]  # n_neigh-th neighbor distances
     eps = np.clip(eps, 1e-10, None)  # avoid log(0)
     const = digamma(n_data) - digamma(n_neigh) + 1
-    return const + np.mean(np.log2(eps))
+    if units == "bit":
+        return const + np.mean(np.log2(eps))
+    return const + np.mean(np.log2(eps)) * np.log(2)
 
 
 def compute_negentropy(data: NDArray[np.float64]) -> float:
