@@ -3,16 +3,16 @@ Information gain analysis
 
 For the theoretical aspects of this work, see https://doi.org/10.48550/arXiv.2504.12990.
 
-This recipe explains how to compute the information gain through clustering 
+This recipe explains how to compute the information gain through clustering
 analysis. We use a synthetic dataset containing a signal that oscillates
 between 0 and 1, with Gaussian noise. Onion clustering is run on a broad
 range of time resolutions ∆t. The information gain and the Shannon entropy of
-the environments is computed for each value of ∆t. The analysis is implemented 
+the environments is computed for each value of ∆t. The analysis is implemented
 using onion 2.0.0 ("onion smooth").
 
 .. warning::
 
-    This code works when run from the ``/docs`` directory of the ``dynsight`` 
+    This code works when run from the ``/docs`` directory of the ``dynsight``
     repo. To use it elsewhere, you have to change the ``Path`` variables
     accordingly.
 
@@ -54,7 +54,7 @@ Let's start by creating a the synthetic dataset:
 
 The following function takes as input the dataset, and a list of values
 of time resolutions ∆t, and for each of these it performs Onion clustering, and
-computes the information gain achieved through clustering with that ∆t. 
+computes the information gain achieved through clustering with that ∆t.
 
 .. warning::
 
@@ -222,7 +222,7 @@ gain goes to 0.
 
 .. raw:: html
 
-    <a class="btn-download" href="../_static/recipes/info_gain.py" download>⬇️ Download Python Script</a>
+    <a class="btn-download" href="_static/recipes/info_gain.py" download>⬇️ Download Python Script</a>
 
 .. testcode:: recipe3-test
     :hide:

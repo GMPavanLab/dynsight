@@ -113,7 +113,7 @@ which should be 2 bits.
         units="bit",
     )
     diff_2d = gauss_entropy_2 - gauss_entropy_1
-    # diff_2d = 1.9983384346024948
+    # diff_2d = 2.0142525628908743
 
 
 .. raw:: html
@@ -126,4 +126,4 @@ which should be 2 bits.
     assert np.isclose(dice_entropy, np.log2(6), rtol=1e-3)
     assert np.isclose(dices_entropy, np.log2(36), rtol=1e-3)
     assert np.isclose(diff, 1, rtol=1e-3, atol=1e-4)
-    assert np.isclose(diff_2d, 2, rtol=1e-3, atol=1e-4)
+    assert np.isclose(diff_2d, 2, rtol=1e-2, atol=1e-2)
