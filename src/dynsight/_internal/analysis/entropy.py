@@ -7,8 +7,9 @@ if TYPE_CHECKING:
 
 import numpy as np
 import numpy.typing as npt
+from scipy.spatial import cKDTree
 from scipy.spatial.distance import cdist
-from scipy.special import digamma
+from scipy.special import digamma, gamma
 
 
 def compute_shannon(
@@ -259,6 +260,68 @@ def compute_shannon_multi(
     if units == "nat":
         return entropy * np.log(2)
     return entropy / np.log2(np.prod(n_bins))  # Normalization
+
+
+def compute_kl_entropy_multi(
+    data: NDArray[np.float64],
+    n_neigh: int = 1,
+    units: Literal["bit", "nat"] = "bit",
+) -> float:
+    """Estimate Shannon differential entropy using Kozachenko-Leonenko.
+
+    This function works for multivariate distribution.
+    The Kozachenko-Leonenko k-nearest neighbors method approximates
+    differential entropy based on distances to nearest neighbors
+    in the sample space. It's main advantage is being parameter-free.
+
+    Parameters:
+        data:
+            The dataset for which the entropy is to be computed.
+            Shape (n_data, n_dims)
+
+        n_neigh:
+            The number of neighbors considered in the KL estimator.
+
+        units:
+            The units of measure of the output entropy.
+
+    Returns:
+        The Shannon differential entropy of the dataset, in bits.
+
+    Example:
+
+        .. testcode:: klm-entropy-test
+
+            import numpy as np
+            from dynsight.analysis import compute_kl_entropy_multi
+
+            np.random.seed(1234)
+            data = np.random.rand(10000, 2)
+
+            data_entropy = compute_kl_entropy_multi(data)
+
+        .. testcode:: klm-entropy-test
+            :hide:
+
+            assert np.isclose(data_entropy, -4.319358938644518)
+
+    """
+    n_samples, dim = data.shape
+    tree = cKDTree(data)
+    eps, _ = tree.query(data, k=n_neigh + 1, p=2)
+    eps = eps[:, -1]  # distance to the n_neigh-th neighbor
+    eps = np.clip(eps, 1e-10, None)  # avoid log(0)
+    unit_ball_volume = (np.pi ** (dim / 2)) / gamma(dim / 2 + 1)
+    entropy = (
+        digamma(n_samples)
+        - digamma(n_neigh)
+        + np.log2(unit_ball_volume)
+        + (dim / n_samples) * np.sum(np.log2(eps))
+    )
+
+    if units == "bit":
+        return entropy
+    return entropy * np.log(2)
 
 
 def compute_entropy_gain(
