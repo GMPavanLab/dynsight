@@ -33,8 +33,8 @@
 
   Descriptors from a Trj <descr_from_trj>
   Dimensionality reduction methods <soap_dim_red>
-  Entropy calculations <entropy>
   Information gain analysis <info_gain>
+  Entropy calculations <entropy>
 
 .. toctree::
   :hidden:
