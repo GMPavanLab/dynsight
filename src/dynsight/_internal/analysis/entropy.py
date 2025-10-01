@@ -133,7 +133,10 @@ def compute_kl_entropy(
     return const + np.mean(np.log2(eps)) * np.log(2)
 
 
-def compute_negentropy(data: NDArray[np.float64]) -> float:
+def compute_negentropy(
+    data: NDArray[np.float64],
+    units: Literal["bit", "nat"] = "bit",
+) -> float:
     """Estimate negentropy of a dataset.
 
     Negentropy is a measure of non-Gaussianity representing the distance
@@ -149,8 +152,11 @@ def compute_negentropy(data: NDArray[np.float64]) -> float:
         data:
             The dataset for which the entropy is to be computed.
 
+        units:
+            The units of measure of the output negentropy.
+
     Returns:
-        The negentropy of the dataset, in bits.
+        The negentropy of the dataset.
 
 
     Example:
@@ -176,8 +182,8 @@ def compute_negentropy(data: NDArray[np.float64]) -> float:
     data_norm = (data - np.mean(data)) / np.std(data, ddof=1)
     sigma = np.std(data_norm, ddof=1)
     data_gauss = rng.normal(loc=0.0, scale=sigma, size=data.size)
-    h_gauss = compute_kl_entropy(data_gauss)
-    h_data = compute_kl_entropy(data_norm)
+    h_gauss = compute_kl_entropy(data_gauss, units=units)
+    h_data = compute_kl_entropy(data_norm, units=units)
     return h_gauss - h_data
 
 
