@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 # Set by cpctools.
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dynamic = ["version"]
 readme = "README.rst"
 description = "Simplifies analysis of simulation and experimental trajectories."
