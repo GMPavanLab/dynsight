@@ -121,17 +121,19 @@ def compute_kl_entropy(
         .. testcode:: kl-entropy-test
             :hide:
 
-            assert np.isclose(data_entropy, -3.3437736767342194)
+            assert np.isclose(data_entropy, -3.650626496174274)
 
     """
     data = np.sort(data.flatten())
     n_data = len(data)
     eps = data[n_neigh:] - data[:-n_neigh]  # n_neigh-th neighbor distances
     eps = np.clip(eps, 1e-10, None)  # avoid log(0)
-    const = digamma(n_data) - digamma(n_neigh) + 1
+    const = digamma(n_data) - digamma(n_neigh) + np.log(2)  # 1D volume
+    h_bits = const + np.mean(np.log2(eps))
     if units == "bit":
-        return const + np.mean(np.log2(eps))
-    return const + np.mean(np.log2(eps)) * np.log(2)
+        return h_bits
+    # nat
+    return h_bits * np.log(2)
 
 
 def compute_negentropy(
