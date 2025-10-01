@@ -191,6 +191,7 @@ def compute_shannon_multi(
     data: NDArray[np.float64],
     data_ranges: list[tuple[float, float]],
     n_bins: list[int],
+    units: Literal["bit", "nat", "frac"] = "frac",
 ) -> float:
     """Compute the Shannon entropy of a multivariate data distribution.
 
@@ -209,6 +210,10 @@ def compute_shannon_multi(
         n_bins:
             A list of integers specifying the number of bins for each
             dimension.
+
+        units:
+            The units of measure of the output entropy. If "frac", entropy is
+            normalized between 0 and 1 by dividing by log(n_bins).
 
     Returns:
         The value of the normalized Shannon entropy of the dataset.
@@ -248,9 +253,12 @@ def compute_shannon_multi(
     counts, _ = np.histogramdd(data, bins=n_bins, range=data_ranges)
     probs = counts / np.sum(counts)  # Probability distribution
     entropy = -np.sum(probs[probs > 0] * np.log2(probs[probs > 0]))
-    entropy /= np.log2(np.prod(n_bins))  # Normalization
 
-    return entropy
+    if units == "bit":
+        return entropy
+    if units == "nat":
+        return entropy * np.log(2)
+    return entropy / np.log2(np.prod(n_bins))  # Normalization
 
 
 def compute_entropy_gain(
