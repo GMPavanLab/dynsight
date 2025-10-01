@@ -66,6 +66,9 @@ def compute_shannon(
     if data.size == 0:
         msg = "data is empty"
         raise ValueError(msg)
+    if units not in ["bit", "nat", "frac"]:
+        msg = "units must be bit, nat or frac."
+        raise ValueError(msg)
     counts, _ = np.histogram(
         data,
         bins=n_bins,
@@ -124,6 +127,9 @@ def compute_kl_entropy(
             assert np.isclose(data_entropy, -3.650626496174274)
 
     """
+    if units not in ["bit", "nat"]:
+        msg = "units must be bit or nat."
+        raise ValueError(msg)
     data = np.sort(data.flatten())
     n_data = len(data)
     eps = data[n_neigh:] - data[:-n_neigh]  # n_neigh-th neighbor distances
@@ -180,6 +186,9 @@ def compute_negentropy(
             assert np.isclose(negentropy, 0.2609932580146541)
 
     """
+    if units not in ["bit", "nat"]:
+        msg = "units must be bit or nat."
+        raise ValueError(msg)
     data = data.flatten()
     rng = np.random.default_rng(seed=1234)
     data_norm = (data - np.mean(data)) / np.std(data, ddof=1)
@@ -252,6 +261,9 @@ def compute_shannon_multi(
     if n_dims != len(data_ranges) or n_dims != len(n_bins):
         msg = "Mismatch between data dimensions, data_ranges, and n_bins"
         raise ValueError(msg)
+    if units not in ["bit", "nat", "frac"]:
+        msg = "units must be bit, nat or frac."
+        raise ValueError(msg)
 
     counts, _ = np.histogramdd(data, bins=n_bins, range=data_ranges)
     probs = counts / np.sum(counts)  # Probability distribution
@@ -308,6 +320,9 @@ def compute_kl_entropy_multi(
             assert np.isclose(data_entropy, -4.319358938644518)
 
     """
+    if units not in ["bit", "nat"]:
+        msg = "units must be bit or nat."
+        raise ValueError(msg)
     n_samples, dim = data.shape
     tree = cKDTree(data)
     eps, _ = tree.query(data, k=n_neigh + 1, p=2)
