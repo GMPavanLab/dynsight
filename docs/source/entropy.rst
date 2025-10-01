@@ -32,7 +32,27 @@ should be equal to log2(6) bit.
         n_bins=6,
         units="bit",
     )
-    # dice_entropy = 2.584832195231254
+    # dice_entropy = 2.584832195231254 ~ log2(6)
+
+
+Entropy of a discrete multivariate variable
+-------------------------------------------
+
+Let's compute the Shanon entropy of rolling `two` dices ``n_sample`` times,
+which should be equal to log2(36) bit.
+
+.. testcode:: recipe4-test
+
+    n_sample = 10000
+    rolls = np.random.randint(1, 7, size=(n_sample, 2))
+
+    dices_entropy = dynsight.analysis.compute_shannon_multi(
+        data=rolls,
+        data_ranges=[(1,6), (1,6)],
+        n_bins=[6, 6],
+        units="bit",
+    )
+    # dices_entropy = 5.168428344754391 ~ log2(36)
 
 
 Entropy of a continuous variable
@@ -61,6 +81,9 @@ standard deviations respectively equal to 1 and 2, which should be 1 bit.
     # diff = 1.0010395631476854
 
 
+
+
+
 %.. raw:: html
 %
 %    <a class="btn-download" href="../_static/recipes/entropy.py" download>⬇️ Download Python Script</a>
@@ -69,4 +92,5 @@ standard deviations respectively equal to 1 and 2, which should be 1 bit.
     :hide:
 
     assert np.isclose(dice_entropy, np.log2(6), rtol=1e-3)
+    assert np.isclose(dices_entropy, np.log2(36), rtol=1e-3)
     assert np.isclose(diff, 1, rtol=1e-3, atol=1e-4)
