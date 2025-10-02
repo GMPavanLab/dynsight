@@ -1,4 +1,4 @@
-Dimensionality reduction methods 
+Dimensionality reduction methods
 ================================
 
 This recipe explains how to compute descriptors via dimensionality reduction
@@ -15,12 +15,12 @@ from dynsight.utilities.
 .. warning::
 
     Please consider that the SOAP dataset can be very large, due to the high
-    dimensionality, thus calculations can be expensive, and saving to/loading 
+    dimensionality, thus calculations can be expensive, and saving to/loading
     from file quite slow.
 
 .. warning::
 
-    This code works when run from the ``/docs`` directory of the ``dynsight`` 
+    This code works when run from the ``/docs`` directory of the ``dynsight``
     repo. To use it elsewhere, you have to change the ``Path`` variables
     accordingly.
 
@@ -189,7 +189,7 @@ parameters, and performs the TICA of the corresponding SOAP dataset.
     )
 
 The output :class:`.trajectory.Insight` stores the SOAP information in its
-"meta" attribute, together with the ``lag_time`` parameter and ``rel_times``, 
+"meta" attribute, together with the ``lag_time`` parameter and ``rel_times``,
 the relaxation times of the computed TICs.
 
 
@@ -257,7 +257,7 @@ The output :class:`.trajectory.Insight` stores the SOAP information in its
 "meta" attribute, together with the ``delay`` parameter.
 
 Notice that, differently from SOAP - which is computed for every frame, tSOAP
-is computed for every pair of frames. Thus, the tSOAP dataset has shape 
+is computed for every pair of frames. Thus, the tSOAP dataset has shape
 ``(n_particles, n_frames - 1)``. Consequently, if you need to match the tSOAP
 values with the particles along the trajectory, you will need to use a sliced
 trajectory (removing the last frame). The easiest way to do this is:
@@ -269,7 +269,7 @@ trajectory (removing the last frame). The easiest way to do this is:
 
 .. raw:: html
 
-    <a class="btn-download" href="../_static/recipes/soap_dim_red.py" download>⬇️ Download Python Script</a>
+    <a class="btn-download" href="_static/recipes/soap_dim_red.py" download>⬇️ Download Python Script</a>
 
 .. testcode:: recipe2-test
     :hide:

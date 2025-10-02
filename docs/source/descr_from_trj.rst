@@ -1,12 +1,12 @@
-Descriptors from a :class:`.trajectory.Trj` 
+Descriptors from a :class:`.trajectory.Trj`
 ===========================================
 
-This recipe explains how to compute descriptors directly from a 
-:class:`.trajectory.Trj` object. 
+This recipe explains how to compute descriptors directly from a
+:class:`.trajectory.Trj` object.
 
 .. warning::
 
-    This code works when run from the ``/docs`` directory of the ``dynsight`` 
+    This code works when run from the ``/docs`` directory of the ``dynsight``
     repo. To use it elsewhere, you have to change the ``Path`` variables
     accordingly.
 
@@ -26,7 +26,7 @@ it's directly calculated by the :class:`.trajectory.Trj.get_soap()` method.
 .. warning::
 
     Please consider that the SOAP dataset can be very large, due to the high
-    dimensionality, thus calculations can be expensive, and saving to/loading 
+    dimensionality, thus calculations can be expensive, and saving to/loading
     from file quite slow.
 
 .. testcode:: recipe1-test
@@ -83,7 +83,7 @@ calculation can be sped up significantly.
     )
 
 Notice that, differently from SOAP - which is computed for every frame, LENS
-is computed for every pair of frames. Thus, the LENS dataset has shape 
+is computed for every pair of frames. Thus, the LENS dataset has shape
 ``(n_particles, n_frames - 1)``. Consequently, if you need to match the LENS
 values with the particles along the trajectory, you will need to use a sliced
 trajectory (removing the last frame). The easiest way to do this is:
@@ -95,7 +95,7 @@ trajectory (removing the last frame). The easiest way to do this is:
 
 .. raw:: html
 
-    <a class="btn-download" href="../_static/recipes/descr_from_trj.py" download>⬇️ Download Python Script</a>
+    <a class="btn-download" href="_static/recipes/descr_from_trj.py" download>⬇️ Download Python Script</a>
 
 .. testcode:: recipe1-test
     :hide:

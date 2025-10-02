@@ -1,20 +1,22 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 import numpy as np
 import numpy.typing as npt
+from scipy.spatial import cKDTree
 from scipy.spatial.distance import cdist
-from scipy.special import digamma
+from scipy.special import digamma, gamma
 
 
 def compute_shannon(
     data: NDArray[np.float64],
     data_range: tuple[float, float],
     n_bins: int,
+    units: Literal["bit", "nat", "frac"] = "frac",
 ) -> float:
     """Compute the Shannon entropy of a univariate data distribution.
 
@@ -30,6 +32,11 @@ def compute_shannon(
 
         n_bins:
             The number of bins with which the data histogram must be computed.
+
+        units:
+            The units of measure of the output entropy. If "frac", entropy is
+            normalized between 0 and 1 by dividing by log(n_bins). If "bit",
+            it is computed with log base 2, if "nat" with natural log.
 
     Returns:
         The value of the normalized Shannon entropy of the dataset.
@@ -60,6 +67,9 @@ def compute_shannon(
     if data.size == 0:
         msg = "data is empty"
         raise ValueError(msg)
+    if units not in ("bit", "nat", "frac"):
+        msg = "units must be bit, nat or frac."
+        raise ValueError(msg)
     counts, _ = np.histogram(
         data,
         bins=n_bins,
@@ -67,11 +77,19 @@ def compute_shannon(
     )
     probs = counts / np.sum(counts)  # Data probabilities are needed
     entropy = -np.sum([p * np.log2(p) for p in probs if p > 0.0])
-    entropy /= np.log2(n_bins)
-    return entropy
+
+    if units == "bit":
+        return entropy
+    if units == "nat":
+        return entropy * np.log(2)
+    return entropy / np.log2(n_bins)
 
 
-def compute_kl_entropy(data: NDArray[np.float64], n_neigh: int = 1) -> float:
+def compute_kl_entropy(
+    data: NDArray[np.float64],
+    n_neigh: int = 1,
+    units: Literal["bit", "nat"] = "bit",
+) -> float:
     """Estimate Shannon differential entropy using Kozachenko-Leonenko.
 
     The Kozachenko-Leonenko k-nearest neighbors method approximates
@@ -85,6 +103,10 @@ def compute_kl_entropy(data: NDArray[np.float64], n_neigh: int = 1) -> float:
 
         n_neigh:
             The number of neighbors considered in the KL estimator.
+
+        units:
+            The units of measure of the output entropy. If "bit", it is
+            computed with log base 2, if "nat" with natural log.
 
     Returns:
         The Shannon differential entropy of the dataset, in bits.
@@ -104,18 +126,28 @@ def compute_kl_entropy(data: NDArray[np.float64], n_neigh: int = 1) -> float:
         .. testcode:: kl-entropy-test
             :hide:
 
-            assert np.isclose(data_entropy, -3.3437736767342194)
+            assert np.isclose(data_entropy, 0.9891067080934253)
 
     """
+    if units not in ("bit", "nat"):
+        msg = "units must be bit or nat."
+        raise ValueError(msg)
     data = np.sort(data.flatten())
     n_data = len(data)
     eps = data[n_neigh:] - data[:-n_neigh]  # n_neigh-th neighbor distances
     eps = np.clip(eps, 1e-10, None)  # avoid log(0)
-    const = digamma(n_data) - digamma(n_neigh) + 1
+    const = digamma(n_data) - digamma(n_neigh) + np.log(2)  # 1D volume
+    if units == "nat":
+        const = digamma(n_data) - digamma(n_neigh) + np.log(2)
+        return const + np.mean(np.log(eps))
+    const = (digamma(n_data) - digamma(n_neigh)) / np.log(2) + 1.0
     return const + np.mean(np.log2(eps))
 
 
-def compute_negentropy(data: NDArray[np.float64]) -> float:
+def compute_negentropy(
+    data: NDArray[np.float64],
+    units: Literal["bit", "nat"] = "bit",
+) -> float:
     """Estimate negentropy of a dataset.
 
     Negentropy is a measure of non-Gaussianity representing the distance
@@ -131,8 +163,12 @@ def compute_negentropy(data: NDArray[np.float64]) -> float:
         data:
             The dataset for which the entropy is to be computed.
 
+        units:
+            The units of measure of the output negentropy. If "bit", it is
+            computed with log base 2, if "nat" with natural log.
+
     Returns:
-        The negentropy of the dataset, in bits.
+        The negentropy of the dataset.
 
 
     Example:
@@ -153,13 +189,16 @@ def compute_negentropy(data: NDArray[np.float64]) -> float:
             assert np.isclose(negentropy, 0.2609932580146541)
 
     """
+    if units not in ("bit", "nat"):
+        msg = "units must be bit or nat."
+        raise ValueError(msg)
     data = data.flatten()
     rng = np.random.default_rng(seed=1234)
     data_norm = (data - np.mean(data)) / np.std(data, ddof=1)
     sigma = np.std(data_norm, ddof=1)
     data_gauss = rng.normal(loc=0.0, scale=sigma, size=data.size)
-    h_gauss = compute_kl_entropy(data_gauss)
-    h_data = compute_kl_entropy(data_norm)
+    h_gauss = compute_kl_entropy(data_gauss, units=units)
+    h_data = compute_kl_entropy(data_norm, units=units)
     return h_gauss - h_data
 
 
@@ -167,6 +206,7 @@ def compute_shannon_multi(
     data: NDArray[np.float64],
     data_ranges: list[tuple[float, float]],
     n_bins: list[int],
+    units: Literal["bit", "nat", "frac"] = "frac",
 ) -> float:
     """Compute the Shannon entropy of a multivariate data distribution.
 
@@ -185,6 +225,11 @@ def compute_shannon_multi(
         n_bins:
             A list of integers specifying the number of bins for each
             dimension.
+
+        units:
+            The units of measure of the output entropy. If "frac", entropy is
+            normalized between 0 and 1 by dividing by log(n_bins). If "bit",
+            it is computed with log base 2, if "nat" with natural log.
 
     Returns:
         The value of the normalized Shannon entropy of the dataset.
@@ -220,18 +265,93 @@ def compute_shannon_multi(
     if n_dims != len(data_ranges) or n_dims != len(n_bins):
         msg = "Mismatch between data dimensions, data_ranges, and n_bins"
         raise ValueError(msg)
+    if units not in ("bit", "nat", "frac"):
+        msg = "units must be bit, nat or frac."
+        raise ValueError(msg)
 
     counts, _ = np.histogramdd(data, bins=n_bins, range=data_ranges)
     probs = counts / np.sum(counts)  # Probability distribution
     entropy = -np.sum(probs[probs > 0] * np.log2(probs[probs > 0]))
-    entropy /= np.log2(np.prod(n_bins))  # Normalization
 
-    return entropy
+    if units == "bit":
+        return entropy
+    if units == "nat":
+        return entropy * np.log(2)
+    return entropy / np.log2(np.prod(n_bins))  # Normalization
+
+
+def compute_kl_entropy_multi(
+    data: NDArray[np.float64],
+    n_neigh: int = 1,
+    units: Literal["bit", "nat"] = "bit",
+) -> float:
+    """Estimate Shannon differential entropy using Kozachenko-Leonenko.
+
+    This function works for multivariate distribution.
+    The Kozachenko-Leonenko k-nearest neighbors method approximates
+    differential entropy based on distances to nearest neighbors
+    in the sample space. It's main advantage is being parameter-free.
+
+    Parameters:
+        data:
+            The dataset for which the entropy is to be computed.
+            Shape (n_data, n_dims)
+
+        n_neigh:
+            The number of neighbors considered in the KL estimator.
+
+        units:
+            The units of measure of the output entropy. If "bit", it is
+            computed with log base 2, if "nat" with natural log.
+
+    Returns:
+        The Shannon differential entropy of the dataset, in bits.
+
+    Example:
+
+        .. testcode:: klm-entropy-test
+
+            import numpy as np
+            from dynsight.analysis import compute_kl_entropy_multi
+
+            np.random.seed(1234)
+            data = np.random.rand(10000, 2)
+
+            data_entropy = compute_kl_entropy_multi(data)
+
+        .. testcode:: klm-entropy-test
+            :hide:
+
+            assert np.isclose(data_entropy, 0.013521446183128614)
+
+    """
+    if units not in ("bit", "nat"):
+        msg = "units must be bit or nat."
+        raise ValueError(msg)
+    n_samples, dim = data.shape
+    tree = cKDTree(data)
+    eps, _ = tree.query(data, k=n_neigh + 1, p=2)
+    eps = eps[:, -1]  # distance to the n_neigh-th neighbor
+    eps = np.clip(eps, 1e-10, None)  # avoid log(0)
+    unit_ball_volume = (np.pi ** (dim / 2)) / gamma(dim / 2 + 1)
+    # --- Compute in nats ---
+    entropy_nats = (
+        digamma(n_samples)
+        - digamma(n_neigh)
+        + np.log(unit_ball_volume)
+        + (dim / n_samples) * np.sum(np.log(eps))
+    )
+
+    if units == "nat":
+        return entropy_nats
+    # bits
+    return entropy_nats / np.log(2)
 
 
 def compute_entropy_gain(
     data: npt.NDArray[np.float64],
     labels: npt.NDArray[np.int64],
+    method: Literal["histo", "kl"] = "histo",
     n_bins: int = 20,
 ) -> tuple[float, float, float, float]:
     """Compute the relative information gained by the clustering.
@@ -247,11 +367,22 @@ def compute_entropy_gain(
             The number of bins with which the data histogram must be computed.
             Default is 20.
 
+        method:
+            How the Shannon entropy is computed. You should use "histo" for
+            discrete variables, and "kl" for continuous variables. If "kl" is
+            chosen, the "n_bins" arg is irrelevant. See the documentation of
+            ``compute_shannon()`` and ``compute_kl_entropy()`` for more
+            details.
+
     Returns:
         * The absolute information gain :math:`H_0 - H_{clust}`
         * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
         * The Shannon entropy of the initial data :math:`H_0`
         * The shannon entropy of the clustered data :math:`H_{clust}`
+
+    Note:
+        The output are expressed as fractions if method is "histo", in bit if
+        method is "kl".
 
     Example:
 
@@ -282,27 +413,40 @@ def compute_entropy_gain(
             "must have same shape[0]"
         )
         raise RuntimeError(msg)
+    if method not in ("histo", "kl"):
+        msg = "method must be histo or kl."
+        raise ValueError(msg)
 
-    data_range = (float(np.min(data)), float(np.max(data)))
-
-    # Compute the entropy of the raw data
-    total_entropy = compute_shannon(
-        data,
-        data_range,
-        n_bins,
-    )
-
-    # Compute the fraction and the entropy of the single clusters
     n_clusters = np.unique(labels).size
     frac, entr = np.zeros(n_clusters), np.zeros(n_clusters)
-    for i, label in enumerate(np.unique(labels)):
-        mask = labels == label
-        frac[i] = np.sum(mask) / labels.size
-        entr[i] = compute_shannon(
-            data[mask],
+
+    if method == "histo":
+        data_range = (float(np.min(data)), float(np.max(data)))
+        # Compute the total entropy of the data
+        total_entropy = compute_shannon(
+            data,
             data_range,
             n_bins,
         )
+
+        # Compute the fraction and the entropy of the single clusters
+        for i, label in enumerate(np.unique(labels)):
+            mask = labels == label
+            frac[i] = np.sum(mask) / labels.size
+            entr[i] = compute_shannon(
+                data[mask],
+                data_range,
+                n_bins,
+            )
+    else:  # method == "kl"
+        # Compute the total entropy of the data
+        total_entropy = compute_kl_entropy(data)
+
+        # Compute the fraction and the entropy of the single clusters
+        for i, label in enumerate(np.unique(labels)):
+            mask = labels == label
+            frac[i] = np.sum(mask) / labels.size
+            entr[i] = compute_kl_entropy(data[mask])
 
     # Compute the entropy of the clustered data
     clustered_entropy = np.dot(frac, entr)
@@ -320,6 +464,7 @@ def compute_entropy_gain_multi(
     data: npt.NDArray[np.float64],
     labels: npt.NDArray[np.int64],
     n_bins: list[int],
+    method: Literal["histo", "kl"] = "histo",
 ) -> tuple[float, float, float, float]:
     """Compute the relative information gained by the clustering.
 
@@ -335,6 +480,13 @@ def compute_entropy_gain_multi(
         n_bins:
             The number of bins with which the data histogram must be computed,
             one for each dimension.
+
+        method:
+            How the Shannon entropy is computed. You should use "histo" for
+            discrete variables, and "kl" for continuous variables. If "kl" is
+            chosen, the "n_bins" arg is irrelevant. See the documentation of
+            ``compute_shannon_multi()`` and ``compute_kl_entropy_multi()`` for
+            more details.
 
     Returns:
         * The absolute information gain :math:`H_0 - H_{clust}`
@@ -372,27 +524,43 @@ def compute_entropy_gain_multi(
             "must have same shape[0]"
         )
         raise RuntimeError(msg)
+    if method not in ("histo", "kl"):
+        msg = "method must be histo or kl."
+        raise ValueError(msg)
 
-    data_range = [(float(np.min(tmp)), float(np.max(tmp))) for tmp in data.T]
-
-    # Compute the entropy of the raw data
-    total_entropy = compute_shannon_multi(
-        data,
-        data_range,
-        n_bins,
-    )
-
-    # Compute the fraction and the entropy of the single clusters
     n_clusters = np.unique(labels).size
     frac, entr = np.zeros(n_clusters), np.zeros(n_clusters)
-    for i, label in enumerate(np.unique(labels)):
-        mask = labels == label
-        frac[i] = np.sum(mask) / labels.size
-        entr[i] = compute_shannon_multi(
-            data[mask],
+
+    if method == "histo":
+        data_range = [
+            (float(np.min(tmp)), float(np.max(tmp))) for tmp in data.T
+        ]
+
+        # Compute the total entropy of the data
+        total_entropy = compute_shannon_multi(
+            data,
             data_range,
             n_bins,
         )
+
+        # Compute the fraction and the entropy of the single clusters
+        for i, label in enumerate(np.unique(labels)):
+            mask = labels == label
+            frac[i] = np.sum(mask) / labels.size
+            entr[i] = compute_shannon_multi(
+                data[mask],
+                data_range,
+                n_bins,
+            )
+    else:  # method == "kl"
+        # Compute the total entropy of the data
+        total_entropy = compute_kl_entropy_multi(data)
+
+        # Compute the fraction and the entropy of the single clusters
+        for i, label in enumerate(np.unique(labels)):
+            mask = labels == label
+            frac[i] = np.sum(mask) / labels.size
+            entr[i] = compute_kl_entropy_multi(data[mask])
 
     # Compute the entropy of the clustered data
     clustered_entropy = np.dot(frac, entr)

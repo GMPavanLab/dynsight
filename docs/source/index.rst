@@ -34,6 +34,7 @@
   Descriptors from a Trj <descr_from_trj>
   Dimensionality reduction methods <soap_dim_red>
   Information gain analysis <info_gain>
+  Entropy calculations <entropy>
 
 .. toctree::
   :hidden:
@@ -81,7 +82,7 @@ How to get started
 ------------------
 
 We suggest you give a read to the ``dynsight.trajectory`` module documentation,
-which offers a compact and easy way of using most of the ``dynsight`` tools. 
+which offers a compact and easy way of using most of the ``dynsight`` tools.
 Also, the documentation offers some copiable Recipes and Examples for the most
 common analyses.
 

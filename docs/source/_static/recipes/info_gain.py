@@ -26,7 +26,7 @@ def info_gain_with_onion(
     float,
 ]:
     """Performs full information gain analysis with Onion clustering."""
-    data_range = (np.min(data), np.max(data))
+    data_range = (float(np.min(data)), float(np.max(data)))
 
     n_clusters = np.zeros(len(delta_t_list), dtype=int)
     clusters_frac = []

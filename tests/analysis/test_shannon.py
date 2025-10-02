@@ -28,6 +28,14 @@ def data_2d(rng: np.random.Generator) -> NDArray[np.float64]:
 
 
 @pytest.fixture
+def data_gauss(rng: np.random.Generator) -> NDArray[np.float64]:
+    """Random 2-Gaussians array."""
+    data_1 = rng.normal(0.0, 0.1, 10000)
+    data_2 = rng.normal(1.0, 0.1, 10000)
+    return np.concatenate((data_1, data_2))
+
+
+@pytest.fixture
 def labels(rng: np.random.Generator) -> NDArray[np.int64]:
     """Valid integer labels for 100 samples."""
     return rng.integers(0, 5, (100,), dtype=np.int64)
@@ -87,6 +95,19 @@ def test_gain(data: NDArray[np.float64], labels: NDArray[np.int64]) -> None:
     )
     ref = 0.0010842808402454819
     assert np.isclose(gain, ref)
+
+
+def test_kl_gain(data_gauss: NDArray[np.float64]) -> None:
+    """Check entropy gain value using KL estimator."""
+    labels = np.concatenate(
+        (np.zeros(10000, dtype=int), np.ones(10000, dtype=int))
+    )
+    gain, *_ = dynsight.analysis.compute_entropy_gain(
+        data_gauss,
+        labels,
+        method="kl",
+    )
+    assert np.isclose(gain, 1.0, rtol=1e-3, atol=1e-3)
 
 
 def test_gain_multi(
