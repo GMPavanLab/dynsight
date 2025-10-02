@@ -35,7 +35,8 @@ def compute_shannon(
 
         units:
             The units of measure of the output entropy. If "frac", entropy is
-            normalized between 0 and 1 by dividing by log(n_bins).
+            normalized between 0 and 1 by dividing by log(n_bins). If "bit",
+            it is computed with log base 2, if "nat" with natural log.
 
     Returns:
         The value of the normalized Shannon entropy of the dataset.
@@ -66,7 +67,7 @@ def compute_shannon(
     if data.size == 0:
         msg = "data is empty"
         raise ValueError(msg)
-    if units not in ["bit", "nat", "frac"]:
+    if units not in ("bit", "nat", "frac"):
         msg = "units must be bit, nat or frac."
         raise ValueError(msg)
     counts, _ = np.histogram(
@@ -104,7 +105,8 @@ def compute_kl_entropy(
             The number of neighbors considered in the KL estimator.
 
         units:
-            The units of measure of the output entropy.
+            The units of measure of the output entropy. If "bit", it is
+            computed with log base 2, if "nat" with natural log.
 
     Returns:
         The Shannon differential entropy of the dataset, in bits.
@@ -127,7 +129,7 @@ def compute_kl_entropy(
             assert np.isclose(data_entropy, -3.650626496174274)
 
     """
-    if units not in ["bit", "nat"]:
+    if units not in ("bit", "nat"):
         msg = "units must be bit or nat."
         raise ValueError(msg)
     data = np.sort(data.flatten())
@@ -162,7 +164,8 @@ def compute_negentropy(
             The dataset for which the entropy is to be computed.
 
         units:
-            The units of measure of the output negentropy.
+            The units of measure of the output negentropy. If "bit", it is
+            computed with log base 2, if "nat" with natural log.
 
     Returns:
         The negentropy of the dataset.
@@ -186,7 +189,7 @@ def compute_negentropy(
             assert np.isclose(negentropy, 0.2609932580146541)
 
     """
-    if units not in ["bit", "nat"]:
+    if units not in ("bit", "nat"):
         msg = "units must be bit or nat."
         raise ValueError(msg)
     data = data.flatten()
@@ -225,7 +228,8 @@ def compute_shannon_multi(
 
         units:
             The units of measure of the output entropy. If "frac", entropy is
-            normalized between 0 and 1 by dividing by log(n_bins).
+            normalized between 0 and 1 by dividing by log(n_bins). If "bit",
+            it is computed with log base 2, if "nat" with natural log.
 
     Returns:
         The value of the normalized Shannon entropy of the dataset.
@@ -261,7 +265,7 @@ def compute_shannon_multi(
     if n_dims != len(data_ranges) or n_dims != len(n_bins):
         msg = "Mismatch between data dimensions, data_ranges, and n_bins"
         raise ValueError(msg)
-    if units not in ["bit", "nat", "frac"]:
+    if units not in ("bit", "nat", "frac"):
         msg = "units must be bit, nat or frac."
         raise ValueError(msg)
 
@@ -297,7 +301,8 @@ def compute_kl_entropy_multi(
             The number of neighbors considered in the KL estimator.
 
         units:
-            The units of measure of the output entropy.
+            The units of measure of the output entropy. If "bit", it is
+            computed with log base 2, if "nat" with natural log.
 
     Returns:
         The Shannon differential entropy of the dataset, in bits.
@@ -320,7 +325,7 @@ def compute_kl_entropy_multi(
             assert np.isclose(data_entropy, -4.319358938644518)
 
     """
-    if units not in ["bit", "nat"]:
+    if units not in ("bit", "nat"):
         msg = "units must be bit or nat."
         raise ValueError(msg)
     n_samples, dim = data.shape
