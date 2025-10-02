@@ -99,9 +99,10 @@ Developer Setup
 ---------------
 
 #. Install `just`_.
+#. Install `uv <https://docs.astral.sh>`_
 #. In a new virtual environment run::
 
-    $ just dev
+    $ just setup
 
 
 #. Run code checks::

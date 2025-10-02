@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+
 from pathlib import Path
-from typing import Callable, Literal, Mapping, Sequence
+from typing import Callable, Literal
 
 import numpy as np
 import numpy.typing as npt
