@@ -18,6 +18,7 @@ information-based calculations.
   compute_negentropy <_autosummary/dynsight.analysis.compute_negentropy>
   compute_entropy_gain <_autosummary/dynsight.analysis.compute_entropy_gain>
   compute_shannon_multi <_autosummary/dynsight.analysis.compute_shannon_multi>
+  compute_kl_entropy_multi <_autosummary/dynsight.analysis.compute_kl_entropy_multi>
   compute_entropy_gain_multi <_autosummary/dynsight.analysis.compute_entropy_gain_multi>
   sample_entropy <_autosummary/dynsight.analysis.sample_entropy>
 
