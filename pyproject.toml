@@ -11,7 +11,7 @@ maintainers = [
 ]
 
 dependencies = [
-    "numpy",
+    "numpy<2",
     "dscribe",
     "tropea-clustering",
     "MDAnalysis",

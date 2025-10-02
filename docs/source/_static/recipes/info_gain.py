@@ -63,7 +63,7 @@ def info_gain_with_onion(
             tmp_entr.append(
                 dynsight.analysis.compute_shannon(
                     selected_points,
-                    data_range,
+                    data_range,  # type: ignore[arg-type]
                     n_bins=n_bins,
                 )
             )
