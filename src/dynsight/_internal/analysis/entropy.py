@@ -126,7 +126,7 @@ def compute_kl_entropy(
         .. testcode:: kl-entropy-test
             :hide:
 
-            assert np.isclose(data_entropy, -3.650626496174274)
+            assert np.isclose(data_entropy, 0.9891067080934253)
 
     """
     if units not in ("bit", "nat"):
@@ -137,11 +137,11 @@ def compute_kl_entropy(
     eps = data[n_neigh:] - data[:-n_neigh]  # n_neigh-th neighbor distances
     eps = np.clip(eps, 1e-10, None)  # avoid log(0)
     const = digamma(n_data) - digamma(n_neigh) + np.log(2)  # 1D volume
-    h_bits = const + np.mean(np.log2(eps))
-    if units == "bit":
-        return h_bits
-    # nat
-    return h_bits * np.log(2)
+    if units == "nat":
+        const = digamma(n_data) - digamma(n_neigh) + np.log(2)
+        return const + np.mean(np.log(eps))
+    const = (digamma(n_data) - digamma(n_neigh)) / np.log(2) + 1.0
+    return const + np.mean(np.log2(eps))
 
 
 def compute_negentropy(
@@ -322,7 +322,7 @@ def compute_kl_entropy_multi(
         .. testcode:: klm-entropy-test
             :hide:
 
-            assert np.isclose(data_entropy, -4.319358938644518)
+            assert np.isclose(data_entropy, 0.013521446183128614)
 
     """
     if units not in ("bit", "nat"):
@@ -334,16 +334,18 @@ def compute_kl_entropy_multi(
     eps = eps[:, -1]  # distance to the n_neigh-th neighbor
     eps = np.clip(eps, 1e-10, None)  # avoid log(0)
     unit_ball_volume = (np.pi ** (dim / 2)) / gamma(dim / 2 + 1)
-    entropy = (
+    # --- Compute in nats ---
+    entropy_nats = (
         digamma(n_samples)
         - digamma(n_neigh)
-        + np.log2(unit_ball_volume)
-        + (dim / n_samples) * np.sum(np.log2(eps))
+        + np.log(unit_ball_volume)
+        + (dim / n_samples) * np.sum(np.log(eps))
     )
 
-    if units == "bit":
-        return entropy
-    return entropy * np.log(2)
+    if units == "nat":
+        return entropy_nats
+    # bits
+    return entropy_nats / np.log(2)
 
 
 def compute_entropy_gain(
@@ -366,15 +368,21 @@ def compute_entropy_gain(
             Default is 20.
 
         method:
-            How the Shannon entropy is computed. You shoud use "histo" for
+            How the Shannon entropy is computed. You should use "histo" for
             discrete variables, and "kl" for continuous variables. If "kl" is
-            chosen, the "n_bins" arg is irrelevant.
+            chosen, the "n_bins" arg is irrelevant. See the documentation of
+            ``compute_shannon()`` and ``compute_kl_entropy()`` for more
+            details.
 
     Returns:
         * The absolute information gain :math:`H_0 - H_{clust}`
         * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
         * The Shannon entropy of the initial data :math:`H_0`
         * The shannon entropy of the clustered data :math:`H_{clust}`
+
+    Note:
+        The output are expressed as fractions if method is "histo", in bit if
+        method is "kl".
 
     Example:
 
@@ -456,6 +464,7 @@ def compute_entropy_gain_multi(
     data: npt.NDArray[np.float64],
     labels: npt.NDArray[np.int64],
     n_bins: list[int],
+    method: Literal["histo", "kl"] = "histo",
 ) -> tuple[float, float, float, float]:
     """Compute the relative information gained by the clustering.
 
@@ -471,6 +480,13 @@ def compute_entropy_gain_multi(
         n_bins:
             The number of bins with which the data histogram must be computed,
             one for each dimension.
+
+        method:
+            How the Shannon entropy is computed. You should use "histo" for
+            discrete variables, and "kl" for continuous variables. If "kl" is
+            chosen, the "n_bins" arg is irrelevant. See the documentation of
+            ``compute_shannon_multi()`` and ``compute_kl_entropy_multi()`` for
+            more details.
 
     Returns:
         * The absolute information gain :math:`H_0 - H_{clust}`
@@ -508,27 +524,43 @@ def compute_entropy_gain_multi(
             "must have same shape[0]"
         )
         raise RuntimeError(msg)
+    if method not in ("histo", "kl"):
+        msg = "method must be histo or kl."
+        raise ValueError(msg)
 
-    data_range = [(float(np.min(tmp)), float(np.max(tmp))) for tmp in data.T]
-
-    # Compute the entropy of the raw data
-    total_entropy = compute_shannon_multi(
-        data,
-        data_range,
-        n_bins,
-    )
-
-    # Compute the fraction and the entropy of the single clusters
     n_clusters = np.unique(labels).size
     frac, entr = np.zeros(n_clusters), np.zeros(n_clusters)
-    for i, label in enumerate(np.unique(labels)):
-        mask = labels == label
-        frac[i] = np.sum(mask) / labels.size
-        entr[i] = compute_shannon_multi(
-            data[mask],
+
+    if method == "histo":
+        data_range = [
+            (float(np.min(tmp)), float(np.max(tmp))) for tmp in data.T
+        ]
+
+        # Compute the total entropy of the data
+        total_entropy = compute_shannon_multi(
+            data,
             data_range,
             n_bins,
         )
+
+        # Compute the fraction and the entropy of the single clusters
+        for i, label in enumerate(np.unique(labels)):
+            mask = labels == label
+            frac[i] = np.sum(mask) / labels.size
+            entr[i] = compute_shannon_multi(
+                data[mask],
+                data_range,
+                n_bins,
+            )
+    else:  # method == "kl"
+        # Compute the total entropy of the data
+        total_entropy = compute_kl_entropy_multi(data)
+
+        # Compute the fraction and the entropy of the single clusters
+        for i, label in enumerate(np.unique(labels)):
+            mask = labels == label
+            frac[i] = np.sum(mask) / labels.size
+            entr[i] = compute_kl_entropy_multi(data[mask])
 
     # Compute the entropy of the clustered data
     clustered_entropy = np.dot(frac, entr)
