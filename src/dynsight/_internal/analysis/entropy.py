@@ -349,6 +349,7 @@ def compute_kl_entropy_multi(
 def compute_entropy_gain(
     data: npt.NDArray[np.float64],
     labels: npt.NDArray[np.int64],
+    method: Literal["histo", "kl"] = "histo",
     n_bins: int = 20,
 ) -> tuple[float, float, float, float]:
     """Compute the relative information gained by the clustering.
@@ -363,6 +364,11 @@ def compute_entropy_gain(
         n_bins:
             The number of bins with which the data histogram must be computed.
             Default is 20.
+
+        method:
+            How the Shannon entropy is computed. You shoud use "histo" for
+            discrete variables, and "kl" for continuous variables. If "kl" is
+            chosen, the "n_bins" arg is irrelevant.
 
     Returns:
         * The absolute information gain :math:`H_0 - H_{clust}`
@@ -399,27 +405,40 @@ def compute_entropy_gain(
             "must have same shape[0]"
         )
         raise RuntimeError(msg)
+    if method not in ("histo", "kl"):
+        msg = "method must be histo or kl."
+        raise ValueError(msg)
 
-    data_range = (float(np.min(data)), float(np.max(data)))
-
-    # Compute the entropy of the raw data
-    total_entropy = compute_shannon(
-        data,
-        data_range,
-        n_bins,
-    )
-
-    # Compute the fraction and the entropy of the single clusters
     n_clusters = np.unique(labels).size
     frac, entr = np.zeros(n_clusters), np.zeros(n_clusters)
-    for i, label in enumerate(np.unique(labels)):
-        mask = labels == label
-        frac[i] = np.sum(mask) / labels.size
-        entr[i] = compute_shannon(
-            data[mask],
+
+    if method == "histo":
+        data_range = (float(np.min(data)), float(np.max(data)))
+        # Compute the total entropy of the data
+        total_entropy = compute_shannon(
+            data,
             data_range,
             n_bins,
         )
+
+        # Compute the fraction and the entropy of the single clusters
+        for i, label in enumerate(np.unique(labels)):
+            mask = labels == label
+            frac[i] = np.sum(mask) / labels.size
+            entr[i] = compute_shannon(
+                data[mask],
+                data_range,
+                n_bins,
+            )
+    else:  # method == "kl"
+        # Compute the total entropy of the data
+        total_entropy = compute_kl_entropy(data)
+
+        # Compute the fraction and the entropy of the single clusters
+        for i, label in enumerate(np.unique(labels)):
+            mask = labels == label
+            frac[i] = np.sum(mask) / labels.size
+            entr[i] = compute_kl_entropy(data[mask])
 
     # Compute the entropy of the clustered data
     clustered_entropy = np.dot(frac, entr)
