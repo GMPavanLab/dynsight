@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 from pathlib import Path
-
+from dynsight.trajectory import Insight
 
 class Logger:
     """Creates and save human-readible log."""
@@ -24,6 +24,8 @@ class Logger:
 
     def get(self) -> str:
         return "\n".join(self._log)
-
+    
+    def register_data(self, insight: Insight) -> None:
+        self.log(f"Registered data: {insight}")
 
 logger = Logger()
