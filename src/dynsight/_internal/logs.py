@@ -48,15 +48,21 @@ class Logger:
 
         saved_paths: list[Path] = []
         for index, insight in enumerate(self._registered_data, start=1):
-            base_name = insight.meta.get("name") if isinstance(insight.meta, dict) else None
-            if isinstance(base_name, str) and base_name:
-                sanitized = "".join(
-                    ch if ch.isalnum() or ch in {"-", "_"} else "_"
-                    for ch in base_name
-                ).strip("_")
-                base_filename = sanitized or f"dataset_{index}"
-            else:
-                base_filename = f"dataset_{index}"
+            base_filename = f"dataset_{index}"
+            if isinstance(insight.meta, dict) and insight.meta:
+                sanitized_values = []
+
+                for value in insight.meta.values():
+                    value_str = str(value)
+                    sanitized = "".join(
+                        ch if ch.isalnum() or ch in {"-", "_"} else "_"
+                        for ch in value_str
+                    ).strip("_")
+                    if sanitized:
+                        sanitized_values.append(sanitized)
+
+                if sanitized_values:
+                    base_filename = "_".join(sanitized_values)
 
             filename = output_path / f"{base_filename}.npy"
 

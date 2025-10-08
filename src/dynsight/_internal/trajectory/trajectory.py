@@ -156,7 +156,7 @@ class Trj:
             delay=delay,
         )
 
-        attr_dict = {"r_cut": r_cut, "delay": delay, "selection": selection}
+        attr_dict = {"name":"coord_number", "r_cut": r_cut, "delay": delay, "selection": selection}
         logger.log(f"Computed coord_number using args {attr_dict}.")
         return neigcounts, Insight(
             dataset=nn.astype(np.float64),
@@ -193,7 +193,7 @@ class Trj:
             delay=delay,
         )
 
-        attr_dict = {"r_cut": r_cut, "delay": delay, "selection": selection}
+        attr_dict = {"name":"lens", "r_cut": r_cut, "delay": delay, "selection": selection}
         logger.log(f"Computed LENS using args {attr_dict}.")
 
         return neigcounts, Insight(
@@ -228,6 +228,7 @@ class Trj:
             trajslice=self.trajslice,
         )
         attr_dict = {
+            "name":"soap", 
             "r_cut": r_cut,
             "n_max": n_max,
             "l_max": l_max,
@@ -267,7 +268,7 @@ class Trj:
             order=order,
         )
 
-        attr_dict = {"r_cut": r_cut, "order": order, "selection": selection}
+        attr_dict = {"name":"orientational_op", "r_cut": r_cut, "order": order, "selection": selection}
 
         logger.log(
             f"Computed orientational order parameter using args {attr_dict}."
@@ -305,7 +306,7 @@ class Trj:
             neigh_list_per_frame=neigcounts,
         )
 
-        attr_dict = {"r_cut": r_cut, "selection": selection}
+        attr_dict = {"name":"velocity_alignement", "r_cut": r_cut, "selection": selection}
 
         logger.log(
             f"Computed average velocity alignment using args {attr_dict}."
@@ -348,6 +349,7 @@ class Trj:
             step=trajslice.step,
         )
         attr_dict = {
+            "name":"rdf", 
             "distances_range": distances_range,
             "s1": s1,
             "s2": s2,
