@@ -5,15 +5,19 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from pathlib import Path
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 
-from dynsight.trajectory import Insight
+if TYPE_CHECKING:
+    from dynsight.trajectory import Insight
+
 class Logger:
     """Creates and save human-readible log."""
 
     def __init__(self) -> None:
         self._log: list[str] = []
-        self._registered_data: list[Insight] = []
+        self._registered_data: list["Insight"] = []
 
     def log(self, msg: str) -> None:
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
@@ -31,7 +35,7 @@ class Logger:
     def get(self) -> str:
         return "\n".join(self._log)
     
-    def register_data(self, insight: Insight) -> None:
+    def register_data(self, insight: "Insight") -> None:
         self._registered_data.append(insight)
         self.log(f"Registered data: {insight}")
     
