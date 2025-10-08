@@ -1,14 +1,19 @@
 """logging package."""
 
+from __future__ import annotations
+
 from datetime import datetime, timezone
 from pathlib import Path
-from dynsight.trajectory import Insight
 
+import numpy as np
+
+from dynsight.trajectory import Insight
 class Logger:
     """Creates and save human-readible log."""
 
     def __init__(self) -> None:
         self._log: list[str] = []
+        self._registered_data: list[Insight] = []
 
     def log(self, msg: str) -> None:
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
@@ -21,11 +26,49 @@ class Logger:
 
     def clear(self) -> None:
         self._log = []
+        self._registered_data = []
 
     def get(self) -> str:
         return "\n".join(self._log)
     
     def register_data(self, insight: Insight) -> None:
+        self._registered_data.append(insight)
         self.log(f"Registered data: {insight}")
+    
+    def extract_datasets(
+        self,
+        output_dir: Path | str = Path("output"),
+    ) -> list[Path]:
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        saved_paths: list[Path] = []
+        for index, insight in enumerate(self._registered_data, start=1):
+            base_name = insight.meta.get("name") if isinstance(insight.meta, dict) else None
+            if isinstance(base_name, str) and base_name:
+                sanitized = "".join(
+                    ch if ch.isalnum() or ch in {"-", "_"} else "_"
+                    for ch in base_name
+                ).strip("_")
+                base_filename = sanitized or f"dataset_{index}"
+            else:
+                base_filename = f"dataset_{index}"
+
+            filename = output_path / f"{base_filename}.npy"
+
+            counter = 1
+            candidate = filename
+            while candidate.exists():
+                candidate = output_path / f"{base_filename}_{counter}.npy"
+                counter += 1
+            filename = candidate
+
+            np.save(filename, insight.dataset)
+            saved_paths.append(filename)
+            self.log(f"Dataset saved to {filename}.")
+
+        self._registered_data = []
+
+        return saved_paths
 
 logger = Logger()

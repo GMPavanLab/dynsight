@@ -32,6 +32,9 @@ class Insight:
     dataset: NDArray[np.float64]
     meta: dict[str, Any] = field(default_factory=dict)
 
+    def __post_init__(self) -> None:
+        logger.register_data(self)
+
     def dump_to_json(self, file_path: Path) -> None:
         """Save the Insight to a JSON file and  .npy file."""
         # Save dataset as .npy
