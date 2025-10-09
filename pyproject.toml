@@ -19,6 +19,7 @@ dependencies = [
     "trackpy",
     "ultralytics",
     "deeptime",
+    "imageio",
 ]
 
 # Set by cpctools.
