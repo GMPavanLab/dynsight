@@ -20,6 +20,7 @@ dependencies = [
     "ultralytics",
     "deeptime",
     "imageio",
+    "seaborn",
 ]
 
 # Set by cpctools.
@@ -133,5 +134,6 @@ module = [
     'deeptime.*',
     'sklearn.decomposition.*',
     'imageio.*',
+    'seaborn.*,
 ]
 ignore_missing_imports = true
