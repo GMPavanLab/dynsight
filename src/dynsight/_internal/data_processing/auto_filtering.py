@@ -34,22 +34,22 @@ ArrayF64: TypeAlias = NDArray[np.float64]
 
 # Frequency conversion constants
 FREQ_TERA = 1e12  # Terahertz in Hz
-FREQ_GIGA = 1e9   # Gigahertz in Hz
-FREQ_MEGA = 1e6   # Megahertz in Hz
-FREQ_KILO = 1e3   # Kilohertz in Hz
+FREQ_GIGA = 1e9  # Gigahertz in Hz
+FREQ_MEGA = 1e6  # Megahertz in Hz
+FREQ_KILO = 1e3  # Kilohertz in Hz
 
 # Default parameters for filtering
 DEFAULT_FRAMES_TO_REMOVE = 20  # Frames to trim from each end
-DEFAULT_FILTER_ORDER = 4        # Butterworth filter order
+DEFAULT_FILTER_ORDER = 4  # Butterworth filter order
 
 # Image processing constants
-IMG_NDIM_GRAYSCALE = 2   # Number of dimensions for grayscale
-IMG_CHANNELS_RGBA = 4    # Number of channels for RGBA images
+IMG_NDIM_GRAYSCALE = 2  # Number of dimensions for grayscale
+IMG_CHANNELS_RGBA = 4  # Number of channels for RGBA images
 
 # Numerical constants
-SMALL_EPSILON = 1e-9     # Small number to avoid division by zero
-NDIM_EXPECTED = 2        # Expected number of dimensions for input
-MIN_FRAMES_TO_DROP = 2   # Minimum frames needed to drop first frame
+SMALL_EPSILON = 1e-9  # Small number to avoid division by zero
+NDIM_EXPECTED = 2  # Expected number of dimensions for input
+MIN_FRAMES_TO_DROP = 2  # Minimum frames needed to drop first frame
 
 # Initialize logger for this module
 logger = logging.getLogger(__name__)
@@ -73,17 +73,15 @@ class AutoFiltInsight:
         meta: Dictionary of metadata (parameters used)
         filtered_collection: Tuple of filtered signal arrays
     """
+
     # Non-default fields must come first
     output_dir: Path
     video_path: Path | None
 
     # Default fields (hide large arrays from repr)
-    cutoffs: list[float] = field(
-        default_factory=list, repr=False)
-    filtered_files: dict[float, Path] = field(
-        default_factory=dict, repr=False)
-    meta: dict[str, Any] = field(
-        default_factory=dict, repr=False)
+    cutoffs: list[float] = field(default_factory=list, repr=False)
+    filtered_files: dict[float, Path] = field(default_factory=dict, repr=False)
+    meta: dict[str, Any] = field(default_factory=dict, repr=False)
     filtered_collection: tuple[ArrayF64, ...] = field(
         default_factory=tuple, repr=False
     )
@@ -404,12 +402,12 @@ def _compute_fft_summed(
 
     # Sum magnitudes across all series
 
-    mag_sum: NDArray[np.float64] = np.asarray(np.abs(fft_vals),
-                                              dtype=np.float64).sum(axis=0)
+    mag_sum: NDArray[np.float64] = np.asarray(
+        np.abs(fft_vals), dtype=np.float64
+    ).sum(axis=0)
 
     # Get positive frequencies
     freq: NDArray[np.float64] = np.asarray(f_all[pos_mask], dtype=np.float64)
-
 
     return freq, mag_sum
 
@@ -752,9 +750,7 @@ def _finalize_frame(fig: Figure) -> NDArray[np.uint8]:
 
     # Convert grayscale to RGB if needed
     if img_raw.ndim == IMG_NDIM_GRAYSCALE:
-        img: NDArray[np.uint8] = np.stack(
-            [img_raw, img_raw, img_raw], axis=2
-        )
+        img: NDArray[np.uint8] = np.stack([img_raw, img_raw, img_raw], axis=2)
     else:
         img = img_raw
 
@@ -869,7 +865,6 @@ def _render_video(
 
     # Try to write videos with detailed parameters
     try:
-
         # Write video
         writer = imageio.get_writer(
             avi_path,
@@ -1357,5 +1352,5 @@ def auto_filtering(
         filtered_files=filtered_paths,
         video_path=video_path,
         meta=meta,
-        filtered_collection=tuple(filtered_collection)
+        filtered_collection=tuple(filtered_collection),
     )
