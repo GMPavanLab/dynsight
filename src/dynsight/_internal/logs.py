@@ -43,7 +43,7 @@ class Logger:
 
     def extract_datasets(
         self,
-        output_dir: Path | str = Path("output"),
+        output_dir: Path | str = Path("analysis_archive"),
     ) -> list[Path]:
         output_path = Path(output_dir)
         zip_parent = output_path.parent
