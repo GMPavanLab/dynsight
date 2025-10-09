@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from io import BytesIO
 from pathlib import Path
+from zipfile import ZIP_DEFLATED, ZipFile
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -64,16 +66,21 @@ class Logger:
                 if sanitized_values:
                     base_filename = "_".join(sanitized_values)
 
-            filename = output_path / f"{base_filename}.npy"
+            filename = output_path / f"{base_filename}.zip"
 
             counter = 1
             candidate = filename
             while candidate.exists():
-                candidate = output_path / f"{base_filename}_{counter}.npy"
+                candidate = output_path / f"{base_filename}_{counter}.zip"
                 counter += 1
             filename = candidate
 
-            np.save(filename, insight.dataset)
+            buffer = BytesIO()
+            np.save(buffer, insight.dataset)
+            buffer.seek(0)
+
+            with ZipFile(filename, "w", compression=ZIP_DEFLATED) as archive:
+                archive.writestr(f"{base_filename}.npy", buffer.getvalue())
             saved_paths.append(filename)
             self.log(f"Dataset saved to {filename}.")
 
