@@ -134,6 +134,6 @@ module = [
     'deeptime.*',
     'sklearn.decomposition.*',
     'imageio.*',
-    'seaborn.*,
+    'seaborn.*',
 ]
 ignore_missing_imports = true
