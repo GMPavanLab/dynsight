@@ -156,7 +156,12 @@ class Trj:
             delay=delay,
         )
 
-        attr_dict = {"name":"coord_number", "r_cut": r_cut, "delay": delay, "selection": selection}
+        attr_dict = {
+            "name": "coord_number",
+            "r_cut": r_cut,
+            "delay": delay,
+            "selection": selection,
+        }
         logger.log(f"Computed coord_number using args {attr_dict}.")
         return neigcounts, Insight(
             dataset=nn.astype(np.float64),
@@ -193,7 +198,12 @@ class Trj:
             delay=delay,
         )
 
-        attr_dict = {"name":"lens", "r_cut": r_cut, "delay": delay, "selection": selection}
+        attr_dict = {
+            "name": "lens",
+            "r_cut": r_cut,
+            "delay": delay,
+            "selection": selection,
+        }
         logger.log(f"Computed LENS using args {attr_dict}.")
 
         return neigcounts, Insight(
@@ -228,7 +238,7 @@ class Trj:
             trajslice=self.trajslice,
         )
         attr_dict = {
-            "name":"soap", 
+            "name": "soap",
             "r_cut": r_cut,
             "n_max": n_max,
             "l_max": l_max,
@@ -238,6 +248,52 @@ class Trj:
         }
         logger.log(f"Computed SOAP with args {attr_dict}.")
         return Insight(dataset=soap, meta=attr_dict)
+
+    def get_timesoap(
+        self,
+        r_cut: float,
+        n_max: int,
+        l_max: int,
+        selection: str = "all",
+        centers: str = "all",
+        respect_pbc: bool = True,
+        n_core: int = 1,
+        delay: int = 1,
+    ) -> tuple[Insight, Insight]:
+        """Compute SOAP and then timeSOAP on the trajectory.
+
+        The returned Insights contain the following meta: name, r_cut, n_max,
+        l_max, respect_pbc, centers, selection.
+        For the timeSOAP Insight, also delay is included.
+        """
+        soap_matrix = dynsight.soap.saponify_trajectory(
+            self.universe,
+            soaprcut=r_cut,
+            soapnmax=n_max,
+            soaplmax=l_max,
+            selection=selection,
+            soap_respectpbc=respect_pbc,
+            centers=centers,
+            n_core=n_core,
+            trajslice=self.trajslice,
+        )
+        attr_dict = {
+            "name": "soap",
+            "r_cut": r_cut,
+            "n_max": n_max,
+            "l_max": l_max,
+            "respect_pbc": respect_pbc,
+            "selection": selection,
+            "centers": centers,
+        }
+        soap = Insight(dataset=soap_matrix, meta=attr_dict)
+        logger.log(f"Computed SOAP with args {soap.meta}.")
+
+        timesoap = soap.get_angular_velocity(delay=delay)
+        timesoap.meta.update({"name": "timesoap"})
+
+        logger.log(f"Computed timeSOAP with args {timesoap.meta}.")
+        return soap, timesoap
 
     def get_orientational_op(
         self,
@@ -268,7 +324,12 @@ class Trj:
             order=order,
         )
 
-        attr_dict = {"name":"orientational_op", "r_cut": r_cut, "order": order, "selection": selection}
+        attr_dict = {
+            "name": "orientational_op",
+            "r_cut": r_cut,
+            "order": order,
+            "selection": selection,
+        }
 
         logger.log(
             f"Computed orientational order parameter using args {attr_dict}."
@@ -306,7 +367,11 @@ class Trj:
             neigh_list_per_frame=neigcounts,
         )
 
-        attr_dict = {"name":"velocity_alignement", "r_cut": r_cut, "selection": selection}
+        attr_dict = {
+            "name": "velocity_alignement",
+            "r_cut": r_cut,
+            "selection": selection,
+        }
 
         logger.log(
             f"Computed average velocity alignment using args {attr_dict}."
@@ -349,7 +414,7 @@ class Trj:
             step=trajslice.step,
         )
         attr_dict = {
-            "name":"rdf", 
+            "name": "rdf",
             "distances_range": distances_range,
             "s1": s1,
             "s2": s2,
