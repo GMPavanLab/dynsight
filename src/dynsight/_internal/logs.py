@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from io import BytesIO
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 from typing import TYPE_CHECKING
@@ -66,25 +65,39 @@ class Logger:
                 if sanitized_values:
                     base_filename = "_".join(sanitized_values)
 
-            filename = output_path / f"{base_filename}.zip"
+            filename = output_path / f"{base_filename}.npy"
 
             counter = 1
             candidate = filename
             while candidate.exists():
-                candidate = output_path / f"{base_filename}_{counter}.zip"
+                candidate = output_path / f"{base_filename}_{counter}.npy"
                 counter += 1
             filename = candidate
 
-            buffer = BytesIO()
-            np.save(buffer, insight.dataset)
-            buffer.seek(0)
-
-            with ZipFile(filename, "w", compression=ZIP_DEFLATED) as archive:
-                archive.writestr(f"{base_filename}.npy", buffer.getvalue())
+            np.save(filename, insight.dataset)
             saved_paths.append(filename)
             self.log(f"Dataset saved to {filename}.")
 
         self._registered_data = []
+        
+        if saved_paths:
+            zip_base = output_path.name
+            zip_filename = output_path.parent / f"{zip_base}.zip"
+
+            counter = 1
+            candidate = zip_filename
+            while candidate.exists():
+                candidate = output_path.parent / f"{zip_base}_{counter}.zip"
+                counter += 1
+            zip_filename = candidate
+
+            with ZipFile(zip_filename, "w", compression=ZIP_DEFLATED) as archive:
+                for file_path in sorted(output_path.rglob("*")):
+                    if file_path.is_file():
+                        archive.write(file_path, arcname=file_path.relative_to(output_path))
+
+            saved_paths.append(zip_filename)
+            self.log(f"Output directory zipped to {zip_filename}.")
 
         return saved_paths
 
