@@ -142,7 +142,7 @@ class Trj:
                 * neighcounts: a list[list[AtomGroup]], it can be used to
                     speed up subsequent descriptors' computations.
                 * An Insight containing the number of neighbors. It has the
-                    following meta: r_cut, selection.
+                    following meta: name, r_cut, delay, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
@@ -183,7 +183,7 @@ class Trj:
                 * neighcounts: a list[list[AtomGroup]], it can be used to
                     speed up subsequent descriptors' computations.
                 * An Insight containing LENS. It has the following meta:
-                    r_cut, selection.
+                    name, r_cut, delay, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
@@ -223,8 +223,8 @@ class Trj:
     ) -> Insight:
         """Compute SOAP on the trajectory.
 
-        The returned Insight contains the following meta: r_cut, n_max, l_max,
-        respect_pbc, centers, selection.
+        The returned Insight contains the following meta: name, r_cut, n_max,
+        l_max, respect_pbc, selection, centers.
         """
         soap = dynsight.soap.saponify_trajectory(
             self.universe,
@@ -264,7 +264,7 @@ class Trj:
         """Compute SOAP and then timeSOAP on the trajectory.
 
         The returned Insights (soap and timesoap) contain the following meta:
-        name, r_cut, n_max, l_max, respect_pbc, centers, selection.
+        name, r_cut, n_max, l_max, respect_pbc, selection, centers.
         Regarding the timeSOAP Insight, the delay used is also included.
         """
         if soap_insight is not None:
@@ -320,7 +320,7 @@ class Trj:
                 * neighcounts: a list[list[AtomGroup]], it can be used to
                     speed up subsequent descriptors' computations.
                 * An Insight containing the orientational order parameter.
-                    It has the following meta: r_cut, order, selection.
+                    It has the following meta: name, r_cut, order, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
@@ -364,7 +364,7 @@ class Trj:
                 * neighcounts: a list[list[AtomGroup]], it can be used to
                     speed up subsequent descriptors' computations.
                 * An Insight containing the average velocities alignment.
-                    It has the following meta: r_cut, selection.
+                    It has the following meta: name, r_cut, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
