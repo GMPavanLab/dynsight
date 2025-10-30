@@ -44,7 +44,7 @@ class Logger:
     def extract_datasets(
         self,
         output_dir: Path | str = Path("analysis_archive"),
-    ) -> list[Path]:
+    ) -> None:
         output_path = Path(output_dir)
         zip_parent = output_path.parent
         zip_parent.mkdir(parents=True, exist_ok=True)
@@ -90,8 +90,6 @@ class Logger:
                 )
                 saved_paths.append(zip_filename)
                 self.log(f"Output directory zipped to {zip_filename}.")
-
-        return saved_paths
 
     def _create_zip_archive(
         self,

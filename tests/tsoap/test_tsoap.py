@@ -12,10 +12,10 @@ from .case_data import TimeSOAPCaseData
 
 
 def test_tsoap(case_data: TimeSOAPCaseData) -> None:
-    oritinal_dir = Path(__file__).resolve().parent
-    topology_file = oritinal_dir / "../systems/balls_7_nvt.gro"
-    trajectory_file = oritinal_dir / "../systems/balls_7_nvt.xtc"
-    expected_tsoap = oritinal_dir / "test_tsoap" / case_data.expected_tsoap
+    original_dir = Path(__file__).resolve().parent
+    topology_file = original_dir / "../systems/balls_7_nvt.gro"
+    trajectory_file = original_dir / "../systems/balls_7_nvt.xtc"
+    expected_tsoap = original_dir / "test_tsoap" / case_data.expected_tsoap
     universe = MDAnalysis.Universe(topology_file, trajectory_file)
 
     example_trj = Trj(universe)
