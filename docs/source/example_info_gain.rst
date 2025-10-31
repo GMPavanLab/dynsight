@@ -7,15 +7,17 @@ Here we show how to compute the information gain through clustering. To this end
 
 To start, let's import the packages we will need and create a folder in the cwd to save the results in.
 
-.. code-block:: python
+.. testcode:: example_info_gain
 
     from pathlib import Path
     from typing import Callable
+    from tqdm import tqdm
     import numpy as np
     import matplotlib.pyplot as plt
+    import dynsight
 
     cwd = Path.cwd()
-    folder_name = "info_gain"
+    folder_name = "source/_static/info_gain"
     folder_path = cwd / folder_name
     if not folder_path.exists():
         folder_path.mkdir()
@@ -23,7 +25,7 @@ To start, let's import the packages we will need and create a folder in the cwd 
 
 Now, we want to simulate the Langevin Dynamics. We start defining the potential energy landscapes, with two and four minima. 
 
-.. code-block:: python
+.. testcode:: example_info_gain
 
     def energy_landscape_1(x: float, y: float) -> float:
         """A potential energy landscape with 2 minima."""
@@ -45,7 +47,7 @@ Now, we want to simulate the Langevin Dynamics. We start defining the potential 
 
 To compute the force acting on the particle, we need to compute the potential energy gradient. 
 
-.. code-block:: python
+.. testcode:: example_info_gain
 
     def numerical_gradient(
         f: Callable[[float, float], float], x: float, y: float, h: float = 1e-5
@@ -58,7 +60,7 @@ To compute the force acting on the particle, we need to compute the potential en
 
 This function simulates, for both energy landscapes, the dynamics of 100 particles for 10000 timesteps. Particles are initialized close to the minima. 
 
-.. code-block:: python
+.. testcode:: example_info_gain
 
     def create_trajectory(
         energy_landscape: Callable[[float, float], float], file_name: Path
@@ -95,18 +97,14 @@ This function simulates, for both energy landscapes, the dynamics of 100 particl
 
                 trajectory[t, i] = particles[i]
 
-        plt.figure()
-        plt.plot(trajectory[:, :, 0], trajectory[:, :, 1])
-        plt.show()
-
         dataset = np.transpose(trajectory, (1, 0, 2))
-        np.save(filename, dataset)
+        np.save(file_name, dataset)
         return dataset
 
 
 Let's simulate the trajectories and store them in two variables. We also save them as .npy files so that we don't have to simulate them every time. 
 
-.. code-block:: python
+.. testcode:: example_info_gain
 
     file_1 = folder_path / "trj_2.npy"  #  With 2 minima
     file_2 = folder_path / "trj_4.npy"  #  With 4 minima
@@ -131,7 +129,7 @@ For each case, we do the analysis for a range of values of the Onion clustering 
 To check if the clustering is working in a meaningful way, we also plot the results of Onion clustering for one specific value of ∆t. 
 
 
-.. code-block:: python
+.. testcode:: example_info_gain
 
     delta_t_list = np.unique(np.geomspace(2, 1000, 45, dtype=int))
     results = np.zeros((4, delta_t_list.size))
@@ -144,59 +142,54 @@ To check if the clustering is working in a meaningful way, we also plot the resu
         y_positions = dataset[:, :, 1]
         info_gain_y = np.zeros(delta_t_list.size)
 
-        for j, delta_t in enumerate(delta_t_list):
-            reshaped_data = dynsight.onion.helpers.reshape_from_nt(
-                y_positions, delta_t
+        for j, delta_t in enumerate(tqdm(delta_t_list)):
+            state_list, labels = dynsight.onion.onion_uni_smooth(
+                y_positions,
+                delta_t=delta_t,
             )
-            state_list, labels = dynsight.onion.onion_uni(reshaped_data)
 
             if j == example_delta_t:
-                dynsight.onion.plot.plot_output_uni(
-                    f"Example_{i}_1D.png",
-                    reshaped_data,
-                    n_atoms,
+                dynsight.onion.plot_smooth.plot_output_uni(
+                    f"source/_static/Example_{i}_1D.png",
+                    y_positions,
                     state_list,
                 )
 
             # and compute the information gain:
-            info_gain_y[j], *_ = dynsight.analysis.compute_entropy_gain(
-                reshaped_data, labels, n_bins=40
-            )
-        results.append(info_gain_y)
+            info_gain_y[j], *_ = dynsight.analysis.info_gain(
+                data=y_positions.ravel(),
+                labels=labels.ravel(),
+                method="kl",
+            )  # Results are in bit
+        results[i * 2] = info_gain_y
 
         # Or we can do clustering using both (x, y) variables:
         info_gain_xy = np.zeros(delta_t_list.size)
-        tmp1_dataset = np.transpose(dataset, (2, 0, 1))
-        for j, delta_t in enumerate(delta_t_list):
-            reshaped_data = dynsight.onion.helpers.reshape_from_dnt(
-                tmp1_dataset, delta_t
+        for j, delta_t in enumerate(tqdm(delta_t_list)):
+            state_list, labels = dynsight.onion.onion_multi_smooth(
+                dataset,
+                delta_t=delta_t,
             )
-            state_list, labels = dynsight.onion.onion_multi(reshaped_data)
 
             if j == example_delta_t:
-                dynsight.onion.plot.plot_output_multi(
-                    f"Example_{i}_2D.png",
-                    tmp1_dataset,
+                dynsight.onion.plot_smooth.plot_output_multi(
+                    f"source/_static/Example_{i}_2D.png",
+                    dataset,
                     state_list,
                     labels,
-                    delta_t,
                 )
 
             # and compute the information gain:
             # We need an array (n_samples, n_dims), and labels (n_samples,)
-            n_sequences = int(n_frames / delta_t)
-            long_labels = np.repeat(labels, delta_t)
-            tmp = dataset[:, : n_sequences * delta_t, :]
-            ds_reshaped = tmp.reshape((-1, n_dims))
+            reshaped_data = dataset.reshape((-1, 2))
+            reshaped_labels = labels.reshape((-1,))
 
-            info_gain_xy[j], *_ = dynsight.analysis.compute_entropy_gain_multi(
-                ds_reshaped, long_labels, n_bins=[40, 40]
-            )
-        # Need to multiply by two because it's 2 dimensional, and the output
-        # of the info_gain functions is normalized by the log volume of the
-        # phase space, which is 2D is doubled
-        info_gain_xy *= 2
-        results.append(info_gain_xy)
+            info_gain_xy[j], *_ = dynsight.analysis.info_gain(
+                reshaped_data,
+                reshaped_labels,
+                method="kl",
+            )  # Results are in bit
+        results[i * 2 + 1] = info_gain_xy
 
 
 Here are the plots of the two datasets, with the different clusters identified when clustering the full, bi-dimensional data, using ∆t = 4 frames:
@@ -205,8 +198,8 @@ Here are the plots of the two datasets, with the different clusters identified w
    :widths: auto
    :align: center
 
-   * - .. image:: _static/info_gain_clusters_1d.png
-     - .. image:: _static/info_gain_clusters_2d.png
+   * - .. image:: _static/Example_0_2D.png
+     - .. image:: _static/Example_1_2D.png
 
 
 As can be seen, all the clusters are correctly identified at this time resolution ∆t. When we are using only the y-coordinate instead, as expected in both cases just two clusters can be identified (the two plots look the same but they are actually from the two different systems):
@@ -215,13 +208,13 @@ As can be seen, all the clusters are correctly identified at this time resolutio
    :widths: auto
    :align: center
 
-   * - .. image:: _static/info_gain_clusters_1d_y.png
-     - .. image:: _static/info_gain_clusters_2d_y.png
+   * - .. image:: _static/Example_0_1D.png
+     - .. image:: _static/Example_1_1D.png
 
 
 We can now plot, for every case and for every choice of ∆t, the corresponding information gain. 
 
-.. code-block:: python
+.. testcode:: example_info_gain
 
     colorlist = ["C0", "C2", "C1", "C3"]
     markerlist = ["s", "o", "d", "o"]
@@ -246,7 +239,7 @@ We can now plot, for every case and for every choice of ∆t, the corresponding 
     ax.set_ylabel(r"Information gain $\Delta H$ [bit]")
     ax.set_xscale("log")
     ax.legend()
-    plt.show()
+    fig.savefig("source/_static/Information_gains.png", dpi=600)
 
 As can be seen in the plot below, clustering both datasets using only the y coordinate gives the same information gain, because only two clusters can be distinguished. 
 
