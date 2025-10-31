@@ -8,6 +8,7 @@ from dynsight._internal.analysis.entropy import (
     compute_negentropy,
     compute_shannon,
     compute_shannon_multi,
+    info_gain,
     sample_entropy,
     shannon,
 )
@@ -30,6 +31,7 @@ __all__ = [
     "compute_shannon",
     "compute_shannon_multi",
     "cross_time_correlation",
+    "info_gain",
     "sample_entropy",
     "self_time_correlation",
     "shannon",

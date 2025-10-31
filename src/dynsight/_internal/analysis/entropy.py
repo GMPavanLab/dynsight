@@ -23,7 +23,7 @@ def shannon(
 
     Parameters:
         data:
-            The dataset for which the entropy is to be computed. Has shape
+            The data for which the entropy is to be computed. Has shape
             (n_samples, n_features).
 
         method:
@@ -33,8 +33,8 @@ def shannon(
             of the infomeasure package for more details.
 
         base:
-            The units of measure of the returned value. Use "2" for bits, "e"
-            for nats.
+            The units of measure of the returned value. Use "2" for bits,
+            "np.e" for nats.
 
         n_neigh:
             The number of neighbors considered in the KL estimator. The
@@ -427,6 +427,130 @@ def compute_kl_entropy_multi(
     return entropy_nats / np.log(2)
 
 
+def info_gain(
+    data: npt.NDArray[np.float64],
+    labels: npt.NDArray[np.int64],
+    method: Literal["histo", "kl"],
+    base: float = 2.0,
+    n_neigh: int = 4,
+) -> tuple[float, float, float, float]:
+    """Compute the information gained by the clustering.
+
+    Parameters:
+        data:
+            The dataset over which the clustering is performed. Has shape
+            (n_samples, n_features).
+
+        labels:
+            The clustering labels. Has shape (n_samples,).
+
+        method:
+            How the Shannon entropy is computed. You should use "histo" for
+            discrete variables, and "kl" for continuous variables. If "histo"
+            is chosen, the "n_neigh" arg is irrelevant. See the documentation
+            of the infomeasure package for more details.
+
+        base:
+            The units of measure of the returned value. Use "2" for bits,
+            "np.e" for nats.
+
+        n_neigh:
+            The number of neighbors considered in the KL estimator. The
+            default value n_neigh = 4 is recommended in the literature.
+
+    Returns:
+        * The absolute information gain :math:`H_0 - H_{clust}`
+        * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
+        * The Shannon entropy of the initial data :math:`H_0`
+        * The shannon entropy of the clustered data :math:`H_{clust}`
+
+    Example:
+
+        .. testcode:: info-gain-test
+
+            import numpy as np
+            from dynsight.analysis import info_gain
+            rng = np.random.default_rng(seed=42)
+
+            ### Descrete case ###
+            int_data = rng.integers(low=0, high=4, size=100000)
+            labels = (int_data < 2).astype(int)
+            delta_i, *_ = info_gain(
+                data=int_data,
+                labels=labels,
+                method="histo",
+            )
+
+        .. testcode:: info-gain-test
+            :hide:
+
+            assert np.isclose(delta_i, 1.0)
+
+        .. testcode:: info-gain-test
+
+            ### Continuous case ###
+            float_data = rng.random(200000)
+            labels = (float_data < 0.5).astype(int)
+            delta_i, *_ = info_gain(
+                data=float_data,
+                labels=labels,
+                method="kl",
+            )
+
+        .. testcode:: info-gain-test
+            :hide:
+
+            assert np.isclose(delta_i, 1.0)
+    """
+    if data.shape[0] != labels.shape[0]:
+        msg = (
+            f"data ({data.shape}) and labels ({labels.shape}) "
+            "must have same shape[0]"
+        )
+        raise RuntimeError(msg)
+    if method not in ("histo", "kl"):
+        msg = "method must be histo or kl."
+        raise ValueError(msg)
+
+    n_clusters = np.unique(labels).size
+    frac, entr = np.zeros(n_clusters), np.zeros(n_clusters)
+
+    if method == "histo":
+        # Compute the total entropy of the data
+        total_entropy = shannon(data, method="histo", base=base)
+
+        # Compute the fraction and the entropy of the single clusters
+        for i, label in enumerate(np.unique(labels)):
+            mask = labels == label
+            frac[i] = np.sum(mask) / labels.size
+            entr[i] = shannon(data[mask], method="histo", base=base)
+    else:  # method == "kl"
+        # Compute the total entropy of the data
+        total_entropy = shannon(data, method="kl", base=base, n_neigh=n_neigh)
+
+        # Compute the fraction and the entropy of the single clusters
+        for i, label in enumerate(np.unique(labels)):
+            mask = labels == label
+            frac[i] = np.sum(mask) / labels.size
+            entr[i] = shannon(
+                data[mask],
+                method="kl",
+                base=base,
+                n_neigh=n_neigh,
+            )
+
+    # Compute the entropy of the clustered data
+    clustered_entropy = np.dot(frac, entr)
+    info_gain = total_entropy - clustered_entropy
+
+    return (
+        info_gain,
+        info_gain / total_entropy,
+        total_entropy,
+        clustered_entropy,
+    )
+
+
 def compute_entropy_gain(
     data: npt.NDArray[np.float64],
     labels: npt.NDArray[np.int64],
@@ -434,6 +558,9 @@ def compute_entropy_gain(
     n_bins: int = 20,
 ) -> tuple[float, float, float, float]:
     """Compute the relative information gained by the clustering.
+
+    .. warning::
+        This function is deprecated. Use `analysis.info_gain()` instead.
 
     Parameters:
         data:
@@ -546,6 +673,9 @@ def compute_entropy_gain_multi(
     method: Literal["histo", "kl"] = "histo",
 ) -> tuple[float, float, float, float]:
     """Compute the relative information gained by the clustering.
+
+    .. warning::
+        This function is deprecated. Use `analysis.info_gain()` instead.
 
     Parameters:
         data:
