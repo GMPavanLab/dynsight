@@ -5,11 +5,77 @@ from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+import infomeasure as im
 import numpy as np
 import numpy.typing as npt
 from scipy.spatial import cKDTree
 from scipy.spatial.distance import cdist
 from scipy.special import digamma, gamma
+
+
+def shannon(
+    data: NDArray[np.float64],
+    method: Literal["histo", "kl"],
+    base: float = 2.0,
+    n_neigh: int = 4,
+) -> float:
+    """Compute the Shannon entropy of a data distribution.
+
+    Parameters:
+        data:
+            The dataset for which the entropy is to be computed. Has shape
+            (n_samples, n_features).
+
+        method:
+            How the Shannon entropy is computed. You should use "histo" for
+            discrete variables, and "kl" for continuous variables. If "histo"
+            is chosen, the "n_neigh" arg is irrelevant. See the documentation
+            of the infomeasure package for more details.
+
+        base:
+            The units of measure of the returned value. Use "2" for bits, "e"
+            for nats.
+
+        n_neigh:
+            The number of neighbors considered in the KL estimator. The
+            default value n_neigh = 4 is recommended in the literature.
+
+    Returns:
+        The value of the Shannon entropy of the data.
+
+    Example:
+
+        .. testcode:: shannon-test
+
+            import numpy as np
+            from dynsight.analysis import shannon
+            rng = np.random.default_rng(seed=42)
+
+            ### Discrete case: fair coin. H = 1 bit. ###
+            int_data = rng.integers(low=0, high=2, size=100000)
+            h_int = shannon(data=int_data, method="histo")
+
+            ### Bivariate case: 2 fair coins. H = 2 bit. ###
+            int_data = rng.integers(low=0, high=2, size=(100000, 2))
+            h_int_2 = shannon(data=int_data, method="histo")
+
+            ### Continuous case: uniform distribution in [0, 10]. ###
+            float_data = rng.random(200000) * 10
+            h_float = shannon(data=float_data, method="kl")
+
+        .. testcode:: shannon-test
+            :hide:
+
+            assert np.isclose(h_int, 1.0, atol=1e-3)
+            assert np.isclose(h_int_2, 2.0, atol=1e-3)
+            assert np.isclose(h_float, np.log2(10), atol=5e-3)
+    """
+    if method not in ("histo", "kl"):
+        msg = "method must be 'histo' or 'kl'."
+        raise ValueError(msg)
+    if method == "histo":
+        return im.entropy(data, approach="discrete", base=base)
+    return im.entropy(data, approach="metric", k=n_neigh, base=base)
 
 
 def compute_shannon(
@@ -21,6 +87,9 @@ def compute_shannon(
     """Compute the Shannon entropy of a univariate data distribution.
 
     It is normalized so that a uniform distribution has unitary entropy.
+
+    .. warning::
+        This function is deprecated. Use `analysis.shannon()` instead.
 
     Parameters:
         data:
@@ -95,6 +164,9 @@ def compute_kl_entropy(
     The Kozachenko-Leonenko k-nearest neighbors method approximates
     differential entropy based on distances to nearest neighbors
     in the sample space. It's main advantage is being parameter-free.
+
+    .. warning::
+        This function is deprecated. Use `analysis.shannon()` instead.
 
     Parameters:
         data:
@@ -186,19 +258,20 @@ def compute_negentropy(
         .. testcode:: negentropy-test
             :hide:
 
-            assert np.isclose(negentropy, 0.2609932580146541)
+            assert np.isclose(negentropy, 0.268, rtol=5e-3)
 
     """
     if units not in ("bit", "nat"):
         msg = "units must be bit or nat."
         raise ValueError(msg)
+    base = 2 if units == "bit" else np.e
     data = data.flatten()
     rng = np.random.default_rng(seed=1234)
     data_norm = (data - np.mean(data)) / np.std(data, ddof=1)
     sigma = np.std(data_norm, ddof=1)
     data_gauss = rng.normal(loc=0.0, scale=sigma, size=data.size)
-    h_gauss = compute_kl_entropy(data_gauss, units=units)
-    h_data = compute_kl_entropy(data_norm, units=units)
+    h_gauss = shannon(data_gauss, method="kl", base=base)
+    h_data = shannon(data_norm, method="kl", base=base)
     return h_gauss - h_data
 
 
@@ -211,6 +284,9 @@ def compute_shannon_multi(
     """Compute the Shannon entropy of a multivariate data distribution.
 
     It is normalized so that a uniform distribution has unitary entropy.
+
+    .. warning::
+        This function is deprecated. Use `analysis.shannon()` instead.
 
     Parameters:
         data:
@@ -291,6 +367,9 @@ def compute_kl_entropy_multi(
     The Kozachenko-Leonenko k-nearest neighbors method approximates
     differential entropy based on distances to nearest neighbors
     in the sample space. It's main advantage is being parameter-free.
+
+    .. warning::
+        This function is deprecated. Use `analysis.shannon()` instead.
 
     Parameters:
         data:
