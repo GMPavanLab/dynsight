@@ -509,7 +509,7 @@ def info_gain(
         )
         raise RuntimeError(msg)
     if method not in ("histo", "kl"):
-        msg = "method must be histo or kl."
+        msg = "method must be 'histo' or 'kl'."
         raise ValueError(msg)
 
     n_clusters = np.unique(labels).size
