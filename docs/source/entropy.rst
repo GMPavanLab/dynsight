@@ -25,11 +25,10 @@ should be equal to log2(6) bits.
     n_sample = 10000
     rolls = rng.integers(1, 7, size=n_sample)
 
-    dice_entropy = dynsight.analysis.compute_shannon(
-        data=rolls.astype(float),
-        data_range=(1,6),
-        n_bins=6,
-        units="bit",
+    dice_entropy = dynsight.analysis.shannon(
+        data=rolls,
+        method="histo",
+        base=2,
     )
     # dice_entropy = 2.584832195231254 ~ log2(6)
 
@@ -45,11 +44,10 @@ which should be equal to log2(36) bits.
     n_sample = 10000
     rolls = rng.integers(1, 7, size=(n_sample, 2))
 
-    dices_entropy = dynsight.analysis.compute_shannon_multi(
-        data=rolls.astype(float),
-        data_ranges=[(1,6), (1,6)],
-        n_bins=[6, 6],
-        units="bit",
+    dices_entropy = dynsight.analysis.shannon(
+        data=rolls,
+        method="histo",
+        base=2,
     )
     # dices_entropy = 5.168428344754391 ~ log2(36)
 
@@ -58,26 +56,30 @@ Entropy of a continuous variable
 ---------------------------------
 
 Shannon entropy is not univocally defined for continuous variables, but the
-difference between the entropy of different distribution is. Let's compute the
-difference between the Shannon entropy of two Gaussian distributions, with
-standard deviations respectively equal to 1 and 2, which should be 1 bit.
+difference between the entropy of different distribution is.
+For continuous variables, we need to use the Kozachenko-Leonenko (KL)
+estimator, passing the argument `method="kl"`.
+Let's compute the difference between the Shannon entropy of two Gaussian distributions, with standard deviations respectively equal to 1 and 2, which
+should be 1 bit.
 
 .. testcode:: recipe4-test
 
-    n_sample = 10000000
+    n_sample = 100000
     data_1 = rng.normal(loc=0.0, scale=1.0, size=n_sample)
     data_2 = rng.normal(loc=0.0, scale=2.0, size=n_sample)
 
-    gauss_entropy_1 = dynsight.analysis.compute_kl_entropy(
+    gauss_entropy_1 = dynsight.analysis.shannon(
         data=data_1,
-        units="bit",
+        method="kl",
+        base=2,
     )
-    gauss_entropy_2 = dynsight.analysis.compute_kl_entropy(
+    gauss_entropy_2 = dynsight.analysis.shannon(
         data=data_2,
-        units="bit",
+        method="kl",
+        base=2,
     )
     diff = gauss_entropy_2 - gauss_entropy_1
-    # diff = 1.0010395631476854
+    # diff = 0.9994806386420283
 
 
 Entropy of a continuous multivariate variable
@@ -104,16 +106,18 @@ which should be 2 bits.
         size=n_sample,
     )
 
-    gauss_entropy_1 = dynsight.analysis.compute_kl_entropy_multi(
+    gauss_entropy_1 = dynsight.analysis.shannon(
         data=data_1,
-        units="bit",
+        method="kl",
+        base=2,
     )
-    gauss_entropy_2 = dynsight.analysis.compute_kl_entropy_multi(
+    gauss_entropy_2 = dynsight.analysis.shannon(
         data=data_2,
-        units="bit",
+        method="kl",
+        base=2,
     )
     diff_2d = gauss_entropy_2 - gauss_entropy_1
-    # diff_2d = 2.0142525628908743
+    # diff_2d = 2.0101274002195764
 
 
 .. raw:: html
