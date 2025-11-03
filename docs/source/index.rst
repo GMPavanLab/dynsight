@@ -16,6 +16,7 @@
    analysis <analysis>
    data processing <data_processing>
    HDF5er <hdf5er>
+   logs <logs>
 
 .. toctree::
   :hidden:
