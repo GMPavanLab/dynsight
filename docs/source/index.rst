@@ -119,19 +119,19 @@ There are examples throughout the documentation and available in
 the ``examples/`` directory of this repository.
 
 There are also examples available in the ``cpctools`` repository
-`here <https://github.com/GMPavanLab/cpctools/tree/main/Examples>`
+`here <https://github.com/GMPavanLab/cpctools/tree/main/Examples>`_
 
 
 How To Cite
 ===========
 
-If you use ``dynsight`` please cite
+If you use ``dynsight`` please cite:
 
-    https://github.com/GMPavanLab/dynsight
+S. Martino, M. Becchi, A. Tarzia, D. Rapetti, G. M. Pavan  
+*dynsight: an open Python platform for simulation and experimental trajectory data analysis*  
+arXiv (2025), DOI: `10.48550/arXiv.2510.23493 <https://doi.org/10.48550/arXiv.2510.23493>`_
 
-and
-
-    TBD
+``dynsight`` uses many different open-source packages. Please cite them when appropriate:
 
 * Most modules also use MDAnalysis, https://www.mdanalysis.org/pages/citations/
 * If you use SOAP, please cite https://doi.org/10.1103/PhysRevB.87.184115 and DScribe https://singroup.github.io/dscribe/latest/citing.html
@@ -146,14 +146,13 @@ and
 Acknowledgements
 ================
 
-We developed this code when working in the Pavan group,
-https://www.gmpavanlab.polito.it/, whose members often provide very valuable
-feedback, which we gratefully acknowledge.
-
-Much of the original code in ``cpctools`` was written by Daniele Rapetti (Iximiel).
-
-The work was funded by the European Union and ERC under projects DYNAPOL and the
-NextGenerationEU project, CAGEX.
+``dynsight`` is developed by the Pavan group at Politecnico di Torino, https://www.gmpavanlab.polito.it/.
+Many group members have provided and continuously provide with their daily work useful feedbacks,
+which we gratefully acknowledge. 
+This work is made possible thanks to the funding received by the European Research Council
+under the European Union’s Horizon 2020 research and innovation program
+(Grant Agreement No. 818776 - DYNAPOL, to G.M.P.), which G.M.P. and the whole Pavan
+group thankfully acknowledge. 
 
 Indices and tables
 ------------------
