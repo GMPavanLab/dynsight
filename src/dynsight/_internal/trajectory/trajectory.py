@@ -268,7 +268,6 @@ class Trj:
         Regarding the timeSOAP Insight, the delay used is also included.
         """
         if soap_insight is not None:
-            msg = ""
             if getattr(soap_insight, "meta", {}).get("name") != "soap":
                 msg = (
                     f"soap_insight.meta['name'] must be 'soap', found: "
