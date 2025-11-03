@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import sys
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from zipfile import ZIP_DEFLATED, ZipFile
 
 import numpy as np
@@ -55,12 +56,20 @@ console.addHandler(handler)
 console.propagate = False
 
 
+@dataclass
+class RegisteredDataset:
+    meta: Any
+    path: Path
+
+
 class Logger:
     """Creates and save human-readible log."""
 
     def __init__(self) -> None:
         self._log: list[str] = []
-        self._registered_data: list[Insight] = []
+        self._registered_data: list[RegisteredDataset] = []
+        self._temp_dir: TemporaryDirectory[str] | None = None
+        self._temp_path: Path | None = None
 
     def log(self, msg: str) -> None:
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
@@ -74,6 +83,7 @@ class Logger:
 
     def clear_history(self) -> None:
         self._log = []
+        self._cleanup_temp_dir()
         self._registered_data = []
 
     def get(self) -> str:
@@ -86,13 +96,21 @@ class Logger:
                 return
 
         insight_bytes = insight.dataset.nbytes
-        self._registered_data.append(insight)
+
+        temp_path = self._ensure_temp_dir()
+
+        base_filename = self._build_base_filename(insight)
+        filename = self._make_unique_filename(temp_path, base_filename)
+
+        np.save(filename, insight.dataset)
+
+        dataset_entry = RegisteredDataset(meta=insight.meta, path=filename)
+        self._registered_data.append(dataset_entry)
 
         total_bytes = sum(
-            x.dataset.nbytes
-            if isinstance(x.dataset, np.ndarray)
-            else sys.getsizeof(x.dataset)
-            for x in self._registered_data
+            entry.path.stat().st_size
+            for entry in self._registered_data
+            if entry.path.exists()
         )
 
         bytes_in_kb = 1024
@@ -114,7 +132,8 @@ class Logger:
         total_size = _format_size(total_bytes)
 
         console.warning(f"Registering dataset with size: {added_size}.")
-        console.warning(f"RAM occupied by dynsight datasets: {total_size}.")
+        console.warning(f"Disk used by dynsight datasets: {total_size}.")
+        self.log(f"Dataset prepared: {filename.name}.")
 
     def extract_datasets(
         self,
@@ -125,42 +144,22 @@ class Logger:
         zip_parent.mkdir(parents=True, exist_ok=True)
 
         saved_paths: list[Path] = []
-        dataset_files: list[Path] = []
 
-        with TemporaryDirectory(
-            dir=zip_parent, prefix=f"{output_path.name}_"
-        ) as temp_dir:
-            temp_path = Path(temp_dir)
+        dataset_files = [
+            entry.path
+            for entry in self._registered_data
+            if entry.path.exists()
+        ]
 
-            for index, insight in enumerate(self._registered_data, start=1):
-                base_filename = f"dataset_{index}"
-                if isinstance(insight.meta, dict) and insight.meta:
-                    sanitized_values = []
-                    for value in insight.meta.values():
-                        value_str = str(value)
-                        sanitized = "".join(
-                            ch if ch.isalnum() or ch in {"-", "_"} else "_"
-                            for ch in value_str
-                        ).strip("_")
-                        if sanitized:
-                            sanitized_values.append(sanitized)
-                    if sanitized_values:
-                        base_filename = "_".join(sanitized_values)
+        if dataset_files:
+            zip_filename = self._create_zip_archive(
+                dataset_files, output_path, zip_parent
+            )
+            saved_paths.append(zip_filename)
+            self.log(f"Output directory zipped to {zip_filename}.")
 
-                filename = temp_path / f"{base_filename}.npy"
-
-                np.save(filename, insight.dataset)
-                dataset_files.append(filename)
-                self.log(f"Dataset prepared: {filename.name}.")
-
-            self._registered_data = []
-
-            if dataset_files:
-                zip_filename = self._create_zip_archive(
-                    dataset_files, output_path, zip_parent
-                )
-                saved_paths.append(zip_filename)
-                self.log(f"Output directory zipped to {zip_filename}.")
+        self._cleanup_temp_dir()
+        self._registered_data = []
 
     def _create_zip_archive(
         self,
@@ -181,6 +180,44 @@ class Logger:
                 archive.write(file_path, arcname=file_path.name)
 
         return zip_filename
+
+    def _ensure_temp_dir(self) -> Path:
+        if self._temp_dir is None or self._temp_path is None:
+            self._temp_dir = TemporaryDirectory(prefix="analysis_archive_")
+            self._temp_path = Path(self._temp_dir.name)
+        return self._temp_path
+
+    def _cleanup_temp_dir(self) -> None:
+        if self._temp_dir is not None:
+            self._temp_dir.cleanup()
+        self._temp_dir = None
+        self._temp_path = None
+
+    def _build_base_filename(self, insight: Insight) -> str:
+        base_filename = "dataset"
+        if isinstance(insight.meta, dict) and insight.meta:
+            sanitized_values = []
+            for value in insight.meta.values():
+                value_str = str(value)
+                sanitized = "".join(
+                    ch if ch.isalnum() or ch in {"-", "_"} else "_"
+                    for ch in value_str
+                ).strip("_")
+                if sanitized:
+                    sanitized_values.append(sanitized)
+            if sanitized_values:
+                base_filename = "_".join(sanitized_values)
+        return base_filename
+
+    def _make_unique_filename(
+        self, temp_path: Path, base_filename: str
+    ) -> Path:
+        filename = temp_path / f"{base_filename}.npy"
+        counter = 1
+        while filename.exists():
+            filename = temp_path / f"{base_filename}_{counter}.npy"
+            counter += 1
+        return filename
 
 
 logger = Logger()
