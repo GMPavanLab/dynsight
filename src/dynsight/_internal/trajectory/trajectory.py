@@ -300,7 +300,6 @@ class Trj:
             logger.log(f"Computed SOAP with args {soap.meta}.")
 
         timesoap = soap.get_angular_velocity(delay=delay)
-        timesoap.meta.update({"name": "timesoap"})
 
         logger.log(f"Computed timeSOAP with args {timesoap.meta}.")
         return soap, timesoap

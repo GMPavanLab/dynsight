@@ -145,7 +145,10 @@ class Insight:
         theta = dynsight.soap.timesoap(self.dataset, delay=delay)
         attr_dict = self.meta.copy()
         attr_dict.update({"delay": delay})
-        attr_dict.update({"name": "angular_velocity"})
+        if self.meta.get("name") == "soap":
+            attr_dict.update({"name": "timesoap"})
+        else:
+            attr_dict.update({"name": "angular_velocity"})
 
         logger.log(f"Computed angular velocity with args {attr_dict}.")
         return Insight(dataset=theta, meta=attr_dict)
