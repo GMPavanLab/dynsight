@@ -9,7 +9,7 @@ from dynsight.trajectory import Trj
 
 def test_zip_arch() -> None:
     """Ensure the zip archive is created and contains the expected files."""
-    logger.clear()
+    logger.clear_history()
 
     original_dir = Path(__file__).absolute().parent
     lens_trajectory_file = original_dir / "../systems/2_particles.xyz"
@@ -53,4 +53,4 @@ def test_zip_arch() -> None:
     finally:
         if zip_path.exists():
             zip_path.unlink(missing_ok=True)
-        logger.clear()
+        logger.clear_history()
