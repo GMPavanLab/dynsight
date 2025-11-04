@@ -65,11 +65,26 @@ class RegisteredDataset:
 class Logger:
     """Creates and save human-readible log."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        auto_register: bool = True,
+    ) -> None:
         self._log: list[str] = []
         self._registered_data: list[RegisteredDataset] = []
         self._temp_dir: TemporaryDirectory[str] | None = None
         self._temp_path: Path | None = None
+        self.auto_register = auto_register
+
+    def configure(
+        self,
+        *,
+        auto_register: bool | None = None,
+    ) -> None:
+        if auto_register is not None:
+            self.auto_register = auto_register
+            state = "enabled" if auto_register else "disabled"
+            console.info(f"Automatic dataset registration {state}.")
 
     def log(self, msg: str) -> None:
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
@@ -139,12 +154,14 @@ class Logger:
         self,
         output_dir: Path | str = Path("analysis_archive"),
     ) -> None:
+        if self._registered_data == []:
+            console.error("No datasets to extract.")
+            return
         output_path = Path(output_dir)
         zip_parent = output_path.parent
         zip_parent.mkdir(parents=True, exist_ok=True)
 
         saved_paths: list[Path] = []
-
         dataset_files = [
             entry.path
             for entry in self._registered_data
