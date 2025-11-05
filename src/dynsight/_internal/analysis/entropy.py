@@ -75,6 +75,10 @@ def shannon(
         raise ValueError(msg)
     if method == "histo":
         return im.entropy(data, approach="discrete", base=base)
+    # If instead method == "kl":
+    min_samples = 2
+    if data.shape[0] <= min_samples:
+        return 0.0  # can't compute KL entropy with only 2 samples
     return im.entropy(data, approach="metric", k=n_neigh, base=base)
 
 
