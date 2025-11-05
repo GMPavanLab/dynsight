@@ -6,7 +6,6 @@ __pycache__
 /build
 docs/build
 docs/source/_autosummary
-docs/source/_static/info_plot.png
 examples/onion_analysis/data.json
 examples/analysis_workflow/lens.json
 examples/analysis_workflow/onion.json

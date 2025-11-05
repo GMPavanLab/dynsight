@@ -184,7 +184,7 @@ values.
         )  # I_clust
 
         ax.set_xlabel(r"Time resolution $\Delta t$")
-        ax.set_ylabel(r"Information $I$")
+        ax.set_ylabel(r"Entropy $H$")
         ax.set_xscale("log")
 
         fig.savefig(file_path, dpi=600)
