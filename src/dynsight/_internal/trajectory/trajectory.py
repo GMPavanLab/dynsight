@@ -357,3 +357,41 @@ class Trj:
         }
         logger.log(f"Computed g(r) with args {attr_dict}.")
         return bins, rdf
+
+    def dump_colored_trj(
+        self,
+        labels: NDArray[np.int64],
+        file_path: Path,
+    ) -> None:
+        """Save an .xyz file with the labels for each atom."""
+        trajslice = slice(None) if self.trajslice is None else self.trajslice
+
+        if labels.shape != (self.n_atoms, self.n_frames):
+            msg = (
+                f"Shape mismatch: ClusterInsight should have "
+                f"{self.n_atoms} atoms, {self.n_frames} frames, but has "
+                f"{labels.shape[0]} atoms, {labels.shape[1]} frames."
+            )
+            logger.log(msg)
+            raise ValueError(msg)
+
+        lab_new = labels + 2
+        with file_path.open("w") as f:
+            for i, ts in enumerate(self.universe.trajectory[trajslice]):
+                f.write(f"{self.n_atoms}\n")
+                if ts.dimensions is not None:
+                    box_str = " ".join(f"{x:.5f}" for x in ts.dimensions)
+                else:
+                    box_str = "0.0 0.0 0.0 0.0 0.0 0.0"
+                f.write(
+                    f"Lattice={box_str} "
+                    f"Properties=species:S:1:pos:R:3:type:I:1\n"
+                )
+                for atom_idx in range(self.n_atoms):
+                    label = str(lab_new[atom_idx, i])
+                    x, y, z = ts.positions[atom_idx]
+                    f.write(
+                        f"{self.universe.atoms[atom_idx].name} {x:.5f}"
+                        f" {y:.5f} {z:.5f} {label}\n"
+                    )
+        logger.log(f"Colored trj saved to {file_path}.")
