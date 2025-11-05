@@ -7,7 +7,7 @@ Here we show how to compute the information gain through clustering. To this end
 
 To start, let's import the packages we will need and create a folder in the cwd to save the results in.
 
-.. testcode:: example_info_gain
+.. code-block:: python
 
     from pathlib import Path
     from typing import Callable
@@ -25,7 +25,7 @@ To start, let's import the packages we will need and create a folder in the cwd 
 
 Now, we want to simulate the Langevin Dynamics. We start defining the potential energy landscapes, with two and four minima. 
 
-.. testcode:: example_info_gain
+.. code-block:: python
 
     def energy_landscape_1(x: float, y: float) -> float:
         """A potential energy landscape with 2 minima."""
@@ -47,7 +47,7 @@ Now, we want to simulate the Langevin Dynamics. We start defining the potential 
 
 To compute the force acting on the particle, we need to compute the potential energy gradient. 
 
-.. testcode:: example_info_gain
+.. code-block:: python
 
     def numerical_gradient(
         f: Callable[[float, float], float], x: float, y: float, h: float = 1e-5
@@ -60,7 +60,7 @@ To compute the force acting on the particle, we need to compute the potential en
 
 This function simulates, for both energy landscapes, the dynamics of 100 particles for 10000 timesteps. Particles are initialized close to the minima. 
 
-.. testcode:: example_info_gain
+.. code-block:: python
 
     def create_trajectory(
         energy_landscape: Callable[[float, float], float], file_name: Path
@@ -104,7 +104,7 @@ This function simulates, for both energy landscapes, the dynamics of 100 particl
 
 Let's simulate the trajectories and store them in two variables. We also save them as .npy files so that we don't have to simulate them every time. 
 
-.. testcode:: example_info_gain
+.. code-block:: python
 
     file_1 = folder_path / "trj_2.npy"  #  With 2 minima
     file_2 = folder_path / "trj_4.npy"  #  With 4 minima
@@ -129,7 +129,7 @@ For each case, we do the analysis for a range of values of the Onion clustering 
 To check if the clustering is working in a meaningful way, we also plot the results of Onion clustering for one specific value of ∆t. 
 
 
-.. testcode:: example_info_gain
+.. code-block:: python
 
     delta_t_list = np.unique(np.geomspace(2, 1000, 45, dtype=int))
     results = np.zeros((4, delta_t_list.size))
@@ -214,7 +214,7 @@ As can be seen, all the clusters are correctly identified at this time resolutio
 
 We can now plot, for every case and for every choice of ∆t, the corresponding information gain. 
 
-.. testcode:: example_info_gain
+.. code-block:: python
 
     colorlist = ["C0", "C2", "C1", "C3"]
     markerlist = ["s", "o", "d", "o"]
