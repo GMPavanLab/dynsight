@@ -5,25 +5,19 @@ For the theoretical aspects of this work, see https://doi.org/10.48550/arXiv.250
 
 This recipe explains how to compute the information gain through clustering
 analysis. We use a synthetic dataset containing a signal that oscillates
-between 0 and 1, with Gaussian noise. Onion clustering is run on a broad
+between 0 and 10, with Gaussian noise. Onion clustering is run on a broad
 range of time resolutions ∆t. The information gain and the Shannon entropy of
 the environments is computed for each value of ∆t. The analysis is implemented
 using onion 2.0.0 ("onion smooth").
-
-.. warning::
-
-    This code works when run from the ``/docs`` directory of the ``dynsight``
-    repo. To use it elsewhere, you have to change the ``Path`` variables
-    accordingly.
 
 First of all, we import all the packages and objects we'll need:
 
 .. testcode:: recipe3-test
 
     from pathlib import Path
+
     import numpy as np
     import dynsight
-    from dynsight.trajectory import Insight
     import matplotlib.pyplot as plt
 
 
@@ -37,13 +31,13 @@ Let's start by creating a the synthetic dataset:
     n_atoms = 10
     num_blocks = 10
     block_size = 100
-    sigma = 0.1
+    sigma = 1.0
 
     # Generate the array
     tmp_data = [
         np.concatenate(
             [
-                rng.normal(loc=(i % 2), scale=sigma, size=block_size)
+                rng.normal(loc=10 * (i % 2), scale=sigma, size=block_size)
                 for i in range(num_blocks)
             ]
         )
@@ -75,14 +69,11 @@ Additionally, the (float) dataset Shannon entropy is returned.
     def info_gain_with_onion(
         delta_t_list: np.ndarray | list[int],
         data: np.array,
-        n_bins: int = 40,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
         """Performs full information gain analysis with Onion clustering."""
-        data_range = (np.min(data), np.max(data))
-
         n_clusters = np.zeros(delta_t_list.size)
         clusters_frac = []
-        info_gain = np.zeros(delta_t_list.size)
+        delta_h = np.zeros(delta_t_list.size)
         clusters_entr = []
 
         for i, delta_t in enumerate(delta_t_list):
@@ -96,10 +87,12 @@ Additionally, the (float) dataset Shannon entropy is returned.
             tmp_frac[0] = 1.0 - np.sum(tmp_frac)
             clusters_frac.append(tmp_frac)
 
-            flat_data = data.flatten()
-            flat_labels = labels.flatten()
-            info_gain[i], _, h_0, _ = dynsight.analysis.compute_entropy_gain(
-                flat_data, flat_labels, n_bins=n_bins,
+            flat_data = data.ravel()
+            flat_labels = labels.ravel()
+            delta_h[i], _, h_0, _ = dynsight.analysis.info_gain(
+                flat_data,
+                flat_labels,
+                method="kl",
             )
 
             tmp_entr = []
@@ -111,11 +104,7 @@ Additionally, the (float) dataset Shannon entropy is returned.
                 mask = labels == lab
                 selected_points = data[mask]
                 tmp_entr.append(
-                    dynsight.analysis.compute_shannon(
-                        selected_points,
-                        data_range,
-                        n_bins=n_bins,
-                    )
+                    dynsight.analysis.shannon(selected_points, method="kl")
                 )
             clusters_entr.append(tmp_entr)
 
@@ -128,13 +117,13 @@ Additionally, the (float) dataset Shannon entropy is returned.
         cl_frac = np.array(clusters_frac)
         cl_entr = np.array(clusters_entr)
 
-        return n_clusters, cl_frac, info_gain, cl_entr, h_0
+        return n_clusters, cl_frac, delta_h, cl_entr, h_0
 
     # Example usage
     _, n_frames = data.shape
     delta_t_list = np.unique(np.geomspace(2, n_frames, 10, dtype=int))
 
-    n_cl, cl_frac, info_gain, cl_entr, h_0 = info_gain_with_onion(
+    n_cl, cl_frac, delta_h, cl_entr, h_0 = info_gain_with_onion(
         delta_t_list,
         data,
     )
@@ -166,29 +155,34 @@ values.
 
         fig, ax = plt.subplots()
 
-        i_0 = (1 - h_0) * np.ones(len(delta_t_list))
-        ax.plot(delta_t_list, i_0, ls="--", c="black", marker="")  # I_0
+        h_0_array = np.ones(len(delta_t_list)) * h_0
+        ax.plot(delta_t_list, h_0_array, ls="--", c="black", marker="")  # H_0
         ax.fill_between(
             delta_t_list,
-            1,
-            1 - s_cumul[0],
+            0.0,
+            s_cumul[0],
             alpha=0.5,
         )
         for i, tmp_s in enumerate(s_cumul[1:]):
             ax.fill_between(
                 delta_t_list,
-                1 - s_cumul[i],
-                1 - tmp_s,
+                s_cumul[i],
+                tmp_s,
                 alpha=0.5,
             )
         ax.fill_between(
-            delta_t_list, 1 - s_cumul[-1], 1 - h_0, color="gainsboro",
+            delta_t_list,
+            s_cumul[-1],
+            h_0_array,
+            color="gainsboro",
         )
         ax.plot(
-            delta_t_list, 1 - s_cumul[-1], c="black", marker="",
+            delta_t_list,
+            s_cumul[-1],
+            c="black",
+            marker="",
         )  # I_clust
 
-        ax.set_ylim(0.0, 1.0)
         ax.set_xlabel(r"Time resolution $\Delta t$")
         ax.set_ylabel(r"Information $I$")
         ax.set_xscale("log")
@@ -207,13 +201,13 @@ values.
 
 The figure obtained (see below) shows, for each value of ∆t:
 
-* The initial information (1 - H) of the entire dataset: dashed line;
-* The information after clustering: solid line;
+* The initial entropy H of the entire dataset: dashed line;
+* The entropy after clustering: solid line;
 * The information gained through clustering ∆I: gray area;
 * The Shannon entropy of each of the discovered clusters: colored bands.
 
-In this case, 2 states are correctly identified for ∆t <= 100 (green and orange),
-with an information gain of around 0.2.
+In this case, 2 states are correctly identified for ∆t < 100 (green and orange),
+with an information gain of around 1 bit.
 For ∆t > 100 all the data points remain unclassified (blue), and the information
 gain goes to 0.
 
@@ -227,4 +221,4 @@ gain goes to 0.
 .. testcode:: recipe3-test
     :hide:
 
-    assert np.isclose(info_gain[0], 0.19043795503255656)
+    assert np.isclose(delta_h[0], 1.0141, atol=13-3)
