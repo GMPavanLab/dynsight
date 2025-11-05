@@ -13,6 +13,20 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
 
+import warnings
+
+from scipy.optimize import OptimizeWarning
+
+# Silence scipy.optimize warning
+warnings.filterwarnings("ignore", category=OptimizeWarning)
+
+# Silence threadpoolctl OpenMP warning
+warnings.filterwarnings(
+    "ignore",
+    message="Found Intel OpenMP.*LLVM OpenMP.*incompatible",
+    category=RuntimeWarning,
+)
+
 project = "dynsight"
 project_copyright = "2023, Andrew Tarzia"
 author = "Andrew Tarzia"
