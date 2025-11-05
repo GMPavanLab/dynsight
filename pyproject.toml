@@ -20,6 +20,7 @@ dependencies = [
     "ultralytics",
     "deeptime",
     "infomeasure",
+    "netCDF4",
 ]
 
 # Set by cpctools.
