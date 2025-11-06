@@ -146,11 +146,11 @@ class Trj:
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-                input_universe=self.universe,
-                cutoff=r_cut,
+                universe=self.universe,
+                r_cut=r_cut,
                 selection=selection,
                 trajslice=self.trajslice,
-                num_processes=n_jobs,
+                n_jobs=n_jobs,
             )
         _, nn, *_ = dynsight.lens.neighbour_change_in_time(
             neigh_list_per_frame=neigcounts,
@@ -183,11 +183,11 @@ class Trj:
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-                input_universe=self.universe,
-                cutoff=r_cut,
+                universe=self.universe,
+                r_cut=r_cut,
                 selection=selection,
                 trajslice=self.trajslice,
-                num_processes=n_jobs,
+                n_jobs=n_jobs,
             )
         lens, *_ = dynsight.lens.neighbour_change_in_time(
             neigh_list_per_frame=neigcounts,
@@ -258,11 +258,11 @@ class Trj:
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-                input_universe=self.universe,
-                cutoff=r_cut,
+                universe=self.universe,
+                r_cut=r_cut,
                 selection=selection,
                 trajslice=self.trajslice,
-                num_processes=n_jobs,
+                n_jobs=n_jobs,
             )
         psi = dynsight.descriptors.orientational_order_param(
             self.universe,
@@ -299,11 +299,11 @@ class Trj:
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-                input_universe=self.universe,
-                cutoff=r_cut,
+                universe=self.universe,
+                r_cut=r_cut,
                 selection=selection,
                 trajslice=self.trajslice,
-                num_processes=n_jobs,
+                n_jobs=n_jobs,
             )
         phi = dynsight.descriptors.velocity_alignment(
             self.universe,

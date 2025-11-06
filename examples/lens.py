@@ -63,8 +63,8 @@ def main() -> None:
     logger.info(natoms)
 
     neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-        input_universe=universe,
-        cutoff=cutoff,
+        universe=universe,
+        r_cut=cutoff,
     )
     lens, nn, *_ = dynsight.lens.neighbour_change_in_time(neigcounts)
 
