@@ -42,7 +42,7 @@ def test_lens_signals(case_data: LENSCaseData) -> None:
     # Run LENS (and nn) calculation for different r_cuts
     for i, r_cut in enumerate(lens_cutoffs):
         neigcounts, test_lens = example_trj.get_lens(
-            r_cut=r_cut, num_processes=case_data.num_processes
+            r_cut=r_cut, n_jobs=case_data.num_processes
         )
         test_lens_ds = np.array(
             [np.concatenate(([0.0], tmp)) for tmp in test_lens.dataset]
