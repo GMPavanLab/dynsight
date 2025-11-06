@@ -131,7 +131,6 @@ class Trj:
     def get_coord_number(
         self,
         r_cut: float,
-        delay: int = 1,
         selection: str = "all",
         neigcounts: list[list[AtomGroup]] | None = None,
     ) -> tuple[list[list[AtomGroup]], Insight]:
@@ -153,10 +152,10 @@ class Trj:
             )
         _, nn, *_ = dynsight.lens.neighbour_change_in_time(
             neigh_list_per_frame=neigcounts,
-            delay=delay,
+            delay=1,
         )
 
-        attr_dict = {"r_cut": r_cut, "delay": delay, "selection": selection}
+        attr_dict = {"r_cut": r_cut, "selection": selection}
         logger.log(f"Computed coord_number using args {attr_dict}.")
         return neigcounts, Insight(
             dataset=nn.astype(np.float64),
@@ -244,6 +243,7 @@ class Trj:
         order: int = 6,
         selection: str = "all",
         neigcounts: list[list[AtomGroup]] | None = None,
+        num_processes: int = 1,
     ) -> tuple[list[list[AtomGroup]], Insight]:
         """Compute the magnitude of the orientational order parameter.
 
@@ -260,6 +260,7 @@ class Trj:
                 cutoff=r_cut,
                 selection=selection,
                 trajslice=self.trajslice,
+                num_processes=num_processes,
             )
         psi = dynsight.descriptors.orientational_order_param(
             self.universe,
@@ -283,6 +284,7 @@ class Trj:
         r_cut: float,
         selection: str = "all",
         neigcounts: list[list[AtomGroup]] | None = None,
+        num_processes: int = 1,
     ) -> tuple[list[list[AtomGroup]], Insight]:
         """Compute the average velocity alignment.
 
@@ -299,6 +301,7 @@ class Trj:
                 cutoff=r_cut,
                 selection=selection,
                 trajslice=self.trajslice,
+                num_processes=num_processes,
             )
         phi = dynsight.descriptors.velocity_alignment(
             self.universe,
