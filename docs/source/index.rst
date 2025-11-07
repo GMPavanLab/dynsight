@@ -31,10 +31,10 @@
   :maxdepth: 2
   :caption: Recipes:
 
-  Descriptors from a Trj <descr_from_trj>
-  Dimensionality reduction methods <soap_dim_red>
-  Information gain analysis <info_gain>
-  Entropy calculations <entropy>
+  Descriptors from a Trj <recipe_descr_from_trj>
+  Dimensionality reduction methods <recipe_soap_dim_red>
+  Entropy calculations <recipe_entropy>
+  Information gain analysis <recipe_info_gain>
 
 .. toctree::
   :hidden:
@@ -118,8 +118,8 @@ Examples
 There are examples throughout the documentation and available in
 the ``examples/`` directory of this repository.
 
-There are also examples available in the ``cpctools`` repository
-`here <https://github.com/GMPavanLab/cpctools/tree/main/Examples>`
+There are also examples available in the ``cpctools`` repository here:
+https://github.com/GMPavanLab/cpctools/tree/main/Examples
 
 
 How To Cite
@@ -129,9 +129,7 @@ If you use ``dynsight`` please cite
 
     https://github.com/GMPavanLab/dynsight
 
-and
-
-    TBD
+    https://doi.org/10.48550/arXiv.2510.23493
 
 * Most modules also use MDAnalysis, https://www.mdanalysis.org/pages/citations/
 * If you use SOAP, please cite https://doi.org/10.1103/PhysRevB.87.184115 and DScribe https://singroup.github.io/dscribe/latest/citing.html

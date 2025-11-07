@@ -56,7 +56,7 @@ def test_spavg(trj: Trj, insight: Insight, files: dict[str, Path]) -> None:
         trj,
         r_cut=5.0,
         selection="type O",
-        num_processes=1,
+        n_jobs=1,
     )
 
     expected: NDArray[np.float64] = np.load(files["ref"])

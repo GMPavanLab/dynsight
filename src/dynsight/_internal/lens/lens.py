@@ -17,7 +17,7 @@ from MDAnalysis.lib.NeighborSearch import AtomNeighborSearch
 def _process_neighbour_frame(
     args: tuple[Universe, AtomGroup, float, int, int],
 ) -> tuple[int, list[NDArray[np.float64]]]:
-    universe, selection, cutoff, traj_frame, result_index = args
+    universe, selection, r_cut, traj_frame, result_index = args
 
     universe.trajectory[traj_frame]
     neigh_search = AtomNeighborSearch(
@@ -25,27 +25,27 @@ def _process_neighbour_frame(
     )
 
     neigh_list_per_atom = [
-        neigh_search.search(atom, cutoff).ix for atom in selection
+        neigh_search.search(atom, r_cut).ix for atom in selection
     ]
 
     return result_index, neigh_list_per_atom
 
 
 def list_neighbours_along_trajectory(
-    input_universe: Universe,
-    cutoff: float,
+    universe: Universe,
+    r_cut: float,
     selection: str = "all",
     trajslice: slice | None = None,
-    num_processes: int = 1,
+    n_jobs: int = 1,
 ) -> list[list[AtomGroup]]:
     """Produce a per-frame list of the neighbors, atom by atom.
 
     * Original author: Martina Crippa
 
     Parameters:
-        input_universe:
+        universe:
             The universe, or the atom group containing the trajectory.
-        cutoff:
+        r_cut:
             The maximum neighbor distance.
         selection:
             Selection of atoms taken from the Universe for the computation.
@@ -53,7 +53,7 @@ def list_neighbours_along_trajectory(
             `here <https://userguide.mdanalysis.org/stable/selections.html>`_
         trajslice:
             The slice of the trajectory to consider. Defaults to slice(None).
-        num_processes:
+        n_jobs:
             The number of processes to use for parallel computation.
             **Warning:** Adjust this based on the available cores.
 
@@ -76,11 +76,11 @@ def list_neighbours_along_trajectory(
             from dynsight.lens import list_neighbours_along_trajectory
 
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
-            cutoff = 2.0
+            r_cut = 2.0
 
             neigh_counts = list_neighbours_along_trajectory(
-                input_universe=univ,
-                cutoff=cutoff,
+                universe=univ,
+                r_cut=r_cut,
             )
 
         .. testcode:: lens1-test
@@ -93,35 +93,35 @@ def list_neighbours_along_trajectory(
     """
     if trajslice is None:
         trajslice = slice(None)
-    selected_atoms = input_universe.select_atoms(selection)
+    selected_atoms = universe.select_atoms(selection)
     frame_indices = list(
-        range(*trajslice.indices(input_universe.trajectory.n_frames))
+        range(*trajslice.indices(universe.trajectory.n_frames))
     )
 
-    if num_processes < 1:
-        msg = "num_processes cannot be negative or zero."
+    if n_jobs < 1:
+        msg = "n_jobs cannot be negative or zero."
         raise ValueError(msg)
 
-    if num_processes == 1:
+    if n_jobs == 1:
         neigh_list_per_frame = []
         for traj_frame in frame_indices:
-            input_universe.trajectory[traj_frame]
+            universe.trajectory[traj_frame]
             neigh_search = AtomNeighborSearch(
-                input_universe.atoms,
-                box=input_universe.trajectory.ts.dimensions,
+                universe.atoms,
+                box=universe.trajectory.ts.dimensions,
             )
             neigh_list_per_atom = [
-                neigh_search.search(atom, cutoff).ix for atom in selected_atoms
+                neigh_search.search(atom, r_cut).ix for atom in selected_atoms
             ]
             neigh_list_per_frame.append(neigh_list_per_atom)
         return neigh_list_per_frame
 
     args = [
-        (input_universe, selected_atoms, cutoff, frame, i)
+        (universe, selected_atoms, r_cut, frame, i)
         for i, frame in enumerate(frame_indices)
     ]
 
-    with Pool(processes=num_processes) as pool:
+    with Pool(processes=n_jobs) as pool:
         results = pool.map(_process_neighbour_frame, args)
 
     ordered_results = dict(results)
@@ -180,11 +180,11 @@ def neighbour_change_in_time(
             import dynsight.lens as lens
 
             univ = MDAnalysis.Universe(path / "trajectory.xyz")
-            cutoff = 3.0
+            r_cut = 3.0
 
             neig_counts = lens.list_neighbours_along_trajectory(
-                input_universe=univ,
-                cutoff=cutoff,
+                universe=univ,
+                r_cut=r_cut,
             )
 
             lens, n_neigh, *_ = lens.neighbour_change_in_time(neig_counts)

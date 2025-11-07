@@ -21,7 +21,7 @@ def main() -> None:
         selection="all",  # compute on a selection of particles
         centers="all",  # compute for a selection of centers
         respect_pbc=False,  # consider PBC
-        n_core=1,  # use multiprocessing to speed up calculations
+        n_jobs=1,  # use multiprocessing to speed up calculations
     )
 
     # Loading an example trajectory
