@@ -86,9 +86,7 @@ If you use ``dynsight`` please cite
 
     https://github.com/GMPavanLab/dynsight
 
-and
-
-    TBD
+    https://doi.org/10.48550/arXiv.2510.23493
 
 * Most modules also use MDAnalysis, https://www.mdanalysis.org/pages/citations/
 * If you use SOAP, please cite https://doi.org/10.1103/PhysRevB.87.184115 and DScribe https://singroup.github.io/dscribe/latest/citing.html
