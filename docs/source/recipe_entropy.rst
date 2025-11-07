@@ -2,7 +2,7 @@ Entropy calculations
 ====================
 
 This recipe explains how to compute Shannon entropy for different types of
-datasets using the functions in the `dynsight.analysis` module.
+datasets using the functions in the ``dynsight.analysis`` module.
 
 First of all, we import all the packages and objects we'll need:
 
@@ -36,7 +36,7 @@ should be equal to log2(6) bits.
 Entropy of a discrete multivariate variable
 -------------------------------------------
 
-Let's compute the Shanon entropy of rolling `two` dices ``n_sample`` times,
+Let's compute the Shanon entropy of rolling two dices ``n_sample`` times,
 which should be equal to log2(36) bits.
 
 .. testcode:: recipe4-test
@@ -58,7 +58,7 @@ Entropy of a continuous variable
 Shannon entropy is not univocally defined for continuous variables, but the
 difference between the entropy of different distribution is.
 For continuous variables, we need to use the Kozachenko-Leonenko (KL)
-estimator, passing the argument `method="kl"`.
+estimator, passing the argument ``method="kl"``.
 Let's compute the difference between the Shannon entropy of two Gaussian distributions, with standard deviations respectively equal to 1 and 2, which
 should be 1 bit.
 

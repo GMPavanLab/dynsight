@@ -368,7 +368,10 @@ class Trj:
         labels: NDArray[np.int64],
         file_path: Path,
     ) -> None:
-        """Save an .xyz file with the labels for each atom."""
+        """Save an .xyz file with the labels for each atom.
+
+        The output file has columns: atom_type, x, y, z, label.
+        """
         trajslice = slice(None) if self.trajslice is None else self.trajslice
 
         if labels.shape != (self.n_atoms, self.n_frames):

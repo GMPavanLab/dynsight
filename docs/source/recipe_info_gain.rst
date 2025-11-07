@@ -221,4 +221,4 @@ gain goes to 0.
 .. testcode:: recipe3-test
     :hide:
 
-    assert np.isclose(delta_h[0], 1.0141, atol=13-3)
+    assert np.isclose(delta_h[0], 1.0141, atol=1e-3)

@@ -30,7 +30,8 @@ def shannon(
             How the Shannon entropy is computed. You should use "histo" for
             discrete variables, and "kl" for continuous variables. If "histo"
             is chosen, the "n_neigh" arg is irrelevant. See the documentation
-            of the infomeasure package for more details.
+            of the infomeasure package for more details (link in the notes
+            below).
 
         base:
             The units of measure of the returned value. Use "2" for bits,
@@ -42,6 +43,10 @@ def shannon(
 
     Returns:
         The value of the Shannon entropy of the data.
+
+    Notes:
+        This function uses the ``infomeasure.entropy()`` function, see
+        https://infomeasure.readthedocs.io/en/latest/guide/entropy/.
 
     Example:
 
@@ -162,7 +167,8 @@ def info_gain(
             How the Shannon entropy is computed. You should use "histo" for
             discrete variables, and "kl" for continuous variables. If "histo"
             is chosen, the "n_neigh" arg is irrelevant. See the documentation
-            of the infomeasure package for more details.
+            of the infomeasure package for more details (link in the notes
+            below).
 
         base:
             The units of measure of the returned value. Use "2" for bits,
@@ -177,6 +183,10 @@ def info_gain(
         * The relative information gain :math:`(H_0 - H_{clust}) / H_0`
         * The Shannon entropy of the initial data :math:`H_0`
         * The shannon entropy of the clustered data :math:`H_{clust}`
+
+    Notes:
+        This function uses the ``infomeasure.entropy()`` function, see
+        https://infomeasure.readthedocs.io/en/latest/guide/entropy/.
 
     Example:
 
@@ -275,8 +285,9 @@ def compute_shannon(
 
     It is normalized so that a uniform distribution has unitary entropy.
 
-    .. warning::
-        This function is deprecated. Use `analysis.shannon()` instead.
+    .. deprecated:: v2025.08.27
+        This function is deprecated and will be removed after June 2026.
+        Use ``analysis.shannon()`` instead.
 
     Parameters:
         data:
@@ -352,8 +363,9 @@ def compute_kl_entropy(
     differential entropy based on distances to nearest neighbors
     in the sample space. It's main advantage is being parameter-free.
 
-    .. warning::
-        This function is deprecated. Use `analysis.shannon()` instead.
+    .. deprecated:: v2025.08.27
+        This function is deprecated and will be removed after June 2026.
+        Use ``analysis.shannon()`` instead.
 
     Parameters:
         data:
@@ -413,8 +425,9 @@ def compute_shannon_multi(
 
     It is normalized so that a uniform distribution has unitary entropy.
 
-    .. warning::
-        This function is deprecated. Use `analysis.shannon()` instead.
+    .. deprecated:: v2025.08.27
+        This function is deprecated and will be removed after June 2026.
+        Use ``analysis.shannon()`` instead.
 
     Parameters:
         data:
@@ -496,8 +509,9 @@ def compute_kl_entropy_multi(
     differential entropy based on distances to nearest neighbors
     in the sample space. It's main advantage is being parameter-free.
 
-    .. warning::
-        This function is deprecated. Use `analysis.shannon()` instead.
+    .. deprecated:: v2025.08.27
+        This function is deprecated and will be removed after June 2026.
+        Use ``analysis.shannon()`` instead.
 
     Parameters:
         data:
@@ -563,8 +577,9 @@ def compute_entropy_gain(
 ) -> tuple[float, float, float, float]:
     """Compute the relative information gained by the clustering.
 
-    .. warning::
-        This function is deprecated. Use `analysis.info_gain()` instead.
+    .. deprecated:: v2025.08.27
+        This function is deprecated and will be removed after June 2026.
+        Use ``analysis.info_gain()`` instead.
 
     Parameters:
         data:
@@ -678,8 +693,9 @@ def compute_entropy_gain_multi(
 ) -> tuple[float, float, float, float]:
     """Compute the relative information gained by the clustering.
 
-    .. warning::
-        This function is deprecated. Use `analysis.info_gain()` instead.
+    .. deprecated:: v2025.08.27
+        This function is deprecated and will be removed after June 2026.
+        Use ``analysis.info_gain()`` instead.
 
     Parameters:
         data:
