@@ -94,7 +94,7 @@ def load_or_compute_soap(
         selection=selection,
         centers=centers,
         respect_pbc=respect_pbc,
-        n_core=n_core,
+        n_jobs=n_core,
     )
 
     if soap_path is not None:

@@ -86,9 +86,7 @@ If you use ``dynsight`` please cite
 
     https://github.com/GMPavanLab/dynsight
 
-and
-
-    TBD
+    https://doi.org/10.48550/arXiv.2510.23493
 
 * Most modules also use MDAnalysis, https://www.mdanalysis.org/pages/citations/
 * If you use SOAP, please cite https://doi.org/10.1103/PhysRevB.87.184115 and DScribe https://singroup.github.io/dscribe/latest/citing.html
@@ -98,6 +96,7 @@ and
 * If you use tICA, please cite ``deeptime`` https://deeptime-ml.github.io/latest/index.html
 * If you use ``dynsight.vision``, please cite Ultralytics YOLO https://docs.ultralytics.com/it/models/yolo11/#usage-examples
 * If you use ``dynsight.track``, please cite Trackpy https://soft-matter.github.io/trackpy/dev/introduction.html
+* Entropy calculations are based on ``infomeasure`` https://doi.org/10.1038/s41598-025-14053-5
 
 
 Acknowledgements

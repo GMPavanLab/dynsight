@@ -22,8 +22,8 @@ def test_special_lens(lensfixtures: MDAnalysis.Universe) -> None:
     universe = lensfixtures[0]
     coff = 1.1
     nnlistperframe = dynsight.lens.list_neighbours_along_trajectory(
-        input_universe=universe,
-        cutoff=coff,
+        universe=universe,
+        r_cut=coff,
     )
     (
         mynconttot,

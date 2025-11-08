@@ -11,7 +11,7 @@ maintainers = [
 ]
 
 dependencies = [
-    "numpy",
+    "numpy<2",
     "dscribe",
     "tropea-clustering",
     "MDAnalysis",
@@ -19,6 +19,7 @@ dependencies = [
     "trackpy",
     "ultralytics",
     "deeptime",
+    "infomeasure",
 ]
 
 # Set by cpctools.
@@ -131,5 +132,6 @@ module = [
     'trackpy.*',
     'deeptime.*',
     'sklearn.decomposition.*',
+    'infomeasure.*',
 ]
 ignore_missing_imports = true

@@ -36,8 +36,8 @@ def test_emulate_lens(
     wantedslice = slice(0, len(inputuniverse.trajectory) // input1_2, 1)
     coff = 4.0
     nnlistperframe = dynsight.lens.list_neighbours_along_trajectory(
-        input_universe=inputuniverse,
-        cutoff=coff,
+        universe=inputuniverse,
+        r_cut=coff,
         trajslice=wantedslice,
     )
     # def local_dynamics(list_sum):

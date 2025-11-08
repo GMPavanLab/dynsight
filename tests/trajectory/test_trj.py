@@ -47,7 +47,8 @@ def universe(file_paths: dict[str, Path]) -> MDAnalysis.Universe:
 
 
 def test_trj_inits(
-    universe: MDAnalysis.Universe, file_paths: dict[str, Path]
+    universe: MDAnalysis.Universe,
+    file_paths: dict[str, Path],
 ) -> None:
     """Test initialization methods for Trj class."""
     n_frames_xyz = 21
@@ -107,7 +108,9 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
 
 
 def test_insight(
-    tmp_path: Path, file_paths: dict[str, Path], universe: MDAnalysis.Universe
+    tmp_path: Path,
+    file_paths: dict[str, Path],
+    universe: MDAnalysis.Universe,
 ) -> None:
     """Test Insight methods."""
     trj = Trj(universe)

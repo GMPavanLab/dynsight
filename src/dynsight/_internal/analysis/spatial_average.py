@@ -67,9 +67,9 @@ def spatialaverage(
     universe: Universe,
     descriptor_array: NDArray[np.float64],
     selection: str,
-    cutoff: float,
+    r_cut: float,
     trajslice: slice | None = None,
-    num_processes: int = 1,
+    n_jobs: int = 1,
 ) -> NDArray[np.float64]:
     """Compute spatially averaged descriptor values over neighboring particles.
 
@@ -78,7 +78,7 @@ def spatialaverage(
     as a physical property for each particle in each frame of the simulation).
     For each particle in the system, the function calculates the average of
     its descriptor values with the descriptor values of its neighboring
-    particles within a specified cutoff radius. The calculation is parallelized
+    particles within a specified r_cut radius. The calculation is parallelized
     across multiple processes for efficiency.
 
     .. caution::
@@ -111,13 +111,13 @@ def spatialaverage(
             An atom selection string compatible with MDAnalysis. This defines
             the subset of atoms for which the spatial averaging
             will be computed.
-        cutoff:
-            The distance cutoff (in the same units as the trajectory) that
+        r_cut:
+            The distance r_cut (in the same units as the trajectory) that
             defines the neighborhood radius within which particles are
             considered as neighbors.
         traj_cut:
             The number of frames to exclude from the end of the trajectory.
-        num_processes:
+        n_jobs:
             The number of processes to use for parallel computation.
             **Warning:** Adjust this based on the available cores.
 
@@ -149,11 +149,12 @@ def spatialaverage(
                 universe=u,
                 descriptor_array=descriptor,
                 selection='name CA',
-                cutoff=5.0,
-                num_processes=8)
+                r_cut=5.0,
+                n_jobs=8,
+            )
 
         This example computes the spatial averages of the descriptor values
-        for atoms selected as `CA` atoms, within a cutoff of 5.0 units, using 8
+        for atoms selected as `CA` atoms, within a r_cut of 5.0 units, using 8
         processes in parallel. The result is stored in `averaged_values`, a
         NumPy array. All supported input file formats by MDAnalysis can be used
         to set up the Universe.
@@ -184,7 +185,7 @@ def spatialaverage(
         raise ValueError(msg)
 
     pool = Pool(
-        processes=num_processes,
+        processes=n_jobs,
         initializer=initworker,
         initargs=(shared_array, shape, dtype),
     )
@@ -193,7 +194,7 @@ def spatialaverage(
         range(*trajslice.indices(universe.trajectory.n_frames))
     )
     args = [
-        (universe, selection, cutoff, traj_frame, i, is_vector)
+        (universe, selection, r_cut, traj_frame, i, is_vector)
         for i, traj_frame in enumerate(frame_indices)
     ]
     results = pool.map(processframe, args)

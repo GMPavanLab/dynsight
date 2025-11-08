@@ -26,7 +26,7 @@ def main() -> None:
 
     # We can do spatial average on the computed LENS
     trj_lens = trj.with_slice(slice(0, -1, 1))
-    lens_aver = lens.spatial_average(trj=trj_lens, r_cut=7.5, num_processes=6)
+    lens_aver = lens.spatial_average(trj=trj_lens, r_cut=7.5, n_jobs=6)
 
     # And we can perform onion-clustering
     lens_onion = lens_aver.get_onion_smooth(delta_t=10)

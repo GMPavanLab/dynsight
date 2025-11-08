@@ -32,10 +32,10 @@
   :maxdepth: 2
   :caption: Recipes:
 
-  Descriptors from a Trj <descr_from_trj>
-  Dimensionality reduction methods <soap_dim_red>
-  Information gain analysis <info_gain>
-  Entropy calculations <entropy>
+  Descriptors from a Trj <recipe_descr_from_trj>
+  Dimensionality reduction methods <recipe_soap_dim_red>
+  Entropy calculations <recipe_entropy>
+  Information gain analysis <recipe_info_gain>
 
 .. toctree::
   :hidden:

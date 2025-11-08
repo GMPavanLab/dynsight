@@ -96,7 +96,7 @@ class Insight:
         trj: Trj,
         r_cut: float,
         selection: str = "all",
-        num_processes: int = 1,
+        n_jobs: int = 1,
     ) -> Insight:
         """Average the descriptor over the neighboring particles.
 
@@ -107,9 +107,9 @@ class Insight:
             universe=trj.universe,
             descriptor_array=self.dataset,
             selection=selection,
-            cutoff=r_cut,
+            r_cut=r_cut,
             trajslice=trj.trajslice,
-            num_processes=num_processes,
+            n_jobs=n_jobs,
         )
         attr_dict = {"sp_av_r_cut": r_cut, "selection": selection}
 

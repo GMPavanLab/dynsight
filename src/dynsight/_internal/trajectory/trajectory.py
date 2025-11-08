@@ -131,9 +131,9 @@ class Trj:
     def get_coord_number(
         self,
         r_cut: float,
-        delay: int = 1,
         selection: str = "all",
         neigcounts: list[list[AtomGroup]] | None = None,
+        n_jobs: int = 1,
     ) -> tuple[list[list[AtomGroup]], Insight]:
         """Compute coordination number on the trajectory.
 
@@ -146,14 +146,15 @@ class Trj:
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-                input_universe=self.universe,
-                cutoff=r_cut,
+                universe=self.universe,
+                r_cut=r_cut,
                 selection=selection,
                 trajslice=self.trajslice,
+                n_jobs=n_jobs,
             )
         _, nn, *_ = dynsight.lens.neighbour_change_in_time(
             neigh_list_per_frame=neigcounts,
-            delay=delay,
+            delay=1,
         )
 
         attr_dict = {
@@ -174,7 +175,7 @@ class Trj:
         delay: int = 1,
         selection: str = "all",
         neigcounts: list[list[AtomGroup]] | None = None,
-        num_processes: int = 1,
+        n_jobs: int = 1,
     ) -> tuple[list[list[AtomGroup]], Insight]:
         """Compute LENS on the trajectory.
 
@@ -187,11 +188,11 @@ class Trj:
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-                input_universe=self.universe,
-                cutoff=r_cut,
+                universe=self.universe,
+                r_cut=r_cut,
                 selection=selection,
                 trajslice=self.trajslice,
-                num_processes=num_processes,
+                n_jobs=n_jobs,
             )
         lens, *_ = dynsight.lens.neighbour_change_in_time(
             neigh_list_per_frame=neigcounts,
@@ -219,7 +220,7 @@ class Trj:
         selection: str = "all",
         centers: str = "all",
         respect_pbc: bool = True,
-        n_core: int = 1,
+        n_jobs: int = 1,
     ) -> Insight:
         """Compute SOAP on the trajectory.
 
@@ -234,7 +235,7 @@ class Trj:
             selection=selection,
             soap_respectpbc=respect_pbc,
             centers=centers,
-            n_core=n_core,
+            n_core=n_jobs,
             trajslice=self.trajslice,
         )
         attr_dict = {
@@ -310,6 +311,7 @@ class Trj:
         order: int = 6,
         selection: str = "all",
         neigcounts: list[list[AtomGroup]] | None = None,
+        n_jobs: int = 1,
     ) -> tuple[list[list[AtomGroup]], Insight]:
         """Compute the magnitude of the orientational order parameter.
 
@@ -322,10 +324,11 @@ class Trj:
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-                input_universe=self.universe,
-                cutoff=r_cut,
+                universe=self.universe,
+                r_cut=r_cut,
                 selection=selection,
                 trajslice=self.trajslice,
+                n_jobs=n_jobs,
             )
         psi = dynsight.descriptors.orientational_order_param(
             self.universe,
@@ -354,6 +357,7 @@ class Trj:
         r_cut: float,
         selection: str = "all",
         neigcounts: list[list[AtomGroup]] | None = None,
+        n_jobs: int = 1,
     ) -> tuple[list[list[AtomGroup]], Insight]:
         """Compute the average velocity alignment.
 
@@ -366,10 +370,11 @@ class Trj:
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-                input_universe=self.universe,
-                cutoff=r_cut,
+                universe=self.universe,
+                r_cut=r_cut,
                 selection=selection,
                 trajslice=self.trajslice,
+                n_jobs=n_jobs,
             )
         phi = dynsight.descriptors.velocity_alignment(
             self.universe,
@@ -433,3 +438,44 @@ class Trj:
         }
         logger.log(f"Computed g(r) with args {attr_dict}.")
         return bins, rdf
+
+    def dump_colored_trj(
+        self,
+        labels: NDArray[np.int64],
+        file_path: Path,
+    ) -> None:
+        """Save an .xyz file with the labels for each atom.
+
+        The output file has columns: atom_type, x, y, z, label.
+        """
+        trajslice = slice(None) if self.trajslice is None else self.trajslice
+
+        if labels.shape != (self.n_atoms, self.n_frames):
+            msg = (
+                f"Shape mismatch: ClusterInsight should have "
+                f"{self.n_atoms} atoms, {self.n_frames} frames, but has "
+                f"{labels.shape[0]} atoms, {labels.shape[1]} frames."
+            )
+            logger.log(msg)
+            raise ValueError(msg)
+
+        lab_new = labels + 2
+        with file_path.open("w") as f:
+            for i, ts in enumerate(self.universe.trajectory[trajslice]):
+                f.write(f"{self.n_atoms}\n")
+                if ts.dimensions is not None:
+                    box_str = " ".join(f"{x:.5f}" for x in ts.dimensions)
+                else:
+                    box_str = "0.0 0.0 0.0 0.0 0.0 0.0"
+                f.write(
+                    f"Lattice={box_str} "
+                    f"Properties=species:S:1:pos:R:3:type:I:1\n"
+                )
+                for atom_idx in range(self.n_atoms):
+                    label = str(lab_new[atom_idx, i])
+                    x, y, z = ts.positions[atom_idx]
+                    f.write(
+                        f"{self.universe.atoms[atom_idx].name} {x:.5f}"
+                        f" {y:.5f} {z:.5f} {label}\n"
+                    )
+        logger.log(f"Colored trj saved to {file_path}.")

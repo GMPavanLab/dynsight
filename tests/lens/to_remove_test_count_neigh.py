@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 def test_count_neigh_for_lens(
-    hdf5_file: tuple[pathlib.Path, MDAnalysis.Universe], input1_2: int
+    hdf5_file: tuple[pathlib.Path, MDAnalysis.Universe], r_cut1_2: int
 ) -> None:
     """Test :class:`.list_neighbours_along_trajectory`.
 
@@ -32,7 +32,7 @@ def test_count_neigh_for_lens(
     # this is the original version by Martina Crippa
 
     inputuniverse: MDAnalysis.Universe = hdf5_file[1]
-    wantedslice = slice(0, len(inputuniverse.trajectory) // input1_2, 1)
+    wantedslice = slice(0, len(inputuniverse.trajectory) // r_cut1_2, 1)
     coff = 10.0
     init = wantedslice.start
     end = wantedslice.stop
@@ -49,8 +49,8 @@ def test_count_neigh_for_lens(
         cont_list.append([nsearch.search(i, coff, level="A") for i in beads])
     for selection in [inputuniverse, beads]:
         neigh_list_per_frame = dynsight.lens.list_neighbours_along_trajectory(
-            input_universe=selection,
-            cutoff=coff,
+            universe=selection,
+            r_cut=coff,
             trajslice=wantedslice,
         )
 
