@@ -3,6 +3,20 @@ Logs
 
 dynsight logging system.
 
+.. warning::
+
+   A default instance of :class:`Logger` is **automatically created** when importing the ``dynsight`` package.  
+   This instance is available as ``dynsight.logs.logger``.
+
+   You can configure it, for example to disable the automatic registration of datasets, using:
+
+   .. code-block:: python
+
+      import dynsight
+      dynsight.logs.logger.configure(auto_register=False)
+
+   You can also access all its attributes and methods described in the Logs page below.
+
 -----
 Usage
 -----

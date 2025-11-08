@@ -79,32 +79,61 @@ class Logger:
     def configure(
         self,
         *,
-        auto_register: bool | None = None,
+        auto_register: bool = True,
     ) -> None:
-        if auto_register is not None:
-            self.auto_register = auto_register
-            state = "enabled" if auto_register else "disabled"
-            console.info(f"Automatic dataset registration {state}.")
+        """Adjusts the runtime configuration of the logger.
+
+        Parameters:
+            auto_register:
+                Enables or disables automatic dataset registration.
+                When set to `True`, every processed dataset will be
+                automatically saved into a temporary archive.
+                When `False`, datasets must be explicitly registered
+                via `register_data()`.
+        """
+        self.auto_register = auto_register
+        state = "enabled" if auto_register else "disabled"
+        console.info(f"Automatic dataset registration {state}.")
 
     def log(self, msg: str) -> None:
+        """Records an informational message to the log.
+
+        Parameters:
+            msg:
+                The message to record.
+        """
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         history_entry = f"[{timestamp}] {msg}"
         console.info(msg)
         self._log.append(history_entry)
 
     def save_history(self, filename: Path) -> None:
+        """Saves the current log history to a text file.
+
+        Parameters:
+            filename:
+                The file path where the log history will be written.
+        """
         with filename.open("w", encoding="utf-8") as f:
             f.write("\n".join(self._log))
 
     def clear_history(self) -> None:
+        """Clears the current log history and registered datasets."""
         self._log = []
         self._cleanup_temp_dir()
         self._registered_data = []
 
     def get(self) -> str:
+        """Retrieves the current log history as a string."""
         return "\n".join(self._log)
 
     def register_data(self, insight: Insight) -> None:
+        """Registers and saves a dataset associated with an `Insight` instance.
+
+        Parameters:
+            insight:
+                the `Insight` to be registered.
+        """
         for existing in self._registered_data:
             if existing.meta == insight.meta:
                 console.warning("Insight already registered, skipping.")
@@ -154,6 +183,12 @@ class Logger:
         self,
         output_dir: Path | str = Path("analysis_archive"),
     ) -> None:
+        """Exports all registered datasets into a ZIP archive.
+
+        Parameters:
+            output_dir:
+                The directory where the ZIP archive will be saved.
+        """
         if self._registered_data == []:
             console.error("No datasets to extract.")
             return
