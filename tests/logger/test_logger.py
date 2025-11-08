@@ -19,7 +19,7 @@ def test_zip_arch() -> None:
     lens_traj = Trj.init_from_xyz(lens_trajectory_file, dt=1)
     tsoap_traj = Trj.init_from_xtc(tsoap_trajectory_file, tsoap_topology_file)
 
-    lens_traj.get_lens(r_cut=4, num_processes=1)
+    lens_traj.get_lens(r_cut=4)
     tsoap_traj.get_timesoap(r_cut=4, n_max=4, l_max=4)
 
     logger.extract_datasets(original_dir / "archive")

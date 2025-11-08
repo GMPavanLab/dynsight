@@ -160,7 +160,6 @@ class Trj:
         attr_dict = {
             "name": "coord_number",
             "r_cut": r_cut,
-            "delay": delay,
             "selection": selection,
         }
         logger.log(f"Computed coord_number using args {attr_dict}.")
@@ -259,7 +258,7 @@ class Trj:
         selection: str = "all",
         centers: str = "all",
         respect_pbc: bool = True,
-        n_core: int = 1,
+        n_jobs: int = 1,
         delay: int = 1,
     ) -> tuple[Insight, Insight]:
         """Compute SOAP and then timeSOAP on the trajectory.
@@ -296,7 +295,7 @@ class Trj:
                 selection=selection,
                 centers=centers,
                 respect_pbc=respect_pbc,
-                n_core=n_core,
+                n_jobs=n_jobs,
             )
             logger.log(f"Computed SOAP with args {soap.meta}.")
 
