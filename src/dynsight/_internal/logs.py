@@ -57,43 +57,43 @@ console.propagate = False
 
 
 @dataclass
-class RegisteredDataset:
+class RecordedDataset:
     meta: Any
     path: Path
 
 
 class Logger:
-    """Creates and save human-readible log."""
+    """Create and save human-readible log."""
 
     def __init__(
         self,
         *,
-        auto_register: bool = True,
+        auto_recording: bool = True,
     ) -> None:
         self._log: list[str] = []
-        self._registered_data: list[RegisteredDataset] = []
+        self._recorded_data: list[RecordedDataset] = []
         self._temp_dir: TemporaryDirectory[str] | None = None
         self._temp_path: Path | None = None
-        self.auto_register = auto_register
+        self.auto_recording = auto_recording
 
     def configure(
         self,
         *,
-        auto_register: bool = True,
+        auto_recording: bool = True,
     ) -> None:
         """Adjusts the runtime configuration of the logger.
 
         Parameters:
-            auto_register:
-                Enables or disables automatic dataset registration.
+            auto_recording:
+                Enables or disables automatic dataset recording.
                 When set to `True`, every processed dataset will be
                 automatically saved into a temporary archive.
                 When `False`, datasets must be explicitly registered
                 via `register_data()`.
         """
-        self.auto_register = auto_register
-        state = "enabled" if auto_register else "disabled"
-        console.info(f"Automatic dataset registration {state}.")
+        self.auto_recording = auto_recording
+        state = "enabled" if auto_recording else "disabled"
+        console.info(f"Automatic dataset recording {state}.")
 
     def log(self, msg: str) -> None:
         """Records an informational message to the log.
@@ -121,20 +121,20 @@ class Logger:
         """Clears the current log history and registered datasets."""
         self._log = []
         self._cleanup_temp_dir()
-        self._registered_data = []
+        self._recorded_data = []
 
     def get(self) -> str:
         """Retrieves the current log history as a string."""
         return "\n".join(self._log)
 
-    def register_data(self, insight: Insight) -> None:
-        """Registers and saves a dataset associated with an `Insight` instance.
+    def record_data(self, insight: Insight) -> None:
+        """Record and save a dataset associated with an `Insight` instance.
 
         Parameters:
             insight:
                 the `Insight` to be registered.
         """
-        for existing in self._registered_data:
+        for existing in self._recorded_data:
             if existing.meta == insight.meta:
                 console.warning("Insight already registered, skipping.")
                 return
@@ -148,12 +148,12 @@ class Logger:
 
         np.save(filename, insight.dataset)
 
-        dataset_entry = RegisteredDataset(meta=insight.meta, path=filename)
-        self._registered_data.append(dataset_entry)
+        dataset_entry = RecordedDataset(meta=insight.meta, path=filename)
+        self._recorded_data.append(dataset_entry)
 
         total_bytes = sum(
             entry.path.stat().st_size
-            for entry in self._registered_data
+            for entry in self._recorded_data
             if entry.path.exists()
         )
 
@@ -183,13 +183,13 @@ class Logger:
         self,
         output_dir: Path | str = Path("analysis_archive"),
     ) -> None:
-        """Exports all registered datasets into a ZIP archive.
+        """Exports all recorded datasets into a ZIP archive.
 
         Parameters:
             output_dir:
                 The directory where the ZIP archive will be saved.
         """
-        if self._registered_data == []:
+        if self._recorded_data == []:
             console.error("No datasets to extract.")
             return
         output_path = Path(output_dir)
@@ -199,7 +199,7 @@ class Logger:
         saved_paths: list[Path] = []
         dataset_files = [
             entry.path
-            for entry in self._registered_data
+            for entry in self._recorded_data
             if entry.path.exists()
         ]
 
@@ -211,7 +211,7 @@ class Logger:
             self.log(f"Output directory zipped to {zip_filename}.")
 
         self._cleanup_temp_dir()
-        self._registered_data = []
+        self._recorded_data = []
 
     def _create_zip_archive(
         self,

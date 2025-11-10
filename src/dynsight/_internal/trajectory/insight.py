@@ -33,8 +33,8 @@ class Insight:
     meta: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        if logger.auto_register:
-            logger.register_data(self)
+        if logger.auto_recording:
+            logger.record_data(self)
 
     def dump_to_json(self, file_path: Path) -> None:
         """Save the Insight to a JSON file and  .npy file."""
