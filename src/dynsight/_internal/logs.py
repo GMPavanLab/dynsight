@@ -198,9 +198,7 @@ class Logger:
 
         saved_paths: list[Path] = []
         dataset_files = [
-            entry.path
-            for entry in self._recorded_data
-            if entry.path.exists()
+            entry.path for entry in self._recorded_data if entry.path.exists()
         ]
 
         if dataset_files:
