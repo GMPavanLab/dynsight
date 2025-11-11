@@ -1,11 +1,11 @@
 """LENS package."""
 
 from dynsight._internal.lens.lens import (
+    compute_lens_over_trj,
     list_neighbours_along_trajectory,
-    neighbour_change_in_time,
 )
 
 __all__ = [
+    "compute_lens_over_trj",
     "list_neighbours_along_trajectory",
-    "neighbour_change_in_time",
 ]

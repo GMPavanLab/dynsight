@@ -38,11 +38,10 @@ def main() -> None:
         neigcounts=None,  # it will be computed and returned
     )
 
-    # Now for LENS we already have neigcounts
-    _, lens = trj.get_lens(
+    # Computing LENS
+    _ = trj.get_lens(
         r_cut=2.0,  # cutoff radius for neighbors list
         selection="all",  # compute on a selection of particles
-        neigcounts=neigcounts,  # no need to compute it again
     )
 
 

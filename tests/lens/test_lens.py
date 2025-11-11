@@ -5,11 +5,9 @@ import numpy as np
 
 from dynsight.trajectory import Trj
 
-from .case_data import LENSCaseData
-
 
 # Define the actual test
-def test_lens_signals(case_data: LENSCaseData) -> None:
+def test_lens_signals() -> None:
     """Test the consistency of LENS calculations with a control calculation.
 
     * Original author: Martina Crippa
@@ -41,16 +39,12 @@ def test_lens_signals(case_data: LENSCaseData) -> None:
 
     # Run LENS (and nn) calculation for different r_cuts
     for i, r_cut in enumerate(lens_cutoffs):
-        neigcounts, test_lens = example_trj.get_lens(
-            r_cut=r_cut, n_jobs=case_data.num_processes
-        )
+        test_lens = example_trj.get_lens(r_cut=r_cut)
         test_lens_ds = np.array(
             [np.concatenate(([0.0], tmp)) for tmp in test_lens.dataset]
         )  # the inner LENS function has always 0.0 as first frame
 
-        _, test_nn = example_trj.get_coord_number(
-            r_cut=r_cut, neigcounts=neigcounts
-        )
+        _, test_nn = example_trj.get_coord_number(r_cut=r_cut)
         test_array = [test_lens_ds, test_nn.dataset]
 
         check_lens_nn = check_file[f"LENS_{i}"]

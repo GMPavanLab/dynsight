@@ -152,15 +152,19 @@ class Trj:
                 trajslice=self.trajslice,
                 n_jobs=n_jobs,
             )
-        _, nn, *_ = dynsight.lens.neighbour_change_in_time(
-            neigh_list_per_frame=neigcounts,
-            delay=1,
-        )
+
+        n_frames = len(neigcounts)
+        n_atoms = len(neigcounts[0])
+        counts = np.zeros((n_atoms, n_frames), dtype=int)
+
+        for f, frame in enumerate(neigcounts):
+            for a, atom_group in enumerate(frame):
+                counts[a, f] = len(atom_group)
 
         attr_dict = {"r_cut": r_cut, "selection": selection}
         logger.log(f"Computed coord_number using args {attr_dict}.")
         return neigcounts, Insight(
-            dataset=nn.astype(np.float64),
+            dataset=counts.astype(np.float64),
             meta=attr_dict,
         )
 
@@ -168,10 +172,11 @@ class Trj:
         self,
         r_cut: float,
         delay: int = 1,
+        centers: str = "all",
         selection: str = "all",
-        neigcounts: list[list[AtomGroup]] | None = None,
+        respect_pbc: bool = True,
         n_jobs: int = 1,
-    ) -> tuple[list[list[AtomGroup]], Insight]:
+    ) -> Insight:
         """Compute LENS on the trajectory.
 
         Returns:
@@ -181,24 +186,22 @@ class Trj:
                 * An Insight containing LENS. It has the following meta:
                     r_cut, selection.
         """
-        if neigcounts is None:
-            neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-                universe=self.universe,
-                r_cut=r_cut,
-                selection=selection,
-                trajslice=self.trajslice,
-                n_jobs=n_jobs,
-            )
-        lens, *_ = dynsight.lens.neighbour_change_in_time(
-            neigh_list_per_frame=neigcounts,
+        lens, *_ = dynsight.lens.compute_lens_over_trj(
+            universe=self.universe,
+            r_cut=r_cut,
             delay=delay,
+            centers=centers,
+            selection=selection,
+            trajslice=self.trajslice,
+            respect_pbc=respect_pbc,
+            n_jobs=n_jobs,
         )
 
         attr_dict = {"r_cut": r_cut, "delay": delay, "selection": selection}
         logger.log(f"Computed LENS using args {attr_dict}.")
 
-        return neigcounts, Insight(
-            dataset=lens[:, 1:],
+        return Insight(
+            dataset=lens,
             meta=attr_dict,
         )
 
