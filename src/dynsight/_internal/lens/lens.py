@@ -385,7 +385,7 @@ def compute_lens_over_trj(
             maxs = coords.max(axis=0)
             box1 = maxs - mins
         csr1 = _neighbor_list_celllist_centers(
-            pos_env1, pos_cent1, r_cut, box1
+            pos_env1, pos_cent1, r_cut, box1,
         )
 
         # ---- frame t2 ----
@@ -400,7 +400,7 @@ def compute_lens_over_trj(
             maxs = coords.max(axis=0)
             box2 = maxs - mins
         csr2 = _neighbor_list_celllist_centers(
-            pos_env2, pos_cent2, r_cut, box2
+            pos_env2, pos_cent2, r_cut, box2,
         )
 
         # ---- LENS ----
