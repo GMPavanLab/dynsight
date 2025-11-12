@@ -53,31 +53,42 @@ def test_lens(
     trajectory: Trj,
     file_paths: dict[str, Path],
 ) -> None:
-    """Test the consistency of LENS and NN calculations."""
+    """Test the consistency of LENS calculations."""
     check_file = np.load(file_paths["check_file"])
 
     # Run LENS (and NN) calculation for different r_cuts
     for i, r_cut in enumerate(LENS_CUTOFF):
         reference_array = check_file[f"LENS_{i}"]
 
-        test_lens = trajectory.get_lens(r_cut=r_cut)
+        test_lens = trajectory.get_lens(r_cut=r_cut, respect_pbc=False)
         test_lens_ds = np.array(
             [np.concatenate(([0.0], tmp)) for tmp in test_lens.dataset]
         )  # the original LENS function gave always 0.0 as first frame
 
-        mask = reference_array[0] != test_lens_ds
-        print(mask)
-
         assert np.allclose(reference_array[0], test_lens_ds), (
             "LENS analyses provided different values "
-            "compared to the control system "
-            f"for r_cut: {r_cut}."
+            f"compared to the control system for r_cut: {r_cut}."
         )
 
-        _, test_nn = trajectory.get_coord_number(r_cut=r_cut)
 
-        assert np.allclose(reference_array[1], test_nn.dataset), (
+def test_nn(
+    trajectory: Trj,
+    file_paths: dict[str, Path],
+) -> None:
+    """Test the consistency of NN calculations."""
+    check_file = np.load(file_paths["check_file"])
+
+    # Run LENS (and NN) calculation for different r_cuts
+    for i, r_cut in enumerate(LENS_CUTOFF):
+        reference_array = check_file[f"LENS_{i}"]
+
+        _, test_nn = trajectory.get_coord_number(
+            r_cut=r_cut,
+            respect_pbc=False,
+        )
+        test_nn_ds = test_nn.dataset
+
+        assert np.allclose(reference_array[1], test_nn_ds), (
             "NN analyses provided different values "
-            "compared to the control system "
-            f"for r_cut: {r_cut}."
+            f"compared to the control system for r_cut: {r_cut}."
         )

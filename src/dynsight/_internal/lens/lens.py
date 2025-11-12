@@ -13,7 +13,6 @@ from multiprocessing import Pool
 import numba
 import numpy as np
 from numba import njit, prange
-from tqdm import tqdm
 
 
 @njit(cache=True, fastmath=True)  # type: ignore[misc]
@@ -41,9 +40,10 @@ def build_cell_list(
 ]:
     """Build a 3D periodic cell list."""
     n_atoms = positions.shape[0]
-    ncellx = max(1, int(box[0] // cell_size))
-    ncelly = max(1, int(box[1] // cell_size))
-    ncellz = max(1, int(box[2] // cell_size))
+    min_cells = 3
+    ncellx = max(min_cells, int(box[0] // cell_size))
+    ncelly = max(min_cells, int(box[1] // cell_size))
+    ncellz = max(min_cells, int(box[2] // cell_size))
     n_cells = ncellx * ncelly * ncellz
 
     head = np.full(n_cells, -1, dtype=np.int32)
@@ -73,20 +73,21 @@ def neighbor_list_celllist_centers(  # noqa: C901, PLR0912
     positions_cent: NDArray[np.float64],
     r_cut: float,
     box: NDArray[np.float64],
+    respect_pbc: bool,
 ) -> tuple[NDArray[np.int32], NDArray[np.int32]]:
     """Build a CSR neighbor list *only for the centers*."""
     n_cent = positions_cent.shape[0]
     r_cut2 = (r_cut - 1e-6) ** 2
 
-    _, head, next_, n_cell = build_cell_list(positions_env, box, r_cut)
+    cell_ids, head, next_, n_cell = build_cell_list(positions_env, box, r_cut)
     nx, ny, nz = n_cell
 
     n_neigh = np.zeros(n_cent, dtype=np.int32)
     # ---- count the neighbors for each center ----
     for i in prange(n_cent):
-        cx = int(positions_cent[i, 0] / box[0] * nx) % nx
-        cy = int(positions_cent[i, 1] / box[1] * ny) % ny
-        cz = int(positions_cent[i, 2] / box[2] * nz) % nz
+        cx = cell_ids[i, 0]  # int(positions_cent[i, 0] / box[0] * nx) % nx
+        cy = cell_ids[i, 1]  # int(positions_cent[i, 1] / box[1] * ny) % ny
+        cz = cell_ids[i, 2]  # int(positions_cent[i, 2] / box[2] * nz) % nz
 
         for dx in (-1, 0, 1):
             for dy in (-1, 0, 1):
@@ -98,8 +99,10 @@ def neighbor_list_celllist_centers(  # noqa: C901, PLR0912
                     j = head[cidx]
                     while j != -1:
                         dr = positions_env[j] - positions_cent[i]
-                        dr = _pbc_diff(dr, box)
-                        if (dr[0] ** 2 + dr[1] ** 2 + dr[2] ** 2) < r_cut2:
+                        if respect_pbc:
+                            dr = _pbc_diff(dr, box)
+                        dr2 = dr[0] ** 2 + dr[1] ** 2 + dr[2] ** 2
+                        if j != i and dr2 < r_cut2:
                             n_neigh[i] += 1
                         j = next_[j]
 
@@ -253,7 +256,7 @@ def compute_lens_over_trj(
         raise RuntimeError(msg)
 
     lens_array = np.zeros((ag_cent.n_atoms, len(pairs)), dtype=np.float64)
-    for k, (t1, t2) in enumerate(tqdm(pairs)):
+    for k, (t1, t2) in enumerate(pairs):
         # ---- frame t1 ----
         universe.trajectory[t1]
         pos_env1 = ag_env.positions.astype(np.float64)
@@ -265,11 +268,12 @@ def compute_lens_over_trj(
             mins = coords.min(axis=0)
             maxs = coords.max(axis=0)
             box = (maxs - mins) * 1.01
-        csr1 = neighbor_list_celllist_centers(
-            pos_env1,
-            pos_cent1,
-            r_cut,
-            box,
+        indptr_t1, indices_t1 = neighbor_list_celllist_centers(
+            positions_env=pos_env1,
+            positions_cent=pos_cent1,
+            r_cut=r_cut,
+            box=box,
+            respect_pbc=respect_pbc,
         )
 
         # ---- frame t2 ----
@@ -283,19 +287,20 @@ def compute_lens_over_trj(
             mins = coords.min(axis=0)
             maxs = coords.max(axis=0)
             box = (maxs - mins) * 1.01
-        csr2 = neighbor_list_celllist_centers(
-            pos_env2,
-            pos_cent2,
-            r_cut,
-            box,
+        indptr_t2, indices_t2 = neighbor_list_celllist_centers(
+            positions_env=pos_env2,
+            positions_cent=pos_cent2,
+            r_cut=r_cut,
+            box=box,
+            respect_pbc=respect_pbc,
         )
 
         # ---- LENS ----
         lens_array[:, k] = lens_from_two_csr(
-            csr1[0],
-            csr1[1],
-            csr2[0],
-            csr2[1],
+            indptr1=indptr_t1,
+            indices1=indices_t1,
+            indptr2=indptr_t2,
+            indices2=indices_t2,
         )
 
     return lens_array, pairs, ag_cent
@@ -304,8 +309,10 @@ def compute_lens_over_trj(
 def list_neighbours_along_trajectory(
     universe: Universe,
     r_cut: float,
+    centers: str = "all",
     selection: str = "all",
     trajslice: slice | None = None,
+    respect_pbc: bool = True,
     n_jobs: int = 1,
 ) -> list[list[AtomGroup]]:
     """Produce a per-frame list of neighbors.
@@ -329,6 +336,7 @@ def list_neighbours_along_trajectory(
     if trajslice is None:
         trajslice = slice(None)
     selected_atoms = universe.select_atoms(selection)
+    center_atoms = universe.select_atoms(centers)
     n_selected = selected_atoms.n_atoms
 
     frame_indices = list(
@@ -337,8 +345,8 @@ def list_neighbours_along_trajectory(
 
     def _compute_frame_neighbors(frame_idx: int) -> list[AtomGroup]:
         universe.trajectory[frame_idx]
-        env_positions = universe.atoms.positions.astype(np.float64)
-        sel_positions = selected_atoms.positions.astype(np.float64)
+        env_positions = selected_atoms.positions.astype(np.float64)
+        sel_positions = center_atoms.positions.astype(np.float64)
         if universe.trajectory.ts.dimensions is not None:
             box = universe.trajectory.ts.dimensions[:3]
         else:
@@ -353,6 +361,7 @@ def list_neighbours_along_trajectory(
             positions_cent=sel_positions,
             r_cut=r_cut,
             box=box,
+            respect_pbc=respect_pbc,
         )
 
         # Build the AtomGroups for each atom
