@@ -77,9 +77,9 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
 
     r_cut = 10.0
     neigcounts, n_c = trj.get_coord_number(r_cut=r_cut)
+    _, phi = trj.get_velocity_alignment(r_cut=r_cut, neigcounts=neigcounts)
     lens = trj.get_lens(r_cut=r_cut)
     soap = trj.get_soap(r_cut=10.0, n_max=8, l_max=8)
-    _, phi = trj.get_velocity_alignment(r_cut=r_cut, neigcounts=neigcounts)
     _, _, tica = soap.get_tica(lag_time=10, tica_dim=2)
 
     test_n_c = Insight.load_from_json(file_paths["files_dir"] / "n_c.json")

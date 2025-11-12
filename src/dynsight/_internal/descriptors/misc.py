@@ -79,7 +79,7 @@ def orientational_order_param(
         frame = universe.atoms.positions[:, :2].copy()
 
         for i, atom_i in enumerate(frame):
-            neighbors = neigh_list_per_frame[t][i]
+            neighbors = neigh_list_per_frame[t][i].indices
             if len(neighbors) <= 2:  # noqa: PLR2004
                 # if neighbors are none or just 1, psi = 0
                 continue
@@ -104,7 +104,7 @@ def _compute_aver_align(
     for i, atom_i in enumerate(frame_vel):
         if not np.any(atom_i):  # skip if zero velocity vector
             continue
-        neighbors = neigh_list_t[i]
+        neighbors = neigh_list_t[i].indices
         if len(neighbors) <= 1:
             continue  # no meaningful averaging if 0 neighbors
         valid_neighbors = [

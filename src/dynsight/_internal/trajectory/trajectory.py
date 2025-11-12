@@ -298,7 +298,9 @@ class Trj:
     def get_velocity_alignment(
         self,
         r_cut: float,
+        centers: str = "all",
         selection: str = "all",
+        respect_pbc: bool = True,
         neigcounts: list[list[AtomGroup]] | None = None,
         n_jobs: int = 1,
     ) -> tuple[list[list[AtomGroup]], Insight]:
@@ -315,10 +317,13 @@ class Trj:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
                 universe=self.universe,
                 r_cut=r_cut,
+                centers=centers,
                 selection=selection,
                 trajslice=self.trajslice,
+                respect_pbc=respect_pbc,
                 n_jobs=n_jobs,
             )
+
         phi = dynsight.descriptors.velocity_alignment(
             self.universe,
             neigh_list_per_frame=neigcounts,
