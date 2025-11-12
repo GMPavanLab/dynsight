@@ -144,7 +144,7 @@ class Trj:
                 * neighcounts: a list[list[AtomGroup]], it can be used to
                     speed up subsequent descriptors' computations.
                 * An Insight containing the number of neighbors. It has the
-                    following meta: r_cut, selection.
+                    following meta: r_cut, centers, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
@@ -165,7 +165,11 @@ class Trj:
             for a, atom_group in enumerate(frame):
                 counts[a, f] = len(atom_group)
 
-        attr_dict = {"r_cut": r_cut, "selection": selection}
+        attr_dict = {
+            "r_cut": r_cut,
+            "selection": selection,
+            "centers": centers,
+        }
         logger.log(f"Computed coord_number using args {attr_dict}.")
         return neigcounts, Insight(
             dataset=counts.astype(np.float64),
@@ -184,11 +188,9 @@ class Trj:
         """Compute LENS on the trajectory.
 
         Returns:
-            tuple:
-                * neighcounts: a list[list[AtomGroup]], it can be used to
-                    speed up subsequent descriptors' computations.
-                * An Insight containing LENS. It has the following meta:
-                    r_cut, selection.
+            Insight
+                An Insight containing LENS. It has the following meta:
+                r_cut, delay, centers, selection.
         """
         lens, *_ = dynsight.lens.compute_lens_over_trj(
             universe=self.universe,
@@ -201,7 +203,12 @@ class Trj:
             n_jobs=n_jobs,
         )
 
-        attr_dict = {"r_cut": r_cut, "delay": delay, "selection": selection}
+        attr_dict = {
+            "r_cut": r_cut,
+            "delay": delay,
+            "selection": selection,
+            "centers": centers,
+        }
         logger.log(f"Computed LENS using args {attr_dict}.")
 
         return Insight(

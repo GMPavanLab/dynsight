@@ -335,8 +335,8 @@ def list_neighbours_along_trajectory(
     """
     if trajslice is None:
         trajslice = slice(None)
-    selected_atoms = universe.select_atoms(selection)
     center_atoms = universe.select_atoms(centers)
+    selected_atoms = universe.select_atoms(selection)
     n_selected = selected_atoms.n_atoms
 
     frame_indices = list(
@@ -346,7 +346,7 @@ def list_neighbours_along_trajectory(
     def _compute_frame_neighbors(frame_idx: int) -> list[AtomGroup]:
         universe.trajectory[frame_idx]
         env_positions = selected_atoms.positions.astype(np.float64)
-        sel_positions = center_atoms.positions.astype(np.float64)
+        centers_positions = center_atoms.positions.astype(np.float64)
         if universe.trajectory.ts.dimensions is not None:
             box = universe.trajectory.ts.dimensions[:3]
         else:
@@ -358,7 +358,7 @@ def list_neighbours_along_trajectory(
         # Compute neighbor lists using the new fast functions
         indptr, indices = neighbor_list_celllist_centers(
             positions_env=env_positions,
-            positions_cent=sel_positions,
+            positions_cent=centers_positions,
             r_cut=r_cut,
             box=box,
             respect_pbc=respect_pbc,
