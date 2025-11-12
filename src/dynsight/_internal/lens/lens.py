@@ -13,6 +13,7 @@ from multiprocessing import Pool
 import numba
 import numpy as np
 from numba import njit, prange
+from tqdm import tqdm
 
 
 @njit(cache=True, fastmath=True)  # type: ignore[misc]
@@ -252,7 +253,7 @@ def compute_lens_over_trj(
         raise RuntimeError(msg)
 
     lens_array = np.zeros((ag_cent.n_atoms, len(pairs)), dtype=np.float64)
-    for k, (t1, t2) in enumerate(pairs):
+    for k, (t1, t2) in enumerate(tqdm(pairs)):
         # ---- frame t1 ----
         universe.trajectory[t1]
         pos_env1 = ag_env.positions.astype(np.float64)
@@ -291,7 +292,10 @@ def compute_lens_over_trj(
 
         # ---- LENS ----
         lens_array[:, k] = lens_from_two_csr(
-            csr1[0], csr1[1], csr2[0], csr2[1]
+            csr1[0],
+            csr1[1],
+            csr2[0],
+            csr2[1],
         )
 
     return lens_array, pairs, ag_cent
