@@ -51,7 +51,7 @@ def test_lens_signals() -> None:
 
         # Check if control and test array are equal
         assert np.allclose(check_lens_nn, test_array), (
-            f"LENS analyses provided different values "
-            f"compared to the control system "
+            "LENS analyses provided different values "
+            "compared to the control system "
             f"for r_cut: {r_cut}."
         )

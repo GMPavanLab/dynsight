@@ -15,7 +15,7 @@ import numpy as np
 from numba import njit, prange
 
 
-@njit(cache=True, fastmath=True)  # type: ignore[decorator]
+@njit(cache=True, fastmath=True)  # type: ignore[misc]
 def _pbc_diff(
     dx: NDArray[np.float64],
     box: NDArray[np.float64],
@@ -27,7 +27,7 @@ def _pbc_diff(
     return dx
 
 
-@njit(cache=True, fastmath=True)  # type: ignore[decorator]
+@njit(cache=True, fastmath=True)  # type: ignore[misc]
 def build_cell_list(
     positions: NDArray[np.float64],
     box: NDArray[np.float64],
@@ -66,7 +66,7 @@ def build_cell_list(
 
 # We need a function this complex and deep for numba to work
 # This is why we are ignoring ruff complaints C901, PLR0912
-@njit(cache=True, fastmath=True, parallel=True)
+@njit(cache=True, fastmath=True, parallel=True)  # type: ignore[misc]
 def neighbor_list_celllist_centers(  # noqa: C901, PLR0912
     positions_env: NDArray[np.float64],
     positions_cent: NDArray[np.float64],
@@ -142,7 +142,7 @@ def neighbor_list_celllist_centers(  # noqa: C901, PLR0912
     return indptr, indices
 
 
-@njit(cache=True, fastmath=True)  # type: ignore[decorator]
+@njit(cache=True, fastmath=True)  # type: ignore[misc]
 def lens_from_two_csr(
     indptr1: NDArray[np.int32],
     indices1: NDArray[np.int32],
