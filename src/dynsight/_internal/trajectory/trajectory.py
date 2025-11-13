@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from MDAnalysis import AtomGroup
     from numpy.typing import NDArray
 
+import logging
+
 import MDAnalysis
 from MDAnalysis.coordinates.memory import MemoryReader
 
@@ -19,6 +21,7 @@ from dynsight.logs import logger
 from dynsight.trajectory import Insight
 
 UNIVAR_DIM = 2
+logging.getLogger("MDAnalysis").setLevel(logging.ERROR)
 
 
 @dataclass(frozen=True)
