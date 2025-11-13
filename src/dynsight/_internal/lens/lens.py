@@ -205,6 +205,11 @@ def compute_lens_over_trj(
     https://doi.org/10.1073/pnas.2300565120.
     The current implementation is mainly due to @SimoneMartino98.
 
+    ..warning::
+
+        The LENS functions only work with orthogonal simulation box. We are
+        working to make them compatible with non-orthogonal ones.
+
     The LENS value of a particle between two frames is deined as:
 
     .. math::
