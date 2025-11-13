@@ -134,6 +134,7 @@ Related works and packages
 * If you use tICA, please cite ``deeptime`` https://deeptime-ml.github.io/latest/index.html
 * If you use ``dynsight.vision``, please cite Ultralytics YOLO https://docs.ultralytics.com/it/models/yolo11/#usage-examples
 * If you use ``dynsight.track``, please cite Trackpy https://soft-matter.github.io/trackpy/dev/introduction.html
+* Entropy calculations are based on ``infomeasure`` https://doi.org/10.1038/s41598-025-14053-5
 
 
 Acknowledgements
