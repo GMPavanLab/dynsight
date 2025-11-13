@@ -1,9 +1,3 @@
-:maintainers:
-    `andrewtarzia <https://github.com/andrewtarzia/>`_;
-    `matteobecchi <https://github.com/matteobecchi/>`_;
-    `simonemartino <https://github.com/SimoneMartino98/>`_
-:documentation: https://dynsight.readthedocs.io
-
 Overview
 ========
 
@@ -14,9 +8,14 @@ performing time-series clustering and conducting various auxiliary analyses.
 To achieve this, dynsight is organized into specialized modules, each
 addressing a specific aspect of this workflow.
 
-Previously in `cpctools`_.
+Complete documentation at `dynsight.readthedocs.io <https://dynsight.readthedocs.io>`_
 
-.. _`cpctools`: https://github.com/GMPavanLab/cpctools
+
+If you use ``dynsight`` please cite:
+
+S. Martino, M. Becchi, A. Tarzia, D. Rapetti, G. M. Pavan,  
+*dynsight: an open Python platform for simulation and experimental trajectory data analysis*,  
+arXiv (2025), DOI: `10.48550/arXiv.2510.23493 <https://doi.org/10.48550/arXiv.2510.23493>`_
 
 Installation
 ============
@@ -80,14 +79,8 @@ There are also examples available in the ``cpctools`` repository
 `here <https://github.com/GMPavanLab/cpctools/tree/main/Examples>`_
 
 
-How To Cite
-===========
-
-If you use ``dynsight`` please cite:
-
-S. Martino, M. Becchi, A. Tarzia, D. Rapetti, G. M. Pavan  
-*dynsight: an open Python platform for simulation and experimental trajectory data analysis*  
-arXiv (2025), DOI: `10.48550/arXiv.2510.23493 <https://doi.org/10.48550/arXiv.2510.23493>`_
+Related works and packages
+==========================
 
 ``dynsight`` uses many different open-source packages. Please cite them when appropriate:
 
@@ -104,11 +97,10 @@ arXiv (2025), DOI: `10.48550/arXiv.2510.23493 <https://doi.org/10.48550/arXiv.25
 Acknowledgements
 ================
 
-``dynsight`` is developed by the Pavan group at Politecnico di Torino, https://www.gmpavanlab.polito.it/.
-Many group members have provided and continuously provide with their daily work useful feedbacks,
-which we gratefully acknowledge. 
-This work is made possible thanks to the funding received by the European Research Council
-under the European Union’s Horizon 2020 research and innovation program
-(Grant Agreement No. 818776 - DYNAPOL, to G.M.P.), which G.M.P. and the whole Pavan
-group thankfully acknowledge. 
+``dynsight`` is developed and mantained by the Pavan group at Politecnico di Torino, https://www.gmpavanlab.polito.it/.
+Many group members provide, with their daily work, useful feedback that we gratefully acknowledge.
 
+
+Previously in `cpctools`_.
+
+.. _`cpctools`: https://github.com/GMPavanLab/cpctools

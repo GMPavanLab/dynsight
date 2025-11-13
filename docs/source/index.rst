@@ -47,43 +47,48 @@
 Overview
 ========
 
-| GitHub: https://www.github.com/GMPavanLab/dynsight
-
-:mod:`.dynsight` is structured to support a wide range of tasks commonly
+``dynsight`` is structured to support a wide range of tasks commonly
 encountered in the analysis of many-body dynamical systems. These tasks
 include handling trajectory data, computing single-particle descriptors,
 performing time-series clustering and conducting various auxiliary analyses.
 To achieve this, dynsight is organized into specialized modules, each
 addressing a specific aspect of this workflow.
 
-Previously in `cpctools`_.
+The software is available at: `www.github.com/GMPavanLab/dynsight <https://www.github.com/GMPavanLab/dynsight>`_
 
-.. _`cpctools`: https://github.com/GMPavanLab/cpctools
 
+If you use ``dynsight`` please cite:
+
+S. Martino, M. Becchi, A. Tarzia, D. Rapetti, G. M. Pavan,  
+*dynsight: an open Python platform for simulation and experimental trajectory data analysis*,  
+arXiv (2025), DOI: `10.48550/arXiv.2510.23493 <https://doi.org/10.48550/arXiv.2510.23493>`_
 
 Installation
 ============
 
-To get :mod:`.dynsight`, you can install it with pip::
+To get ``dynsight``, you can install it with pip::
 
-  $ pip install dynsight
-
+    $ pip install dynsight
 
 Optional Dependancies
 ---------------------
 
-Old versions :mod:`dynsight` used :mod:`cpctools` for SOAP calculations, if
-you are using Python 3.10 and below, you can use :mod:`cpctools` to access
-:mod:`SOAPify` and :mod:`hd5er` using ::
+Old versions ``dynsight`` used ``cpctools`` for SOAP calculations, if
+you are using Python 3.10 and below, you can use ``cpctools`` to access
+``SOAPify`` and ``hd5er`` using ::
 
   $ pip install cpctools
 
+If you want to use the ``dynsight.vision`` and ``dynsight.track`` modules
+you will need to install a series of packages. This can be done with with pip::
+
+  $ pip install ultralytics PyYAML
 
 How to get started
 ------------------
 
 We suggest you give a read to the ``dynsight.trajectory`` module documentation,
-which offers a compact and easy way of using most of the ``dynsight`` tools.
+which offers a compact and easy way of using most of the ``dynsight`` tools. 
 Also, the documentation offers some copiable Recipes and Examples for the most
 common analyses.
 
@@ -104,14 +109,11 @@ Developer Setup
 
     $ just dev
 
-
 #. Run code checks::
 
     $ just check
 
-
 .. _`just`: https://github.com/casey/just
-
 
 Examples
 ========
@@ -123,14 +125,8 @@ There are also examples available in the ``cpctools`` repository
 `here <https://github.com/GMPavanLab/cpctools/tree/main/Examples>`_
 
 
-How To Cite
-===========
-
-If you use ``dynsight`` please cite:
-
-S. Martino, M. Becchi, A. Tarzia, D. Rapetti, G. M. Pavan  
-*dynsight: an open Python platform for simulation and experimental trajectory data analysis*  
-arXiv (2025), DOI: `10.48550/arXiv.2510.23493 <https://doi.org/10.48550/arXiv.2510.23493>`_
+Related works and packages
+==========================
 
 ``dynsight`` uses many different open-source packages. Please cite them when appropriate:
 
@@ -147,13 +143,13 @@ arXiv (2025), DOI: `10.48550/arXiv.2510.23493 <https://doi.org/10.48550/arXiv.25
 Acknowledgements
 ================
 
-``dynsight`` is developed by the Pavan group at Politecnico di Torino, https://www.gmpavanlab.polito.it/.
-Many group members have provided and continuously provide with their daily work useful feedbacks,
-which we gratefully acknowledge. 
-This work is made possible thanks to the funding received by the European Research Council
-under the European Union’s Horizon 2020 research and innovation program
-(Grant Agreement No. 818776 - DYNAPOL, to G.M.P.), which G.M.P. and the whole Pavan
-group thankfully acknowledge. 
+``dynsight`` is developed and mantained by the Pavan group at Politecnico di Torino, https://www.gmpavanlab.polito.it/.
+Many group members provide, with their daily work, useful feedback that we gratefully acknowledge.
+
+
+Previously in `cpctools`_.
+
+.. _`cpctools`: https://github.com/GMPavanLab/cpctools
 
 Indices and tables
 ------------------
