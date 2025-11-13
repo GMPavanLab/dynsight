@@ -1,21 +1,21 @@
 Overview
 ========
 
-``dynsight`` is structured to support a wide range of tasks commonly
-encountered in the analysis of many-body dynamical systems. These tasks
-include handling trajectory data, computing single-particle descriptors,
-performing time-series clustering and conducting various auxiliary analyses.
-To achieve this, dynsight is organized into specialized modules, each
-addressing a specific aspect of this workflow.
-
-Complete documentation at `dynsight.readthedocs.io <https://dynsight.readthedocs.io>`_
-
-
-If you use ``dynsight`` please cite:
-
-S. Martino, M. Becchi, A. Tarzia, D. Rapetti, G. M. Pavan,  
-*dynsight: an open Python platform for simulation and experimental trajectory data analysis*,  
-arXiv (2025), DOI: `10.48550/arXiv.2510.23493 <https://doi.org/10.48550/arXiv.2510.23493>`_
+``dynsight`` is an open Python platform built to support a wide range of tasks commonly encountered 
+in the analysis of complex dynamical systems. The software contains and combines modules that allows
+resolving and handling trajectory data, computing single-particle descriptors obtaining time-series
+data that are easier to analyze, performing time-series data clustering, and extracting relevant information out of them. 
+dynsight contains also various auxiliary tools useful to data analysis, including, e.g., modules (:doc:`vision <vision>` and :doc:`track <track>`)  
+for resolving individual-object trajectories for many-body systems - e.g., experimental ones - for which these are 
+not readily available, denoising algorithms, and tools for assessing maximum information extraction from data. 
+ 
+The documentation is available at: `dynsight.readthedocs.io <https://dynsight.readthedocs.io>`_
+ 
+If you use ``dynsight``, please to cite the associated scientific paper:
+ 
+| S. Martino, M. Becchi, A. Tarzia, D. Rapetti & G. M. Pavan
+| "dynsight: an open Python platform for simulation and experimental trajectory data analysis"  
+| arXiv (2025), DOI: `10.48550/arXiv.2510.23493 <https://doi.org/10.48550/arXiv.2510.23493>`_
 
 Installation
 ============
@@ -75,10 +75,6 @@ Examples
 There are examples throughout the documentation and available in
 the ``examples/`` directory of this repository.
 
-There are also examples available in the ``cpctools`` repository
-`here <https://github.com/GMPavanLab/cpctools/tree/main/Examples>`_
-
-
 Related works and packages
 ==========================
 
@@ -97,10 +93,5 @@ Related works and packages
 Acknowledgements
 ================
 
-``dynsight`` is developed and mantained by the Pavan group at Politecnico di Torino, https://www.gmpavanlab.polito.it/.
-Many group members provide, with their daily work, useful feedback that we gratefully acknowledge.
-
-
-Previously in `cpctools`_.
-
-.. _`cpctools`: https://github.com/GMPavanLab/cpctools
+``dynsight`` is developed and mantained by the G. M. Pavan group at Politecnico di Torino, https://www.gmpavanlab.polito.it/.
+Many group members continuously provide, with their daily work, useful feedback that we gratefully acknowledge.
