@@ -80,7 +80,7 @@ def orientational_order_param(
 
         for i, atom_i in enumerate(frame):
             neighbors = neigh_list_per_frame[t][i].indices
-            if len(neighbors) <= 1:  # noqa: PLR2004
+            if len(neighbors) <= 1:
                 # if neighbors are none or just 1, psi = 0
                 continue
             tmp = 0.0
