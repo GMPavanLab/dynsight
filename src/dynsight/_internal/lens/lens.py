@@ -207,7 +207,7 @@ def compute_lens_over_trj(
 
     .. warning::
 
-        The LENS functions only works with orthogonal simulation boxes. We are
+        The LENS functions only work with orthogonal simulation boxes. We are
         working to make them compatible with non-orthogonal ones.
 
     The LENS value of a particle between two frames is deined as:
@@ -222,15 +222,15 @@ def compute_lens_over_trj(
     the particle at frames :math:`t` and :math:`t+\delta t` respectively.
 
     Parameters:
-        universe : 
+        universe :
             MDAnalysis Universe containing the trajectory.
-        r_cut : 
+        r_cut :
             r_cut distance (Å) for defining neighbors.
         delay :
             Number of frames separating the pairs for comparison.
-        centers : 
+        centers :
             Atom selection string for the centers where LENS is computed.
-        selection : 
+        selection :
             Atom selection string defining the environment.
         trajslice :
             Frame slicing parameters for trajectory iteration.
@@ -323,14 +323,19 @@ def list_neighbours_along_trajectory(
 ) -> list[list[AtomGroup]]:
     """Produce a per-frame list of neighbors.
 
+    .. warning::
+
+        The LENS functions only work with orthogonal simulation boxes. We are
+        working to make them compatible with non-orthogonal ones.
+
     Parameters:
-        universe : 
+        universe :
             MDAnalysis Universe containing the trajectory.
-        r_cut : 
+        r_cut :
             r_cut distance (Å) for defining neighbors.
-        centers : 
+        centers :
             Atom selection string for the centers where LENS is computed.
-        selection : 
+        selection :
             Atom selection string defining the environment.
         trajslice :
             Frame slicing parameters for trajectory iteration.
