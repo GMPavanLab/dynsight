@@ -5,7 +5,7 @@ Overview
 in the analysis of complex dynamical systems. The software contains and combines modules that allows
 resolving and handling trajectory data, computing single-particle descriptors obtaining time-series
 data that are easier to analyze, performing time-series data clustering, and extracting relevant information out of them. 
-dynsight contains also various auxiliary tools useful to data analysis, including, e.g., modules (:doc:`vision <vision>` and :doc:`track <track>`)  
+``dynsight`` contains also various auxiliary tools useful to data analysis, including, e.g., modules (:doc:`vision <vision>` and :doc:`track <track>`)  
 for resolving individual-object trajectories for many-body systems - e.g., experimental ones - for which these are 
 not readily available, denoising algorithms, and tools for assessing maximum information extraction from data. 
  
