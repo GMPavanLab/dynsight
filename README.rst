@@ -1,22 +1,22 @@
-:maintainers:
-    `andrewtarzia <https://github.com/andrewtarzia/>`_;
-    `matteobecchi <https://github.com/matteobecchi/>`_;
-    `simonemartino <https://github.com/SimoneMartino98/>`_
-:documentation: https://dynsight.readthedocs.io
-
 Overview
 ========
 
-``dynsight`` is structured to support a wide range of tasks commonly
-encountered in the analysis of many-body dynamical systems. These tasks
-include handling trajectory data, computing single-particle descriptors,
-performing time-series clustering and conducting various auxiliary analyses.
-To achieve this, dynsight is organized into specialized modules, each
-addressing a specific aspect of this workflow.
-
-Previously in `cpctools`_.
-
-.. _`cpctools`: https://github.com/GMPavanLab/cpctools
+``dynsight`` is an open Python platform built to support a wide range of tasks commonly encountered 
+in the analysis of complex dynamical systems. The software contains and combines modules that allows
+resolving and handling trajectory data, computing single-particle descriptors obtaining time-series
+data that are easier to analyze, performing time-series data clustering, and extracting relevant information out of them. 
+``dynsight`` contains also various auxiliary tools useful to data analysis, including, e.g., modules 
+(`vision <https://dynsight.readthedocs.io/en/latest/vision.html>`_ and `track <https://dynsight.readthedocs.io/en/latest/track.html>`_)  
+for resolving individual-object trajectories for many-body systems - e.g., experimental ones - for which these are 
+not readily available, denoising algorithms, and tools for assessing maximum information extraction from data. 
+ 
+The documentation is available at: `dynsight.readthedocs.io <https://dynsight.readthedocs.io>`_
+ 
+If you use ``dynsight``, please to cite the associated scientific paper:
+ 
+| S. Martino, M. Becchi, A. Tarzia, D. Rapetti & G. M. Pavan
+| "dynsight: an open Python platform for simulation and experimental trajectory data analysis"  
+| arXiv (2025), DOI: `10.48550/arXiv.2510.23493 <https://doi.org/10.48550/arXiv.2510.23493>`_
 
 Installation
 ============
@@ -76,17 +76,10 @@ Examples
 There are examples throughout the documentation and available in
 the ``examples/`` directory of this repository.
 
-There are also examples available in the ``cpctools`` repository
-`here <https://github.com/GMPavanLab/cpctools/tree/main/Examples>`
+Related works and packages
+==========================
 
-How To Cite
-===========
-
-If you use ``dynsight`` please cite
-
-    https://github.com/GMPavanLab/dynsight
-
-    https://doi.org/10.48550/arXiv.2510.23493
+``dynsight`` uses many different open-source packages. Please cite them when appropriate:
 
 * Most modules also use MDAnalysis, https://www.mdanalysis.org/pages/citations/
 * If you use SOAP, please cite https://doi.org/10.1103/PhysRevB.87.184115 and DScribe https://singroup.github.io/dscribe/latest/citing.html
@@ -98,17 +91,8 @@ If you use ``dynsight`` please cite
 * If you use ``dynsight.track``, please cite Trackpy https://soft-matter.github.io/trackpy/dev/introduction.html
 * Entropy calculations are based on ``infomeasure`` https://doi.org/10.1038/s41598-025-14053-5
 
-
 Acknowledgements
 ================
 
-We developed this code when working in the Pavan group,
-https://www.gmpavanlab.polito.it/, whose members often provide very valuable
-feedback, which we gratefully acknowledge.
-
-Much of the original code in ``cpctools`` was written by Daniele Rapetti (Iximiel).
-
-The work was funded by the European Union and ERC under projects DYNAPOL and the
-NextGenerationEU project, CAGEX.
-
-.. figure:: docs/source/_static/EU_image.png
+``dynsight`` is developed and mantained by the G. M. Pavan group at Politecnico di Torino, https://www.gmpavanlab.polito.it/.
+Many group members continuously provide, with their daily work, useful feedback that we gratefully acknowledge.
