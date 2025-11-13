@@ -199,51 +199,51 @@ def compute_lens_over_trj(
     respect_pbc: bool = True,
     n_jobs: int = 1,
 ) -> tuple[NDArray[np.float64], list[tuple[int, int]], AtomGroup]:
-    r"""Compute LENS over a trajectory.
+    r"""Compute the LENS descriptor for all frames along a trajectory.
 
-    LENS was developed by Martina Crippa. See for reference the paper
+    LENS was developed by Martina Crippa, see
     https://doi.org/10.1073/pnas.2300565120.
     The current implementation is mainly due to @SimoneMartino98.
 
-    ..warning::
+    .. warning::
 
-        The LENS functions only work with orthogonal simulation box. We are
+        The LENS functions only works with orthogonal simulation boxes. We are
         working to make them compatible with non-orthogonal ones.
 
     The LENS value of a particle between two frames is deined as:
 
     .. math::
-        LENS(t, t + \\delta t) =
-        \frac{|C(t)\\cup C(t+\\delta t)| - |C(t)\\cap C(t+\\delta t)|}
-        {|C(t)| + |C(t+\\delta t|}
 
-    where C(t) and C(t+\\delta t) are the neighbors' list of the particle
-    at frames t and t+\\delta t.
+        LENS(t, t + \delta t) =
+        \frac{|C(t)\cup C(t+\delta t)| - |C(t)\cap C(t+\delta t)|}
+        {|C(t)| + |C(t+\delta t)|}
+
+    where :math:`C(t)` and :math:`C(t+\delta t)` are the neighbors' list of
+    the particle at frames :math:`t` and :math:`t+\delta t` respectively.
 
     Parameters:
-        universe : mda.Universe
+        universe : 
             MDAnalysis Universe containing the trajectory.
-        r_cut : float
+        r_cut : 
             r_cut distance (Å) for defining neighbors.
-        selection : str, optional
-            Atom selection string defining the environment (default "all").
-        centers : str, optional
-            Atom selection string for the centers where LENS is computed.
-        delay : int, optional
+        delay :
             Number of frames separating the pairs for comparison.
-        start, stop, step : int or None, optional
+        centers : 
+            Atom selection string for the centers where LENS is computed.
+        selection : 
+            Atom selection string defining the environment.
+        trajslice :
             Frame slicing parameters for trajectory iteration.
-        use_pbc : bool, optional
+        respect_pbc :
             Whether to apply periodic boundary conditions.
+        n_jobs :
+            The number of jobs for parallelization with numba.
 
     Returns:
-        tuple
-            lens_array : (n_centers, n_pairs) NDArray[np.float64]
-                LENS values for each pair of frames and each center.
-            pairs : list[tuple[int, int]]
-                Frame index pairs used for comparison.
-            ag_cent : mda.AtomGroup
-                The AtomGroup corresponding to the centers selection.
+        * LENS values for each center and each pair of frames. Has shape
+            (n_centers, n_pairs)
+        * Frame index pairs used for comparison.
+        * The AtomGroup corresponding to the centers selection.
     """
     numba.set_num_threads(n_jobs)
 
@@ -324,20 +324,23 @@ def list_neighbours_along_trajectory(
     """Produce a per-frame list of neighbors.
 
     Parameters:
-        universe : mda.Universe
-            The Universe containing the trajectory.
-        r_cut : float
-            Maximum neighbor distance.
-        selection : str
-            Atom selection string.
-        trajslice : slice | None
-            Slice of trajectory to consider. Defaults to full trajectory.
-        n_jobs : int
-            Number of processes for parallel computation.
+        universe : 
+            MDAnalysis Universe containing the trajectory.
+        r_cut : 
+            r_cut distance (Å) for defining neighbors.
+        centers : 
+            Atom selection string for the centers where LENS is computed.
+        selection : 
+            Atom selection string defining the environment.
+        trajslice :
+            Frame slicing parameters for trajectory iteration.
+        respect_pbc :
+            Whether to apply periodic boundary conditions.
+        n_jobs :
+            The number of jobs for parallelization with numba.
 
     Returns:
-        list[list[AtomGroup]]
-            List of frames, each frame a list of AtomGroups for each atom.
+        List of frames, each frame a list of AtomGroups for each atom.
     """
     if trajslice is None:
         trajslice = slice(None)
