@@ -8,7 +8,6 @@ if TYPE_CHECKING:
     from MDAnalysis import AtomGroup, Universe
     from numpy.typing import NDArray
 
-from multiprocessing import Pool
 
 import numba
 import numpy as np
@@ -130,8 +129,10 @@ def neighbor_list_celllist_centers(  # noqa: C901, PLR0912
                     j = head[cidx]
                     while j != -1:
                         dr = positions_env[j] - positions_cent[i]
-                        dr = _pbc_diff(dr, box)
-                        if (dr[0] ** 2 + dr[1] ** 2 + dr[2] ** 2) < r_cut2:
+                        if respect_pbc:
+                            dr = _pbc_diff(dr, box)
+                        dr2 = dr[0] ** 2 + dr[1] ** 2 + dr[2] ** 2
+                        if j != i and dr2 < r_cut2:
                             pos_i = indptr[i] + cursor[i]
                             indices[pos_i] = j
                             cursor[i] += 1
@@ -239,7 +240,7 @@ def compute_lens_over_trj(
             ag_cent : mda.AtomGroup
                 The AtomGroup corresponding to the centers selection.
     """
-    numba.set_num_threads(n_jobs)  # Not sure this works
+    numba.set_num_threads(n_jobs)
 
     ag_env = universe.select_atoms(selection)
     ag_cent = universe.select_atoms(centers)
@@ -335,19 +336,22 @@ def list_neighbours_along_trajectory(
     """
     if trajslice is None:
         trajslice = slice(None)
-    center_atoms = universe.select_atoms(centers)
-    selected_atoms = universe.select_atoms(selection)
-    n_selected = selected_atoms.n_atoms
+
+    ag_centers = universe.select_atoms(centers)
+    ag_env = universe.select_atoms(selection)
 
     frame_indices = list(
         range(*trajslice.indices(universe.trajectory.n_frames))
     )
 
+    numba.set_num_threads(n_jobs)
+
     def _compute_frame_neighbors(frame_idx: int) -> list[AtomGroup]:
         universe.trajectory[frame_idx]
-        env_positions = selected_atoms.positions.astype(np.float64)
-        centers_positions = center_atoms.positions.astype(np.float64)
-        if universe.trajectory.ts.dimensions is not None:
+        pos_env = ag_env.positions.astype(np.float64)
+        pos_cent = ag_centers.positions.astype(np.float64)
+
+        if respect_pbc and universe.trajectory.ts.dimensions is not None:
             box = universe.trajectory.ts.dimensions[:3]
         else:
             coords = universe.atoms.positions
@@ -355,27 +359,21 @@ def list_neighbours_along_trajectory(
             maxs = coords.max(axis=0)
             box = maxs - mins
 
-        # Compute neighbor lists using the new fast functions
+        # --- Build neighbor list (CSR form) ---
         indptr, indices = neighbor_list_celllist_centers(
-            positions_env=env_positions,
-            positions_cent=centers_positions,
+            positions_env=pos_env,
+            positions_cent=pos_cent,
             r_cut=r_cut,
             box=box,
             respect_pbc=respect_pbc,
         )
 
-        # Build the AtomGroups for each atom
+        # --- Reconstruct AtomGroups per center ---
         frame_neighbors: list[AtomGroup] = []
-        for i in range(n_selected):
+        for i in range(ag_centers.n_atoms):
             start, end = indptr[i], indptr[i + 1]
-            neighbor_atoms = universe.atoms[indices[start:end]]
+            neighbor_atoms = ag_env[indices[start:end]]
             frame_neighbors.append(neighbor_atoms)
         return frame_neighbors
 
-    if n_jobs == 1:
-        return [_compute_frame_neighbors(frame) for frame in frame_indices]
-
-    # Parallel computation
-    args = frame_indices
-    with Pool(processes=n_jobs) as pool:
-        return pool.map(_compute_frame_neighbors, args)
+    return [_compute_frame_neighbors(frame) for frame in frame_indices]
