@@ -170,8 +170,8 @@ class Trj:
 
         attr_dict = {
             "r_cut": r_cut,
-            "selection": selection,
             "centers": centers,
+            "selection": selection,
         }
         logger.log(f"Computed coord_number using args {attr_dict}.")
         return neigcounts, Insight(
@@ -209,8 +209,8 @@ class Trj:
         attr_dict = {
             "r_cut": r_cut,
             "delay": delay,
-            "selection": selection,
             "centers": centers,
+            "selection": selection,
         }
         logger.log(f"Computed LENS using args {attr_dict}.")
 
@@ -260,7 +260,9 @@ class Trj:
         self,
         r_cut: float,
         order: int = 6,
+        centers: str = "all",
         selection: str = "all",
+        respect_pbc: bool = True,
         neigcounts: list[list[AtomGroup]] | None = None,
         n_jobs: int = 1,
     ) -> tuple[list[list[AtomGroup]], Insight]:
@@ -277,8 +279,10 @@ class Trj:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
                 universe=self.universe,
                 r_cut=r_cut,
+                centers=centers,
                 selection=selection,
                 trajslice=self.trajslice,
+                respect_pbc=respect_pbc,
                 n_jobs=n_jobs,
             )
         psi = dynsight.descriptors.orientational_order_param(
@@ -287,7 +291,12 @@ class Trj:
             order=order,
         )
 
-        attr_dict = {"r_cut": r_cut, "order": order, "selection": selection}
+        attr_dict = {
+            "r_cut": r_cut,
+            "order": order,
+            "centers": centers,
+            "selection": selection,
+        }
 
         logger.log(
             f"Computed orientational order parameter using args {attr_dict}."
@@ -332,7 +341,11 @@ class Trj:
             neigh_list_per_frame=neigcounts,
         )
 
-        attr_dict = {"r_cut": r_cut, "selection": selection}
+        attr_dict = {
+            "r_cut": r_cut,
+            "centers": centers,
+            "selection": selection,
+        }
 
         logger.log(
             f"Computed average velocity alignment using args {attr_dict}."
