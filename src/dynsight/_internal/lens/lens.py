@@ -189,7 +189,7 @@ def lens_from_two_csr(
     return out
 
 
-def compute_lens_over_trj(
+def compute_lens(
     universe: Universe,
     r_cut: float,
     delay: int = 1,

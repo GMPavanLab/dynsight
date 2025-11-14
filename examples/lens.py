@@ -62,7 +62,7 @@ def main() -> None:
     logger = logging.getLogger(__name__)
     logger.info(natoms)
 
-    lens, *_ = dynsight.lens.compute_lens_over_trj(
+    lens, *_ = dynsight.lens.compute_lens(
         universe=universe,
         r_cut=cutoff,
     )

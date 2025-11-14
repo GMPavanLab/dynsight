@@ -21,7 +21,7 @@ Functions
   :maxdepth: 1
 
   list_neighbours_along_trajectory <_autosummary/dynsight.lens.list_neighbours_along_trajectory>
-  compute_lens_over_trj <_autosummary/dynsight.lens.compute_lens_over_trj>
+  compute_lens <_autosummary/dynsight.lens.compute_lens>
 
 Acknowledgements
 ----------------

@@ -196,7 +196,7 @@ class Trj:
                 An Insight containing LENS. It has the following meta:
                 name, r_cut, delay, centers, selection.
         """
-        lens, *_ = dynsight.lens.compute_lens_over_trj(
+        lens, *_ = dynsight.lens.compute_lens(
             universe=self.universe,
             r_cut=r_cut,
             delay=delay,
