@@ -75,7 +75,7 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
     """Test computation methods for Trj and Insight classes."""
     trj = Trj.init_from_xtc(file_paths["xtc"], file_paths["gro"])
 
-    r_cut = 15.0  ## Typical interparticle distance is around 12.0
+    r_cut = 15.0  ## Interparticle distance is around 12.0 (simulation units)
     neigcounts, n_c = trj.get_coord_number(r_cut=r_cut)
     _, phi = trj.get_velocity_alignment(r_cut=r_cut)
     lens = trj.get_lens(r_cut=r_cut)
