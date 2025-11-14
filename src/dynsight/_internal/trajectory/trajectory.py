@@ -147,7 +147,7 @@ class Trj:
                 * neighcounts: a list[list[AtomGroup]], it can be used to
                     speed up subsequent descriptors' computations.
                 * An Insight containing the number of neighbors. It has the
-                    following meta: r_cut, centers, selection.
+                    following meta: name, r_cut, centers, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
@@ -169,6 +169,7 @@ class Trj:
                 counts[a, f] = len(atom_group)
 
         attr_dict = {
+            "name": "coord_number",
             "r_cut": r_cut,
             "centers": centers,
             "selection": selection,
@@ -193,7 +194,7 @@ class Trj:
         Returns:
             Insight
                 An Insight containing LENS. It has the following meta:
-                r_cut, delay, centers, selection.
+                name, r_cut, delay, centers, selection.
         """
         lens, *_ = dynsight.lens.compute_lens_over_trj(
             universe=self.universe,
@@ -207,6 +208,7 @@ class Trj:
         )
 
         attr_dict = {
+            "name": "lens",
             "r_cut": r_cut,
             "delay": delay,
             "centers": centers,
@@ -273,7 +275,8 @@ class Trj:
                 * neighcounts: a list[list[AtomGroup]], it can be used to
                     speed up subsequent descriptors' computations.
                 * An Insight containing the orientational order parameter.
-                    It has the following meta: r_cut, order, selection.
+                    It has the following meta: name, r_cut, order, centers,
+                    selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
@@ -292,6 +295,7 @@ class Trj:
         )
 
         attr_dict = {
+            "name": "orientational_op",
             "r_cut": r_cut,
             "order": order,
             "centers": centers,
@@ -323,7 +327,7 @@ class Trj:
                 * neighcounts: a list[list[AtomGroup]], it can be used to
                     speed up subsequent descriptors' computations.
                 * An Insight containing the average velocities alignment.
-                    It has the following meta: r_cut, selection.
+                    It has the following meta: name, r_cut, centers, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
@@ -342,6 +346,7 @@ class Trj:
         )
 
         attr_dict = {
+            "name": "velocity_alignement",
             "r_cut": r_cut,
             "centers": centers,
             "selection": selection,
