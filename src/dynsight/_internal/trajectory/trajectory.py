@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from MDAnalysis import AtomGroup
     from numpy.typing import NDArray
 
+import logging
+
 import MDAnalysis
 from MDAnalysis.coordinates.memory import MemoryReader
 
@@ -19,6 +21,7 @@ from dynsight.logs import logger
 from dynsight.trajectory import Insight
 
 UNIVAR_DIM = 2
+logging.getLogger("MDAnalysis").setLevel(logging.ERROR)
 
 
 @dataclass(frozen=True)
@@ -131,7 +134,9 @@ class Trj:
     def get_coord_number(
         self,
         r_cut: float,
+        centers: str = "all",
         selection: str = "all",
+        respect_pbc: bool = True,
         neigcounts: list[list[AtomGroup]] | None = None,
         n_jobs: int = 1,
     ) -> tuple[list[list[AtomGroup]], Insight]:
@@ -142,29 +147,36 @@ class Trj:
                 * neighcounts: a list[list[AtomGroup]], it can be used to
                     speed up subsequent descriptors' computations.
                 * An Insight containing the number of neighbors. It has the
-                    following meta: name, r_cut, delay, selection.
+                    following meta: name, r_cut, centers, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
                 universe=self.universe,
                 r_cut=r_cut,
+                centers=centers,
                 selection=selection,
                 trajslice=self.trajslice,
+                respect_pbc=respect_pbc,
                 n_jobs=n_jobs,
             )
-        _, nn, *_ = dynsight.lens.neighbour_change_in_time(
-            neigh_list_per_frame=neigcounts,
-            delay=1,
-        )
+
+        n_frames = len(neigcounts)
+        n_atoms = len(neigcounts[0])
+        counts = np.zeros((n_atoms, n_frames), dtype=int)
+
+        for f, frame in enumerate(neigcounts):
+            for a, atom_group in enumerate(frame):
+                counts[a, f] = len(atom_group)
 
         attr_dict = {
             "name": "coord_number",
             "r_cut": r_cut,
+            "centers": centers,
             "selection": selection,
         }
         logger.log(f"Computed coord_number using args {attr_dict}.")
         return neigcounts, Insight(
-            dataset=nn.astype(np.float64),
+            dataset=counts.astype(np.float64),
             meta=attr_dict,
         )
 
@@ -172,42 +184,40 @@ class Trj:
         self,
         r_cut: float,
         delay: int = 1,
+        centers: str = "all",
         selection: str = "all",
-        neigcounts: list[list[AtomGroup]] | None = None,
+        respect_pbc: bool = True,
         n_jobs: int = 1,
-    ) -> tuple[list[list[AtomGroup]], Insight]:
+    ) -> Insight:
         """Compute LENS on the trajectory.
 
         Returns:
-            tuple:
-                * neighcounts: a list[list[AtomGroup]], it can be used to
-                    speed up subsequent descriptors' computations.
-                * An Insight containing LENS. It has the following meta:
-                    name, r_cut, delay, selection.
+            Insight
+                An Insight containing LENS. It has the following meta:
+                name, r_cut, delay, centers, selection.
         """
-        if neigcounts is None:
-            neigcounts = dynsight.lens.list_neighbours_along_trajectory(
-                universe=self.universe,
-                r_cut=r_cut,
-                selection=selection,
-                trajslice=self.trajslice,
-                n_jobs=n_jobs,
-            )
-        lens, *_ = dynsight.lens.neighbour_change_in_time(
-            neigh_list_per_frame=neigcounts,
+        lens, *_ = dynsight.lens.compute_lens(
+            universe=self.universe,
+            r_cut=r_cut,
             delay=delay,
+            centers=centers,
+            selection=selection,
+            trajslice=self.trajslice,
+            respect_pbc=respect_pbc,
+            n_jobs=n_jobs,
         )
 
         attr_dict = {
             "name": "lens",
             "r_cut": r_cut,
             "delay": delay,
+            "centers": centers,
             "selection": selection,
         }
         logger.log(f"Computed LENS using args {attr_dict}.")
 
-        return neigcounts, Insight(
-            dataset=lens[:, 1:],
+        return Insight(
+            dataset=lens,
             meta=attr_dict,
         )
 
@@ -308,7 +318,9 @@ class Trj:
         self,
         r_cut: float,
         order: int = 6,
+        centers: str = "all",
         selection: str = "all",
+        respect_pbc: bool = True,
         neigcounts: list[list[AtomGroup]] | None = None,
         n_jobs: int = 1,
     ) -> tuple[list[list[AtomGroup]], Insight]:
@@ -319,14 +331,17 @@ class Trj:
                 * neighcounts: a list[list[AtomGroup]], it can be used to
                     speed up subsequent descriptors' computations.
                 * An Insight containing the orientational order parameter.
-                    It has the following meta: name, r_cut, order, selection.
+                    It has the following meta: name, r_cut, order, centers,
+                    selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
                 universe=self.universe,
                 r_cut=r_cut,
+                centers=centers,
                 selection=selection,
                 trajslice=self.trajslice,
+                respect_pbc=respect_pbc,
                 n_jobs=n_jobs,
             )
         psi = dynsight.descriptors.orientational_order_param(
@@ -339,6 +354,7 @@ class Trj:
             "name": "orientational_op",
             "r_cut": r_cut,
             "order": order,
+            "centers": centers,
             "selection": selection,
         }
 
@@ -354,7 +370,9 @@ class Trj:
     def get_velocity_alignment(
         self,
         r_cut: float,
+        centers: str = "all",
         selection: str = "all",
+        respect_pbc: bool = True,
         neigcounts: list[list[AtomGroup]] | None = None,
         n_jobs: int = 1,
     ) -> tuple[list[list[AtomGroup]], Insight]:
@@ -365,16 +383,19 @@ class Trj:
                 * neighcounts: a list[list[AtomGroup]], it can be used to
                     speed up subsequent descriptors' computations.
                 * An Insight containing the average velocities alignment.
-                    It has the following meta: name, r_cut, selection.
+                    It has the following meta: name, r_cut, centers, selection.
         """
         if neigcounts is None:
             neigcounts = dynsight.lens.list_neighbours_along_trajectory(
                 universe=self.universe,
                 r_cut=r_cut,
+                centers=centers,
                 selection=selection,
                 trajslice=self.trajslice,
+                respect_pbc=respect_pbc,
                 n_jobs=n_jobs,
             )
+
         phi = dynsight.descriptors.velocity_alignment(
             self.universe,
             neigh_list_per_frame=neigcounts,
@@ -383,6 +404,7 @@ class Trj:
         attr_dict = {
             "name": "velocity_alignement",
             "r_cut": r_cut,
+            "centers": centers,
             "selection": selection,
         }
 

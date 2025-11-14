@@ -75,11 +75,11 @@ def test_get_descriptors(file_paths: dict[str, Path]) -> None:
     """Test computation methods for Trj and Insight classes."""
     trj = Trj.init_from_xtc(file_paths["xtc"], file_paths["gro"])
 
-    r_cut = 10.0
+    r_cut = 15.0  ## Interparticle distance is around 12.0 (simulation units)
     neigcounts, n_c = trj.get_coord_number(r_cut=r_cut)
-    _, lens = trj.get_lens(r_cut=r_cut, neigcounts=neigcounts)
+    _, phi = trj.get_velocity_alignment(r_cut=r_cut)
+    lens = trj.get_lens(r_cut=r_cut)
     soap = trj.get_soap(r_cut=10.0, n_max=8, l_max=8)
-    _, phi = trj.get_velocity_alignment(r_cut=r_cut, neigcounts=neigcounts)
     _, _, tica = soap.get_tica(lag_time=10, tica_dim=2)
 
     test_n_c = Insight.load_from_json(file_paths["files_dir"] / "n_c.json")
@@ -114,7 +114,7 @@ def test_insight(
 ) -> None:
     """Test Insight methods."""
     trj = Trj(universe)
-    _, insight = trj.get_lens(r_cut=10.0)
+    insight = trj.get_lens(r_cut=10.0)
 
     # Insight dump/load
     json_file = tmp_path / "insight.json"
@@ -156,7 +156,7 @@ def test_insight(
 def test_onion_analysis(universe: MDAnalysis.Universe) -> None:
     """Test the onion clustering complete analysis tool."""
     trj = Trj(universe)
-    _, insight = trj.get_lens(10.0)
+    insight = trj.get_lens(10.0)
     result = insight.get_onion_analysis()
     assert result is not None
 

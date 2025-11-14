@@ -1,7 +1,9 @@
 {
     "dataset_file": "phi.npy",
     "meta": {
-        "r_cut": 10.0,
+        "name": "velocity_alignement",
+        "r_cut": 15.0,
+        "centers": "all",
         "selection": "all"
     }
 }

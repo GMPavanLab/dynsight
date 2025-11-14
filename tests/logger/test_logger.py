@@ -44,7 +44,7 @@ def test_zip_arch() -> None:
                 f" files in archive, found {len(names)}: {names}"
             )
             expected = {
-                "lens_4_1_all",
+                "lens_4_1_all_all",
                 "soap_4_4_4_True_all_all",
                 "timesoap_4_4_4_True_all_all_1",
             }

@@ -75,11 +75,10 @@ calculation can be sped up significantly.
         neigcounts=None,    # it will be computed and returned
     )
 
-    # Now for LENS we already have neigcounts
-    _, lens = trj.get_lens(
+    # Computing LENS
+    lens = trj.get_lens(
         r_cut=2.0,               # cutoff radius for neighbors list
         selection="all",         # compute on a selection of particles
-        neigcounts=neigcounts,   # no need to compute it again
     )
 
 Notice that, differently from SOAP - which is computed for every frame, LENS
