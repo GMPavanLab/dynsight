@@ -32,6 +32,10 @@ class Insight:
     dataset: NDArray[np.float64]
     meta: dict[str, Any] = field(default_factory=dict)
 
+    def __post_init__(self) -> None:
+        if logger.auto_recording:
+            logger.record_data(self)
+
     def dump_to_json(self, file_path: Path) -> None:
         """Save the Insight to a JSON file and  .npy file."""
         # Save dataset as .npy
@@ -142,6 +146,10 @@ class Insight:
         theta = dynsight.soap.timesoap(self.dataset, delay=delay)
         attr_dict = self.meta.copy()
         attr_dict.update({"delay": delay})
+        if self.meta.get("name") == "soap":
+            attr_dict.update({"name": "timesoap"})
+        else:
+            attr_dict.update({"name": "angular_velocity"})
 
         logger.log(f"Computed angular velocity with args {attr_dict}.")
         return Insight(dataset=theta, meta=attr_dict)

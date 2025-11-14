@@ -12,10 +12,10 @@ from .case_data import TimeSOAPCaseData
 
 
 def test_tsoap(case_data: TimeSOAPCaseData) -> None:
-    oritinal_dir = Path(__file__).resolve().parent
-    topology_file = oritinal_dir / "../systems/balls_7_nvt.gro"
-    trajectory_file = oritinal_dir / "../systems/balls_7_nvt.xtc"
-    expected_tsoap = oritinal_dir / "test_tsoap" / case_data.expected_tsoap
+    original_dir = Path(__file__).resolve().parent
+    topology_file = original_dir / "../systems/balls_7_nvt.gro"
+    trajectory_file = original_dir / "../systems/balls_7_nvt.xtc"
+    expected_tsoap = original_dir / "test_tsoap" / case_data.expected_tsoap
     universe = MDAnalysis.Universe(topology_file, trajectory_file)
 
     example_trj = Trj(universe)
@@ -26,7 +26,9 @@ def test_tsoap(case_data: TimeSOAPCaseData) -> None:
         l_max=4,
     )
 
-    test_tsoap = test_soap.get_angular_velocity(delay=case_data.delay)
+    _, test_tsoap = example_trj.get_timesoap(
+        soap_insight=test_soap, delay=case_data.delay
+    )
 
     if not expected_tsoap.exists():
         np.save(expected_tsoap, test_tsoap.dataset)

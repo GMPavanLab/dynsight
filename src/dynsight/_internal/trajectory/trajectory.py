@@ -233,8 +233,8 @@ class Trj:
     ) -> Insight:
         """Compute SOAP on the trajectory.
 
-        The returned Insight contains the following meta: r_cut, n_max, l_max,
-        respect_pbc, centers, selection.
+        The returned Insight contains the following meta: name, r_cut, n_max,
+        l_max, respect_pbc, selection, centers.
         """
         soap = dynsight.soap.saponify_trajectory(
             self.universe,
@@ -248,6 +248,7 @@ class Trj:
             trajslice=self.trajslice,
         )
         attr_dict = {
+            "name": "soap",
             "r_cut": r_cut,
             "n_max": n_max,
             "l_max": l_max,
@@ -257,6 +258,61 @@ class Trj:
         }
         logger.log(f"Computed SOAP with args {attr_dict}.")
         return Insight(dataset=soap, meta=attr_dict)
+
+    def get_timesoap(
+        self,
+        r_cut: float | None = None,
+        n_max: int | None = None,
+        l_max: int | None = None,
+        soap_insight: Insight | None = None,
+        selection: str = "all",
+        centers: str = "all",
+        respect_pbc: bool = True,
+        n_jobs: int = 1,
+        delay: int = 1,
+    ) -> tuple[Insight, Insight]:
+        """Compute SOAP and then timeSOAP on the trajectory.
+
+        The returned Insights (soap and timesoap) contain the following meta:
+        name, r_cut, n_max, l_max, respect_pbc, selection, centers.
+        Regarding the timeSOAP Insight, the delay used is also included.
+        """
+        if soap_insight is not None:
+            if getattr(soap_insight, "meta", {}).get("name") != "soap":
+                msg = (
+                    f"soap_insight.meta['name'] must be 'soap', found: "
+                    f"{soap_insight.meta.get('name', None)}"
+                )
+                raise ValueError(msg)
+            msg = (
+                "Loaded existing soap_insight: parameters r_cut, n_max, l_max,"
+                " selection, centers, and respect_pbc will be ignored."
+            )
+            logger.log(msg)
+            soap = soap_insight
+        else:
+            if r_cut is None or n_max is None or l_max is None:
+                msg = (
+                    "r_cut, n_max e l_max cannot be None"
+                    " if the soap_insight is not provided."
+                )
+                raise ValueError(msg)
+
+            soap = self.get_soap(
+                r_cut=r_cut,
+                n_max=n_max,
+                l_max=l_max,
+                selection=selection,
+                centers=centers,
+                respect_pbc=respect_pbc,
+                n_jobs=n_jobs,
+            )
+            logger.log(f"Computed SOAP with args {soap.meta}.")
+
+        timesoap = soap.get_angular_velocity(delay=delay)
+
+        logger.log(f"Computed timeSOAP with args {timesoap.meta}.")
+        return soap, timesoap
 
     def get_orientational_op(
         self,
@@ -393,6 +449,7 @@ class Trj:
             step=trajslice.step,
         )
         attr_dict = {
+            "name": "rdf",
             "distances_range": distances_range,
             "s1": s1,
             "s2": s2,

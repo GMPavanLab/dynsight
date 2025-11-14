@@ -327,6 +327,7 @@ exportAllBtn.onclick = async () => {
     }
     const numTrain = Math.floor(images.length * (trainPercent / 100));
     const zip = new JSZip();
+    const datasetName = "yolo_dataset";
     const imgTrain = zip.folder("images/train");
     const imgVal = zip.folder("images/val");
     const lblTrain = zip.folder("labels/train");
@@ -372,18 +373,19 @@ exportAllBtn.onclick = async () => {
     }
 
     const names = Object.keys(labelMap);
-    const yaml = `path: .
-    train: images/train
-    val: images/val
-    nc: ${names.length}
-    names: [${names.map((n) => `'${n}'`).join(", ")}]
-    `;
+    const yaml = [
+        `path: ${datasetName}`,
+        "train: images/train",
+        "val: images/val",
+        `nc: ${names.length}`,
+        `names: [${names.map((n) => `'${n}'`).join(", ")}]`,
+    ].join("\n");
     zip.file("dataset.yaml", yaml);
 
     const content = await zip.generateAsync({ type: "blob" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(content);
-    a.download = "yolo_dataset.zip";
+    a.download = `${datasetName}.zip`;
     a.click();
     URL.revokeObjectURL(a.href);
 };
@@ -400,20 +402,27 @@ synthBtn.onclick = async () => {
     );
     const width = parseInt(prompt("Image width?", "640"), 10);
     const height = parseInt(prompt("Image height?", "640"), 10);
-
+    const requestedPerImage = parseInt(
+        prompt("Number of objects per image?", "10"),
+        10,
+    );
     if (
         !numImages ||
         Number.isNaN(numImages) ||
         !width ||
         Number.isNaN(width) ||
         !height ||
-        Number.isNaN(height)
+        Number.isNaN(height) ||
+        !requestedPerImage ||
+        Number.isNaN(requestedPerImage) ||
+        requestedPerImage < 1
     ) {
         alert("Invalid parameters.");
         return;
     }
 
     const crops = [];
+    const datasetName = "synt_dataset";
     const labelMap = {};
     let nextId = 0;
     for (const file of images) {
@@ -460,8 +469,7 @@ synthBtn.onclick = async () => {
         ctx.fillRect(0, 0, width, height);
 
         const placed = [];
-        const numObj = Math.min(5, crops.length);
-        for (let i = 0; i < numObj; i++) {
+        for (let i = 0; i < requestedPerImage; i++) {
             const crop = crops[Math.floor(Math.random() * crops.length)];
             const img = await loadImage(crop.file);
             const c = document.createElement("canvas");
@@ -479,9 +487,7 @@ synthBtn.onclick = async () => {
                 crop.height,
             );
 
-            const scale =
-                (0.15 + 0.15 * Math.random()) *
-                (Math.min(width, height) / Math.max(crop.width, crop.height));
+            const scale = 1
             const w = crop.width * scale;
             const h = crop.height * scale;
 
@@ -539,18 +545,19 @@ synthBtn.onclick = async () => {
     }
 
     const names = Object.keys(labelMap);
-    const yaml = `path: .
-    train: images/train
-    val: images/val
-    nc: ${names.length}
-    names: [${names.map((n) => `'${n}'`).join(", ")}]
-    `;
+    const yaml = [
+        `path: ${datasetName}`,
+        "train: images/train",
+        "val: images/val",
+        `nc: ${names.length}`,
+        `names: [${names.map((n) => `'${n}'`).join(", ")}]`,
+    ].join("\n");
     zip.file("dataset.yaml", yaml);
 
     const content = await zip.generateAsync({ type: "blob" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(content);
-    a.download = "synt_dataset.zip";
+    a.download = `${datasetName}.zip`;
     a.click();
     URL.revokeObjectURL(a.href);
 };
