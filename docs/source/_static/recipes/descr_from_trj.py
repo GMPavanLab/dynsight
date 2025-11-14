@@ -39,7 +39,7 @@ def main() -> None:
     )
 
     # Computing LENS
-    _ = trj.get_lens(
+    lens = trj.get_lens(  # noqa: F841
         r_cut=2.0,  # cutoff radius for neighbors list
         selection="all",  # compute on a selection of particles
     )
