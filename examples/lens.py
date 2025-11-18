@@ -1,86 +1,92 @@
-import argparse
-import logging
-import pathlib
+"""An example for the lens module.
 
-try:
-    import h5py
-except ImportError:
-    h5py = None
+Details on LENS and additional examples can be found in the paper:
+M. Crippa, A. Cardellini, C. Caruso,  & G.M. Pavan,
+Detecting dynamic domains and local fluctuations in complex molecular
+systems via timelapse neighbors shuffling, PNAS 120 (30) e2300565120,
+https://doi.org/10.1073/pnas.2300565120 (2023).
+"""
+
+from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
+from MDAnalysis import Universe
 
-import dynsight
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s",
-)
+from dynsight.lens import compute_lens, list_neighbours_along_trajectory
 
 
-def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("data_path", type=str, help="path with test files")
-    return parser.parse_args()
+def example_for_lens(universe: Universe, r_cut: float) -> None:
+    """Compute LENS on a trajectory."""
+    lens, *_ = compute_lens(
+        universe=universe,
+        r_cut=r_cut,
+        delay=1,
+        centers="all",
+        selection="all",
+        respect_pbc=True,
+        n_jobs=4,
+    )
+
+    # Plot the LENS time-series and the cumulative distribution
+    fig, ax = plt.subplots(1, 2, sharey=True)
+    fig.suptitle(f"LENS computed with cutoff radius {r_cut} Å")
+    for particle in lens[::200]:
+        ax[0].plot(particle, c="k", lw=1.0, alpha=0.5)
+    ax[1].hist(lens.ravel(), bins=50, density=True, orientation="horizontal")
+    ax[0].set_xlabel("Time")
+    ax[0].set_ylabel("LENS")
+    ax[1].set_xlabel("Probability density")
+    plt.show()
+    plt.close()
+
+
+def example_for_number_of_neighbors(universe: Universe, r_cut: float) -> None:
+    """Compute number of neighbors on a trajectory."""
+    neighlist = list_neighbours_along_trajectory(
+        universe=universe,
+        r_cut=r_cut,
+        centers="all",
+        selection="all",
+        respect_pbc=True,
+        n_jobs=4,
+    )  # list[list[AtomGroup]]
+
+    # Count the neighbors for each molecule at each frame
+    n_neigh = np.array(
+        [[len(atom_group) for atom_group in frame] for frame in neighlist]
+    ).T
+
+    # Plot the n_neigh time-series and the cumulative distribution
+    fig, ax = plt.subplots(1, 2, sharey=True)
+    fig.suptitle(f"Number of neighbors within a cutoff radius {r_cut} Å")
+    for particle in n_neigh[::200]:
+        ax[0].plot(particle, c="k", lw=1.0, alpha=0.5)
+    ax[1].hist(
+        n_neigh.ravel(),
+        bins=np.unique(n_neigh).size,
+        density=True,
+        orientation="horizontal",
+    )
+    ax[0].set_xlabel("Time")
+    ax[0].set_ylabel(r"$n_{neigh}$")
+    ax[1].set_xlabel("Probability density")
+    plt.show()
+    plt.close()
 
 
 def main() -> None:
-    """Run the example.
-
-    * Original author: Martina Crippa
-    * Mantainer: Matteo Becchi
-
-    Example available for cpctools here:
-    https://github.com/GMPavanLab/cpctools/blob/main/Examples/LENS.ipynb
-
-    An example for a LENS analysis as in the original paper:
-    https://arxiv.org/abs/2212.12694
-    """
-    # Let's get the data:
-    # wget https://github.com/GMPavanLab/dynNP/releases/download/V1.0-trajectories/ico309.hdf5
-    # We'll start by caclulating the neighbours and the LENS parameters.
-    # using cutoff=2.88*1.1 that is 10% more than the Au radius.
-    if h5py is None:
-        msg = "Please install SOAPify|h5py with cpctools."
-        raise ModuleNotFoundError(msg)
-
-    args = _parse_args()
-
-    data_path = pathlib.Path(args.data_path)
-
-    trajfilename = data_path / "ico309.hdf5"
-    cutoff = 2.88 * 1.1
-
-    wantedtrajectory = slice(0, None, 10)
-    trajaddress = "/Trajectories/ico309-SV_18631-SL_31922-T_500"
-    with h5py.File(trajfilename, "r") as trajfile:
-        tgroup = trajfile[trajaddress]
-        universe = dynsight.hdf5er.create_universe_from_slice(
-            tgroup, wantedtrajectory
-        )
-
-    natoms = len(universe.atoms)
-    logger = logging.getLogger(__name__)
-    logger.info(natoms)
-
-    lens, *_ = dynsight.lens.compute_lens(
-        universe=universe,
-        r_cut=cutoff,
+    """An example for the lens module."""
+    # Get the trajectory data (as an MDAnalysis.Universe)
+    files_path = Path("analysis_workflow")
+    universe = Universe(
+        files_path / "oxygens.gro",
+        files_path / "oxygens.xtc",
     )
 
-    fig, axes = plt.subplots(2, sharey=True)
-    for i in range(4):
-        axes[0].plot(lens[i], label=f"Atom {i}")
-        axes[1].plot(lens[natoms - 1 - i], label=f"Atom {natoms - 1 - i}")
-
-    for ax in axes:
-        ax.legend()
-    fig.tight_layout()
-    fig.savefig(
-        "lens.png",
-        dpi=360,
-        bbox_inches="tight",
-    )
-    plt.close()
+    r_cut = 7.5  # Angstrom
+    example_for_lens(universe, r_cut)
+    example_for_number_of_neighbors(universe, r_cut)
 
 
 if __name__ == "__main__":
