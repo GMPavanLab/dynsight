@@ -198,7 +198,7 @@ def compute_lens(
     trajslice: slice | None = None,
     respect_pbc: bool = True,
     n_jobs: int = 1,
-) -> tuple[NDArray[np.float64], list[tuple[int, int]], AtomGroup]:
+) -> NDArray[np.float64]:
     r"""Compute the LENS descriptor for all frames along a trajectory.
 
     LENS was developed by Martina Crippa, see
@@ -240,10 +240,8 @@ def compute_lens(
             The number of jobs for parallelization with numba.
 
     Returns:
-        * LENS values for each center and each pair of frames. Has shape
+        LENS values for each center and each pair of frames. Has shape
             (n_centers, n_pairs)
-        * Frame index pairs used for comparison.
-        * The AtomGroup corresponding to the centers selection.
     """
     numba.set_num_threads(n_jobs)
 
@@ -309,7 +307,7 @@ def compute_lens(
             indices2=indices_t2,
         )
 
-    return lens_array, pairs, ag_cent
+    return lens_array
 
 
 def list_neighbours_along_trajectory(
