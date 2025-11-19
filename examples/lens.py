@@ -18,7 +18,7 @@ from dynsight.lens import compute_lens, list_neighbours_along_trajectory
 
 def example_for_lens(universe: Universe, r_cut: float) -> None:
     """Compute LENS on a trajectory."""
-    lens, *_ = compute_lens(
+    lens = compute_lens(
         universe=universe,
         r_cut=r_cut,
         delay=1,
