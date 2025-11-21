@@ -171,6 +171,23 @@ class OnionInsight(ClusterInsight):
                 logger.log(msg)
                 raise ValueError(msg)
 
+        raw_list = data["state_list"]
+        state_list = []
+
+        for entry in raw_list:
+            # Infer the correct class
+            if isinstance(entry.get("mean"), list):
+                state_cls = StateMulti
+            else:
+                state_cls = StateUni
+
+            # Convert lists back to ndarray
+            kwargs = {}
+            for k, v in entry.items():
+                kwargs[k] = np.array(v) if isinstance(v, list) else v
+
+            state_list.append(state_cls(**kwargs))
+
         base_dir = file_path.parent
         labels = np.load(base_dir / data["labels_file"], mmap_mode=mmap_mode)
         reshaped = np.load(
@@ -182,7 +199,7 @@ class OnionInsight(ClusterInsight):
         return cls(
             labels=labels,
             reshaped_data=reshaped,
-            state_list=data["state_list"],
+            state_list=state_list,
             meta=data.get("meta", {}),
         )
 
