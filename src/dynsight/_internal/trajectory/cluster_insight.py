@@ -10,10 +10,14 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from numpy.typing import NDArray
-    from tropea_clustering._internal.first_classes import StateMulti, StateUni
 
     from dynsight.trajectory import Insight, Trj
 
+
+from tropea_clustering._internal.onion_smooth.first_classes import (
+    StateMulti,
+    StateUni,
+)
 
 import dynsight
 from dynsight.logs import logger
@@ -353,6 +357,26 @@ class OnionSmoothInsight(ClusterInsight):
             logger.log(msg)
             raise ValueError(msg)
 
+        raw_list = data["state_list"]
+        state_list = []
+
+        for entry in raw_list:
+            # Decide which class to use
+            if isinstance(entry.get("mean"), list):
+                state_cls = StateMulti
+            else:
+                state_cls = StateUni
+
+            # Rebuild kwargs (convert lists back to np.ndarrays)
+            kwargs = {}
+            for k, v in entry.items():
+                if isinstance(v, list):
+                    kwargs[k] = np.array(v)
+                else:
+                    kwargs[k] = v
+
+            state_list.append(state_cls(**kwargs))
+
         labels_path = file_path.parent / data["labels_file"]
         labels = np.load(labels_path, mmap_mode=mmap_mode)
 
@@ -363,7 +387,7 @@ class OnionSmoothInsight(ClusterInsight):
 
         return cls(
             labels=labels,
-            state_list=data["state_list"],
+            state_list=state_list,
             meta=data.get("meta", {}),
         )
 
