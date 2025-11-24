@@ -78,7 +78,7 @@ def neighbor_list_celllist_centers(  # noqa: C901, PLR0912
     n_cent = positions_cent.shape[0]
     r_cut2 = (r_cut - 1e-6) ** 2
 
-    cell_ids, head, next_, n_cell = build_cell_list(positions_env, box, r_cut)
+    head, next_, n_cell = build_cell_list(positions_env, box, r_cut)
     nx, ny, nz = n_cell
 
     n_neigh = np.zeros(n_cent, dtype=np.int32)
