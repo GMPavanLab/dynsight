@@ -95,7 +95,7 @@ def orientational_order_param(
     return psi
 
 
-def compute_aver_align(
+def compute_mean_alignment(
     neigh_list_t: list[AtomGroup],
     vectors: NDArray[np.float64],  # shape (n_atoms, n_dim)
     metric: Callable[[NDArray[np.float64], NDArray[np.float64]], float],
@@ -195,7 +195,7 @@ def velocity_alignment(
     ):  # If the Universe has velocities, use them
         phi = np.zeros((n_frames, n_atoms))
         for t, _ in enumerate(universe.trajectory):
-            phi[t] = compute_aver_align(
+            phi[t] = compute_mean_alignment(
                 neigh_list_per_frame[t],
                 vectors=universe.atoms.velocities,
                 metric=cosine_distance,
@@ -211,7 +211,7 @@ def velocity_alignment(
             r_0 = r_1
             continue
         frame_vel = r_1 - r_0
-        phi[t - 1] = compute_aver_align(
+        phi[t - 1] = compute_mean_alignment(
             neigh_list_per_frame[t - 1],
             vectors=frame_vel,
             metric=cosine_distance,

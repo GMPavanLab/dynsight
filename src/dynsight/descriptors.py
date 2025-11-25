@@ -1,7 +1,7 @@
 """descriptors package."""
 
 from dynsight._internal.descriptors.misc import (
-    compute_aver_align,
+    compute_mean_alignment,
     orientational_order_param,
     velocity_alignment,
 )
@@ -10,7 +10,7 @@ from dynsight._internal.descriptors.tica import (
 )
 
 __all__ = [
-    "compute_aver_align",
+    "compute_mean_alignment",
     "many_body_tica",
     "orientational_order_param",
     "velocity_alignment",
