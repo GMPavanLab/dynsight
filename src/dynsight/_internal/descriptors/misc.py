@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
     from MDAnalysis import AtomGroup, Universe
@@ -95,29 +95,39 @@ def orientational_order_param(
     return psi
 
 
-def _compute_aver_align(
+def compute_aver_align(
     neigh_list_t: list[AtomGroup],
-    frame_vel: NDArray[np.float64],  # shape (n_atoms, n_dim)
+    vectors: NDArray[np.float64],  # shape (n_atoms, n_dim)
+    metric: Callable[[NDArray[np.float64], NDArray[np.float64]], float],
 ) -> NDArray[np.float64]:
-    """Computes the average alignment for all the atoms in a frame."""
-    phi_t = np.zeros(len(frame_vel))
-    for i, atom_i in enumerate(frame_vel):
+    """Computes the average vector alignment for all the atoms in a frame.
+
+    Parameters:
+        neigh_list_t:
+            List of paerticle's neighbors.
+        vectors:
+            Vector field associated to each particle.
+        metric:
+            A metric(vec_i, vec_j) -> float returning a scalar alignment.
+
+    Returns:
+        Average alignment per particle (shape (n_atoms, n_dim)).
+    """
+    phi_t = np.zeros(len(vectors))
+    for i, atom_i in enumerate(vectors):
         if not np.any(atom_i):  # skip if zero velocity vector
             continue
         neighbors = neigh_list_t[i].indices
         if len(neighbors) == 0:
             continue  # no meaningful averaging if 0 neighbors
         valid_neighbors = [
-            j for j in neighbors if j != i and np.any(frame_vel[j])
+            j for j in neighbors if j != i and np.any(vectors[j])
         ]
         if not valid_neighbors:
             continue  # no self-counting, no neighbors with v = 0.0
 
         alignments = np.array(
-            [
-                1 - cosine(np.array(atom_i), frame_vel[j])
-                for j in valid_neighbors
-            ]
+            [metric(np.array(atom_i), vectors[j]) for j in valid_neighbors]
         )
         phi_t[i] = np.mean(alignments)
     return phi_t
@@ -173,15 +183,22 @@ def velocity_alignment(
     n_atoms = universe.atoms.n_atoms
     n_frames = len(universe.trajectory)
 
+    def cosine_distance(
+        a: NDArray[np.float64],
+        b: NDArray[np.float64],
+    ) -> float:
+        return float(1 - cosine(a, b))
+
     if (
         hasattr(universe.atoms, "velocities")
         and universe.atoms.velocities is not None
     ):  # If the Universe has velocities, use them
         phi = np.zeros((n_frames, n_atoms))
         for t, _ in enumerate(universe.trajectory):
-            phi[t] = _compute_aver_align(
+            phi[t] = compute_aver_align(
                 neigh_list_per_frame[t],
-                frame_vel=universe.atoms.velocities,
+                vectors=universe.atoms.velocities,
+                metric=cosine_distance,
             )
         return phi.T
 
@@ -194,8 +211,9 @@ def velocity_alignment(
             r_0 = r_1
             continue
         frame_vel = r_1 - r_0
-        phi[t - 1] = _compute_aver_align(
+        phi[t - 1] = compute_aver_align(
             neigh_list_per_frame[t - 1],
-            frame_vel,
+            vectors=frame_vel,
+            metric=cosine_distance,
         )
     return phi.T
