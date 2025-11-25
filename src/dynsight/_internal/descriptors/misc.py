@@ -111,7 +111,7 @@ def compute_aver_align(
             A metric(vec_i, vec_j) -> float returning a scalar alignment.
 
     Returns:
-        Average alignment per particle (shape (n_atoms, n_dim)).
+        Average alignment per particle - shape (n_atoms).
     """
     phi_t = np.zeros(len(vectors))
     for i, atom_i in enumerate(vectors):
