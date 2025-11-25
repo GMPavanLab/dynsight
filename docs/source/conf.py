@@ -59,6 +59,7 @@ html_theme = "furo"
 html_static_path = ["_static"]
 html_logo = "_static/logo_dynsight.png"
 
+
 def setup(app: Sphinx) -> None:
     """Configure the Sphinx app by adding a custom CSS file."""
     app.add_css_file("style.css")
