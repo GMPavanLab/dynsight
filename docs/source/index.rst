@@ -44,6 +44,8 @@
 
   Modules <modules>
 
+.. image:: _static/logo_dynsight.png
+
 Overview
 ========
 

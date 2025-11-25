@@ -1,3 +1,4 @@
+.. image:: docs/_static/logo_dynsight.png
 Overview
 ========
 
