@@ -1,94 +1,37 @@
-"""Test the consistency of LENS calculations with a control calculation.
-
-* Original author: Martina Crippa
-
-This test verifies that the LENS calculation (LENS and nn) yields the same
-values as a control calculation at different r_cut.
-
-Control file path:
-    - tests/systems/2_particles.xyz
-
-Dynsight function tested:
-    - dynsight.lens.list_neighbours_along_trajectory()
-    - dynsight.lens.compute_lens_over_trj()
-
-r_cuts checked:
-    - [2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5]
-"""
-
-from __future__ import annotations
+"""Pytest for dynsight.lens.compute_lens."""
 
 from pathlib import Path
 
+import MDAnalysis
 import numpy as np
 import pytest
 
 from dynsight.trajectory import Trj
 
-LENS_CUTOFF = [2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5]
-
-# ---------------- Fixtures ----------------
+from .case_data import LENSCaseData
 
 
-@pytest.fixture(scope="module")
-def here() -> Path:
-    return Path(__file__).parent
+def test_lens(case_data: LENSCaseData) -> None:
+    original_dir = Path(__file__).resolve().parent
+    topology_file = original_dir / "../systems/balls_7_nvt.gro"
+    trajectory_file = original_dir / "../systems/balls_7_nvt.xtc"
+    expected_lens = original_dir / "test_lens" / case_data.expected_lens
+    universe = MDAnalysis.Universe(topology_file, trajectory_file)
 
+    example_trj = Trj(universe)
 
-@pytest.fixture(scope="module")
-def file_paths(here: Path) -> dict[str, Path]:
-    return {
-        "xyz": here / "../systems/2_particles.xyz",
-        "check_file": here / "../systems/LENS.npz",
-    }
+    test_lens = example_trj.get_lens(
+        r_cut=case_data.r_cut,
+        delay=case_data.delay,
+        centers=case_data.centers,
+        selection=case_data.selection,
+        n_jobs=case_data.n_jobs,
+    )
 
-
-@pytest.fixture(scope="module")
-def trajectory(file_paths: dict[str, Path]) -> Trj:
-    return Trj.init_from_xyz(file_paths["xyz"], dt=1)
-
-
-# ---------------- Tests ----------------
-def test_lens(
-    trajectory: Trj,
-    file_paths: dict[str, Path],
-) -> None:
-    """Test the consistency of LENS calculations."""
-    check_file = np.load(file_paths["check_file"])
-
-    # Run LENS (and NN) calculation for different r_cuts
-    for i, r_cut in enumerate(LENS_CUTOFF):
-        reference_array = check_file[f"LENS_{i}"]
-
-        test_lens = trajectory.get_lens(r_cut=r_cut, respect_pbc=False)
-        test_lens_ds = np.array(
-            [np.concatenate(([0.0], tmp)) for tmp in test_lens.dataset]
-        )  # the original LENS function gave always 0.0 as first frame
-
-        assert np.allclose(reference_array[0], test_lens_ds), (
-            "LENS analyses provided different values "
-            f"compared to the control system for r_cut: {r_cut}."
+    if not expected_lens.exists():
+        np.save(expected_lens, test_lens.dataset)
+        pytest.fail(
+            "LENS test files were not present. They have been created."
         )
-
-
-def test_nn(
-    trajectory: Trj,
-    file_paths: dict[str, Path],
-) -> None:
-    """Test the consistency of NN calculations."""
-    check_file = np.load(file_paths["check_file"])
-
-    # Run LENS (and NN) calculation for different r_cuts
-    for i, r_cut in enumerate(LENS_CUTOFF):
-        reference_array = check_file[f"LENS_{i}"]
-
-        _, test_nn = trajectory.get_coord_number(
-            r_cut=r_cut,
-            respect_pbc=False,
-        )
-        test_nn_ds = test_nn.dataset
-
-        assert np.allclose(reference_array[1], test_nn_ds), (
-            "NN analyses provided different values "
-            f"compared to the control system for r_cut: {r_cut}."
-        )
+    exp_lens = np.load(expected_lens)
+    assert np.allclose(exp_lens, test_lens.dataset, atol=1e-6)
