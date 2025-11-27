@@ -1084,9 +1084,7 @@ class AutoFilteringPipeline:
         vals = vals[np.isfinite(vals)]
 
         if vals.size > 1 and np.nanstd(vals) > 0:
-            sns.kdeplot(
-                y=vals, ax=ax, fill=True, alpha=0.3, bw_adjust=kde_bw
-            )
+            sns.kdeplot(y=vals, ax=ax, fill=True, alpha=0.3, bw_adjust=kde_bw)
         elif vals.size > 0:
             ax.axhline(float(vals[0]), ls="--", alpha=0.6)
 
