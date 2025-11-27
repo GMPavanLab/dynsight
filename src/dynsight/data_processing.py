@@ -1,6 +1,7 @@
 """data processing package."""
 
 from dynsight._internal.data_processing.auto_filtering import (
+    AutoFilteringPipeline,
     auto_filtering,
 )
 from dynsight._internal.data_processing.classify import (
@@ -22,6 +23,7 @@ from dynsight._internal.data_processing.distances import (
 )
 
 __all__ = [
+    "AutoFilteringPipeline",
     "applyclassification",
     "auto_filtering",
     "createreferencesfromtrajectory",
