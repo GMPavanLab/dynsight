@@ -10,13 +10,11 @@ if TYPE_CHECKING:
 import numpy as np
 
 
-def normalize_soap(
-    soaptrajectory: NDArray[np.float64],
-) -> NDArray[np.float64]:
+def normalize_soap(soap: NDArray[np.float64]) -> NDArray[np.float64]:
     """Returns the SOAP spectra normalized to unitary length.
 
     Parameters:
-        soaptrajectory : shape (n_particles, n_frames, n_comp)
+        soap : shape (n_particles, n_frames, n_comp)
             The SOAP spctra for the trajectory.
 
     Returns:
@@ -53,10 +51,10 @@ def normalize_soap(
                 np.sum(unitary_soap[0]), 21.987915602216525,
                 atol=1e-6, rtol=1e-3)
     """
-    norms = np.linalg.norm(soaptrajectory, axis=-1)
+    norms = np.linalg.norm(soap, axis=-1)
     mask = norms > 0.0
-    norm_soap = np.zeros(soaptrajectory.shape)
-    norm_soap[mask] = soaptrajectory[mask] / norms[..., np.newaxis][mask]
+    norm_soap = np.zeros(soap.shape)
+    norm_soap[mask] = soap[mask] / norms[..., np.newaxis][mask]
     return norm_soap
 
 
@@ -129,17 +127,14 @@ def soap_distance(
     return np.sqrt(tsoap)
 
 
-def timesoap(
-    soaptrajectory: NDArray[np.float64],
-    delay: int = 1,
-) -> NDArray[np.float64]:
+def timesoap(soap: NDArray[np.float64], delay: int = 1) -> NDArray[np.float64]:
     """Performs the 'timeSOAP' analysis on the given SOAP trajectory.
 
     timeSOAP was developed by Cristina Caurso. See for reference the paper
     https://doi.org/10.1063/5.0147025.
 
     Parameters:
-        soaptrajectory: shape (n_particles, n_frames, n_comp)
+        soap: shape (n_particles, n_frames, n_comp)
             The SOAP spctra for the trajectory.
 
         delay:
@@ -178,9 +173,7 @@ def timesoap(
                 atol=1e-6, rtol=1e-3)
     """
     value_error = "delay value outside bounds"
-    if delay < 1 or delay >= soaptrajectory.shape[1]:
+    if delay < 1 or delay >= soap.shape[1]:
         raise ValueError(value_error)
 
-    return soap_distance(
-        soaptrajectory[:, :-delay, :], soaptrajectory[:, delay:, :]
-    )
+    return soap_distance(soap[:, :-delay, :], soap[:, delay:, :])

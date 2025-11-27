@@ -1,6 +1,7 @@
 {
     "dataset_file": "tica.npy",
     "meta": {
+        "name": "soap",
         "r_cut": 10.0,
         "n_max": 8,
         "l_max": 8,

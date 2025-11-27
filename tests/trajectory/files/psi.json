@@ -1,8 +1,10 @@
 {
     "dataset_file": "psi.npy",
     "meta": {
-        "r_cut": 10.0,
+        "name": "orientational_op",
+        "r_cut": 15.0,
         "order": 6,
+        "centers": "all",
         "selection": "all"
     }
 }

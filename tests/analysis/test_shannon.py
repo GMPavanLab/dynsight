@@ -1,4 +1,4 @@
-"""Pytest for dynsight.analysis.compute_entropy_gain."""
+"""Pytest for dynsight.analysis.entropy."""
 
 import numpy as np
 import pytest
@@ -42,9 +42,8 @@ def labels(rng: np.random.Generator) -> NDArray[np.int64]:
 
 
 @pytest.fixture
-def bad_labels() -> NDArray[np.int64]:
+def bad_labels(rng: np.random.Generator) -> NDArray[np.int64]:
     """Mismatched label shape."""
-    rng = np.random.default_rng(12345)
     return rng.integers(0, 5, (200, 50), dtype=np.int64)
 
 
@@ -56,18 +55,25 @@ def test_wrong_input(
     labels: NDArray[np.int64],
 ) -> None:
     """Check wrong input raises Errors."""
+    with pytest.raises(ValueError, match=r"method must be 'histo' or 'kl'."):
+        dynsight.analysis.shannon(data_2d, method="wrong")  # type: ignore[arg-type]
+
     with pytest.raises(ValueError, match="data is empty"):
         dynsight.analysis.compute_shannon(np.array([]), (0.0, 1.0), n_bins=20)
     with pytest.raises(ValueError, match="data is empty"):
         dynsight.analysis.compute_shannon_multi(
-            np.array([]), [(0.0, 1.0), (0.0, 1.0)], n_bins=[20, 20]
+            np.array([]),
+            [(0.0, 1.0), (0.0, 1.0)],
+            n_bins=[20, 20],
         )
     with pytest.raises(
         ValueError,
         match="Mismatch between data dimensions, data_ranges, and n_bins",
     ):
         dynsight.analysis.compute_shannon_multi(
-            data_2d, [(0.0, 1.0)], n_bins=[20]
+            data_2d,
+            [(0.0, 1.0)],
+            n_bins=[20],
         )
     with pytest.raises(
         RuntimeError,
@@ -76,7 +82,9 @@ def test_wrong_input(
         r"must have same shape\[0\]",
     ):
         dynsight.analysis.compute_entropy_gain_multi(
-            data_2d, labels[:50], n_bins=[20, 20]
+            data_2d,
+            labels[:50],
+            n_bins=[20, 20],
         )
 
 
@@ -86,12 +94,28 @@ def test_bad_shape(
     """Bad label shape should raise RuntimeError."""
     with pytest.raises(RuntimeError):
         dynsight.analysis.compute_entropy_gain(data, bad_labels, n_bins=20)
+    with pytest.raises(RuntimeError):
+        dynsight.analysis.info_gain(data, bad_labels, "kl")
+
+
+def test_shannon(data_2d: NDArray[np.float64]) -> None:
+    """Check Shannon-based functions."""
+    entropy = dynsight.analysis.shannon(data_2d, method="histo")
+    assert np.isclose(entropy, 6.643856189774724, rtol=1e-3, atol=1e-3)
+    entropy = dynsight.analysis.shannon(data_2d, method="kl")
+    assert np.isclose(entropy, 0.0755109447796211, rtol=1e-3, atol=1e-3)
+    entropy = dynsight.analysis.shannon(np.array([0.0, 1.0]), method="kl")
+    assert entropy == 0.0
+    negentropy = dynsight.analysis.compute_negentropy(data_2d)
+    assert np.isclose(negentropy, 0.40485364974320515, rtol=1e-3, atol=1e-3)
 
 
 def test_gain(data: NDArray[np.float64], labels: NDArray[np.int64]) -> None:
     """Check entropy gain value."""
     _, gain, *_ = dynsight.analysis.compute_entropy_gain(
-        data, labels, n_bins=20
+        data,
+        labels,
+        n_bins=20,
     )
     ref = 0.0010842808402454819
     assert np.isclose(gain, ref)

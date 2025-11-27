@@ -1,8 +1,10 @@
 {
     "dataset_file": "lens.npy",
     "meta": {
-        "r_cut": 10.0,
+        "name": "lens",
+        "r_cut": 15.0,
         "delay": 1,
+        "centers": "all",
         "selection": "all"
     }
 }
