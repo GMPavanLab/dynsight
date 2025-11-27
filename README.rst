@@ -1,3 +1,10 @@
+.. |pymin| image:: https://img.shields.io/badge/Python-%3E%3D3.8-blue
+.. |pytested| image:: https://img.shields.io/badge/Tested_on-3.10%20|%203.13-blue
+.. |doi| image:: https://img.shields.io/badge/DOI-arXiv.2510.23493-red
+   :target: https://doi.org/10.48550/arXiv.2510.23493
+
+|pymin| |pytested| |doi|
+
 .. image:: docs/source/_static/logo_dynsight.png
   
 Overview
