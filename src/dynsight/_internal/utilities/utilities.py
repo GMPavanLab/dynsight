@@ -173,3 +173,35 @@ def read_xyz(
             row += 1
 
     return pd.DataFrame(data)
+
+
+def save_xyz_from_ndarray(
+    output_path: Path | str,
+    coords: npt.NDArray[np.float64],
+    comment_line: str = "# comment line",
+    atom_type: str = "C",
+) -> None:
+    """Saves a .xyz file with the coordinates from a numpy.ndarray.
+
+    Parameters:
+        coords : np.ndarray with shape (n_frames, n_atoms, 3)
+            The array containing the coordinates of all the particles at each
+            frame.
+
+        output_file : str
+            The path to the .xyz output trajectory.
+    """
+    if isinstance(output_path, str):
+        output_path = Path(output_path)
+
+    n_coordinates = 3
+    if coords.shape[2] != n_coordinates:
+        msg = "coords must have shape (n_frames, n_atoms, 3)."
+        raise ValueError(msg)
+
+    with output_path.open("w+") as file:
+        for _, frame in enumerate(coords):
+            print(coords.shape[1], file=file)
+            print(comment_line, file=file)
+            for _, atom in enumerate(frame):
+                print(atom_type, atom[0], atom[1], atom[2], file=file)
