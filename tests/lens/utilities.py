@@ -4,7 +4,7 @@ import numba
 import numpy as np
 
 
-@numba.jit  # type: ignore[misc]
+@numba.jit  # type: ignore[untyped-decorator]
 def is_sorted(a: np.ndarray, /) -> bool:  # type: ignore[type-arg]
     """Checks if an array is sorted.
 
