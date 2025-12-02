@@ -1,5 +1,7 @@
 """Pytest for dynsight.utilities."""
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -34,7 +36,7 @@ def test_find_extrema_points() -> None:
     assert np.allclose(max_points, expected_max, atol=1e-2, rtol=1e-2)
 
 
-def test_save_xyz_from_array(tmp_path) -> None:
+def test_save_xyz_from_array(tmp_path: Path) -> None:
     output_path = tmp_path / "tmp.xyz"
     rng = np.random.default_rng(42)
     coords = rng.random((10, 10, 3))
