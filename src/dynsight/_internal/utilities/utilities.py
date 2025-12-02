@@ -184,19 +184,25 @@ def save_xyz_from_ndarray(
     """Saves a .xyz file with the coordinates from a numpy.ndarray.
 
     Parameters:
-        coords : np.ndarray with shape (n_frames, n_atoms, 3)
-            The array containing the coordinates of all the particles at each
-            frame.
-
-        output_file : str
+        output_file:
             The path to the .xyz output trajectory.
+
+        coords:
+            The array containing the coordinates of all the particles at each
+            frame. Has shape (n_frames, n_atoms, 3).
+
+        comment_line:
+            The second line in each frame.
+
+        atom_type:
+            The type to assign to all atoms in the trajectory.
     """
     if isinstance(output_path, str):
         output_path = Path(output_path)
 
     n_coordinates = 3
     if coords.shape[2] != n_coordinates:
-        msg = "coords must have shape (n_frames, n_atoms, 3)."
+        msg = "coords array must have shape (n_frames, n_atoms, 3)."
         raise ValueError(msg)
 
     with output_path.open("w+") as file:
