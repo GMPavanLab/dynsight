@@ -1,9 +1,13 @@
 """Pytest for dynsight.utilities."""
 
+from pathlib import Path
+
 import numpy as np
+import pytest
 
 from dynsight.utilities import (
     find_extrema_points,
+    save_xyz_from_ndarray,
 )
 
 
@@ -30,3 +34,22 @@ def test_find_extrema_points() -> None:
 
     assert np.allclose(min_points, expected_min, atol=1e-2, rtol=1e-2)
     assert np.allclose(max_points, expected_max, atol=1e-2, rtol=1e-2)
+
+
+def test_save_xyz_from_array(tmp_path) -> None:
+    output_path = tmp_path / "tmp.xyz"
+    rng = np.random.default_rng(42)
+    coords = rng.random((10, 10, 3))
+    save_xyz_from_ndarray(
+        output_path=output_path,
+        coords=coords,
+    )
+    coords = rng.random((10, 10, 2))
+    with pytest.raises(
+        ValueError,
+        match=r"coords array must have shape \(n_frames, n_atoms, 3\)\.",
+    ):
+        save_xyz_from_ndarray(
+            output_path=output_path,
+            coords=coords,
+        )
