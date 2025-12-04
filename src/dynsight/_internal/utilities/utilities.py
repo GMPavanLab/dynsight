@@ -183,6 +183,11 @@ def save_xyz_from_ndarray(
 ) -> None:
     """Saves a .xyz file with the coordinates from a numpy.ndarray.
 
+    This saves an array of coordinates as an .xyz file. This is useful to
+    visualize simple systems' trajectory with visualization tools like Ovito.
+    If your system requires more information that what is stored in a simple
+    .xyz format, you should consider building a Trj object.
+
     Parameters:
         output_file:
             The path to the .xyz output trajectory.
