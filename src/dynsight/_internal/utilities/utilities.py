@@ -173,3 +173,46 @@ def read_xyz(
             row += 1
 
     return pd.DataFrame(data)
+
+
+def save_xyz_from_ndarray(
+    output_path: Path | str,
+    coords: npt.NDArray[np.float64],
+    comment_line: str = "# comment line",
+    atom_type: str = "C",
+) -> None:
+    """Saves a .xyz file with the coordinates from a numpy.ndarray.
+
+    This saves an array of coordinates as an .xyz file. This is useful to
+    visualize simple systems' trajectory with visualization tools like Ovito.
+    If your system requires more information that what is stored in a simple
+    .xyz format, you should consider building a Trj object.
+
+    Parameters:
+        output_file:
+            The path to the .xyz output trajectory.
+
+        coords:
+            The array containing the coordinates of all the particles at each
+            frame. Has shape (n_frames, n_atoms, 3).
+
+        comment_line:
+            The second line in each frame.
+
+        atom_type:
+            The type to assign to all atoms in the trajectory.
+    """
+    if isinstance(output_path, str):
+        output_path = Path(output_path)
+
+    n_coordinates = 3
+    if coords.shape[2] != n_coordinates:
+        msg = "coords array must have shape (n_frames, n_atoms, 3)."
+        raise ValueError(msg)
+
+    with output_path.open("w+") as file:
+        for _, frame in enumerate(coords):
+            print(coords.shape[1], file=file)
+            print(comment_line, file=file)
+            for _, atom in enumerate(frame):
+                print(atom_type, atom[0], atom[1], atom[2], file=file)

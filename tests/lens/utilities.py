@@ -1,10 +1,10 @@
 import re
 
-import numba
 import numpy as np
+from numba import njit
 
 
-@numba.jit  # type: ignore[misc]
+@njit  # type: ignore[untyped-decorator]
 def is_sorted(a: np.ndarray, /) -> bool:  # type: ignore[type-arg]
     """Checks if an array is sorted.
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import filecmp
 from pathlib import Path
 
 import MDAnalysis
@@ -183,3 +184,34 @@ def test_insight_load_errors(file_paths: dict[str, Path]) -> None:
         )
 
     logger.get()
+
+
+def test_dump_xyz_functions(
+    tmp_path: Path,
+    universe: MDAnalysis.Universe,
+    file_paths: dict[str, Path],
+) -> None:
+    """Test methods to dump Trj to .xyz files."""
+    trj = Trj(universe)
+    _, insight = trj.get_coord_number(r_cut=10.0)
+    onion_ins = insight.get_onion_smooth(delta_t=5)
+
+    trj.dump_colored_trj(
+        labels=onion_ins.labels,
+        file_path=tmp_path / "labels.xyz",
+    )
+    assert filecmp.cmp(
+        tmp_path / "labels.xyz",
+        file_paths["files_dir"] / "labels.xyz",
+        shallow=False,
+    )
+
+    trj.dump_xyz_with_insight(
+        insight_list=[insight],
+        file_path=tmp_path / "insight.xyz",
+    )
+    assert filecmp.cmp(
+        tmp_path / "insight.xyz",
+        file_paths["files_dir"] / "insight.xyz",
+        shallow=False,
+    )

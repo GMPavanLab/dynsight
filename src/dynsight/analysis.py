@@ -1,5 +1,6 @@
 """analysis package."""
 
+from dynsight._internal.analysis.dim_reduction import two_nn_estimator
 from dynsight._internal.analysis.entropy import (
     compute_entropy_gain,
     compute_entropy_gain_multi,
@@ -36,4 +37,5 @@ __all__ = [
     "self_time_correlation",
     "shannon",
     "spatialaverage",
+    "two_nn_estimator",
 ]

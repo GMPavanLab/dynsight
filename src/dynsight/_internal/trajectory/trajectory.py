@@ -500,3 +500,42 @@ class Trj:
                         f" {y:.5f} {z:.5f} {label}\n"
                     )
         logger.log(f"Colored trj saved to {file_path}.")
+
+    def dump_xyz_with_insight(
+        self,
+        insight_list: list[Insight],
+        file_path: Path,
+    ) -> None:
+        """Save an .xyz file with the insights values for each atom.
+
+        The output file has columns: atom_type, x, y, z, ins_1, ins_2, ...
+        """
+        trajslice = slice(None) if self.trajslice is None else self.trajslice
+
+        for ins in insight_list:
+            if ins.dataset.shape != (self.n_atoms, self.n_frames):
+                msg = (
+                    f"Shape mismatch: expected ({self.n_atoms}, "
+                    f"{self.n_frames}), but got {ins.dataset.shape}"
+                )
+                logger.log(msg)
+                raise ValueError(msg)
+
+        with file_path.open("w") as f:
+            for i, ts in enumerate(self.universe.trajectory[trajslice]):
+                f.write(f"{self.n_atoms}\n")
+                if ts.dimensions is not None:
+                    box_str = " ".join(f"{x:.5f}" for x in ts.dimensions)
+                else:
+                    box_str = "0 0 0 0 0 0"
+                f.write(f'Lattice="{box_str}" Frame={i}\n')
+                for n in range(self.n_atoms):
+                    x, y, z = ts.positions[n]
+                    desc_values = [ins.dataset[n, i] for ins in insight_list]
+                    descriptors = " ".join(f"{d:.5f}" for d in desc_values)
+                    f.write(
+                        f"{self.universe.atoms[n].name} "
+                        f"{x:.5f} {y:.5f} {z:.5f} "
+                        f"{descriptors}\n"
+                    )
+        logger.log(f"Trajectory with insights saved to {file_path}.")
