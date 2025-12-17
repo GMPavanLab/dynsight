@@ -265,7 +265,7 @@ def compute_lens(
         universe.trajectory[t1]
         pos_env1 = ag_env.positions.astype(np.float64)
         pos_cent1 = ag_cent.positions.astype(np.float64)
-        if respect_pbc and universe.trajectory.ts.dimensions is not None:
+        if universe.trajectory.ts.dimensions is not None:
             box = universe.trajectory.ts.dimensions[:3]
         else:
             coords = universe.atoms.positions
@@ -284,7 +284,7 @@ def compute_lens(
         universe.trajectory[t2]
         pos_env2 = ag_env.positions.astype(np.float64)
         pos_cent2 = ag_cent.positions.astype(np.float64)
-        if respect_pbc and universe.trajectory.ts.dimensions is not None:
+        if universe.trajectory.ts.dimensions is not None:
             box = universe.trajectory.ts.dimensions[:3]
         else:
             coords = universe.atoms.positions
