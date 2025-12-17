@@ -21,7 +21,12 @@ from dynsight.logs import logger
 from dynsight.trajectory import Insight
 
 UNIVAR_DIM = 2
-logging.getLogger("MDAnalysis").setLevel(logging.ERROR)
+# Silence MDAnalysis INFO messages by default
+logging.getLogger("MDAnalysis").setLevel(logging.WARNING)
+
+# Prevent log propagation unless user configures logging
+logging.getLogger("MDAnalysis").addHandler(logging.NullHandler())
+logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 
 @dataclass(frozen=True)
