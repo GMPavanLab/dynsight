@@ -21,7 +21,8 @@ from dynsight.logs import logger
 from dynsight.trajectory import Insight
 
 UNIVAR_DIM = 2
-logging.getLogger("MDAnalysis").setLevel(logging.ERROR)
+logging.getLogger(__name__).addHandler(logging.NullHandler())
+logging.getLogger("MDAnalysis").addHandler(logging.NullHandler())
 
 
 @dataclass(frozen=True)
