@@ -362,7 +362,7 @@ def list_neighbours_along_trajectory(
         pos_env = ag_env.positions.astype(np.float64)
         pos_cent = ag_centers.positions.astype(np.float64)
 
-        if respect_pbc and universe.trajectory.ts.dimensions is not None:
+        if universe.trajectory.ts.dimensions is not None:
             box = universe.trajectory.ts.dimensions[:3]
         else:
             coords = universe.atoms.positions

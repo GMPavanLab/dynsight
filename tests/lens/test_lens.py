@@ -64,10 +64,11 @@ def test_lens(case_data: LENSCaseData) -> None:
 
 
 def test_lens_2d(trj_2d: Trj) -> None:
-    """Test LENS on a 2D system."""
+    """Test LENS and number of neighbors on a 2D system."""
     original_dir = Path(__file__).resolve().parent
 
     test_lens_pbc = trj_2d.get_lens(r_cut=0.1, respect_pbc=True)
+    _ = trj_2d.get_coord_number(r_cut=0.1, respect_pbc=True)
     pbc_path = original_dir / "../systems/lens_2d_pbc.npy"
     if not pbc_path.exists():
         np.save(pbc_path, test_lens_pbc.dataset)
@@ -78,6 +79,7 @@ def test_lens_2d(trj_2d: Trj) -> None:
     assert np.allclose(exp_lens, test_lens_pbc.dataset)
 
     test_lens_fbc = trj_2d.get_lens(r_cut=0.1, respect_pbc=False)
+    _ = trj_2d.get_coord_number(r_cut=0.1, respect_pbc=False)
     fbc_path = original_dir / "../systems/lens_2d_fbc.npy"
     if not fbc_path.exists():
         np.save(fbc_path, test_lens_fbc.dataset)
