@@ -10,6 +10,9 @@ from dynsight._internal.data_processing.classify import (
     mergereferences,
     savereferences,
 )
+from dynsight._internal.data_processing.clusters import (
+    cleaning_cluster_population,
+)
 from dynsight._internal.data_processing.distances import (
     kernelsoap,
     simplekernelsoap,
@@ -20,6 +23,7 @@ from dynsight._internal.data_processing.distances import (
 
 __all__ = [
     "applyclassification",
+    "cleaning_cluster_population",
     "createreferencesfromtrajectory",
     "getdistancebetween",
     "getdistancesfromref",
