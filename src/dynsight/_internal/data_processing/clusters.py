@@ -33,7 +33,8 @@ def cleaning_cluster_population(
             A float value from 0 to 1 that defines the threshold at which 
             small clusters are neglected.
         assigned_env:
-            The label at which smaller clusters are assigned to.
+            The label at which smaller clusters are assigned to, if the label
+            already exists the population extracted will be merged to the existing one.
 
     Returns:
         A NumPy array of the same shape as the input descriptor array,
