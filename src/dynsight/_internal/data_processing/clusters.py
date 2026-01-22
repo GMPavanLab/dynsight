@@ -7,6 +7,7 @@ import numpy as np
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+from dynsight.logs import logger
 
 def cleaning_cluster_population(
     labels: NDArray[np.int64],
@@ -88,6 +89,12 @@ def cleaning_cluster_population(
         if excluded_env is not None
         else np.array([], dtype=np.int64)
     )
+
+    missing = np.setdiff1d(excluded_env, np.unique(labels))
+
+    if missing.size > 0:
+        logger.log(f"Excluded value(s) not found in labels: {missing}")
+
 
     if labels.ndim == dimension:
         flat = labels.ravel()
