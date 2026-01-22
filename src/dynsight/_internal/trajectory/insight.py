@@ -279,7 +279,12 @@ class Insight:
         bins: str | int = "auto",
         number_of_sigmas: float = 3.0,
         max_area_overlap: float = 0.8,
-    ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+    ) -> tuple[
+        NDArray[np.float64],
+        NDArray[np.float64],
+        NDArray[np.float64],
+        NDArray[np.float64],
+    ]:
         """Perform the full onion time resolution analysis.
 
         Note: this method uses the "onion smooth" functions (see documentation
@@ -319,7 +324,9 @@ class Insight:
         )
         n_clust = np.zeros(delta_t_list.size, dtype=int)
         unclass_frac = np.zeros(delta_t_list.size)
-        list_of_labels = np.zeros((self.dataset.shape[0],self.dataset.shape[1],delta_t_list.size))
+        list_of_labels = np.zeros(
+            (self.dataset.shape[0], self.dataset.shape[1], delta_t_list.size)
+        )
         list_of_pop = []
 
         for i, delta_t in enumerate(delta_t_list):
@@ -329,7 +336,7 @@ class Insight:
                 number_of_sigmas,
                 max_area_overlap,
             )
-            list_of_labels[:,:,i] = on_cl.labels
+            list_of_labels[:, :, i] = on_cl.labels
             n_clust[i] = len(on_cl.state_list)
             unclass_frac[i] = np.sum(on_cl.labels == -1) / self.dataset.size
             list_of_pop.append(
