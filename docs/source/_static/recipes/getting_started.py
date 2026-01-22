@@ -1,9 +1,12 @@
 """Code from the Getting Started tutorial."""
 
 from pathlib import Path
+
 from dynsight.trajectory import Trj
 
+
 def main() -> None:
+    """Code from the Getting Started tutorial."""
     # Loading an example trajectory
     files_path = Path("Path/to/the/folder/where/files/are/stored")
     trj = Trj.init_from_xtc(
@@ -26,11 +29,11 @@ def main() -> None:
         data_insight=lens,
         particle_id=1234,
     )
-    
+
     # Exporting a colored trajectory based on the clustering results
     trajslice = slice(0, -1, 1)
     sliced_trj = trj.with_slice(trajslice=trajslice)
-    
+
     lens_onion.dump_colored_trj(
         trj=sliced_trj,
         file_path=files_path / "colored_trj.xyz",
