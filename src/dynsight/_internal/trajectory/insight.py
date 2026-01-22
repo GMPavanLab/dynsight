@@ -310,6 +310,7 @@ class Insight:
                 * delta_t_list: The list of ∆t used.
                 * n_clust: The number of clusters at each ∆t.
                 * unclass_frac: The fraction of unclassified data at each ∆t.
+                * list_of_labels: Labels at each ∆t.
         """
         if delta_t_max is None:
             delta_t_max = self.dataset.shape[1]
@@ -318,6 +319,7 @@ class Insight:
         )
         n_clust = np.zeros(delta_t_list.size, dtype=int)
         unclass_frac = np.zeros(delta_t_list.size)
+        list_of_labels = np.zeros((self.dataset.shape[0],self.dataset.shape[1],delta_t_list.size))
         list_of_pop = []
 
         for i, delta_t in enumerate(delta_t_list):
@@ -327,6 +329,7 @@ class Insight:
                 number_of_sigmas,
                 max_area_overlap,
             )
+            list_of_labels[:,:,i] = on_cl.labels
             n_clust[i] = len(on_cl.state_list)
             unclass_frac[i] = np.sum(on_cl.labels == -1) / self.dataset.size
             list_of_pop.append(
@@ -358,4 +361,4 @@ class Insight:
         logger.log(
             f"Performed full onion clustering analysis with args {attr_dict}."
         )
-        return delta_t_list, n_clust, unclass_frac
+        return delta_t_list, n_clust, unclass_frac, list_of_labels
