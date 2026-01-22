@@ -21,3 +21,27 @@
         top: 0;
     }
 }
+
+.tutorial-card {
+  height: 280px;                 
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.tutorial-card-img {
+  height: 180px;                
+  width: 100%;
+  object-fit: contain;           
+  margin: 0 auto;
+  display: block;
+}
+
+
+.tutorial-card-title {
+  margin-top: auto;             
+  padding-top: 10px;
+  font-weight: 600;
+  text-align: center;
+}
+
