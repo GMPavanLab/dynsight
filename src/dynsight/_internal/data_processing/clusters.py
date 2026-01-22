@@ -14,7 +14,7 @@ def cleaning_cluster_population(
     labels: NDArray[np.int64],
     threshold: float,
     assigned_env: int,
-    excluded_env: NDArray[np.int64] | None = None,
+    excluded_env: int | list[int] | None = None,
 ) -> NDArray[np.int64]:
     """Replace labels of low-population clusters with a reference label.
 
@@ -85,13 +85,14 @@ def cleaning_cluster_population(
         msg = "descriptor_array must be 2D or 3D."
         raise ValueError(msg)
 
-    excluded_env = (
-        excluded_env
-        if excluded_env is not None
-        else np.array([], dtype=np.int64)
-    )
+    if excluded_env is None:
+        excluded_arr: NDArray[np.int64] = np.array([], dtype=np.int64)
+    elif isinstance(excluded_env, int):
+        excluded_arr = np.array([excluded_env], dtype=np.int64)
+    else:
+        excluded_arr = np.array(excluded_env, dtype=np.int64)
 
-    missing = np.setdiff1d(excluded_env, np.unique(labels))
+    missing = np.setdiff1d(excluded_arr, np.unique(labels))
 
     if missing.size > 0:
         logger.log(f"Excluded value(s) not found in labels: {missing}")
@@ -103,7 +104,7 @@ def cleaning_cluster_population(
         populations = counts / flat.size
         small_clusters = unique[populations <= threshold]
 
-        small_clusters = small_clusters[~np.isin(small_clusters, excluded_env)]
+        small_clusters = small_clusters[~np.isin(small_clusters, excluded_arr)]
 
         new_labels = labels.copy()
         if small_clusters.size > 0:
@@ -120,7 +121,7 @@ def cleaning_cluster_population(
             small_clusters = unique[populations <= threshold]
 
             small_clusters = small_clusters[
-                ~np.isin(small_clusters, excluded_env)
+                ~np.isin(small_clusters, excluded_arr)
             ]
 
             if small_clusters.size > 0:
