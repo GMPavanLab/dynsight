@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 def cleaning_cluster_population(
     labels: NDArray[np.int64],
     threshold: float,
-    assigned_env: int = 1,
+    assigned_env: int,
 ) -> NDArray[np.int64]:
     """Replace labels belonging to low-population clusters with a reference environment label.
 
