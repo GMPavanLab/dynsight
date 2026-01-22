@@ -2,7 +2,14 @@
    :hidden:
    :maxdepth: 1
 
-   How to get started <trajectory>
+   The dynsight workflow <workflow>
+
+.. toctree::
+  :hidden:
+  :maxdepth: 2
+  :caption: Tutorials
+
+  Tutorials <tutorials_menu>
 
 .. toctree::
    :hidden:
@@ -18,29 +25,11 @@
    HDF5er <hdf5er>
    logs <logs>
 
-.. toctree::
-  :hidden:
-  :maxdepth: 2
-  :caption: Examples:
-
-  Typical analysis workflow <example_analysis_workflow>
-  Information gain <example_info_gain>
-  Sample Entropy <example_sample_entropy>
 
 .. toctree::
   :hidden:
   :maxdepth: 2
-  :caption: Recipes:
-
-  Descriptors from a Trj <recipe_descr_from_trj>
-  Dimensionality reduction methods <recipe_soap_dim_red>
-  Entropy calculations <recipe_entropy>
-  Information gain analysis <recipe_info_gain>
-
-.. toctree::
-  :hidden:
-  :maxdepth: 2
-  :caption: Modules:
+  :caption: Modules
 
   Modules <modules>
 
