@@ -12,16 +12,21 @@ def cleaning_cluster_population(
     labels: NDArray[np.int64],
     threshold: float,
     assigned_env: int,
+    excluded_env: NDArray[np.int64] | None = None,
 ) -> NDArray[np.int64]:
-    """Replace labels belonging to low-population clusters with a reference environment label.
+    """Replace labels of low-population clusters with a reference label.
 
-    This function identifies clusters whose relative population is below a given threshold and 
-    reassigns their labels to a specified environment.
-    The population of each cluster is computed as the fraction of elements belonging to that label, 
-    either for 2D inputs (`(n_atoms, n_frames)`) or for 3D inputs (`(n_atoms, n_frames, n_dims)`, 
-    where n_dims can correspond to the different ∆t from Onion clustering).
-    Clusters with a population smaller than or equal to the `threshold` are considered negligible 
-    and are replaced by the `assigned_env` label, while all other labels are preserved.
+    This function identifies clusters whose relative population is below a
+    given threshold and reassigns their labels to a specified environment.
+    The population of each cluster is computed as the fraction of elements
+    belonging to that label, either for 2D inputs (`(n_atoms, n_frames)`)
+    or for 3D inputs (`(n_atoms, n_frames, n_dims)`, where n_dims can
+    correspond to the different ∆t from Onion clustering).
+    Clusters with a population smaller than or equal to the `threshold` are
+    considered negligible and are replaced by the `assigned_env` label,
+    while all other labels are preserved.
+    `excluded_env` give the possibility to exclude some clusters from
+    the re-labeling.
 
     Parameters:
         labels:
@@ -30,18 +35,23 @@ def cleaning_cluster_population(
             to either (n_atoms, n_frames) for 2D inputs,
             or (n_atoms, n_frames, n_dims) for 3D inputs.
         threshold:
-            A float value from 0 to 1 that defines the threshold at which 
+            A float value from 0 to 1 that defines the threshold at which
             small clusters are neglected.
         assigned_env:
             The label at which smaller clusters are assigned to, if the label
-            already exists the population extracted will be merged to the existing one.
+            already exists the population extracted will be merged to the
+            existing one.
+        excluded_env:
+            Clusters that need to be preserved even if their population is
+            under the threshold.
 
     Returns:
         A NumPy array of the same shape as the input descriptor array,
         containing the updated labels. If the input
         array is 2D (n_atoms, n_frames), the output will be a 2D array of
-        the same shape. Otherwise, if the input is 3D (n_atoms, n_frames, n_dims),
-        the output will also be a 3D array of the same shape. 
+        the same shape. Otherwise, if the input is 3D
+        (n_atoms, n_frames, n_dims), the output will also be a 3D array
+        of the same shape.
         The labels of bigger clusters are uneffected by the re-labeling.
 
     Raises:
@@ -64,14 +74,20 @@ def cleaning_cluster_population(
                 assigned_env=99,
             )
 
-        In this example, the labels of the smaller clusters (lower than 10%) from 
-        `original_labels` are replaced with label 99. The result is stored in 
-        `cleaned_labels`, a NumPy array.
+        In this example, the labels of the smaller clusters (lower than 10%)
+        from `original_labels` are replaced with label 99. The result is
+        stored in `cleaned_labels`, a NumPy array.
     """
     dimension = 2
     if labels.ndim < dimension or labels.ndim > dimension + 1:
         msg = "descriptor_array must be 2D or 3D."
         raise ValueError(msg)
+
+    excluded_env = (
+        excluded_env
+        if excluded_env is not None
+        else np.array([], dtype=np.int64)
+    )
 
     if labels.ndim == dimension:
         flat = labels.ravel()
@@ -79,6 +95,8 @@ def cleaning_cluster_population(
 
         populations = counts / flat.size
         small_clusters = unique[populations <= threshold]
+
+        small_clusters = small_clusters[~np.isin(small_clusters, excluded_env)]
 
         new_labels = labels.copy()
         if small_clusters.size > 0:
@@ -93,6 +111,10 @@ def cleaning_cluster_population(
 
             populations = counts / flat.size
             small_clusters = unique[populations <= threshold]
+
+            small_clusters = small_clusters[
+                ~np.isin(small_clusters, excluded_env)
+            ]
 
             if small_clusters.size > 0:
                 mask = np.isin(lab, small_clusters)
