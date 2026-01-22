@@ -33,3 +33,11 @@ Classification
   savereferences <_autosummary/dynsight.data_processing.savereferences>
   getreferencesfromdataset <_autosummary/dynsight.data_processing.getreferencesfromdataset>
   applyclassification <_autosummary/dynsight.data_processing.applyclassification>
+
+Clustering
+----------
+
+.. toctree::
+  :maxdepth: 1
+
+  cleaning_cluster_population <_autosummary/dynsight.data_processing.cleaning_cluster_population>
