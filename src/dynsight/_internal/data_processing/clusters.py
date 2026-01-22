@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 from dynsight.logs import logger
 
+
 def cleaning_cluster_population(
     labels: NDArray[np.int64],
     threshold: float,
@@ -94,7 +95,6 @@ def cleaning_cluster_population(
 
     if missing.size > 0:
         logger.log(f"Excluded value(s) not found in labels: {missing}")
-
 
     if labels.ndim == dimension:
         flat = labels.ravel()
