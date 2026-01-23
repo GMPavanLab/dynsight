@@ -118,7 +118,7 @@ The single particle trajectory plot:
 
 It is also possible to save a copy of the trajectory where each particle is labeled
 according to its cluster assignment, using the ``dump_colored_trj()`` method. Notice that, 
-differently from other descriptors - which is computed for every frame, LENS
+differently from other descriptors, which are computed for every frame, LENS
 is computed for every pair of frames. Thus, the LENS dataset has shape
 ``(n_particles, n_frames - 1)``. Consequently, if you need to match the LENS
 values with the particles along the trajectory, you will need to use a sliced
