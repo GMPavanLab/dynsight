@@ -53,7 +53,7 @@ templates_path = ["_templates"]
 exclude_patterns: list[str] = []
 
 suppress_warnings = [
-    "ref.duplicate", # Suppress duplicate reference warnings (such as "here" links)
+    "ref.duplicate",  # duplicate link name warnings (such as "here" links)
 ]
 
 # -- Options for HTML output -------------------------------------------------

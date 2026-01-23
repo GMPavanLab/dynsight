@@ -39,5 +39,6 @@ def main() -> None:
         file_path=files_path / "colored_trj.xyz",
     )
 
+
 if __name__ == "__main__":
     main()
