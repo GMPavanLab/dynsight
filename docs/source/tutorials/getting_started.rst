@@ -27,7 +27,7 @@ object that contains a trajectory, meaning the coordinates of a set of particles
 
 The first step is usually to create a :class:`.trajectory.Trj` object from
 some trajectory file (e.g., `.xtc` and `.gro` files for GROMACS simulation output). In this example, we are using the water/ice
-coexistence trajectory which files can be downloaded here:
+coexistence trajectory, which can be downloaded here:
 
 .. image:: ../_static/tutorials/getting_started/wat_ice.png
    :scale: 50%
