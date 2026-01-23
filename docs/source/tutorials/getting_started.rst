@@ -73,7 +73,7 @@ contains the LENS values computed on the ``trj`` trajectory. Moreover, its
 ``.meta`` attribute stores all the parameters relevant to this descriptor
 computation (in this case, the value of the cutoff radius used, the delay, the centers or the selections used).
 
-3. Clustering analysis (Onion Clustering case)
+3. Clustering analysis using Onion Clustering
 ----------------------------------------------
 
 The :class:`.trajectory.Insight` objects can directly be used to perform post-processing such as smoothing (see the other tutorial pages).
