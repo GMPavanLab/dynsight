@@ -7,7 +7,7 @@ workflow of a typical ``dynsight`` usage is described. Briefly, the reccomended 
 object, and then using the methods of this class to compute the desired. 
 
 In this tutorial, we will show you a minimal example of a ``dynsight`` analysis workflow; 
-starting from loading a trajectory, computing a descriptor and completing
+starting from loading a trajectory, computing a descriptor and finishing
 with clustering analysis. 
 
 At the end of this tutorial, you will find links to download the full ``python`` scripts 
