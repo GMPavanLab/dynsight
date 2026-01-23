@@ -11,7 +11,7 @@ starting from loading a trajectory, computing a descriptor and finishing
 with clustering analysis. 
 
 At the end of this tutorial, you will find links to download the full ``python`` scripts 
-and its relative input files.
+and its relevant input files.
 
 
 1. Loading a trajectory
