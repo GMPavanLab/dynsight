@@ -31,3 +31,10 @@ so stay tuned for future updates!
 
       .. rubric:: More Soon...
          :class: tutorial-card-title
+
+.. toctree::
+  :hidden:
+  :maxdepth: 2
+  :caption: tutorials_list
+
+  Getting Started <tutorials/getting_started>

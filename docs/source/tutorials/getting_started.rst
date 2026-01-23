@@ -38,7 +38,8 @@ coexistence trajectory, which can be downloaded here:
     <a class="btn-download" href="../../../../examples/analysis_workflow/oxygens.gro" download>⬇️ Download the .gro file</a> <br>
     <a class="btn-download" href="../../../../examples/analysis_workflow/oxygens.xtc" download>⬇️ Download the .xtc file</a>
 
-We now can load the trajectory using the :class:`.trajectory.Trj.init_from_xtc()` method:
+We now can load the trajectory using the :class:`.trajectory.Trj.init_from_xtc()` method. All file operations 
+(checking existence, opening, saving, defining a path) is done using the `pathlib <https://docs.python.org/3/library/pathlib.html>`_ library.
 
 .. code-block:: python
 
@@ -52,7 +53,7 @@ We now can load the trajectory using the :class:`.trajectory.Trj.init_from_xtc()
     )
 
 Other methods to load trajectories are listed `here <../_autosummary/dynsight.trajectory.Trj.html>`_ and can be simply
-replaced with your format (we will add more formats in the future).
+replaced with your format (If you need another format, please submit an issue `here <https://github.com/GMPavanLab/dynsight/issues>`_).
 
 2. Computing a descriptor (the LENS case)
 -----------------------------------------
@@ -76,7 +77,7 @@ computation (in this case, the value of the cutoff radius used, the delay, the c
 3. Clustering analysis using Onion Clustering
 ----------------------------------------------
 
-The :class:`.trajectory.Insight` objects can directly be used to perform post-processing such as smoothing (see the other tutorial pages).
+The :class:`.trajectory.Insight` objects can directly be used to perform post-processing such as smoothing (see the other `tutorials pages <../tutorials_menu.html>`_).
 But they can also be used to perform clustering analysis. In this example, we will show how to use the
 ``Onion Clustering`` method (`published paper <https://doi.org/10.1073/pnas.2403771121>`_) to cluster the LENS values computed above.
 

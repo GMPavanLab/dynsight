@@ -1,7 +1,7 @@
 The ``dynsight`` workflow
 =========================
 
-The dynsight platform has been designed to merge different tecniques or methods into a single, 
+The dynsight platform has been designed to merge different techniques or methods into a single, 
 user-friendly workflow. The final aim is to allow users to easily build complex analysis pipelines
 with minimal effort and with a single software. 
 
@@ -21,8 +21,8 @@ to trajectories originating from molecular dynamics simulations as well as from 
 Trajectory
 ----------
 
-All the ``dynsight`` applications operate on trajectory files containing
-particles coordinates sampled over time. At its actual state, ``dynsight``
+All the ``dynsight`` applications operate on trajectories, loaded from standard file types, containing
+particles coordinates sampled over time. In its current state, ``dynsight``
 supports some among the most common trajectory formats, such as .xtc, .xyz, as well as trajectories
 provided through ``MDAnalysis`` Universes.
 
@@ -35,12 +35,12 @@ Dataset and analyses
 Once a trajectory is loaded into a :class:`.trajectory.Trj` object, users can compute a variety of
 descriptors using the methods provided by this class. The full list of methods is available `here <_autosummary/dynsight.trajectory.Trj.html>`_.
 
-Most of these methods return datasets encapsulated in :class:`.trajectory.Insight` objects, which can be target of post-processing analyses
-or clustering methods. There are also specific type of Insight objects, such as :class:`.trajectory.OnionInsight` that contains tailored
-visualization methods or analysis for speicific algorithm (such as the Onion Clustering algorithm in this case).
+Most of these methods return datasets encapsulated in :class:`.trajectory.Insight` objects, which can be a target of post-processing analyses
+or clustering methods. There are also specific types of Insight objects, such as :class:`.trajectory.OnionInsight` that contain tailored
+visualization methods or analysis for specific algorithms (such as the Onion Clustering algorithm in this case).
 
-Example and tutorials
----------------------
+Examples and tutorials
+----------------------
 
 As a minimal example, a typical code for the computation of the LENS descriptor
 may look like this:
