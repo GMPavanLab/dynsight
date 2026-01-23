@@ -52,9 +52,6 @@ intersphinx_mapping = {
 templates_path = ["_templates"]
 exclude_patterns: list[str] = []
 
-suppress_warnings = [
-    "ref.duplicate",  # duplicate link name warnings (such as "here" links)
-]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
