@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
     from numpy.typing import NDArray
@@ -55,9 +54,7 @@ class AutoFiltInsight:
     meta: dict[str, Any] = field(default_factory=dict, repr=False)
     filtered_collection: tuple[NDArray[np.float64], ...] = field(
         default_factory=tuple, repr=False
-     )
-
-
+    )
 
 
 def _resolve_dataset_path(user_path: str | Path) -> Path:
@@ -141,8 +138,6 @@ def _freq_label_for_folder(freq_hz: float) -> str:
     if freq_hz >= freq_kilo:
         return f"{freq_hz / freq_kilo:.3f}kHz"
     return f"{freq_hz:.3f}Hz"
-
-
 
 
 class AutoFilteringPipeline:
@@ -254,7 +249,6 @@ class AutoFilteringPipeline:
         logger.log(f"Using signals -> shape {signals.shape}")
 
         return signals
-
 
     def _select_output_dir(self, out_dir: str | Path | None) -> Path:
         """Create and return output directory path."""
@@ -453,8 +447,6 @@ class AutoFilteringPipeline:
                 rand_atoms = np.argsort(rng.random(self.n_series))[:n_pick]
                 rand_atoms = rand_atoms.tolist()
 
-
-
                 length = filtered_trim.shape[1]
                 original_aligned = self.original_trim[:, -length:]
 
@@ -624,7 +616,6 @@ class AutoFilteringPipeline:
             meta=meta,
             filtered_collection=tuple(self.filtered_collection),
         )
-
 
     def _compute_fft_summed(
         self, signals: NDArray[np.float64], dt: float
@@ -865,7 +856,6 @@ class AutoFilteringPipeline:
             else []
         )
 
-
         traces = [raw_trim[i] for i in picks]
 
         frames.append(
@@ -890,7 +880,6 @@ class AutoFilteringPipeline:
                 if n_series
                 else []
             )
-
 
             traces = [filt[i] for i in picks]
 
@@ -1205,4 +1194,3 @@ class AutoFilteringPipeline:
         fig.tight_layout()
 
         return self._finalize_frame(fig)
-
