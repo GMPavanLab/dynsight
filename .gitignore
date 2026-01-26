@@ -15,8 +15,10 @@ examples/analysis_workflow/colored_trj.xyz
 examples/info_gain/trj_*.npy
 tests/systems/coex/.*
 tests/systems/.*
+.DS_Store
 
 .mypy_cache
 .pytest_cache
 .ruff_cache
 .venv
+
