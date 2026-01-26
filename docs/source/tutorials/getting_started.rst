@@ -21,7 +21,7 @@ The ``dynsight.trajectory`` module provides a unified set of tools that
 streamline the analysis of many-body trajectories, offering a consistent and
 user-friendly interface across most analysis tasks. 
 
-This is achieved through the classe, :class:`.trajectory.Trj`, which corresponds to an
+This is achieved through the class, :class:`.trajectory.Trj`, which corresponds to an
 object that contains a trajectory, meaning the coordinates of a set of particles over a series of frames. 
 
 
