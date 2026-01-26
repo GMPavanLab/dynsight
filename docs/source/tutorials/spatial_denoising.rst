@@ -42,6 +42,10 @@ It captures local structural changes or transitions in the neighborhood of every
 
 To compute ``TimeSOAP``, we first need to compute the ``SOAP`` spectra. In ``dynsight``, we can use the :class:`.trajectory.Trj.get_soap()` method:
 
+.. warning::
+    Consider that the computation of ``SOAP`` can be computationally expensive depending on the system size or the parameters used and can produce very large datasets. 
+    It is recommended to tune the ``n_max`` or ``l_max`` parameter and speed up the calculation with ``n_jobs`` (according to the amount of CPU cores of your machine).
+
 .. code-block:: python
 
     # Computing SOAP descriptor
