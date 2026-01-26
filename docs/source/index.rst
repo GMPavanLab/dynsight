@@ -106,11 +106,15 @@ Developer Setup
 
 .. _`just`: https://github.com/casey/just
 
-Examples
-========
+Tutorials and examples
+======================
 
-There are examples throughout the documentation and available in
-the ``examples/`` directory of this repository.
+We provide and continuously update a set of tutorials to help new users to
+get started with ``dynsight``. They are available at the following link: 
+https://dynsight.readthedocs.io/en/latest/tutorials_menu.html.
+
+There are also examples throughout the documentation and available in
+the ``examples/`` directory of the GitHub repository (https://github.com/GMPavanLab/dynsight/tree/main/examples).
 
 Related works and packages
 ==========================
