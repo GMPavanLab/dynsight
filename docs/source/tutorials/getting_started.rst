@@ -61,13 +61,16 @@ replaced with your format (If you need another format, please submit an issue `h
 Now the ``trj`` variable contains the trajectory, and using the methods of the
 :class:`.trajectory.Trj` class we can perform all the dynsight analyses on
 this trajectory. For instance, let's say we want to compute the LENS 
-descriptor (`published paper <https://doi.org/10.1073/pnas.2300565120>`__).
+descriptor (`Crippa et al. <https://doi.org/10.1073/pnas.2300565120>`__).
 This can be easily done using the :class:`.trajectory.Trj.get_lens()` method after the trajectory loading:
 
 .. code-block:: python
 
     # Adjust n_jobs according to your computer capabilities
     lens = trj.get_lens(r_cut=10, n_jobs=4)
+
+.. important::
+    The units for the ``r_cut`` parameter are the same as those used in the trajectory (In this case Angstroms).
 
 The method :class:`.trajectory.Trj.get_lens()` returns a
 :class:`.trajectory.Insight` object (``lens``), which in its ``.dataset`` attribute
@@ -80,7 +83,7 @@ computation (in this case, the value of the cutoff radius used, the delay, the c
 
 The :class:`.trajectory.Insight` objects can directly be used to perform post-processing such as smoothing (see the other `tutorials pages <../tutorials_menu.html>`_).
 But they can also be used to perform clustering analysis. In this example, we will show how to use the
-``Onion Clustering`` method (`published paper <https://doi.org/10.1073/pnas.2403771121>`__) to cluster the LENS values computed above.
+``Onion Clustering`` method (`Becchi et al. <https://doi.org/10.1073/pnas.2403771121>`__) to cluster the LENS values computed above.
 
 We can perform clustering on the ``lens`` object, using for
 instance the :class:`Insight.get_onion_smooth()` method with a time window of 10 frames: 
