@@ -51,3 +51,9 @@ so stay tuned for future updates!
 
   Getting Started <tutorials/getting_started>
   Spatial Denoising <tutorials/spatial_denoising>
+
+Other example files
+-------------------
+
+You can find more scripts in the `examples folder <https://github.com/GMPavanLab/dynsight/tree/main/examples>`__ of the dynsight 
+GitHub repository.
