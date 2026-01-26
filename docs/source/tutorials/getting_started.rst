@@ -4,7 +4,7 @@ Getting Started
 Welcome to the first tutorial of the dynsight platform. 
 Before start, we strongly suggest to read the `dynsight workflow page <../workflow.html>`_ where the typical
 workflow of a typical ``dynsight`` usage is described. Briefly, the reccomended way to use ``dynsight`` is via loading a trajectory into a :class:`.trajectory.Trj`
-object, and then using the methods of this class to compute the desired. 
+object, and then using the methods of this class to compute the desired descriptors and/or analyses.
 
 In this tutorial, we will show you a minimal example of a ``dynsight`` analysis workflow; 
 starting from loading a trajectory, computing a descriptor and finishing
