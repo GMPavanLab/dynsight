@@ -10,11 +10,12 @@ def main() -> None:
     # Loading an example trajectory
     files_path = Path("Path/to/the/folder/where/files/are/stored")
     trj = Trj.init_from_xtc(
-        traj_file=files_path / "oxygens.xtc",
-        topo_file=files_path / "oxygens.gro",
+        traj_file=files_path / "ice_water_ox.xtc",
+        topo_file=files_path / "ice_water_ox.gro",
     )
     # Computing a descriptor
-    lens = trj.get_lens(r_cut=7.5)
+    # Adjust n_jobs according to your computer capabilities
+    lens = trj.get_lens(r_cut=10, n_jobs=4)
 
     # Performing Onion Clustering on the descriptor computed
     lens_onion = lens.get_onion_smooth(delta_t=10)

@@ -48,8 +48,8 @@ We now can load the trajectory using the :class:`.trajectory.Trj.init_from_xtc()
 
     files_path = Path("Path/to/the/folder/where/files/are/stored")
     trj = Trj.init_from_xtc(
-        traj_file=files_path / "oxygens.xtc",
-        topo_file=files_path / "oxygens.gro",
+        traj_file=files_path / "ice_water_ox.xtc",
+        topo_file=files_path / "ice_water_ox.gro",
     )
 
 Other methods to load trajectories are listed `here <../_autosummary/dynsight.trajectory.Trj.html>`__ and can be simply
@@ -66,7 +66,8 @@ This can be easily done using the :class:`.trajectory.Trj.get_lens()` method aft
 
 .. code-block:: python
 
-    lens = trj.get_lens(r_cut=7.5)
+    # Adjust n_jobs according to your computer capabilities
+    lens = trj.get_lens(r_cut=10, n_jobs=4)
 
 The method :class:`.trajectory.Trj.get_lens()` returns a
 :class:`.trajectory.Insight` object (``lens``), which in its ``.dataset`` attribute
@@ -150,6 +151,6 @@ Full scripts and input files
 
 .. raw:: html
 
-    <a class="btn-download" href="../../../../examples/analysis_workflow/oxygens.gro" download>⬇️ Download the .gro file</a> <br>
-    <a class="btn-download" href="../../../../examples/analysis_workflow/oxygens.xtc" download>⬇️ Download the .xtc file</a> <br>
+    <a class="btn-download" href="../_static/simulations/ice_water_ox.gro" download>⬇️ Download the .gro file</a> <br>
+    <a class="btn-download" href="../_static/simulations/ice_water_ox.xtc" download>⬇️ Download the .xtc file</a> <br>
     <a class="btn-download" href="../_static/recipes/getting_started.py" download>⬇️ Download Python Script</a>
