@@ -27,25 +27,13 @@ so stay tuned for future updates!
       :link-type: doc
       :class-card: tutorial-card
 
-      .. image:: _static/tutorials/getting_started/colored_wat_ice_lens_10.png
+      .. image:: _static/tutorials/spatial_denoising/denoised_onion_analysis.png
          :alt: Spatial Denoising
          :class: tutorial-card-img
 
       .. rubric:: Spatial Denoising
          :class: tutorial-card-title
 
-   .. grid-item-card::
-      :link: tutorials/onion_analysis
-      :link-type: doc
-      :class-card: tutorial-card
-
-      .. image:: _static/tutorials/getting_started/colored_wat_ice_lens_10.png
-         :alt: Onion Analysis
-         :class: tutorial-card-img
-
-      .. rubric:: Onion Analysis
-         :class: tutorial-card-title
-         
    .. grid-item-card::
       :class-card: tutorial-card
 
@@ -62,3 +50,4 @@ so stay tuned for future updates!
   :caption: tutorials_list
 
   Getting Started <tutorials/getting_started>
+  Spatial Denoising <tutorials/spatial_denoising>
