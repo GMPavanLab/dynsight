@@ -39,7 +39,7 @@ coexistence trajectory, which can be downloaded here:
     <a class="btn-download" href="../../../../examples/analysis_workflow/oxygens.xtc" download>⬇️ Download the .xtc file</a>
 
 We now can load the trajectory using the :class:`.trajectory.Trj.init_from_xtc()` method. All file operations 
-(checking existence, opening, saving, defining a path) is done using the `pathlib <https://docs.python.org/3/library/pathlib.html>`_ library.
+(checking existence, opening, saving, defining a path) are done using the `pathlib <https://docs.python.org/3/library/pathlib.html>`_ library.
 
 .. code-block:: python
 
