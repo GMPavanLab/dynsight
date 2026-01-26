@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
 
-project = "dynsight"
+project = ""
 project_copyright = "2023, Andrew Tarzia"
 author = "Andrew Tarzia"
 
@@ -57,6 +57,7 @@ exclude_patterns: list[str] = []
 
 html_theme = "furo"
 html_static_path = ["_static"]
+html_logo = "_static/logo_dynsight.png"
 
 
 def setup(app: Sphinx) -> None:

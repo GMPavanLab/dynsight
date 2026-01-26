@@ -8,228 +8,383 @@ if TYPE_CHECKING:
     from MDAnalysis import AtomGroup, Universe
     from numpy.typing import NDArray
 
-from multiprocessing import Pool
 
+import numba
 import numpy as np
-from MDAnalysis.lib.NeighborSearch import AtomNeighborSearch
+from numba import njit, prange
 
 
-def _process_neighbour_frame(
-    args: tuple[Universe, AtomGroup, float, int, int],
-) -> tuple[int, list[NDArray[np.float64]]]:
-    universe, selection, cutoff, traj_frame, result_index = args
+@njit(cache=True, fastmath=True)  # type: ignore[misc]
+def _pbc_diff(
+    dx: NDArray[np.float64],
+    box: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Find distances in PBC box."""
+    for k in range(3):
+        if box[k] > 0.0:
+            dx[k] -= np.rint(dx[k] / box[k]) * box[k]
+    return dx
 
-    universe.trajectory[traj_frame]
-    neigh_search = AtomNeighborSearch(
-        universe.atoms, box=universe.trajectory.ts.dimensions
-    )
 
-    neigh_list_per_atom = [
-        neigh_search.search(atom, cutoff).ix for atom in selection
+@njit(cache=True, fastmath=True)  # type: ignore[misc]
+def build_cell_list(
+    positions: NDArray[np.float64],
+    box: NDArray[np.float64],
+    cell_size: float,
+) -> tuple[
+    NDArray[np.int32],
+    NDArray[np.int32],
+    NDArray[np.int32],
+    NDArray[np.int32],
+]:
+    """Build a 3D periodic cell list."""
+    n_atoms = positions.shape[0]
+    min_cells = 3
+    ncellx = max(min_cells, int(box[0] // cell_size))
+    ncelly = max(min_cells, int(box[1] // cell_size))
+    ncellz = max(min_cells, int(box[2] // cell_size))
+    n_cells = ncellx * ncelly * ncellz
+
+    head = np.full(n_cells, -1, dtype=np.int32)
+    next_ = np.full(n_atoms, -1, dtype=np.int32)
+    cell_ids = np.empty((n_atoms, 3), dtype=np.int32)
+
+    for i in range(n_atoms):
+        cx = int(positions[i, 0] / box[0] * ncellx) % ncellx
+        cy = int(positions[i, 1] / box[1] * ncelly) % ncelly
+        cz = int(positions[i, 2] / box[2] * ncellz) % ncellz
+        cell_ids[i, 0] = cx
+        cell_ids[i, 1] = cy
+        cell_ids[i, 2] = cz
+        cindex = cx * ncelly * ncellz + cy * ncellz + cz
+        next_[i] = head[cindex]
+        head[cindex] = i
+    n_cell = np.array([ncellx, ncelly, ncellz])
+
+    return cell_ids, head, next_, n_cell
+
+
+# We need a function this complex and deep for numba to work
+# This is why we are ignoring ruff complaints C901, PLR0912
+@njit(cache=True, fastmath=True, parallel=True)  # type: ignore[misc]
+def neighbor_list_celllist_centers(  # noqa: C901, PLR0912
+    positions_env: NDArray[np.float64],
+    positions_cent: NDArray[np.float64],
+    r_cut: float,
+    box: NDArray[np.float64],
+    respect_pbc: bool,
+) -> tuple[NDArray[np.int32], NDArray[np.int32]]:
+    """Build a CSR neighbor list *only for the centers*."""
+    n_cent = positions_cent.shape[0]
+    r_cut2 = (r_cut - 1e-6) ** 2
+
+    _, head, next_, n_cell = build_cell_list(positions_env, box, r_cut)
+    nx, ny, nz = n_cell
+
+    n_neigh = np.zeros(n_cent, dtype=np.int32)
+    # ---- count the neighbors for each center ----
+    for i in prange(n_cent):
+        cx = int(positions_cent[i, 0] / box[0] * nx) % nx
+        cy = int(positions_cent[i, 1] / box[1] * ny) % ny
+        cz = int(positions_cent[i, 2] / box[2] * nz) % nz
+
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                for dz in (-1, 0, 1):
+                    nx_ = (cx + dx) % nx
+                    ny_ = (cy + dy) % ny
+                    nz_ = (cz + dz) % nz
+                    cidx = nx_ * ny * nz + ny_ * nz + nz_
+                    j = head[cidx]
+                    while j != -1:
+                        dr = positions_env[j] - positions_cent[i]
+                        if respect_pbc:
+                            dr = _pbc_diff(dr, box)
+                        dr2 = dr[0] ** 2 + dr[1] ** 2 + dr[2] ** 2
+                        if j != i and dr2 < r_cut2:
+                            n_neigh[i] += 1
+                        j = next_[j]
+
+    indptr = np.empty(n_cent + 1, dtype=np.int32)
+    indptr[0] = 0
+    for i in range(n_cent):
+        indptr[i + 1] = indptr[i] + n_neigh[i]
+
+    indices = np.empty(indptr[-1], dtype=np.int32)
+    cursor = np.zeros(n_cent, dtype=np.int32)
+
+    # ---- fill up neighbors' lists ----
+    for i in prange(n_cent):
+        cx = int(positions_cent[i, 0] / box[0] * nx) % nx
+        cy = int(positions_cent[i, 1] / box[1] * ny) % ny
+        cz = int(positions_cent[i, 2] / box[2] * nz) % nz
+
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                for dz in (-1, 0, 1):
+                    nx_ = (cx + dx) % nx
+                    ny_ = (cy + dy) % ny
+                    nz_ = (cz + dz) % nz
+                    cidx = nx_ * ny * nz + ny_ * nz + nz_
+                    j = head[cidx]
+                    while j != -1:
+                        dr = positions_env[j] - positions_cent[i]
+                        if respect_pbc:
+                            dr = _pbc_diff(dr, box)
+                        dr2 = dr[0] ** 2 + dr[1] ** 2 + dr[2] ** 2
+                        if j != i and dr2 < r_cut2:
+                            pos_i = indptr[i] + cursor[i]
+                            indices[pos_i] = j
+                            cursor[i] += 1
+                        j = next_[j]
+
+    # sort each list (needed for computing intersections)
+    for i in range(n_cent):
+        s, e = indptr[i], indptr[i + 1]
+        if e > s + 1:
+            indices[s:e].sort()
+
+    return indptr, indices
+
+
+@njit(cache=True, fastmath=True)  # type: ignore[misc]
+def lens_from_two_csr(
+    indptr1: NDArray[np.int32],
+    indices1: NDArray[np.int32],
+    indptr2: NDArray[np.int32],
+    indices2: NDArray[np.int32],
+) -> NDArray[np.float64]:
+    """Return LENS distance between two neighbor lists.
+
+    Note: CSR lists do NOT include the particle istelf.
+    """
+    n_centers = len(indptr1) - 1
+    out = np.zeros(n_centers, dtype=np.float64)
+    for u in range(n_centers):
+        s1, e1 = indptr1[u], indptr1[u + 1]
+        s2, e2 = indptr2[u], indptr2[u + 1]
+        a = e1 - s1
+        b = e2 - s2
+        denom = a + b  # -2
+        if denom <= 0:
+            out[u] = 0.0
+            continue
+
+        i, j = s1, s2
+        inter = 0
+        while i < e1 and j < e2:
+            vi = indices1[i]
+            vj = indices2[j]
+            if vi == vj:
+                inter += 1
+                i += 1
+                j += 1
+            elif vi < vj:
+                i += 1
+            else:
+                j += 1
+
+        numer = (a + b) - 2 * inter
+        out[u] = numer / denom
+    return out
+
+
+def compute_lens(
+    universe: Universe,
+    r_cut: float,
+    delay: int = 1,
+    centers: str = "all",
+    selection: str = "all",
+    trajslice: slice | None = None,
+    respect_pbc: bool = True,
+    n_jobs: int = 1,
+) -> NDArray[np.float64]:
+    r"""Compute the LENS descriptor for all frames along a trajectory.
+
+    LENS was developed by Martina Crippa, see
+    https://doi.org/10.1073/pnas.2300565120.
+    The current implementation is mainly due to @SimoneMartino98.
+
+    .. warning::
+
+        The LENS functions only work with orthogonal simulation boxes. We are
+        working to make them compatible with non-orthogonal ones.
+
+    The LENS value of a particle between two frames is deined as:
+
+    .. math::
+
+        LENS(t, t + \delta t) =
+        \frac{|C(t)\cup C(t+\delta t)| - |C(t)\cap C(t+\delta t)|}
+        {|C(t)| + |C(t+\delta t)|}
+
+    where :math:`C(t)` and :math:`C(t+\delta t)` are the neighbors' list of
+    the particle at frames :math:`t` and :math:`t+\delta t` respectively.
+
+    Parameters:
+        universe :
+            MDAnalysis Universe containing the trajectory.
+        r_cut :
+            r_cut distance (Å) for defining neighbors.
+        delay :
+            Number of frames separating the pairs for comparison.
+        centers :
+            Atom selection string for the centers where LENS is computed.
+        selection :
+            Atom selection string defining the environment.
+        trajslice :
+            Frame slicing parameters for trajectory iteration.
+        respect_pbc :
+            Whether to apply periodic boundary conditions.
+        n_jobs :
+            The number of jobs for parallelization with numba.
+
+    Returns:
+        LENS values for each center and each pair of frames. Has shape
+            (n_centers, n_pairs)
+    """
+    numba.set_num_threads(n_jobs)
+
+    ag_env = universe.select_atoms(selection)
+    ag_cent = universe.select_atoms(centers)
+
+    if trajslice is not None:
+        fr_idx = list(range(universe.trajectory.n_frames))[trajslice]
+    else:
+        fr_idx = list(range(universe.trajectory.n_frames))
+    pairs = [
+        (fr_idx[i], fr_idx[i + delay]) for i in range(len(fr_idx) - delay)
     ]
+    if not pairs:
+        msg = "No valid pairs found."
+        raise RuntimeError(msg)
 
-    return result_index, neigh_list_per_atom
+    lens_array = np.zeros((ag_cent.n_atoms, len(pairs)), dtype=np.float64)
+    for k, (t1, t2) in enumerate(pairs):
+        # ---- frame t1 ----
+        universe.trajectory[t1]
+        pos_env1 = ag_env.positions.astype(np.float64)
+        pos_cent1 = ag_cent.positions.astype(np.float64)
+        if respect_pbc and universe.trajectory.ts.dimensions is not None:
+            box = universe.trajectory.ts.dimensions[:3]
+        else:
+            coords = universe.atoms.positions
+            mins = coords.min(axis=0)
+            maxs = coords.max(axis=0)
+            box = (maxs - mins) * 1.01
+        indptr_t1, indices_t1 = neighbor_list_celllist_centers(
+            positions_env=pos_env1,
+            positions_cent=pos_cent1,
+            r_cut=r_cut,
+            box=box,
+            respect_pbc=respect_pbc,
+        )
+
+        # ---- frame t2 ----
+        universe.trajectory[t2]
+        pos_env2 = ag_env.positions.astype(np.float64)
+        pos_cent2 = ag_cent.positions.astype(np.float64)
+        if respect_pbc and universe.trajectory.ts.dimensions is not None:
+            box = universe.trajectory.ts.dimensions[:3]
+        else:
+            coords = universe.atoms.positions
+            mins = coords.min(axis=0)
+            maxs = coords.max(axis=0)
+            box = (maxs - mins) * 1.01
+        indptr_t2, indices_t2 = neighbor_list_celllist_centers(
+            positions_env=pos_env2,
+            positions_cent=pos_cent2,
+            r_cut=r_cut,
+            box=box,
+            respect_pbc=respect_pbc,
+        )
+
+        # ---- LENS ----
+        lens_array[:, k] = lens_from_two_csr(
+            indptr1=indptr_t1,
+            indices1=indices_t1,
+            indptr2=indptr_t2,
+            indices2=indices_t2,
+        )
+
+    return lens_array
 
 
 def list_neighbours_along_trajectory(
-    input_universe: Universe,
-    cutoff: float,
+    universe: Universe,
+    r_cut: float,
+    centers: str = "all",
     selection: str = "all",
     trajslice: slice | None = None,
-    num_processes: int = 1,
+    respect_pbc: bool = True,
+    n_jobs: int = 1,
 ) -> list[list[AtomGroup]]:
-    """Produce a per-frame list of the neighbors, atom by atom.
+    """Produce a per-frame list of neighbors.
 
-    * Original author: Martina Crippa
+    .. warning::
+
+        The LENS functions only work with orthogonal simulation boxes. We are
+        working to make them compatible with non-orthogonal ones.
 
     Parameters:
-        input_universe:
-            The universe, or the atom group containing the trajectory.
-        cutoff:
-            The maximum neighbor distance.
-        selection:
-            Selection of atoms taken from the Universe for the computation.
-            More information concerning the selection language can be found
-            `here <https://userguide.mdanalysis.org/stable/selections.html>`_
-        trajslice:
-            The slice of the trajectory to consider. Defaults to slice(None).
-        num_processes:
-            The number of processes to use for parallel computation.
-            **Warning:** Adjust this based on the available cores.
+        universe :
+            MDAnalysis Universe containing the trajectory.
+        r_cut :
+            r_cut distance (Å) for defining neighbors.
+        centers :
+            Atom selection string for the centers where LENS is computed.
+        selection :
+            Atom selection string defining the environment.
+        trajslice :
+            Frame slicing parameters for trajectory iteration.
+        respect_pbc :
+            Whether to apply periodic boundary conditions.
+        n_jobs :
+            The number of jobs for parallelization with numba.
 
     Returns:
-        list[list[AtomGroup]]:
-            List of AtomGroups with the neighbors of each atom for each frame.
-
-    Example:
-
-        .. testsetup:: lens1-test
-
-            import pathlib
-
-            path = pathlib.Path('source/_static/ex_test_files')
-
-        .. testcode:: lens1-test
-
-            import numpy as np
-            import MDAnalysis
-            from dynsight.lens import list_neighbours_along_trajectory
-
-            univ = MDAnalysis.Universe(path / "trajectory.xyz")
-            cutoff = 2.0
-
-            neigh_counts = list_neighbours_along_trajectory(
-                input_universe=univ,
-                cutoff=cutoff,
-            )
-
-        .. testcode:: lens1-test
-            :hide:
-
-            assert neigh_counts[0][0][3] == 17
-
-        All supported input file formats by MDAnalysis can be used
-        to set up the Universe.
+        List of frames, each frame a list of AtomGroups for each atom.
     """
     if trajslice is None:
         trajslice = slice(None)
-    selected_atoms = input_universe.select_atoms(selection)
+
+    ag_centers = universe.select_atoms(centers)
+    ag_env = universe.select_atoms(selection)
+
     frame_indices = list(
-        range(*trajslice.indices(input_universe.trajectory.n_frames))
+        range(*trajslice.indices(universe.trajectory.n_frames))
     )
 
-    if num_processes < 1:
-        msg = "num_processes cannot be negative or zero."
-        raise ValueError(msg)
+    numba.set_num_threads(n_jobs)
 
-    if num_processes == 1:
-        neigh_list_per_frame = []
-        for traj_frame in frame_indices:
-            input_universe.trajectory[traj_frame]
-            neigh_search = AtomNeighborSearch(
-                input_universe.atoms,
-                box=input_universe.trajectory.ts.dimensions,
-            )
-            neigh_list_per_atom = [
-                neigh_search.search(atom, cutoff).ix for atom in selected_atoms
-            ]
-            neigh_list_per_frame.append(neigh_list_per_atom)
-        return neigh_list_per_frame
+    def _compute_frame_neighbors(frame_idx: int) -> list[AtomGroup]:
+        universe.trajectory[frame_idx]
+        pos_env = ag_env.positions.astype(np.float64)
+        pos_cent = ag_centers.positions.astype(np.float64)
 
-    args = [
-        (input_universe, selected_atoms, cutoff, frame, i)
-        for i, frame in enumerate(frame_indices)
-    ]
+        if respect_pbc and universe.trajectory.ts.dimensions is not None:
+            box = universe.trajectory.ts.dimensions[:3]
+        else:
+            coords = universe.atoms.positions
+            mins = coords.min(axis=0)
+            maxs = coords.max(axis=0)
+            box = maxs - mins
 
-    with Pool(processes=num_processes) as pool:
-        results = pool.map(_process_neighbour_frame, args)
-
-    ordered_results = dict(results)
-
-    return [ordered_results[i] for i in range(len(frame_indices))]
-
-
-def neighbour_change_in_time(
-    neigh_list_per_frame: list[list[AtomGroup]],
-    delay: int = 1,
-) -> tuple[
-    NDArray[np.float64],
-    NDArray[np.int64],
-    NDArray[np.float64],
-    NDArray[np.float64],
-]:
-    """Return, listed per atom, the LENS values at each frame.
-
-    * Original author: Martina Crippa
-
-    Parameters:
-        neigh_list_per_frame:
-            A frame-by-frame list of the neighbors of each atom, output
-            of :func:`listNeighboursAlongTrajecøtory`.
-
-        delay:
-            The delay between frames on which LENS is computed. Default is 1.
-
-    Returns:
-        tuple:
-            - lens_array: The calculated LENS parameter.
-                It's a np.array of shape (n_particles, n_frames - delay + 1)
-            - number_of_neighs: The count of neighbors per frame.
-                It's a np.array of shape (n_particles, n_frames)
-            - lens_numerators: The numerators used for calculating LENS.
-                It's a np.array of shape (n_particles, n_frames - delay + 1)
-            - lens_denominators: The denominators used for calculating LENS.
-                It's a np.array of shape (n_particles, n_frames - delay + 1)
-
-    Note:
-        The first frame of the output array is identically zero. This is due
-        to compatibility with older code.
-
-    Example:
-
-        .. testsetup:: lens2-test
-
-            import pathlib
-
-            path = pathlib.Path('source/_static/ex_test_files')
-
-        .. testcode:: lens2-test
-
-            import numpy as np
-            import MDAnalysis
-            import dynsight.lens as lens
-
-            univ = MDAnalysis.Universe(path / "trajectory.xyz")
-            cutoff = 3.0
-
-            neig_counts = lens.list_neighbours_along_trajectory(
-                input_universe=univ,
-                cutoff=cutoff,
-            )
-
-            lens, n_neigh, *_ = lens.neighbour_change_in_time(neig_counts)
-
-        .. testcode:: lens2-test
-            :hide:
-
-            assert lens[0][4] == 0.75
-
-        All supported input file formats by MDAnalysis can be used
-        to set up the Universe.
-    """
-    n_atoms = np.asarray(neigh_list_per_frame, dtype=object).shape[1]
-    n_frames = np.asarray(neigh_list_per_frame, dtype=object).shape[0]
-
-    lens_array = np.zeros((n_atoms, n_frames - delay + 1))
-    number_of_neighs = np.zeros((n_atoms, n_frames), dtype=int)
-    lens_numerators = np.zeros((n_atoms, n_frames - delay + 1))
-    lens_denominators = np.zeros((n_atoms, n_frames - delay + 1))
-
-    # each nnlist contains also the atom that generates them,
-    # so 0 nn is a 1 element list
-    for atom_id in range(n_atoms):
-        number_of_neighs[atom_id, 0] = (
-            neigh_list_per_frame[0][atom_id].shape[0] - 1
+        # --- Build neighbor list (CSR form) ---
+        indptr, indices = neighbor_list_celllist_centers(
+            positions_env=pos_env,
+            positions_cent=pos_cent,
+            r_cut=r_cut,
+            box=box,
+            respect_pbc=respect_pbc,
         )
-        # let's calculate the numerators and the denominators
-        for frame in range(delay, n_frames - delay + 1):
-            number_of_neighs[atom_id, frame] = (
-                neigh_list_per_frame[frame][atom_id].shape[0] - 1
-            )
-            lens_denominators[atom_id, frame] = (
-                neigh_list_per_frame[frame][atom_id].shape[0]
-                + neigh_list_per_frame[frame - delay][atom_id].shape[0]
-                - 2
-            )
-            lens_numerators[atom_id, frame] = np.setxor1d(
-                neigh_list_per_frame[frame][atom_id],
-                neigh_list_per_frame[frame - delay][atom_id],
-            ).shape[0]
 
-    den_not_0 = lens_denominators != 0
+        # --- Reconstruct AtomGroups per center ---
+        frame_neighbors: list[AtomGroup] = []
+        for i in range(ag_centers.n_atoms):
+            start, end = indptr[i], indptr[i + 1]
+            neighbor_atoms = ag_env[indices[start:end]]
+            frame_neighbors.append(neighbor_atoms)
+        return frame_neighbors
 
-    lens_array[den_not_0] = (
-        lens_numerators[den_not_0] / lens_denominators[den_not_0]
-    )
-
-    return lens_array, number_of_neighs, lens_numerators, lens_denominators
+    return [_compute_frame_neighbors(frame) for frame in frame_indices]

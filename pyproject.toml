@@ -11,7 +11,7 @@ maintainers = [
 ]
 
 dependencies = [
-    "numpy",
+    "numpy<2",
     "dscribe",
     "tropea-clustering",
     "MDAnalysis",
@@ -21,6 +21,7 @@ dependencies = [
     "deeptime",
     "imageio",
     "seaborn",
+    "infomeasure",
 ]
 
 # Set by cpctools.
@@ -135,5 +136,6 @@ module = [
     'sklearn.decomposition.*',
     'imageio.*',
     'seaborn.*',
+    'infomeasure.*',
 ]
 ignore_missing_imports = true

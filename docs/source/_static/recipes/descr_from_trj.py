@@ -21,7 +21,7 @@ def main() -> None:
         selection="all",  # compute on a selection of particles
         centers="all",  # compute for a selection of centers
         respect_pbc=False,  # consider PBC
-        n_core=1,  # use multiprocessing to speed up calculations
+        n_jobs=1,  # use multiprocessing to speed up calculations
     )
 
     # Loading an example trajectory
@@ -38,11 +38,10 @@ def main() -> None:
         neigcounts=None,  # it will be computed and returned
     )
 
-    # Now for LENS we already have neigcounts
-    _, lens = trj.get_lens(
+    # Computing LENS
+    lens = trj.get_lens(  # noqa: F841
         r_cut=2.0,  # cutoff radius for neighbors list
         selection="all",  # compute on a selection of particles
-        neigcounts=neigcounts,  # no need to compute it again
     )
 
 

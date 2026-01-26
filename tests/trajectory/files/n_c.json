@@ -1,8 +1,9 @@
 {
     "dataset_file": "n_c.npy",
     "meta": {
-        "r_cut": 10.0,
-        "delay": 1,
+        "name": "coord_number",
+        "r_cut": 15.0,
+        "centers": "all",
         "selection": "all"
     }
 }
