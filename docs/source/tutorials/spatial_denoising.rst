@@ -5,7 +5,7 @@ Welcome to the spatial denoising tutorial.
 
 In this tutorial, we will show you the effect of noise reduction by using
 the spatial denoising algorithm implemented in ``dynsight`` (Related paper: `Donkor et al. <https://doi.org/10.1021/acs.jpclett.4c00383>`__, `Martino et al. <https://doi.org/10.1088/2632-2153/adfa66>`__).
-We will also explain a new application of the Onion Clustering algorithm to explore different time resolutions for the classification (:class:`.trajectory.Insight.get_onion_analysis()`). 
+We will also explain another application of the Onion Clustering algorithm to explore different time resolutions for the classification (:class:`.trajectory.Insight.get_onion_analysis()`). 
 
 
 At the end of this tutorial, you will find links to download the full ``python`` scripts 

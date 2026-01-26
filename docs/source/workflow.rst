@@ -27,7 +27,7 @@ supports some among the most common trajectory formats, such as .xtc, .xyz, as w
 provided through ``MDAnalysis`` Universes.
 
 Descriptor calculations in ``dynsight`` are performed via the :class:`.trajectory.Trj` class which
-wraps an ``MDAnalysis`` Universe.
+wraps an ``MDAnalysis.Universe``.
 
 Dataset and analyses
 --------------------
