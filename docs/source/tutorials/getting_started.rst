@@ -41,16 +41,22 @@ coexistence trajectory, which can be downloaded here:
 We now can load the trajectory using the :class:`.trajectory.Trj.init_from_xtc()` method. All file operations 
 (checking existence, opening, saving, defining a path) are done using the `pathlib <https://docs.python.org/3/library/pathlib.html>`_ library.
 
-.. code-block:: python
+.. testcode:: getting_started_test
 
     from pathlib import Path
     from dynsight.trajectory import Trj
 
-    files_path = Path("Path/to/the/folder/where/files/are/stored")
+    files_path = Path("source/_static/simulations")
     trj = Trj.init_from_xtc(
         traj_file=files_path / "ice_water_ox.xtc",
         topo_file=files_path / "ice_water_ox.gro",
     )
+
+.. testcode:: getting_started_test
+    :hide:
+
+    assert trj.n_atoms == 2048
+    assert trj.n_frames == 1001
 
 Other methods to load trajectories are listed `here <../_autosummary/dynsight.trajectory.Trj.html>`__ and can be simply
 replaced with your format (If you need another format, please submit an issue `here <https://github.com/GMPavanLab/dynsight/issues>`__).
@@ -129,10 +135,17 @@ is computed for every pair of frames. Thus, the LENS dataset has shape
 values with the particles along the trajectory, you will need to use a sliced
 trajectory (removing the last frame). The easiest way to do this is:
 
-.. code-block:: python
+.. testcode:: getting_started_test
 
     trajslice = slice(0, -1, 1)
     sliced_trj = trj.with_slice(trajslice=trajslice)
+
+.. testcode:: getting_started_test
+    :hide:
+
+    assert isinstance(sliced_trj, Trj)
+    assert sliced_trj.n_atoms == 2048
+    assert sliced_trj.n_frames == trj.n_frames - 1
 
 Then we can dump the colored trajectory:
 
@@ -157,3 +170,24 @@ Full scripts and input files
     <a class="btn-download" href="../_static/simulations/ice_water_ox.gro" download>⬇️ Download the .gro file</a> <br>
     <a class="btn-download" href="../_static/simulations/ice_water_ox.xtc" download>⬇️ Download the .xtc file</a> <br>
     <a class="btn-download" href="../_static/recipes/getting_started.py" download>⬇️ Download Python Script</a>
+
+
+.. testcode:: getting_started_test
+    :hide:
+
+    import numpy as np
+    from dynsight.trajectory import OnionSmoothInsight
+
+    trj_test = trj.with_slice(slice(0, 4, 1))
+
+    expected_tests = Path("source/_static/tutorials/getting_started/doctests")
+
+    lens_test = trj_test.get_lens(r_cut=10, n_jobs=1)
+
+    reference_lens = np.load(expected_tests / "test_lens.npy")
+    assert np.allclose(lens_test.dataset, reference_lens, atol=1e-6)
+
+    lens_onion = lens_test.get_onion_smooth(delta_t=10)
+
+    assert isinstance(lens_onion, OnionSmoothInsight)
+

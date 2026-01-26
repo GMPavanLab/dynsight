@@ -16,16 +16,22 @@ and its relevant input files.
 
 As explained in the `getting started tutorial <./getting_started.html>`_, the first step is to load a trajectory into a :class:`.trajectory.Trj` object:
 
-.. code-block:: python
+.. testcode:: spatial_denoising_test
 
     from pathlib import Path
     from dynsight.trajectory import Trj
 
-    files_path = Path("Path/to/the/folder/where/files/are/stored")
+    files_path = Path("source/_static/simulations")
     trj = Trj.init_from_xtc(
         traj_file=files_path / "ice_water_ox.xtc",
         topo_file=files_path / "ice_water_ox.gro",
     )
+
+.. testcode:: spatial_denoising_test
+    :hide:
+
+    assert trj.n_atoms == 2048
+    assert trj.n_frames == 1001
 
 In this tutorial, we will use the descriptor ``TimeSOAP`` ( `Caruso et al. <https://doi.org/10.1063/5.0147025>`__). 
 
@@ -68,7 +74,7 @@ We can now use this dataset to obtain the ``TimeSOAP`` descriptor with the :clas
 
 Alternatively, we can compute the ``SOAP`` and ``TimeSOAP`` descriptors in a single step by using the :class:`.trajectory.Trj.get_timesoap()` method directly:
 
-.. code-block:: python
+.. code-block:: spatial_denoising_test
 
     soap, tsoap = trj.get_timesoap(r_cut=10, n_max=8, l_max=8, n_jobs=4)
 
@@ -84,7 +90,7 @@ Particles that cannot be assigned to a cluster are labeled as "unclassified frac
 
 Through the :class:`.trajectory.Insight.get_onion_analysis()` method, we can perform the Onion Clustering recursively for different time windows (``delta_t``).
 
-.. code-block:: python
+.. code-block:: spatial_denoising_test
 
     # Performing Onion Clustering on the descriptor computed
     tsoap.get_onion_analysis(
@@ -110,7 +116,7 @@ This algorithm works by averaging the descriptor values of neighboring particles
 As seen in the `getting started tutorial <./getting_started.html>`_ for LENS, also TimeSOAP is computed for every pair of frames. Thus, the resulting dataset has shape
 ``(n_particles, n_frames - 1)``. Consequently, we need to remove the last frame from the trajectory:
 
-.. code-block:: python
+.. code-block:: spatial_denoising_test
 
     # Applying Spatial Denoising
     sliced_trj = trj.with_slice(slice(0, -1, 1))
@@ -122,7 +128,7 @@ As seen in the `getting started tutorial <./getting_started.html>`_ for LENS, al
 
 We can now repeat the Onion Clustering analysis on the denoised descriptor:
 
-.. code-block:: python
+.. code-block:: spatial_denoising_test
 
     # Performing Onion Clustering on the descriptor computed
     sp_denoised_tsoap.get_onion_analysis(
@@ -145,7 +151,7 @@ Now we can select a specific time window and visualize the clustering results fo
 time window the one that corresponds to the highest number of clusters and longest ``delta_t`` (in this case, ``delta_t=37`` frames). 
 This choice should guarantee that the clusters identified are stable for longer time.
 
-.. code-block:: python
+.. code-block:: spatial_denoising_test
 
     single_point_onion = tsoap.get_onion_smooth(
         delta_t=37,
@@ -179,3 +185,43 @@ Full scripts and input files
     <a class="btn-download" href="../_static/simulations/ice_water_ox.gro" download>⬇️ Download the .gro file</a> <br>
     <a class="btn-download" href="../_static/simulations/ice_water_ox.xtc" download>⬇️ Download the .xtc file</a> <br>
     <a class="btn-download" href="../_static/recipes/spatial_denoising.py" download>⬇️ Download Python Script</a>
+
+.. testcode:: spatial_denoising_test
+    :hide:
+
+    import numpy as np
+
+    trj_test = trj.with_slice(slice(0, 2, 1))
+
+    expected_tests = Path("source/_static/tutorials/spatial_denoising/doctests")
+
+    soap_test = trj_test.get_soap(
+        r_cut=10, 
+        n_max=8,
+        l_max=8,
+        n_jobs=1, # Adjust n_jobs according to your computer capabilities
+    )
+
+    reference_soap = np.load(expected_tests / "test_soap.npy")
+
+    assert soap_test.meta["r_cut"]==10
+    assert soap_test.meta["n_max"]==8
+    assert soap_test.meta["l_max"]==8
+    assert np.allclose(soap_test.dataset, reference_soap, atol=1e-6)
+    
+    _, tsoap_test = trj.get_timesoap(
+        soap_insight=soap_test,
+    )
+
+    reference_tsoap = np.load(expected_tests / "test_tsoap.npy")
+    assert np.allclose(tsoap_test.dataset, reference_tsoap, atol=1e-6)
+
+    sliced_trj_test = trj.with_slice(slice(0, 1, 1))
+    sp_denoised_tsoap_test = tsoap_test.spatial_average(
+        trj=sliced_trj_test,
+        r_cut=10,
+        n_jobs=1,
+    )
+
+    reference_denoised_tsoap = np.load(expected_tests / "test_denoised_tsoap.npy")
+    assert np.allclose(sp_denoised_tsoap_test.dataset, reference_denoised_tsoap, atol=1e-6)
