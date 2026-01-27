@@ -28,6 +28,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx_copybutton",
     "sphinx.ext.mathjax",
+    "sphinx_design",
 ]
 
 # Check if SOAPify is available
