@@ -73,7 +73,10 @@ This can be easily done using the :class:`.trajectory.Trj.get_lens()` method aft
 .. code-block:: python
 
     # Adjust n_jobs according to your computer capabilities
-    lens = trj.get_lens(r_cut=10, n_jobs=4)
+    lens = trj.get_lens(
+        r_cut=10,
+        n_jobs=4
+    )
 
 .. important::
     The units for the ``r_cut`` parameter are the same as those used in the trajectory (In this case Angstroms).

@@ -77,7 +77,12 @@ Alternatively, we can compute the ``SOAP`` and ``TimeSOAP`` descriptors in a sin
 
 .. code-block:: python
 
-    soap, tsoap = trj.get_timesoap(r_cut=10, n_max=8, l_max=8, n_jobs=4)
+    soap, tsoap = trj.get_timesoap(
+        r_cut=10,
+        n_max=8,
+        l_max=8,
+        n_jobs=4
+    )
 
 The ``tsoap`` and ``soap`` variables are the same :class:`.trajectory.Insight` objects computed above.
 
@@ -157,12 +162,18 @@ This choice should guarantee that the clusters identified are stable for longer 
     single_point_onion = tsoap.get_onion_smooth(
         delta_t=37,
     )
-    single_point_onion.dump_colored_trj(sliced_trj, files_path / "onion_trj.xyz")
+    single_point_onion.dump_colored_trj(
+        sliced_trj,
+        files_path / "onion_trj.xyz",
+    )
 
     denoised_single_point_onion = sp_denoised_tsoap.get_onion_smooth(
         delta_t=37,
     )
-    denoised_single_point_onion.dump_colored_trj(sliced_trj, files_path / "onion_trj_denoised.xyz")
+    denoised_single_point_onion.dump_colored_trj(
+        sliced_trj,
+        files_path / "onion_trj_denoised.xyz",
+    )
 
 The resulting colored snapshots for the two descriptors (raw on the left, denoised on the right) are shown below:
 
