@@ -33,7 +33,7 @@ As explained in the `getting started tutorial <./getting_started.html>`_, the fi
     assert trj.n_atoms == 2048
     assert trj.n_frames == 1001
 
-In this tutorial, we will use the descriptor ``TimeSOAP`` ( `Caruso et al. <https://doi.org/10.1063/5.0147025>`__). 
+In this tutorial, we will use the descriptor ``TimeSOAP`` (`Caruso et al. <https://doi.org/10.1063/5.0147025>`__). 
 
 
 Before understanding what ``TimeSOAP`` is, we need to define the Smooth Overlap of Atomic Positions (``SOAP``) spectra (`Bartók et al. <https://doi.org/10.1103/PhysRevB.87.184115>`__).
@@ -49,6 +49,7 @@ It captures local structural changes or transitions in the neighborhood of every
 To compute ``TimeSOAP``, we first need to compute the ``SOAP`` spectra. In ``dynsight``, we can use the :class:`.trajectory.Trj.get_soap()` method:
 
 .. warning::
+
     Consider that the computation of ``SOAP`` can be computationally expensive depending on the system size or the parameters used and can produce very large datasets. 
     It is recommended to tune the ``n_max`` or ``l_max`` parameter and speed up the calculation with ``n_jobs`` (according to the amount of CPU cores of your machine).
 
@@ -62,7 +63,7 @@ To compute ``TimeSOAP``, we first need to compute the ``SOAP`` spectra. In ``dyn
         n_jobs=4, # Adjust n_jobs according to your computer capabilities
     )
 
-the ``soap`` variable is a :class:`.trajectory.Insight` object that contains the computed ``SOAP`` spectra. 
+The ``soap`` variable is a :class:`.trajectory.Insight` object that contains the computed ``SOAP`` spectra. 
 We can now use this dataset to obtain the ``TimeSOAP`` descriptor with the :class:`.trajectory.Insight.get_timesoap()` method:
 
 .. code-block:: python
@@ -74,7 +75,7 @@ We can now use this dataset to obtain the ``TimeSOAP`` descriptor with the :clas
 
 Alternatively, we can compute the ``SOAP`` and ``TimeSOAP`` descriptors in a single step by using the :class:`.trajectory.Trj.get_timesoap()` method directly:
 
-.. code-block:: spatial_denoising_test
+.. code-block:: python
 
     soap, tsoap = trj.get_timesoap(r_cut=10, n_max=8, l_max=8, n_jobs=4)
 
@@ -90,7 +91,7 @@ Particles that cannot be assigned to a cluster are labeled as "unclassified frac
 
 Through the :class:`.trajectory.Insight.get_onion_analysis()` method, we can perform the Onion Clustering recursively for different time windows (``delta_t``).
 
-.. code-block:: spatial_denoising_test
+.. code-block:: python
 
     # Performing Onion Clustering on the descriptor computed
     tsoap.get_onion_analysis(
@@ -116,7 +117,7 @@ This algorithm works by averaging the descriptor values of neighboring particles
 As seen in the `getting started tutorial <./getting_started.html>`_ for LENS, also TimeSOAP is computed for every pair of frames. Thus, the resulting dataset has shape
 ``(n_particles, n_frames - 1)``. Consequently, we need to remove the last frame from the trajectory:
 
-.. code-block:: spatial_denoising_test
+.. code-block:: python
 
     # Applying Spatial Denoising
     sliced_trj = trj.with_slice(slice(0, -1, 1))
@@ -128,7 +129,7 @@ As seen in the `getting started tutorial <./getting_started.html>`_ for LENS, al
 
 We can now repeat the Onion Clustering analysis on the denoised descriptor:
 
-.. code-block:: spatial_denoising_test
+.. code-block:: python
 
     # Performing Onion Clustering on the descriptor computed
     sp_denoised_tsoap.get_onion_analysis(
@@ -151,7 +152,7 @@ Now we can select a specific time window and visualize the clustering results fo
 time window the one that corresponds to the highest number of clusters and longest ``delta_t`` (in this case, ``delta_t=37`` frames). 
 This choice should guarantee that the clusters identified are stable for longer time.
 
-.. code-block:: spatial_denoising_test
+.. code-block:: python
 
     single_point_onion = tsoap.get_onion_smooth(
         delta_t=37,

@@ -26,13 +26,7 @@ def main() -> None:
     _, tsoap = trj.get_timesoap(
         soap_insight=soap,
     )
-    """
-    Alternatively time soap can be also calculated as:
 
-    soap, tsoap = trj.get_timesoap(r_cut=10, n_max=8, l_max=8)
-
-    (this command computes SOAP and then TimeSOAP)
-    """
     # Performing Onion Clustering on the descriptor computed
     tsoap.get_onion_analysis(
         delta_t_min=2,

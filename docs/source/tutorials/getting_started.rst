@@ -94,7 +94,6 @@ But they can also be used to perform clustering analysis. In this example, we wi
 We can perform clustering on the ``lens`` object, using for
 instance the :class:`Insight.get_onion_smooth()` method with a time window of 10 frames: 
 
-
 .. code-block:: python
     
     lens_onion = lens.get_onion_smooth(delta_t=10)
@@ -170,7 +169,6 @@ Full scripts and input files
     <a class="btn-download" href="../_static/simulations/ice_water_ox.gro" download>⬇️ Download the .gro file</a> <br>
     <a class="btn-download" href="../_static/simulations/ice_water_ox.xtc" download>⬇️ Download the .xtc file</a> <br>
     <a class="btn-download" href="../_static/recipes/getting_started.py" download>⬇️ Download Python Script</a>
-
 
 .. testcode:: getting_started_test
     :hide:
