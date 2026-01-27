@@ -9,8 +9,6 @@ from dynsight.data_processing import cleaning_cluster_population
 
 from .case_data import CleanPopCaseData
 
-# ---------------- Tests ----------------
-
 
 def test_clean_pop_noexcl(case_data: CleanPopCaseData) -> None:
     original_dir = Path(__file__).resolve().parent
@@ -60,4 +58,4 @@ def test_clean_pop_noexcl(case_data: CleanPopCaseData) -> None:
             "Clean_pop test files were not present. They have been created."
         )
     exp_clean_pop = np.load(expected_clean_pop)
-    assert np.allclose(exp_clean_pop, test_clean_pop, atol=1e-6)
+    assert np.array_equal(exp_clean_pop, test_clean_pop)
