@@ -95,7 +95,7 @@ def cleaning_cluster_population(
     missing = np.setdiff1d(excluded_arr, np.unique(labels))
 
     if missing.size > 0:
-        logger.log(f"Excluded value(s) not found in labels: {missing}")
+        logger.warning(f"Excluded value(s) not found in labels: {missing}")
 
     if labels.ndim == dimension:
         flat = labels.ravel()

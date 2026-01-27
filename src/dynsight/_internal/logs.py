@@ -107,6 +107,18 @@ class Logger:
         console.info(msg)
         self._log.append(history_entry)
 
+    def warning(self, msg: str) -> None:
+        """Records an informational warning message to the log.
+
+        Parameters:
+            msg:
+                The message to record.
+        """
+        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        history_entry = f"[{timestamp}] {msg}"
+        console.warning(msg)
+        self._log.append(history_entry)
+
     def save_history(self, filename: Path) -> None:
         """Saves the current log history to a text file.
 
