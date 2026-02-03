@@ -15,8 +15,12 @@ examples/analysis_workflow/colored_trj.xyz
 examples/info_gain/trj_*.npy
 tests/systems/coex/.*
 tests/systems/.*
+.DS_Store
+.ice_water_ox.xtc_offsets.lock
+.ice_water_ox.xtc_offsets.npz
 
 .mypy_cache
 .pytest_cache
 .ruff_cache
 .venv
+
