@@ -68,7 +68,7 @@ class Logger:
     def __init__(
         self,
         *,
-        auto_recording: bool = True,
+        auto_recording: bool = False,
     ) -> None:
         self._log: list[str] = []
         self._recorded_data: list[RecordedDataset] = []
@@ -79,7 +79,7 @@ class Logger:
     def configure(
         self,
         *,
-        auto_recording: bool = True,
+        auto_recording: bool = False,
     ) -> None:
         """Adjusts the runtime configuration of the logger.
 

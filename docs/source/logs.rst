@@ -3,17 +3,17 @@ Logs
 
 dynsight logging system.
 
-.. warning::
+.. note::
 
-   A default instance of :class:`Logger` is **automatically created** when importing the ``dynsight`` package.  
-   This instance is available as ``dynsight.logs.logger``.
-
-   You can configure it, for example to disable the automatic recording of datasets, using:
+   A default :class:`Logger` is istantiated to keep the user updated on the ongoing computational steps.
+   
+   An option of :class:`Logger` that automatically saves and records the dataset
+   can be activated after importing the ``dynsight`` package by using:
 
    .. code-block:: python
 
       import dynsight
-      dynsight.logs.logger.configure(auto_recording=False)
+      dynsight.logs.logger.configure(auto_recording=True)
 
    You can also access all its attributes and methods described in the Logs page below.
 
