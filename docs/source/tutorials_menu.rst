@@ -35,6 +35,18 @@ so stay tuned for future updates!
          :class: tutorial-card-title
 
    .. grid-item-card::
+      :link: tutorials/tips_and_tricks
+      :link-type: doc
+      :class-card: tutorial-card
+
+      .. image:: _static/tutorials/spatial_denoising/denoised_onion_analysis.png
+         :alt: Tips and Tricks
+         :class: tutorial-card-img
+
+      .. rubric:: Tips and Tricks
+         :class: tutorial-card-title
+
+   .. grid-item-card::
       :class-card: tutorial-card
 
       .. image:: _static/logo_dynsight.png
@@ -51,6 +63,7 @@ so stay tuned for future updates!
 
   Getting Started <tutorials/getting_started>
   Spatial Denoising <tutorials/spatial_denoising>
+  Tips and Tricks <tutorials/tips_and_tricks>
 
 Other example files
 -------------------
