@@ -281,9 +281,9 @@ class Insight:
         max_area_overlap: float = 0.8,
     ) -> tuple[
         NDArray[np.float64],
+        NDArray[np.int64],
         NDArray[np.float64],
-        NDArray[np.float64],
-        NDArray[np.float64],
+        NDArray[np.int64],
     ]:
         """Perform the full onion time resolution analysis.
 
@@ -325,7 +325,8 @@ class Insight:
         n_clust = np.zeros(delta_t_list.size, dtype=int)
         unclass_frac = np.zeros(delta_t_list.size)
         list_of_labels = np.zeros(
-            (self.dataset.shape[0], self.dataset.shape[1], delta_t_list.size)
+            (self.dataset.shape[0], self.dataset.shape[1], delta_t_list.size),
+            dtype=np.int64,
         )
         list_of_pop = []
 
