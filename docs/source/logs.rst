@@ -15,7 +15,8 @@ dynsight logging system.
       import dynsight
       dynsight.logs.logger.configure(auto_recording=True)
 
-   You can also access all its attributes and methods described in the Logs page below.
+The automatically stored datasets can be extracted using the
+:meth:`Logger.extract_datasets` method. A complete list of available attributes and methods is provided below.
 
 -----
 Usage
