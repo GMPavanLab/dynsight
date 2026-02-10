@@ -6,7 +6,7 @@ from tests.lens.case_data import LENSCaseData
 @pytest.fixture(
     scope="session",
     params=(
-        # Case 0: Default case
+        # Case 0: default case
         lambda name: LENSCaseData(
             expected_lens="c0_lens_rc3_d1_all_all_1.npy",
             r_cut=3,
