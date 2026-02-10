@@ -39,7 +39,7 @@ so stay tuned for future updates!
       :link-type: doc
       :class-card: tutorial-card
 
-      .. image:: _static/tutorials/spatial_denoising/denoised_onion_analysis.png
+      .. image:: _static/tutorials/tips_and_tricks/tips_and_tricks_logo.png
          :alt: Tips and Tricks
          :class: tutorial-card-img
 
