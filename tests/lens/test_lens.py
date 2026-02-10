@@ -11,7 +11,7 @@ from dynsight.utilities import save_xyz_from_ndarray
 
 from .case_data import LENSCaseData
 
-# ---------------- Fixturesas --------------
+# ---------------- Fixtures ----------------
 
 
 @pytest.fixture
