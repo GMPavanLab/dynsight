@@ -81,7 +81,7 @@ def cleaning_cluster_population(
         stored in `cleaned_labels`, a NumPy array.
     """
     dimension = 2
-    if labels.ndim not in (dimension, dimension +1):
+    if labels.ndim not in (dimension, dimension + 1):
         msg = "descriptor_array must be 2D or 3D."
         raise ValueError(msg)
 
