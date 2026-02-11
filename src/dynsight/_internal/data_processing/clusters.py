@@ -81,7 +81,7 @@ def cleaning_cluster_population(
         stored in `cleaned_labels`, a NumPy array.
     """
     dimension = 2
-    if labels.ndim < dimension or labels.ndim > dimension + 1:
+    if labels.ndim not in (dimension, dimension +1):
         msg = "descriptor_array must be 2D or 3D."
         raise ValueError(msg)
 
@@ -110,7 +110,7 @@ def cleaning_cluster_population(
         if small_clusters.size > 0:
             new_labels[np.isin(labels, small_clusters)] = assigned_env
 
-    if labels.ndim == dimension + 1:
+    elif labels.ndim == dimension + 1:
         new_labels = labels.copy()
         for i in range(labels.shape[2]):
             lab = labels[:, :, i]
