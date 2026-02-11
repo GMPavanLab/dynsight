@@ -11,7 +11,7 @@ At the end of every section, you will find links to download the full ``python``
 and its relevant input files.
 
 As an example, we consider the ouput of the analysis computed in the `spatial denoising tutorial <./spatial_denoising.html>`_.
-Briefly, we consider the denoised ``TimeSOAP`` descriptor that can be ontained from:
+Briefly, we consider the denoised ``TimeSOAP`` descriptor that can be obtained from:
 
 .. code-block:: python
 
@@ -97,9 +97,9 @@ Briefly, we consider the denoised ``TimeSOAP`` descriptor that can be ontained f
     reference_denoised_tsoap = np.load(expected_tests / "test_denoised_tsoap.npy")
     assert np.allclose(sp_denoised_tsoap_test.dataset, reference_denoised_tsoap, atol=1e-6)
 
-For further details users should refers to `spatial denoising tutorial <./spatial_denoising.html>`_.
+For further details users should refer to `spatial denoising tutorial <./spatial_denoising.html>`_.
 
-Figure `cluster_population.png` shows the population of every cluster, where blue refers to the unclassified fraction:
+Figure ``cluster_population.png`` shows the population of every cluster, where blue refers to the unclassified fraction:
 
 .. image:: ../_static/tutorials/cleaning_cluster_population/cluster_population.png
    :scale: 15%
@@ -122,14 +122,14 @@ class :class:`.data_processing.cleaning_cluster_population()`:
 
     cleaned_labels = cleaning_cluster_population(labels, threshold=0.05, assigned_env=-1)
 
-where `leaned_labels` has the same dimensions as `labels`. Now we can reproduce the plot with the number 
+where ``leaned_labels`` has the same dimensions as ``labels``. Now we can reproduce the plot with the number 
 of clusters and the unclassified fraction after re-organizing the data:
 
 .. code-block:: python
     
     import dynsight
     
-    delta_t_list = onion_output[:, 0]  #since unchanged, windows can be copied from above
+    delta_t_list = onion_output[:, 0]  # Since unchanged, windows can be copied from above.
     
     n_clust = np.zeros(delta_t_list.shape[0],dtype=np.int64)
     unclass_frac = np.zeros(delta_t_list.shape[0])
@@ -188,7 +188,7 @@ of clusters and the unclassified fraction after re-organizing the data:
 
 On the left are reported the results from Onion clustering on the denoised time-series (`denoised_onion_analysis.png`
 from `spatial denoising tutorial <./spatial_denoising.html>`_), while on the rigth is reported the figure 
-`cleaned_onion_analysis.png` 
+``cleaned_onion_analysis.png``. 
 
 .. image:: ../_static/tutorials/spatial_denoising/denoised_onion_analysis.png
    :scale: 8%
