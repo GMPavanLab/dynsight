@@ -50,14 +50,15 @@ def main() -> None:
     # Assigning clusters with population <5% to the unclassified environment
     # (label=-1)
     cleaned_labels = cleaning_cluster_population(
-        labels, threshold=0.05, assigned_env=-1
+        labels,
+        threshold=0.05,
+        assigned_env=-1,
     )
 
     # Updating the data and plotting the cleaned number of clusters and
-    # unclassified fraction
-    delta_t_list = onion_output[
-        :, 0
-    ]  # since unchanged, windows can be copied from above
+    # unclassified fraction.
+    # Since unchanged, windows can be copied from above.
+    delta_t_list = onion_output[:, 0]
 
     n_clust = np.zeros(delta_t_list.shape[0], dtype=np.int64)
     unclass_frac = np.zeros(delta_t_list.shape[0])
