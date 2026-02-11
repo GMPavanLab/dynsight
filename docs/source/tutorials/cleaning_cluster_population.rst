@@ -1,21 +1,14 @@
-Tips and Tricks
-===============
-
-Welcome to the Tips and Trick section of the dynsight platform.
-Here we will show you additional hints that can help you when analyzing your data.
-
-
-At the end of every section, you will find links to download the full ``python`` scripts 
-and its relevant input files.
-
-Cleaning cluster population
----------------------------
+Cleaning Cluster Population
+===========================
 
 Sometimes, clusters obtained with Onion Clustering analysis can be very small.
 To better interpret the results, it can be useful to remove those ones by assigning them to 
 the cluster of the unclassified particles.
 This is achieved through the class, :class:`.data_processing.cleaning_cluster_population()`, which 
 assign the cluster under a certain population threshold to a specific cluster selected by the user. 
+
+At the end of every section, you will find links to download the full ``python`` scripts 
+and its relevant input files.
 
 As an example, we consider the ouput of the analysis computed in the `spatial denoising tutorial <./spatial_denoising.html>`_.
 Briefly, we consider the denoised ``TimeSOAP`` descriptor that can be ontained from:
@@ -52,7 +45,7 @@ Briefly, we consider the denoised ``TimeSOAP`` descriptor that can be ontained f
         fig2_path=files_path / "cluster_population.png",
     )
 
-.. testcode:: tips_and_tricks_test
+.. testcode:: cleaning_cluster_population_test
     :hide:
     
     from pathlib import Path
@@ -67,7 +60,7 @@ Briefly, we consider the denoised ``TimeSOAP`` descriptor that can be ontained f
     assert trj.n_atoms == 2048
     assert trj.n_frames == 1001
 
-.. testcode:: tips_and_tricks_test
+.. testcode:: cleaning_cluster_population_test
     :hide:
 
     import numpy as np
@@ -108,7 +101,7 @@ For further details users should refers to `spatial denoising tutorial <./spatia
 
 Figure `cluster_population.png` shows the population of every cluster, where blue refers to the unclassified fraction:
 
-.. image:: ../_static/tutorials/tips_and_tricks/cluster_population.png
+.. image:: ../_static/tutorials/cleaning_cluster_population/cluster_population.png
    :scale: 15%
    :align: center
 
@@ -148,7 +141,7 @@ of clusters and the unclassified fraction after re-organizing the data:
 
     dynsight.onion.plot_smooth.plot_time_res_analysis("cleaned_onion_analysis.png", cleaned_onion_output)
 
-.. testcode:: tips_and_tricks_test
+.. testcode:: cleaning_cluster_population_test
     :hide:
 
     from dynsight.data_processing import cleaning_cluster_population
@@ -201,7 +194,7 @@ from `spatial denoising tutorial <./spatial_denoising.html>`_), while on the rig
    :scale: 8%
    :align: left
 
-.. image:: ../_static/tutorials/tips_and_tricks/cleaned_onion_analysis.png
+.. image:: ../_static/tutorials/cleaning_cluster_population/cleaned_onion_analysis.png
    :scale: 8%
    :align: right
 

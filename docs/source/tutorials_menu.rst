@@ -7,6 +7,8 @@ to help you get started with dynsight and explore its various features.
 We are continuously working to expand this section with more tutorials, 
 so stay tuned for future updates!
 
+Fundamentals
+------------
 .. grid:: 3
    :gutter: 3
 
@@ -35,15 +37,30 @@ so stay tuned for future updates!
          :class: tutorial-card-title
 
    .. grid-item-card::
-      :link: tutorials/tips_and_tricks
+      :class-card: tutorial-card
+
+      .. image:: _static/logo_dynsight.png
+         :alt: More Soon...
+         :class: tutorial-card-img
+
+      .. rubric:: More Soon...
+         :class: tutorial-card-title
+
+Advanced topics
+---------------
+.. grid:: 3
+   :gutter: 3
+
+   .. grid-item-card::
+      :link: tutorials/cleaning_cluster_population
       :link-type: doc
       :class-card: tutorial-card
 
-      .. image:: _static/tutorials/tips_and_tricks/tips_and_tricks_logo.png
-         :alt: Tips and Tricks
+      .. image:: _static/tutorials/cleaning_cluster_population/cleaned_onion_analysis.png
+         :alt: Cleaning Cluster Population
          :class: tutorial-card-img
 
-      .. rubric:: Tips and Tricks
+      .. rubric:: Cleaning Cluster Population
          :class: tutorial-card-title
 
    .. grid-item-card::
@@ -63,7 +80,7 @@ so stay tuned for future updates!
 
   Getting Started <tutorials/getting_started>
   Spatial Denoising <tutorials/spatial_denoising>
-  Tips and Tricks <tutorials/tips_and_tricks>
+  Cleaning Cluster Population <tutorials/cleaning_cluster_population>
 
 Other example files
 -------------------

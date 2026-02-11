@@ -1,4 +1,4 @@
-"""Code from the Spatial Denoising tutorial."""
+"""Code from the Cleaning Cluster Population tutorial."""
 
 from pathlib import Path
 
@@ -33,6 +33,8 @@ def main() -> None:
         r_cut=10,
         n_jobs=4,  # Adjust n_jobs according to your computer capabilities
     )
+
+    """Code from the Cleaning Cluster Population tutorial."""
 
     # Performing Onion Clustering on the descriptor computed
     delta_t_list, n_clust, unclass_frac, labels = (
