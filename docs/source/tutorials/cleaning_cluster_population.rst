@@ -123,7 +123,12 @@ class :class:`.data_processing.cleaning_cluster_population()`:
     cleaned_labels = cleaning_cluster_population(labels, threshold=0.05, assigned_env=-1)
 
 where ``leaned_labels`` has the same dimensions as ``labels``. Now we can reproduce the plot with the number 
-of clusters and the unclassified fraction after re-organizing the data:
+of clusters and the unclassified fraction after re-organizing the data. In particular, 
+:class:`.onion.plot_smooth.plot_time_res_analysis()`, which gives the plot that we want to obtain,
+requires and array with the list of the time windows, the number of clusters at every ∆t, and the unclassified
+fraction. Therefore, before plotting the graph, we need to create it by copying the list of time windows from 
+the one given by the Onion analysis, and calculate the number of clusters and the unclassified fraction from the 
+cleaned labels:
 
 .. code-block:: python
     
