@@ -21,7 +21,7 @@ Briefly, we consider the denoised ``TimeSOAP`` descriptor that can be obtained f
     from dynsight.trajectory import Trj
     from dynsight.data_processing import cleaning_cluster_population
 
-    files_path = Path("source/_static/simulations")
+    files_path = Path.cwd()
     trj = Trj.init_from_xtc(
         traj_file=files_path / "ice_water_ox.xtc",
         topo_file=files_path / "ice_water_ox.gro",

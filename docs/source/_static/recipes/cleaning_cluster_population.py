@@ -12,8 +12,7 @@ from dynsight.trajectory import Trj
 def main() -> None:
     """Code from the Spatial Denoising tutorial."""
     # Loading an example trajectory
-    dynsight_path = Path(dynsight.__file__).resolve().parent
-    files_path = dynsight_path / "docs" / "source" / "_static" / "simulations"
+    files_path = Path.cwd()
     trj = Trj.init_from_xtc(
         traj_file=files_path / "ice_water_ox.xtc",
         topo_file=files_path / "ice_water_ox.gro",
