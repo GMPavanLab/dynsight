@@ -34,8 +34,6 @@ def main() -> None:
         n_jobs=4,  # Adjust n_jobs according to your computer capabilities
     )
 
-    """Code from the Cleaning Cluster Population tutorial."""
-
     # Performing Onion Clustering on the descriptor computed
     delta_t_list, n_clust, unclass_frac, labels = (
         sp_denoised_tsoap.get_onion_analysis(
