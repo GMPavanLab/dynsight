@@ -5,7 +5,7 @@ dynsight logging system.
 
 .. note::
 
-   A default :class:`Logger` is istantiated to keep the user updated on the ongoing computational steps.
+ A default :class:`Logger` is used, it writes to file every step processed by ``dynsight`` (e.g. comptuting a descriptor, performing clustering, etc.).
    
    An option of :class:`Logger` that automatically saves and records the dataset
    can be activated after importing the ``dynsight`` package by using:
