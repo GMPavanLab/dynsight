@@ -221,7 +221,7 @@ Full scripts and input files
     assert soap_test.meta["l_max"]==8
     assert np.allclose(soap_test.dataset, reference_soap, atol=1e-6)
     
-    _, tsoap_test = trj.get_timesoap(
+    _, tsoap_test = trj_test.get_timesoap(
         soap_insight=soap_test,
     )
 

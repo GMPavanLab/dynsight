@@ -9,6 +9,7 @@ from dynsight.trajectory import Trj
 
 def test_zip_arch() -> None:
     """Ensure the zip archive is created and contains the expected files."""
+    logger.configure(auto_recording=True)
     logger.clear_history()
 
     original_dir = Path(__file__).absolute().parent
