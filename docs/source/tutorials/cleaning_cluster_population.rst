@@ -15,8 +15,11 @@ Briefly, we consider the denoised ``TimeSOAP`` descriptor that can be obtained f
 
 .. code-block:: python
 
+    import numpy as np
     from pathlib import Path
+    import dynsight
     from dynsight.trajectory import Trj
+    from dynsight.data_processing import cleaning_cluster_population
 
     files_path = Path("source/_static/simulations")
     trj = Trj.init_from_xtc(
@@ -109,16 +112,12 @@ Before cleaning the cluster we have to save the output from the Onion analysis i
 
 .. code-block:: python
 
-    import numpy as np
-
     onion_output = np.array([delta_t_list, n_clust, unclass_frac]).T
 
 The small clusters can be removed and assigned to the unclassified fraction using the 
 class :class:`.data_processing.cleaning_cluster_population()`:
 
 .. code-block:: python
-
-    from dynsight.data_processing import cleaning_cluster_population
 
     cleaned_labels = cleaning_cluster_population(labels, threshold=0.05, assigned_env=-1)
 
@@ -131,8 +130,6 @@ the one given by the Onion analysis, and calculate the number of clusters and th
 cleaned labels:
 
 .. code-block:: python
-    
-    import dynsight
     
     delta_t_list = onion_output[:, 0]  # Since unchanged, windows can be copied from above.
     
