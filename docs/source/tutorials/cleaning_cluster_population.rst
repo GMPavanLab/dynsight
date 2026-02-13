@@ -102,7 +102,8 @@ Briefly, we consider the denoised ``TimeSOAP`` descriptor that can be obtained f
 
 For further details users should refer to `spatial denoising tutorial <./spatial_denoising.html>`_.
 
-Figure ``cluster_population.png`` shows the population of every cluster, where blue refers to the unclassified fraction:
+Figure ``cluster_population.png`` shows the population of every cluster, each color is a different cluster and
+blue refers to the unclassified fraction:
 
 .. image:: ../_static/tutorials/cleaning_cluster_population/cluster_population.png
    :scale: 15%
