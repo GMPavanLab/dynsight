@@ -14,8 +14,15 @@ if TYPE_CHECKING:
     from sphinx.application import Sphinx
 
 project = ""
-project_copyright = "2023, Andrew Tarzia"
-author = "Andrew Tarzia"
+project_copyright = "2026, Politecnico di Torino"
+author = (
+    "Simone Martino, "
+    "Matteo Becchi, "
+    "Andrew Tarzia, "
+    "Daniele Rapetti, "
+    "Chiara Lionello, "
+    "Giovanni Maria Pavan"
+)
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

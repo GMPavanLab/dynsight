@@ -50,9 +50,9 @@ The software is available at: `www.github.com/GMPavanLab/dynsight <https://www.g
  
 If you use ``dynsight``, please to cite the associated scientific paper:
  
-| S. Martino, M. Becchi, A. Tarzia, D. Rapetti & G. M. Pavan
+| S. Martino, M. Becchi, A. Tarzia, D. Rapetti, C. Lionello & G. M. Pavan
 | "dynsight: an open Python platform for simulation and experimental trajectory data analysis"  
-| arXiv (2025), DOI: `10.48550/arXiv.2510.23493 <https://doi.org/10.48550/arXiv.2510.23493>`_
+| J. Chem. Phys. (2026), DOI: `10.1063/5.0309974 <https://doi.org/10.1063/5.0309974>`_
 
 Installation
 ============
