@@ -13,15 +13,15 @@ from dynsight._internal.data_processing.classify import (
 from dynsight._internal.data_processing.clusters import (
     cleaning_cluster_population,
 )
-from dynsight._internal.data_processing.tessellation import(
-        tessellate,
-)
 from dynsight._internal.data_processing.distances import (
     kernelsoap,
     simplekernelsoap,
     simplesoapdistance,
     soapdistance,
     soapdistancenormalized,
+)
+from dynsight._internal.data_processing.tessellation import (
+    tessellate,
 )
 
 __all__ = [
