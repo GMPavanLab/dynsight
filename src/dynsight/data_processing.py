@@ -21,10 +21,11 @@ from dynsight._internal.data_processing.distances import (
     soapdistancenormalized,
 )
 from dynsight._internal.data_processing.tessellation import (
-    tessellate,
+    Tessellate,
 )
 
 __all__ = [
+    "Tessellate",
     "applyclassification",
     "cleaning_cluster_population",
     "createreferencesfromtrajectory",
@@ -39,5 +40,4 @@ __all__ = [
     "simplesoapdistance",
     "soapdistance",
     "soapdistancenormalized",
-    "tessellate",
 ]

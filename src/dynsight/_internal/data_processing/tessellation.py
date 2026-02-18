@@ -30,50 +30,25 @@ class Tessellate:
         merges connected tetrahedra into cavities.
         It computes geometric properties of the cavities, including volume,
         centroid coordinates, surface area, and effective spherical radius.
+
         Parameters:
             vertices_file: str
                 Path to the vertices file.
+
             radii_file: str
                 Path to the radii file.
+
             r_min: float
                 Minimum radius to consider (default 0.01).
+
             r_max: float
                 Maximum radius to consider (default 10.0).
+
             xyzcols: tuple
                 Columns to use from the vertices_file (default (4,7)).
+
             target_volume: float
                 Target volume for voids (default 5.6).
-            
-
-        Attributes:
-            centers: ndarray
-                Filtered coordinates of sphere centers.
-            radii: ndarray
-                Filtered radii of spheres.
-            delaunay: Delaunay object
-                Computed Delaunay triangulation of centers.
-            tetra_pts: ndarray
-                Coordinates of tetrahedra vertices.
-            simplices: ndarray
-                Indices of points forming each tetrahedron.
-            circ_radii: ndarray
-                Circumsphere radius of each tetrahedron.
-            tetra_volumes: ndarray
-                Volume of each tetrahedron.
-            kept_tetra: ndarray
-                Indices of tetrahedra passing the alpha filter.
-            labels: ndarray
-                Cavity ID for each kept tetrahedron.
-            n_cavities: int
-                Total number of cavities.
-            cavity_volumes: ndarray
-                Volume of each cavity.
-            cavity_centroids: ndarray
-                Centroid of each cavity.
-            cavity_areas: ndarray
-                Surface area of each cavity.
-            cavity_radii: ndarray
-                Effective spherical radius of each cavity.
         """
         self.vertices_file = vertices_file
         self.radii_file = radii_file
@@ -81,7 +56,6 @@ class Tessellate:
         self.r_max = r_max
         self.xyzcols = xyzcols
         self.target_volume = target_volume
-        
 
         # Data
         self.centers: NDArray[np.float64]
@@ -316,5 +290,3 @@ class Tessellate:
             ) ** (1 / 3)
 
             self.cavity_centroids[c] = np.mean(t_pts.reshape(-1, 3), axis=0)
-
-
