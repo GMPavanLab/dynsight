@@ -19,6 +19,8 @@ dependencies = [
     "trackpy",
     "ultralytics",
     "deeptime",
+    "imageio",
+    "seaborn",
     "infomeasure",
 ]
 
@@ -133,6 +135,8 @@ module = [
     'trackpy.*',
     'deeptime.*',
     'sklearn.decomposition.*',
+    'imageio.*',
+    'seaborn.*',
     'infomeasure.*',
 ]
 ignore_missing_imports = true
