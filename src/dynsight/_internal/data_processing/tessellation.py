@@ -77,7 +77,6 @@ class Tessellate:
         self.circ_radii: NDArray[np.float64]
         self.tetra_volumes: NDArray[np.float64]
 
-
         self.kept_tetra: NDArray[np.float64] | None = None
         self.kept_tetra_pts: NDArray[np.float64] | None = None
 
@@ -191,10 +190,6 @@ class Tessellate:
         a, b, c = points
         return float(0.5 * np.linalg.norm(np.cross(b - a, c - a)))
 
-    # ---------------------------
-    # Delaunay
-    # ---------------------------
-
     def compute_delaunay(self) -> None:
         """Perform the Delaunay triangulation of the tangent spheres.
 
@@ -202,9 +197,9 @@ class Tessellate:
         non-overlapping tetrahedra.
         """
         # Delaunay triangulation and per-tetrahedron geometric properties:
-        #Build triangulation from filtered sphere centers
-        #Extract tetrahedral vertex indices and coordinates
-        #Compute circumsphere radii and tetrahedron volumes
+        # Build triangulation from filtered sphere centers
+        # Extract tetrahedral vertex indices and coordinates
+        # Compute circumsphere radii and tetrahedron volumes
         self.delaunay = Delaunay(self.centers)
         self.simplices = self.delaunay.simplices
         self.tetra_pts = self.centers[self.simplices]
@@ -215,8 +210,6 @@ class Tessellate:
         self.tetra_volumes = np.array(
             [self._tetra_volume(t) for t in self.tetra_pts]
         )
-
-
 
     def optimize_alpha(
         self,
@@ -258,7 +251,6 @@ class Tessellate:
         #   or interval width < break condition
         # - If no exact match, choose alpha minimizing |max_vol - target|
         for _ in range(max_iter):
-
             alpha = 0.5 * (low + high)
             mask = self.circ_radii <= alpha
             max_vol = (
@@ -290,7 +282,6 @@ class Tessellate:
         self.alpha = optimal_alpha
         self.alpha_history = alphas_tried
         self.volume_history = max_volumes
-
 
     def build_alpha_shape(self) -> None:
         """Public alpha-shape construction.
