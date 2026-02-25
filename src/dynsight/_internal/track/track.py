@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Literal, Sequence
 
 import pandas as pd
 import trackpy as tp
@@ -86,11 +87,8 @@ def track_xyz(
             during adaptive search. Effective only if `adaptive_stop` is not
             `None`.
     """
-    if adaptive_stop is None and adaptive_step is not None:
-        msg = "adaptive_step is set but adaptive_stop is None."
-        raise ValueError(msg)
-    if adaptive_stop is not None and adaptive_step is None:
-        msg = "adaptive_stop is set but adaptive_step is None."
+    if (adaptive_stop is None) != (adaptive_step is None):
+        msg = "adaptive_stop and adaptive_step must be both set or both None."
         raise ValueError(msg)
 
     input_xyz = Path(input_xyz)
@@ -100,11 +98,50 @@ def track_xyz(
         msg = f"Input file not found: {input_xyz}"
         raise FileNotFoundError(msg)
 
-    positions = read_xyz(
-        input_xyz=input_xyz, cols_order=["name", "x", "y", "z"]
-    )
+    # Define valid column names
+    col = Literal["name", "x", "y", "z"]
 
-    if not {"frame", "x", "y", "z"}.issubset(positions.columns):
+    def _detect_cols_order(xyz_path: Path) -> Sequence[col]:
+        """Detect the column order of an XYZ file.
+
+        Returns:
+            ["x", "y", "z"] if the file has only coordinates
+            ["name", "x", "y", "z"] if the file has atom names
+        """
+        with xyz_path.open("r") as f:
+            _ = f.readline()  # number of atoms
+            _ = f.readline()  # comment
+            first_atom_line = f.readline().split()
+
+        first_value = first_atom_line[0]
+
+        def is_number(s: str) -> bool:
+            try:
+                float(s)
+            except ValueError:
+                return False
+            else:
+                return True
+
+        has_name = not is_number(first_value)
+
+        return ["name", "x", "y", "z"] if has_name else ["x", "y", "z"]
+
+    cols_order = _detect_cols_order(input_xyz)
+    positions = read_xyz(input_xyz=input_xyz, cols_order=cols_order)
+    ncols = len(positions.columns)
+    ncols_frame_name_xyz = 5
+    ncols_frame_xyz = 4
+    required_name = {"frame", "name", "x", "y", "z"}
+    required_no_name = {"frame", "x", "y", "z"}
+
+    if (
+        ncols == ncols_frame_name_xyz
+        and not required_name.issubset(positions.columns)
+    ) or (
+        ncols == ncols_frame_xyz
+        and not required_no_name.issubset(positions.columns)
+    ):
         msg = (
             "Error in the .xyz format. Each line must be "
             "<x> <y> <z> or <name> <x> <y> <z>."
@@ -130,11 +167,10 @@ def track_xyz(
                 pid = int(row["particle"])
                 x, y, z = row["x"], row["y"], row["z"]
                 name = row.get("name")
-                if name is not None and pd.notna(name):
-                    f.write(f"{name} {x:.6f} {y:.6f} {z:.6f} {pid}\n")
-                else:
-                    f.write(f"{x:.6f} {y:.6f} {z:.6f} {pid}\n")
-
+                name_str = (
+                    f"{name} " if (name is not None and pd.notna(name)) else ""
+                )
+                f.write(f"{name_str}{x:.6f} {y:.6f} {z:.6f} {pid}\n")
     logger.info(f"Linked .xyz file written to: {output_xyz}")
     return Trj.init_from_xyz(traj_file=output_xyz, dt=1)
 
