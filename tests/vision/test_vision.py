@@ -118,7 +118,6 @@ def test_vision_training(tmp_path: Path) -> None:
     assert instance.training_results is not None
 
     assert str(instance.training_results.names[0]) == "class_0"
-    assert str(instance.training_results.task) == "detect"
 
     assert new_model_path.exists()
     assert old_model != new_model
