@@ -363,12 +363,17 @@ def list_neighbours_along_trajectory(
         pos_cent = ag_centers.positions.astype(np.float64)
 
         if universe.trajectory.ts.dimensions is not None:
-            box = universe.trajectory.ts.dimensions[:3]
+            box = universe.trajectory.ts.dimensions[:3].astype(np.float64)
+            local_pbc = respect_pbc
         else:
-            coords = universe.atoms.positions
-            mins = coords.min(axis=0)
-            maxs = coords.max(axis=0)
-            box = maxs - mins
+            # No periodic box: shift positions to [0, span] and disable PBC
+            all_pos = np.vstack([pos_env, pos_cent])
+            mins = all_pos.min(axis=0)
+            maxs = all_pos.max(axis=0)
+            box = (maxs - mins) + 2 * r_cut
+            pos_env = pos_env - mins
+            pos_cent = pos_cent - mins
+            local_pbc = False
 
         # --- Build neighbor list (CSR form) ---
         indptr, indices = neighbor_list_celllist_centers(
@@ -376,7 +381,7 @@ def list_neighbours_along_trajectory(
             positions_cent=pos_cent,
             r_cut=r_cut,
             box=box,
-            respect_pbc=respect_pbc,
+            respect_pbc=local_pbc,
         )
 
         # --- Reconstruct AtomGroups per center ---
