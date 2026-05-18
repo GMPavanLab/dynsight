@@ -101,7 +101,7 @@ def neighbor_list_celllist_centers(  # noqa: C901, PLR0912
                         if respect_pbc:
                             dr = _pbc_diff(dr, box)
                         dr2 = dr[0] ** 2 + dr[1] ** 2 + dr[2] ** 2
-                        if j != i and dr2 < r_cut2:
+                        if dr2 > 0.0 and dr2 < r_cut2:
                             n_neigh[i] += 1
                         j = next_[j]
 
@@ -132,7 +132,7 @@ def neighbor_list_celllist_centers(  # noqa: C901, PLR0912
                         if respect_pbc:
                             dr = _pbc_diff(dr, box)
                         dr2 = dr[0] ** 2 + dr[1] ** 2 + dr[2] ** 2
-                        if j != i and dr2 < r_cut2:
+                        if dr2 > 0.0 and dr2 < r_cut2:
                             pos_i = indptr[i] + cursor[i]
                             indices[pos_i] = j
                             cursor[i] += 1
