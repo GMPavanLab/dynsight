@@ -63,6 +63,24 @@ def test_lens(case_data: LENSCaseData) -> None:
     assert np.allclose(exp_lens, test_lens.dataset, atol=1e-6)
 
 
+def test_lens_centers_subset_of_selection() -> None:
+    """For a subset of centers must match the rows of the full computation."""
+    original_dir = Path(__file__).resolve().parent
+    topology_file = original_dir / "../systems/balls_7_nvt.gro"
+    trajectory_file = original_dir / "../systems/balls_7_nvt.xtc"
+    universe = MDAnalysis.Universe(topology_file, trajectory_file)
+
+    trj = Trj(universe)
+
+    # Reference: compute LENS for all atoms (centers == selection, no bug)
+    lens_all = trj.get_lens(r_cut=4, centers="all", selection="all")
+
+    # Subject: atom id 2 has env_idx=1, so center_idx=0 != env_idx → bug site
+    lens_subset = trj.get_lens(r_cut=4, centers="id 2", selection="all")
+
+    assert np.array_equal(lens_subset.dataset[0], lens_all.dataset[1])
+
+
 def test_lens_2d(trj_2d: Trj) -> None:
     """Test LENS and number of neighbors on a 2D system."""
     original_dir = Path(__file__).resolve().parent
