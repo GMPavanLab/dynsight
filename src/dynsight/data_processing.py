@@ -20,8 +20,12 @@ from dynsight._internal.data_processing.distances import (
     soapdistance,
     soapdistancenormalized,
 )
+from dynsight._internal.data_processing.tessellation import (
+    Tessellate,
+)
 
 __all__ = [
+    "Tessellate",
     "applyclassification",
     "cleaning_cluster_population",
     "createreferencesfromtrajectory",
