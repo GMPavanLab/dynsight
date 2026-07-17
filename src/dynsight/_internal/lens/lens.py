@@ -83,7 +83,7 @@ def neighbor_list_celllist_centers(  # noqa: C901, PLR0912
 
     n_neigh = np.zeros(n_cent, dtype=np.int32)
     # ---- count the neighbors for each center ----
-    for i in prange(n_cent):
+    for i in prange(n_cent):  # type: ignore[attr-defined]
         cx = int(positions_cent[i, 0] / box[0] * nx) % nx
         cy = int(positions_cent[i, 1] / box[1] * ny) % ny
         cz = int(positions_cent[i, 2] / box[2] * nz) % nz
@@ -114,7 +114,7 @@ def neighbor_list_celllist_centers(  # noqa: C901, PLR0912
     cursor = np.zeros(n_cent, dtype=np.int32)
 
     # ---- fill up neighbors' lists ----
-    for i in prange(n_cent):
+    for i in prange(n_cent):  # type: ignore[attr-defined]
         cx = int(positions_cent[i, 0] / box[0] * nx) % nx
         cy = int(positions_cent[i, 1] / box[1] * ny) % ny
         cz = int(positions_cent[i, 2] / box[2] * nz) % nz
