@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, cast
 
 import numpy as np
 import torch
@@ -209,22 +209,27 @@ class VisionInstance:
                 The maximum number of detections for a single frame / image.
 
         """
-        self.prediction_results = self.model.predict(
-            source=self.source,
-            save=True,
-            save_txt=False,
-            save_conf=True,
-            show_labels=show_labels,
-            name=prediction_title,
-            project=self.output_path,
-            device=self.device,
-            augment=augment,
-            agnostic_nms=agnostic_nms,
-            classes=class_filter,
-            conf=confidence,
-            iou=iou,
-            imgsz=imgsz,
-            max_det=max_det,
+        # Without stream=True, ultralytics always returns a list of
+        # Results; the cast narrows the wider annotated return union.
+        self.prediction_results = cast(
+            "list[Results]",
+            self.model.predict(
+                source=self.source,
+                save=True,
+                save_txt=False,
+                save_conf=True,
+                show_labels=show_labels,
+                name=prediction_title,
+                project=self.output_path,
+                device=self.device,
+                augment=augment,
+                agnostic_nms=agnostic_nms,
+                classes=class_filter,
+                conf=confidence,
+                iou=iou,
+                imgsz=imgsz,
+                max_det=max_det,
+            ),
         )
 
     def create_dataset_from_predictions(
