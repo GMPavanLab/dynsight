@@ -1,3 +1,15 @@
+# Works with both uv and conda:
+# - If a project-local uv virtualenv (./.venv) exists, its tools are
+#   used automatically (no activation needed).
+# - Otherwise the active environment is used (conda, system, ...).
+venv_bin := justfile_directory() / ".venv/bin"
+
+export PATH := if path_exists(venv_bin) == "true" {
+  venv_bin + ":" + env("PATH")
+} else {
+  env("PATH")
+}
+
 # List all commands.
 default:
   @just --list
@@ -8,9 +20,28 @@ docs:
   make -C docs html
   echo Docs are in $PWD/docs/build/html/index.html
 
-# Do a dev install.
+# Do a dev install (uv venv, conda or plain pip - autodetected).
 dev:
-  pip install -e '.[dev]'
+  #!/usr/bin/env bash
+  set -euo pipefail
+  if [ -d .venv ] && command -v uv >/dev/null 2>&1; then
+    echo "Installing into ./.venv with uv"
+    uv pip install -e '.[dev]'
+  elif [ -n "${CONDA_PREFIX:-}" ]; then
+    echo "Installing into conda env '${CONDA_DEFAULT_ENV:-}' with pip"
+    pip install -e '.[dev]'
+  elif command -v uv >/dev/null 2>&1; then
+    echo "Creating ./.venv with uv"
+    uv venv
+    uv pip install -e '.[dev]'
+  else
+    pip install -e '.[dev]'
+  fi
+  # macOS can end up with the "hidden" flag on .pth files, which makes
+  # Python >= 3.11 silently skip them (ModuleNotFoundError on import).
+  if [ "$(uname)" = "Darwin" ] && [ -d .venv ]; then
+    chflags nohidden .venv/lib/python*/site-packages/*.pth 2>/dev/null || true
+  fi
 
 # Run code checks.
 check:
