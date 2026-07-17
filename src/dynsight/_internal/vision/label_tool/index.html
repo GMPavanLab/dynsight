@@ -9,7 +9,12 @@
     </head>
     <body>
         <header id="topbar">
-            <div class="brand">dynsight<span>label tool</span></div>
+            <img
+                id="logo"
+                src="/logo.png"
+                alt="dynsight label tool"
+                title="dynsight label tool"
+            />
 
             <div class="group">
                 <button id="prevBtn" class="icon-btn" title="Previous image">&#8592;</button>
@@ -26,6 +31,8 @@
 
             <div class="spacer"></div>
 
+            <button id="loadSessionBtn" class="ghost-btn" title="Load a session file">Load</button>
+            <button id="saveSessionBtn" class="ghost-btn" title="Save the session to a file">Save session</button>
             <button id="synthBtn" class="ghost-btn">Synthesize</button>
             <button id="exportBtn" class="primary-btn">Export dataset</button>
             <button id="quitBtn" class="danger-btn" title="Stop the server">Quit</button>
@@ -70,6 +77,15 @@
                     </p>
                 </div>
                 <div id="dropHint" class="hidden">Drop images or a video</div>
+                <div id="progress" class="hidden">
+                    <div class="progress-header">
+                        <span id="progressLabel"></span>
+                        <span id="progressPct"></span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="progressFill"></div>
+                    </div>
+                </div>
             </main>
         </div>
 
@@ -174,6 +190,70 @@
                 <div class="dialog-actions">
                     <button type="button" class="ghost-btn" data-close>Cancel</button>
                     <button type="submit" class="primary-btn">Generate</button>
+                </div>
+            </form>
+        </dialog>
+
+        <dialog id="saveDialog">
+            <form method="dialog" id="saveForm">
+                <h3>Save session</h3>
+                <p class="muted">
+                    Labels and boxes are written to a JSON file that can be
+                    loaded back later.
+                </p>
+                <label>
+                    Session file path
+                    <input
+                        type="text"
+                        name="path"
+                        placeholder="/path/to/session.json"
+                        required
+                    />
+                </label>
+                <div class="dialog-actions">
+                    <button type="button" class="ghost-btn" data-close>Cancel</button>
+                    <button type="submit" class="primary-btn">Save</button>
+                </div>
+            </form>
+        </dialog>
+
+        <dialog id="loadDialog">
+            <form method="dialog" id="loadForm">
+                <h3>Load session</h3>
+                <p class="muted">
+                    Loading a session replaces the current labels and boxes.
+                </p>
+                <label>
+                    Session file path
+                    <input
+                        type="text"
+                        name="path"
+                        placeholder="/path/to/session.json"
+                        required
+                    />
+                </label>
+                <div class="dialog-actions">
+                    <button type="button" class="ghost-btn" data-close>Cancel</button>
+                    <button type="submit" class="primary-btn">Load</button>
+                </div>
+            </form>
+        </dialog>
+
+        <dialog id="quitDialog">
+            <form method="dialog">
+                <h3>Unsaved session</h3>
+                <p class="muted">
+                    The current session has not been saved to a file. Do you
+                    want to save it before quitting?
+                </p>
+                <div class="dialog-actions">
+                    <button type="button" class="ghost-btn" data-close>Cancel</button>
+                    <button type="button" class="danger-btn" id="quitDiscardBtn">
+                        Quit without saving
+                    </button>
+                    <button type="button" class="primary-btn" id="quitSaveBtn">
+                        Save session&hellip;
+                    </button>
                 </div>
             </form>
         </dialog>
