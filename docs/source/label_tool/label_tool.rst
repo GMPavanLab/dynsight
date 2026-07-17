@@ -47,11 +47,13 @@ automatically appear in your default web browser.
     not open automatically, you can manually open it by copying and pasting
     the URL provided in the terminal output.
 
-All uploaded images and the labeling progress are stored inside the
-*workspace* directory (``./label_tool_workspace`` by default). Work is saved
-automatically after every change: the browser tab can be closed and reopened
-at any time without losing progress. The server keeps running until the
-*Quit* button in the GUI is pressed (or ``Ctrl+C`` in the terminal).
+All uploaded images are stored inside the *workspace* directory
+(``./label_tool_workspace`` by default). The labeling session (labels and
+boxes) is kept in memory and is **never written to disk automatically**:
+use the *Save session* button to write it to a JSON file at a path of your
+choice, and *Load* to restore it later. If the session has unsaved changes,
+the *Quit* button asks whether to save it before stopping the server
+(``Ctrl+C`` in the terminal also stops it).
 
 -------
 The GUI
@@ -80,6 +82,9 @@ Annotating is done directly on the canvas:
 * **Delete**: right-click a box, or select it and press backspace.
 * **Navigate**: mouse wheel to zoom, space (or middle mouse) drag to pan,
   arrow keys to switch image.
+
+Every long operation (image and video uploads, frame extraction, dataset
+export and synthesis) shows a progress bar at the bottom of the canvas.
 
 Two export options are available in the top bar. Both write the dataset
 folder directly to disk (inside the workspace by default) together with a

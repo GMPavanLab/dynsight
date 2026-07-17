@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import json
 import threading
+import urllib.error
 import urllib.request
 from typing import TYPE_CHECKING, Any
 
@@ -16,6 +17,8 @@ from dynsight._internal.vision.label_tool import (
     _split_count,
     _Workspace,
     export_dataset,
+    load_session_file,
+    save_session_file,
     synthesize_dataset,
 )
 
@@ -80,12 +83,20 @@ def test_add_image_rejects_invalid_data(tmp_path: Path) -> None:
         ws.add_image("file.txt", b"hello")
 
 
-def test_session_roundtrip(tmp_path: Path) -> None:
-    ws = _Workspace(tmp_path / "ws")
-    assert ws.load_session() == {"labels": [], "annotations": {}}
+def test_session_file_roundtrip(tmp_path: Path) -> None:
     session = make_session()
-    ws.save_session(session)
-    assert ws.load_session() == session
+    path = save_session_file(session, tmp_path / "sub" / "session.json")
+    assert path.is_file()
+    assert load_session_file(path) == session
+    # A directory gets a default file name, missing suffixes are added.
+    assert save_session_file(session, tmp_path).name == "session.json"
+    assert save_session_file(session, tmp_path / "named").name == (
+        "named.json"
+    )
+    with pytest.raises(ValueError, match="file path is required"):
+        save_session_file(session, "")
+    with pytest.raises(ValueError, match="not found"):
+        load_session_file(tmp_path / "missing.json")
 
 
 def test_export_dataset_layout(workspace: _Workspace) -> None:
@@ -212,12 +223,38 @@ def test_http_api_roundtrip(tmp_path: Path) -> None:
         info = request("/api/images?name=img.png", "POST", make_image_bytes())
         assert info == {"name": "img.png", "width": 64, "height": 48}
 
+        # Edits are mirrored to the server memory, without disk writes.
         session = make_session()
-        request("/api/session", "POST", json.dumps(session).encode("utf-8"))
+        request("/api/sync", "POST", json.dumps(session).encode("utf-8"))
 
         state = request("/api/state")
         assert [img["name"] for img in state["images"]] == ["img.png"]
         assert state["labels"] == session["labels"]
+        assert state["dirty"] is True
+        assert state["session_path"] is None
+
+        # No long operation running: the progress endpoint is idle.
+        assert request("/api/progress") == {"active": False}
+
+        # Saving requires an explicit path.
+        with pytest.raises(urllib.error.HTTPError):
+            request("/api/session", "POST", b"{}")
+        session_file = tmp_path / "saved" / "session.json"
+        saved = request(
+            "/api/session",
+            "POST",
+            json.dumps({"path": str(session_file)}).encode("utf-8"),
+        )
+        assert saved["path"] == str(session_file)
+        assert session_file.is_file()
+        assert request("/api/state")["dirty"] is False
+
+        loaded = request(
+            "/api/session/load",
+            "POST",
+            json.dumps({"path": str(session_file)}).encode("utf-8"),
+        )
+        assert loaded == session
 
         export = request(
             "/api/export",
