@@ -2,9 +2,10 @@
 
 The tool starts a small HTTP server (standard library only) that serves
 a single-page labeling GUI and a JSON API. Images (or video frames) are
-stored inside a *workspace* directory together with the labeling
-session, so the work survives page reloads and restarts. Datasets are
-written directly to disk in the exact layout expected by
+stored inside a *workspace* directory, while the labeling session
+(labels and boxes) is kept in memory and written to disk only when the
+user explicitly saves it to a chosen file. Datasets are written
+directly to disk in the exact layout expected by
 :class:`dynsight.vision.VisionInstance`.
 """
 
@@ -20,7 +21,7 @@ import webbrowser
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 from urllib.parse import parse_qs, urlparse
 
 import yaml
@@ -34,7 +35,10 @@ _STATIC_FILES = {
     "/index.html": ("index.html", "text/html; charset=utf-8"),
     "/styles.css": ("styles.css", "text/css; charset=utf-8"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/logo.png": ("logo.png", "image/png"),
 }
+
+_ProgressCallback = Callable[[int, int], None]
 
 _IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".webp"}
 _VIDEO_SUFFIXES = {".mp4", ".avi", ".mov", ".mkv", ".webm"}
@@ -59,27 +63,57 @@ def _image_size(path: Path) -> tuple[int, int]:
         return img.size
 
 
+def _empty_session() -> dict[str, Any]:
+    """Return a new empty labeling session."""
+    return {"labels": [], "annotations": {}}
+
+
+def _normalize_session_path(raw: object) -> Path:
+    """Validate and normalize a user-provided session file path."""
+    if not raw or not str(raw).strip():
+        msg = "A file path is required for the session."
+        raise ValueError(msg)
+    path = Path(str(raw).strip()).expanduser()
+    if path.is_dir():
+        path = path / "session.json"
+    elif path.suffix.lower() != ".json":
+        path = path.with_name(path.name + ".json")
+    return path
+
+
+def save_session_file(session: dict[str, Any], raw_path: object) -> Path:
+    """Write a labeling session to an explicitly chosen file."""
+    path = _normalize_session_path(raw_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(session, f, indent=1)
+    return path
+
+
+def load_session_file(raw_path: object) -> dict[str, Any]:
+    """Read a labeling session from a file."""
+    path = _normalize_session_path(raw_path)
+    if not path.is_file():
+        msg = f"Session file not found: '{path}'"
+        raise ValueError(msg)
+    with path.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+    if not isinstance(data, dict):
+        msg = f"'{path}' is not a valid session file."
+        raise TypeError(msg)
+    return {
+        "labels": data.get("labels", []),
+        "annotations": data.get("annotations", {}),
+    }
+
+
 class _Workspace:
-    """Filesystem-backed state of a labeling session."""
+    """Filesystem-backed image storage of a labeling session."""
 
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
         self.images_dir = self.root / "images"
-        self.session_file = self.root / "session.json"
         self.images_dir.mkdir(parents=True, exist_ok=True)
-
-    def load_session(self) -> dict[str, Any]:
-        """Read the stored session, returning an empty one if missing."""
-        if self.session_file.is_file():
-            with self.session_file.open("r", encoding="utf-8") as f:
-                data: dict[str, Any] = json.load(f)
-            return data
-        return {"labels": [], "annotations": {}}
-
-    def save_session(self, session: dict[str, Any]) -> None:
-        """Persist the session to disk."""
-        with self.session_file.open("w", encoding="utf-8") as f:
-            json.dump(session, f, indent=1)
 
     def list_images(self) -> list[dict[str, Any]]:
         """Return metadata for every image stored in the workspace."""
@@ -110,7 +144,11 @@ class _Workspace:
         return {"name": safe, "width": width, "height": height}
 
     def add_video(
-        self, name: str, data: bytes, stride: int
+        self,
+        name: str,
+        data: bytes,
+        stride: int,
+        on_progress: _ProgressCallback | None = None,
     ) -> list[dict[str, Any]]:
         """Extract frames from an uploaded video into the workspace."""
         import cv2  # noqa: PLC0415 (heavy import, only needed here)
@@ -129,6 +167,7 @@ class _Workspace:
             if not capture.isOpened():
                 msg = f"Could not open video '{safe}'."
                 raise ValueError(msg)
+            total = max(0, int(capture.get(cv2.CAP_PROP_FRAME_COUNT)))
             index = 0
             while True:
                 ok, frame = capture.read()
@@ -146,6 +185,8 @@ class _Workspace:
                         }
                     )
                 index += 1
+                if on_progress is not None:
+                    on_progress(index, total)
             capture.release()
         finally:
             tmp.unlink(missing_ok=True)
@@ -225,6 +266,7 @@ def export_dataset(
     shuffle: bool = True,
     seed: int | None = None,
     output_dir: Path | None = None,
+    on_progress: _ProgressCallback | None = None,
 ) -> dict[str, Any]:
     """Write a YOLO dataset from the current session to disk.
 
@@ -267,6 +309,8 @@ def export_dataset(
         )
         lbl = dirs[f"labels/{subset}"] / (Path(info["name"]).stem + ".txt")
         lbl.write_text(txt, encoding="utf-8")
+        if on_progress is not None:
+            on_progress(idx + 1, len(images))
 
     yaml_path = _write_dataset_yaml(dataset_path, names)
     return {
@@ -315,6 +359,7 @@ def synthesize_dataset(
     background: str = "#ffffff",
     seed: int | None = None,
     output_dir: Path | None = None,
+    on_progress: _ProgressCallback | None = None,
 ) -> dict[str, Any]:
     """Generate a synthetic YOLO dataset from the annotated crops.
 
@@ -372,6 +417,8 @@ def synthesize_dataset(
         txt = _yolo_lines(boxes, class_ids, width, height)
         lbl = dirs[f"labels/{subset}"] / f"synt_{idx:05d}.txt"
         lbl.write_text(txt, encoding="utf-8")
+        if on_progress is not None:
+            on_progress(idx + 1, num_images)
 
     for source in sources.values():
         source.close()
@@ -385,14 +432,49 @@ def synthesize_dataset(
 
 
 class _LabelToolServer(ThreadingHTTPServer):
-    """HTTP server carrying the workspace shared by all requests."""
+    """HTTP server carrying the state shared by all requests.
+
+    The labeling session (labels and boxes) lives in ``self.session``
+    and is written to disk only through the explicit save endpoint.
+    ``self.progress`` mirrors the state of the long-running operation
+    currently in flight (if any) and is polled by the GUI to render
+    progress bars.
+    """
 
     allow_reuse_address = True
     daemon_threads = True
 
     def __init__(self, port: int, workspace: _Workspace) -> None:
         self.workspace = workspace
+        self.session = _empty_session()
+        self.session_path: str | None = None
+        self.session_dirty = False
+        self.progress: dict[str, Any] = {"active": False}
+        self.progress_lock = threading.Lock()
         super().__init__(("127.0.0.1", port), _RequestHandler)
+
+    def start_progress(self, label: str) -> _ProgressCallback:
+        """Mark a long operation as active and return its callback."""
+        with self.progress_lock:
+            self.progress = {
+                "active": True,
+                "label": label,
+                "done": 0,
+                "total": 0,
+            }
+
+        def on_progress(done: int, total: int) -> None:
+            with self.progress_lock:
+                if self.progress.get("active"):
+                    self.progress["done"] = done
+                    self.progress["total"] = total
+
+        return on_progress
+
+    def end_progress(self) -> None:
+        """Mark the current long operation as finished."""
+        with self.progress_lock:
+            self.progress = {"active": False}
 
 
 class _RequestHandler(BaseHTTPRequestHandler):
@@ -456,6 +538,8 @@ class _RequestHandler(BaseHTTPRequestHandler):
             )
         elif route == "/api/state":
             self._api(self._handle_state)
+        elif route == "/api/progress":
+            self._api(self._handle_progress)
         else:
             self.send_error(HTTPStatus.NOT_FOUND)
 
@@ -463,7 +547,9 @@ class _RequestHandler(BaseHTTPRequestHandler):
         """Dispatch API mutations."""
         route = urlparse(self.path).path
         handlers = {
+            "/api/sync": self._handle_sync,
             "/api/session": self._handle_save_session,
+            "/api/session/load": self._handle_load_session,
             "/api/images": self._handle_upload_image,
             "/api/video": self._handle_upload_video,
             "/api/export": self._handle_export,
@@ -487,7 +573,7 @@ class _RequestHandler(BaseHTTPRequestHandler):
     def _api(self, handler: Any) -> None:
         try:
             payload = handler()
-        except (ValueError, KeyError, TypeError, json.JSONDecodeError) as e:
+        except (ValueError, KeyError, TypeError, OSError) as e:
             logger.warning(f"Request failed: {e}")
             self._send_json({"error": str(e)}, status=HTTPStatus.BAD_REQUEST)
         else:
@@ -497,23 +583,53 @@ class _RequestHandler(BaseHTTPRequestHandler):
         data: dict[str, Any] = json.loads(self._read_body() or b"{}")
         return data
 
+    def _session_from(self, body: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "labels": body.get("labels", []),
+            "annotations": body.get("annotations", {}),
+        }
+
     def _handle_state(self) -> dict[str, Any]:
-        session = self._workspace.load_session()
+        session = self.server.session
         return {
             "workspace": str(self._workspace.root),
             "images": self._workspace.list_images(),
             "labels": session.get("labels", []),
             "annotations": session.get("annotations", {}),
+            "session_path": self.server.session_path,
+            "dirty": self.server.session_dirty,
         }
 
+    def _handle_progress(self) -> dict[str, Any]:
+        with self.server.progress_lock:
+            return dict(self.server.progress)
+
+    def _handle_sync(self) -> dict[str, Any]:
+        """Update the in-memory session (no disk write)."""
+        self.server.session = self._session_from(self._json_body())
+        self.server.session_dirty = True
+        return {"synced": True}
+
     def _handle_save_session(self) -> dict[str, Any]:
+        """Write the session to an explicitly chosen file."""
         body = self._json_body()
-        session = {
-            "labels": body.get("labels", []),
-            "annotations": body.get("annotations", {}),
-        }
-        self._workspace.save_session(session)
-        return {"saved": True}
+        if "labels" in body or "annotations" in body:
+            self.server.session = self._session_from(body)
+        path = save_session_file(self.server.session, body.get("path"))
+        self.server.session_path = str(path)
+        self.server.session_dirty = False
+        return {"path": str(path)}
+
+    def _handle_load_session(self) -> dict[str, Any]:
+        """Load a session file into memory and return it."""
+        body = self._json_body()
+        session = load_session_file(body.get("path"))
+        self.server.session = session
+        self.server.session_path = str(
+            _normalize_session_path(body.get("path"))
+        )
+        self.server.session_dirty = False
+        return session
 
     def _handle_upload_image(self) -> dict[str, Any]:
         query = self._query()
@@ -521,11 +637,17 @@ class _RequestHandler(BaseHTTPRequestHandler):
 
     def _handle_upload_video(self) -> dict[str, Any]:
         query = self._query()
-        frames = self._workspace.add_video(
-            query["name"],
-            self._read_body(),
-            stride=int(query.get("stride", "1")),
-        )
+        data = self._read_body()
+        on_progress = self.server.start_progress("Extracting frames")
+        try:
+            frames = self._workspace.add_video(
+                query["name"],
+                data,
+                stride=int(query.get("stride", "1")),
+                on_progress=on_progress,
+            )
+        finally:
+            self.server.end_progress()
         return {"frames": frames}
 
     def _handle_delete_image(self) -> dict[str, Any]:
@@ -536,36 +658,46 @@ class _RequestHandler(BaseHTTPRequestHandler):
     def _handle_export(self) -> dict[str, Any]:
         body = self._json_body()
         output = body.get("output_dir")
-        return export_dataset(
-            self._workspace,
-            self._workspace.load_session(),
-            name=body.get("name", "yolo_dataset"),
-            train_split=float(body.get("train_split", 0.8)),
-            shuffle=bool(body.get("shuffle", True)),
-            seed=body.get("seed"),
-            output_dir=Path(output) if output else None,
-        )
+        on_progress = self.server.start_progress("Exporting dataset")
+        try:
+            return export_dataset(
+                self._workspace,
+                self.server.session,
+                name=body.get("name", "yolo_dataset"),
+                train_split=float(body.get("train_split", 0.8)),
+                shuffle=bool(body.get("shuffle", True)),
+                seed=body.get("seed"),
+                output_dir=Path(output) if output else None,
+                on_progress=on_progress,
+            )
+        finally:
+            self.server.end_progress()
 
     def _handle_synthesize(self) -> dict[str, Any]:
         body = self._json_body()
         output = body.get("output_dir")
-        return synthesize_dataset(
-            self._workspace,
-            self._workspace.load_session(),
-            name=body.get("name", "synt_dataset"),
-            num_images=int(body.get("num_images", 10)),
-            width=int(body.get("width", 640)),
-            height=int(body.get("height", 640)),
-            per_image=int(body.get("per_image", 10)),
-            train_split=float(body.get("train_split", 0.8)),
-            scale_range=(
-                float(body.get("scale_min", 1.0)),
-                float(body.get("scale_max", 1.0)),
-            ),
-            background=str(body.get("background", "#ffffff")),
-            seed=body.get("seed"),
-            output_dir=Path(output) if output else None,
-        )
+        on_progress = self.server.start_progress("Synthesizing dataset")
+        try:
+            return synthesize_dataset(
+                self._workspace,
+                self.server.session,
+                name=body.get("name", "synt_dataset"),
+                num_images=int(body.get("num_images", 10)),
+                width=int(body.get("width", 640)),
+                height=int(body.get("height", 640)),
+                per_image=int(body.get("per_image", 10)),
+                train_split=float(body.get("train_split", 0.8)),
+                scale_range=(
+                    float(body.get("scale_min", 1.0)),
+                    float(body.get("scale_max", 1.0)),
+                ),
+                background=str(body.get("background", "#ffffff")),
+                seed=body.get("seed"),
+                output_dir=Path(output) if output else None,
+                on_progress=on_progress,
+            )
+        finally:
+            self.server.end_progress()
 
     def _handle_shutdown(self) -> dict[str, Any]:
         logger.info("Shutdown requested from the GUI.")
@@ -580,18 +712,19 @@ def label_tool(
 ) -> None:
     """Start the dynsight labeling tool.
 
-    The tool opens in the default web browser. All uploaded images and
-    the labeling progress are stored in ``workspace`` so a session can
-    be resumed at any time. The server stops with the *Quit* button in
-    the GUI or with ``Ctrl+C`` in the terminal.
+    The tool opens in the default web browser. Uploaded images are
+    stored in ``workspace``, while the labeling session (labels and
+    boxes) is saved to disk only when explicitly requested from the
+    GUI, to a file path chosen by the user. The server stops with the
+    *Quit* button in the GUI or with ``Ctrl+C`` in the terminal.
 
     Parameters:
         port:
             Port for the local HTTP server.
 
         workspace:
-            Directory where images, the labeling session and exported
-            datasets are stored. Defaults to ``./label_tool_workspace``.
+            Directory where images and exported datasets are stored by
+            default. Defaults to ``./label_tool_workspace``.
 
         open_browser:
             Automatically open the GUI in the default browser.

@@ -5,7 +5,8 @@
  *
  * All annotation coordinates are stored in natural image
  * pixels: {label, x, y, w, h} with (x, y) = top-left corner.
- * The backend persists the session and writes YOLO datasets.
+ * The session lives in memory (mirrored to the server) and is
+ * written to disk only via the explicit Save session dialog.
  * ========================================================= */
 
 /* ---------- constants ---------- */
@@ -38,8 +39,10 @@ let drag = null; // {mode, ...} while a pointer drag is active
 let hover = { box: -1, handle: -1 };
 let pointer = { x: 0, y: 0, inside: false };
 let spaceDown = false;
-let saveTimer = null;
-let dirty = false;
+let syncTimer = null;
+let dirty = false; // changes not yet saved to a session file
+let sessionPath = null; // last file the session was saved to / loaded from
+let quitAfterSave = false;
 
 const imageCache = new Map(); // name -> HTMLImageElement
 const imageVersion = new Map(); // name -> int, bumped on re-upload
@@ -102,30 +105,41 @@ async function api(path, options = {}) {
     return payload;
 }
 
-function setSaveStatus(text, cls) {
+function setSaveStatus() {
     const el = $("saveStatus");
-    el.textContent = text;
-    el.className = cls || "";
+    if (dirty) {
+        el.textContent = "● Unsaved session";
+        el.className = "busy";
+    } else if (sessionPath) {
+        el.textContent = `Saved ✓ (${sessionPath})`;
+        el.className = "ok";
+    } else {
+        el.textContent = "";
+        el.className = "";
+    }
 }
 
-function scheduleSave() {
+// The session is never written to disk automatically: edits are only
+// mirrored to the server's memory so a page reload does not lose work
+// while the server is running. Disk writes happen exclusively through
+// the "Save session" dialog, to a user-chosen path.
+function markChanged() {
     dirty = true;
-    setSaveStatus("Saving…", "busy");
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveSession, 400);
+    setSaveStatus();
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(syncSession, 300);
 }
 
-async function saveSession() {
+async function syncSession() {
+    clearTimeout(syncTimer);
     try {
-        await api("/api/session", {
+        await api("/api/sync", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: sessionBody(),
         });
-        dirty = false;
-        setSaveStatus("Saved ✓", "ok");
-    } catch (err) {
-        setSaveStatus(`Save failed: ${err.message}`, "error");
+    } catch {
+        /* retried on the next change */
     }
 }
 
@@ -136,15 +150,19 @@ function sessionBody() {
     });
 }
 
-// Flush unsaved work when the page is closed or reloaded. The server
-// keeps running: it is stopped only via the Quit button or Ctrl+C.
+// Mirror unsaved work to the server's memory when the page is closed
+// or reloaded (no disk write). The server keeps running: it is stopped
+// only via the Quit button or Ctrl+C.
 window.addEventListener("pagehide", () => {
-    if (dirty) {
-        navigator.sendBeacon(
-            "/api/session",
-            new Blob([sessionBody()], { type: "application/json" }),
-        );
-    }
+    navigator.sendBeacon(
+        "/api/sync",
+        new Blob([sessionBody()], { type: "application/json" }),
+    );
+});
+
+// Warn before leaving the page with an unsaved session.
+window.addEventListener("beforeunload", (e) => {
+    if (dirty) e.preventDefault();
 });
 
 /* ---------- toasts ---------- */
@@ -162,6 +180,63 @@ function toast(message, cls = "", detail = "", timeout = 6000) {
     el.onclick = () => el.remove();
     $("toasts").appendChild(el);
     setTimeout(() => el.remove(), timeout);
+}
+
+/* ---------- progress ---------- */
+
+let progressPoll = null;
+
+function showProgress(label) {
+    $("progressLabel").textContent = label;
+    $("progressPct").textContent = "";
+    $("progressFill").classList.add("indeterminate");
+    $("progress").classList.remove("hidden");
+}
+
+function setProgress(done, total) {
+    const fill = $("progressFill");
+    if (total > 0) {
+        const pct = Math.min(100, Math.round((done / total) * 100));
+        fill.classList.remove("indeterminate");
+        fill.style.width = `${pct}%`;
+        $("progressPct").textContent = `${pct}%`;
+    } else {
+        fill.classList.add("indeterminate");
+        $("progressPct").textContent = done > 0 ? String(done) : "";
+    }
+}
+
+function hideProgress() {
+    stopProgressPoll();
+    $("progress").classList.add("hidden");
+    $("progressFill").style.width = "0%";
+    $("progressFill").classList.remove("indeterminate");
+}
+
+// Long server-side operations (export, synthesize, frame extraction)
+// report their progress through /api/progress, polled while the main
+// request is in flight.
+function startProgressPoll(fallbackLabel) {
+    stopProgressPoll();
+    progressPoll = setInterval(async () => {
+        try {
+            const p = await api("/api/progress");
+            if (p.active) {
+                $("progressLabel").textContent =
+                    (p.label || fallbackLabel) + "…";
+                setProgress(p.done || 0, p.total || 0);
+            }
+        } catch {
+            /* server busy or gone; keep the bar as-is */
+        }
+    }, 250);
+}
+
+function stopProgressPoll() {
+    if (progressPoll) {
+        clearInterval(progressPoll);
+        progressPoll = null;
+    }
 }
 
 /* ---------- sidebar: labels ---------- */
@@ -204,7 +279,7 @@ function renderLabels() {
             const boxes = currentBoxes();
             if (state.selection >= 0 && boxes[state.selection]) {
                 boxes[state.selection].label = label.name;
-                scheduleSave();
+                markChanged();
             }
             renderLabels();
             render();
@@ -227,7 +302,7 @@ function addLabel(name) {
     const color = PALETTE[state.labels.length % PALETTE.length];
     state.labels.push({ name, color });
     state.activeLabel = name;
-    scheduleSave();
+    markChanged();
     renderLabels();
     render();
 }
@@ -248,7 +323,7 @@ function deleteLabel(name) {
     }
     if (state.activeLabel === name) state.activeLabel = null;
     state.selection = -1;
-    scheduleSave();
+    markChanged();
     renderLabels();
     renderImages();
     render();
@@ -323,7 +398,7 @@ async function deleteImage(name) {
         state.current = Math.max(0, state.current - (idx < state.current));
     }
     state.selection = -1;
-    scheduleSave();
+    markChanged();
     selectImage(state.current, true);
     renderLabels();
 }
@@ -360,29 +435,38 @@ async function uploadImages(files) {
     const list = Array.from(files);
     if (!list.length) return;
     let done = 0;
-    for (const file of list) {
-        try {
-            const info = await api(
-                `/api/images?name=${encodeURIComponent(file.name)}`,
-                { method: "POST", body: file },
-            );
-            const existing = state.images.findIndex(
-                (i) => i.name === info.name,
-            );
-            if (existing >= 0) {
-                state.images[existing] = info;
-                imageCache.delete(info.name);
-                imageVersion.set(
-                    info.name,
-                    (imageVersion.get(info.name) || 0) + 1,
+    showProgress(`Uploading images (0/${list.length})…`);
+    setProgress(0, list.length);
+    try {
+        for (const [idx, file] of list.entries()) {
+            try {
+                const info = await api(
+                    `/api/images?name=${encodeURIComponent(file.name)}`,
+                    { method: "POST", body: file },
                 );
-            } else {
-                state.images.push(info);
+                const existing = state.images.findIndex(
+                    (i) => i.name === info.name,
+                );
+                if (existing >= 0) {
+                    state.images[existing] = info;
+                    imageCache.delete(info.name);
+                    imageVersion.set(
+                        info.name,
+                        (imageVersion.get(info.name) || 0) + 1,
+                    );
+                } else {
+                    state.images.push(info);
+                }
+                done += 1;
+            } catch (err) {
+                toast(`"${file.name}": ${err.message}`, "error");
             }
-            done += 1;
-        } catch (err) {
-            toast(`"${file.name}": ${err.message}`, "error");
+            $("progressLabel").textContent =
+                `Uploading images (${idx + 1}/${list.length})…`;
+            setProgress(idx + 1, list.length);
         }
+    } finally {
+        hideProgress();
     }
     if (done > 0) {
         toast(`Added ${done} image(s).`, "ok");
@@ -399,6 +483,43 @@ function askVideoStride(file) {
     $("videoDialog").showModal();
 }
 
+// Upload with XMLHttpRequest to get byte-level upload progress, then
+// poll /api/progress while the server extracts frames.
+function uploadVideo(url, file) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", url);
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+                $("progressLabel").textContent = "Uploading video…";
+                setProgress(e.loaded, e.total);
+            }
+        };
+        xhr.upload.onload = () => {
+            showProgress("Extracting frames…");
+            startProgressPoll("Extracting frames");
+        };
+        xhr.onload = () => {
+            let payload = {};
+            try {
+                payload = JSON.parse(xhr.responseText);
+            } catch {
+                /* non-json */
+            }
+            if (xhr.status >= 200 && xhr.status < 300) resolve(payload);
+            else {
+                reject(
+                    new Error(
+                        payload.error || `Request failed (${xhr.status})`,
+                    ),
+                );
+            }
+        };
+        xhr.onerror = () => reject(new Error("Network error"));
+        xhr.send(file);
+    });
+}
+
 $("videoForm").onsubmit = async (e) => {
     e.preventDefault();
     const stride = $("videoForm").elements.stride.value || "1";
@@ -406,12 +527,12 @@ $("videoForm").onsubmit = async (e) => {
     pendingVideo = null;
     $("videoDialog").close();
     if (!file) return;
-    toast(`Extracting frames from "${file.name}"…`);
+    showProgress("Uploading video…");
     try {
-        const result = await api(
+        const result = await uploadVideo(
             `/api/video?name=${encodeURIComponent(file.name)}` +
                 `&stride=${encodeURIComponent(stride)}`,
-            { method: "POST", body: file },
+            file,
         );
         for (const info of result.frames) {
             if (!state.images.some((i) => i.name === info.name)) {
@@ -423,6 +544,8 @@ $("videoForm").onsubmit = async (e) => {
         renderImages();
     } catch (err) {
         toast(`Video import failed: ${err.message}`, "error");
+    } finally {
+        hideProgress();
     }
 };
 
@@ -718,7 +841,7 @@ canvas.addEventListener("pointerup", (e) => {
             const boxes = currentBoxes();
             boxes.push({ label: state.activeLabel, ...drag.rect });
             state.selection = boxes.length - 1;
-            scheduleSave();
+            markChanged();
             renderLabels();
             renderImages();
         }
@@ -726,7 +849,7 @@ canvas.addEventListener("pointerup", (e) => {
         (drag.mode === "move" || drag.mode === "resize") &&
         drag.moved
     ) {
-        scheduleSave();
+        markChanged();
     }
     drag = null;
     hover = info ? hitTest(e.offsetX, e.offsetY) : { box: -1, handle: -1 };
@@ -752,7 +875,7 @@ function deleteBox(index) {
     boxes.splice(index, 1);
     if (state.selection === index) state.selection = -1;
     else if (state.selection > index) state.selection -= 1;
-    scheduleSave();
+    markChanged();
     renderLabels();
     renderImages();
     render();
@@ -927,7 +1050,9 @@ $("exportForm").onsubmit = async (e) => {
     const form = e.target.elements;
     const submitBtn = e.target.querySelector("button[type=submit]");
     submitBtn.disabled = true;
-    await saveSession();
+    await syncSession();
+    showProgress("Exporting dataset…");
+    startProgressPoll("Exporting dataset");
     try {
         const result = await api("/api/export", {
             method: "POST",
@@ -951,6 +1076,7 @@ $("exportForm").onsubmit = async (e) => {
     } catch (err) {
         toast(`Export failed: ${err.message}`, "error");
     } finally {
+        hideProgress();
         submitBtn.disabled = false;
     }
 };
@@ -960,7 +1086,9 @@ $("synthForm").onsubmit = async (e) => {
     const form = e.target.elements;
     const submitBtn = e.target.querySelector("button[type=submit]");
     submitBtn.disabled = true;
-    await saveSession();
+    await syncSession();
+    showProgress("Synthesizing dataset…");
+    startProgressPoll("Synthesizing dataset");
     try {
         const result = await api("/api/synthesize", {
             method: "POST",
@@ -989,13 +1117,95 @@ $("synthForm").onsubmit = async (e) => {
     } catch (err) {
         toast(`Synthesis failed: ${err.message}`, "error");
     } finally {
+        hideProgress();
         submitBtn.disabled = false;
     }
 };
 
-$("quitBtn").onclick = async () => {
-    if (!confirm("Stop the label tool server?")) return;
-    if (dirty) await saveSession();
+/* ---------- session save / load ---------- */
+
+$("saveSessionBtn").onclick = () => {
+    quitAfterSave = false;
+    openSaveDialog();
+};
+
+function openSaveDialog() {
+    const input = $("saveForm").elements.path;
+    if (sessionPath && !input.value) input.value = sessionPath;
+    $("saveDialog").showModal();
+}
+
+$("saveForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const path = e.target.elements.path.value.trim();
+    if (!path) return;
+    try {
+        const result = await api("/api/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                path,
+                labels: state.labels,
+                annotations: state.annotations,
+            }),
+        });
+        sessionPath = result.path;
+        dirty = false;
+        setSaveStatus();
+        $("saveDialog").close();
+        toast("Session saved.", "ok", result.path);
+        if (quitAfterSave) {
+            quitAfterSave = false;
+            await shutdownServer();
+        }
+    } catch (err) {
+        toast(`Save failed: ${err.message}`, "error");
+    }
+};
+
+$("loadSessionBtn").onclick = () => {
+    const input = $("loadForm").elements.path;
+    if (sessionPath && !input.value) input.value = sessionPath;
+    $("loadDialog").showModal();
+};
+
+$("loadForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const path = e.target.elements.path.value.trim();
+    if (!path) return;
+    if (
+        dirty &&
+        !confirm("Loading a session discards unsaved changes. Continue?")
+    ) {
+        return;
+    }
+    try {
+        const session = await api("/api/session/load", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ path }),
+        });
+        state.labels = session.labels || [];
+        state.annotations = session.annotations || {};
+        state.activeLabel = null;
+        state.selection = -1;
+        sessionPath = path;
+        dirty = false;
+        setSaveStatus();
+        $("loadDialog").close();
+        renderLabels();
+        renderImages();
+        render();
+        toast("Session loaded.", "ok", path);
+    } catch (err) {
+        toast(`Load failed: ${err.message}`, "error");
+    }
+};
+
+/* ---------- quit ---------- */
+
+async function shutdownServer() {
+    dirty = false; // suppress the beforeunload warning
     try {
         await api("/api/shutdown", { method: "POST" });
     } catch {
@@ -1004,6 +1214,22 @@ $("quitBtn").onclick = async () => {
     document.body.innerHTML =
         '<div id="emptyState"><p><strong>Server stopped.</strong></p>' +
         "<p>You can close this tab.</p></div>";
+}
+
+$("quitBtn").onclick = () => {
+    if (dirty) $("quitDialog").showModal();
+    else shutdownServer();
+};
+
+$("quitDiscardBtn").onclick = () => {
+    $("quitDialog").close();
+    shutdownServer();
+};
+
+$("quitSaveBtn").onclick = () => {
+    $("quitDialog").close();
+    quitAfterSave = true;
+    openSaveDialog();
 };
 
 /* ---------- init ---------- */
@@ -1016,8 +1242,10 @@ async function init() {
         state.images = data.images;
         state.labels = data.labels;
         state.annotations = data.annotations;
+        sessionPath = data.session_path;
+        dirty = Boolean(data.dirty);
         $("workspacePath").textContent = data.workspace;
-        setSaveStatus("Saved ✓", "ok");
+        setSaveStatus();
         renderLabels();
         renderImages();
         if (state.images.length) selectImage(0, true);
