@@ -23,8 +23,8 @@ def track_xyz(
     output_xyz: Path,
     search_range: float,
     memory: int = 1,
-    adaptive_stop: None | float = 0.95,
-    adaptive_step: None | float = 0.5,
+    adaptive_stop: float | None = 0.95,
+    adaptive_step: float | None = 0.5,
 ) -> Trj:
     """Track particles from an ``.xyz`` file and write a new file with IDs.
 
