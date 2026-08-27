@@ -39,9 +39,15 @@ docs:
 dev:
   #!/usr/bin/env bash
   set -euo pipefail
-  if [ -d .venv ] && command -v uv >/dev/null 2>&1; then
-    echo "Installing into ./.venv with uv"
-    uv pip install -e '.[dev]'
+  # An existing project venv wins over the active environment, and
+  # ./.venv wins over ./venv (same order as the PATH setting above).
+  target=""
+  for candidate in .venv venv; do
+    if [ -d "$candidate" ]; then target="$candidate"; break; fi
+  done
+  if [ -n "$target" ] && command -v uv >/dev/null 2>&1; then
+    echo "Installing into ./$target with uv"
+    uv pip install --python "$target/bin/python" -e '.[dev]'
   elif [ -n "${CONDA_PREFIX:-}" ]; then
     echo "Installing into conda env '${CONDA_DEFAULT_ENV:-}' with pip"
     pip install -e '.[dev]'
@@ -53,12 +59,13 @@ dev:
     pip install -e '.[dev]'
   fi
   # On macOS the .pth file of the editable install can carry the
-  # "hidden" flag, which makes Python >= 3.11 skip it (the package then
-  # fails to import). Clearing it helps when running python/pytest
-  # directly; some setups re-apply the flag, so the recipes above do
-  # not rely on it and import the package from ./src via PYTHONPATH.
-  if [ "$(uname)" = "Darwin" ] && [ -d .venv ]; then
-    chflags nohidden .venv/lib/python*/site-packages/*.pth 2>/dev/null || true
+  # "hidden" flag, which makes Python >= 3.11 skip it, so that the
+  # package fails to import (including from the label_tool command).
+  # Some setups keep re-applying the flag to dot-directories such as
+  # ./.venv; a venv named ./venv avoids it. The recipes above do not
+  # depend on the .pth anyway: they import the package from ./src.
+  if [ "$(uname)" = "Darwin" ] && [ -n "$target" ]; then
+    chflags nohidden "$target"/lib/python*/site-packages/*.pth 2>/dev/null || true
   fi
 
 # Run code checks.
