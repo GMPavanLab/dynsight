@@ -2,12 +2,27 @@
 # - If a project-local uv virtualenv (./.venv) exists, its tools are
 #   used automatically (no activation needed).
 # - Otherwise the active environment is used (conda, system, ...).
-venv_bin := justfile_directory() / ".venv/bin"
+dot_venv_bin := justfile_directory() / ".venv/bin"
+venv_bin := justfile_directory() / "venv/bin"
+src_dir := justfile_directory() / "src"
 
-export PATH := if path_exists(venv_bin) == "true" {
+export PATH := if path_exists(dot_venv_bin) == "true" {
+  dot_venv_bin + ":" + env("PATH")
+} else if path_exists(venv_bin) == "true" {
   venv_bin + ":" + env("PATH")
 } else {
   env("PATH")
+}
+
+# Import the package from ./src regardless of the editable install.
+# This keeps the checks working even when the .pth file of the install
+# is unreadable to Python, which happens on macOS when a synced folder
+# (iCloud Desktop/Documents) sets the "hidden" flag on it: Python >=
+# 3.11 silently skips hidden .pth files.
+export PYTHONPATH := if env_var_or_default("PYTHONPATH", "") == "" {
+  src_dir
+} else {
+  src_dir + ":" + env_var_or_default("PYTHONPATH", "")
 }
 
 # List all commands.
@@ -37,8 +52,11 @@ dev:
   else
     pip install -e '.[dev]'
   fi
-  # macOS can end up with the "hidden" flag on .pth files, which makes
-  # Python >= 3.11 silently skip them (ModuleNotFoundError on import).
+  # On macOS the .pth file of the editable install can carry the
+  # "hidden" flag, which makes Python >= 3.11 skip it (the package then
+  # fails to import). Clearing it helps when running python/pytest
+  # directly; some setups re-apply the flag, so the recipes above do
+  # not rely on it and import the package from ./src via PYTHONPATH.
   if [ "$(uname)" = "Darwin" ] && [ -d .venv ]; then
     chflags nohidden .venv/lib/python*/site-packages/*.pth 2>/dev/null || true
   fi
@@ -47,25 +65,30 @@ dev:
 check:
   #!/usr/bin/env bash
 
+  # bash 3.2 (the macOS default) does not run the ERR trap when a
+  # subshell fails, so failures are collected explicitly: without this,
+  # `just check` reported success even when a step failed.
   error=0
-  trap error=1 ERR
+  failed=()
+
+  run() {
+    echo
+    ( set -x; "$@" ) || { error=1; failed+=("$1"); }
+  }
+
+  run ruff check .
+  run ruff format --check .
+  run mypy .
+  run pytest --cov=src --cov-report term-missing
+  run make -C docs doctest
 
   echo
-  (set -x; ruff check . )
-
-  echo
-  ( set -x; ruff format --check . )
-
-  echo
-  ( set -x; mypy . )
-
-  echo
-  ( set -x; pytest --cov=src --cov-report term-missing )
-
-  echo
-  ( set -x; make -C docs doctest )
-
-  test $error = 0
+  if [ $error -ne 0 ]; then
+    echo "FAILED: ${failed[*]}"
+  else
+    echo "All checks passed."
+  fi
+  exit $error
 
 # Auto-fix code issues.
 fix:
