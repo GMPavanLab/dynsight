@@ -34,7 +34,7 @@ def track_xyz(
     memory: int = 1,
     adaptive_stop: float | None = 0.95,
     adaptive_step: float | None = 0.5,
-) -> Trj:
+) -> Trj | None:
     """Track particles from an ``.xyz`` file and write a new file with IDs.
 
     The input ``.xyz`` is assumed to contain only raw 3D coordinates
@@ -67,6 +67,24 @@ def track_xyz(
         comment line
         <name> <x> <y> <z> <ID>
         ...
+
+    .. important::
+
+        The output file holds **one line per detection**, so its frames
+        contain different numbers of objects whenever the detector missed
+        an object or found a spurious one. Such a file records faithfully
+        what was detected, but it is not a trajectory: trajectory readers
+        require a constant number of particles.
+
+        This function therefore returns a :class:`.trajectory.Trj` **only
+        when every frame contains the same number of particles**. Otherwise
+        it writes the file, logs how large the variation is, and returns
+        ``None`` rather than handing back an object that raises as soon as
+        a descriptor is computed on it.
+
+        If you get ``None``, either improve the detections upstream, raise
+        ``memory`` so that briefly-lost objects keep their ID, or build a
+        trajectory yourself by keeping only the IDs present in every frame.
 
     Parameters:
         input_xyz:
@@ -101,6 +119,11 @@ def track_xyz(
             Factor by which the `search_range` is multiplied to reduce it
             during adaptive search. Effective only if `adaptive_stop` is not
             `None`.
+
+    Returns:
+        A :class:`.trajectory.Trj` built from the output file if every frame
+        holds the same number of particles, ``None`` otherwise. The output
+        file is written in both cases.
     """
     if adaptive_stop is None and adaptive_step is not None:
         msg = "adaptive_step is set but adaptive_stop is None."
@@ -153,6 +176,20 @@ def track_xyz(
                 f.write(f"{name} {x:.6f} {y:.6f} {z:.6f} {pid}\n")
 
     logger.info(f"Linked .xyz file written to: {output_xyz}")
+
+    counts = linked.groupby("frame").size()
+    n_min, n_max = int(counts.min()), int(counts.max())
+    if n_min != n_max:
+        logger.warning(
+            "The tracked frames hold between %d and %d objects, so the "
+            "output file is not a valid trajectory and no Trj is returned. "
+            "Improve the detections, increase 'memory', or keep only the "
+            "particle IDs present in every frame.",
+            n_min,
+            n_max,
+        )
+        return None
+
     return Trj.init_from_xyz(traj_file=output_xyz, dt=1)
 
 
