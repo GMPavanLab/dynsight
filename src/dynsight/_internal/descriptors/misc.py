@@ -12,10 +12,36 @@ import numpy as np
 from scipy.spatial.distance import cosine
 
 
+def _sliced_n_frames(
+    universe: Universe,
+    trajslice: slice | None,
+) -> int:
+    """Number of frames the given slice selects, without reading them."""
+    if trajslice is None:
+        return len(universe.trajectory)
+    return len(range(*trajslice.indices(len(universe.trajectory))))
+
+
+def _check_neigh_list(
+    neigh_list_per_frame: list[list[AtomGroup]],
+    n_frames: int,
+) -> None:
+    """Fail early and clearly on a neighbor list / trajectory mismatch."""
+    if len(neigh_list_per_frame) != n_frames:
+        msg = (
+            f"neigh_list_per_frame covers {len(neigh_list_per_frame)} frames, "
+            f"but the trajectory (after slicing) has {n_frames}. Compute the "
+            "neighbor list and the descriptor on the same Trj, and pass the "
+            "same trajslice to both."
+        )
+        raise ValueError(msg)
+
+
 def orientational_order_param(
     universe: Universe,
     neigh_list_per_frame: list[list[AtomGroup]],
     order: int = 6,
+    trajslice: slice | None = None,
 ) -> NDArray[np.float64]:
     r"""Compute the magnitude of the orientational order parameter.
 
@@ -38,6 +64,10 @@ def orientational_order_param(
 
         order: the order of the symmetry measured by the descriptor. Default
             is 6, corresponding to the hexatic order parameter.
+
+        trajslice: the slice of frames the neighbor list was computed on. Must
+            match the slice used to build ``neigh_list_per_frame``; if None,
+            the whole trajectory is used.
 
     Returns:
         An array of shape (n_atoms, n_frames), with the values of psi.
@@ -71,11 +101,13 @@ def orientational_order_param(
 
     """
     n_atoms = universe.atoms.n_atoms
-    n_frames = len(universe.trajectory)
+    n_frames = _sliced_n_frames(universe, trajslice)
+    _check_neigh_list(neigh_list_per_frame, n_frames)
 
     psi = np.zeros((n_atoms, n_frames))
 
-    for t, _ in enumerate(universe.trajectory):
+    frames = slice(None) if trajslice is None else trajslice
+    for t, _ in enumerate(universe.trajectory[frames]):
         frame = universe.atoms.positions[:, :2].copy()
 
         for i, atom_i in enumerate(frame):
@@ -136,6 +168,7 @@ def compute_mean_alignment(
 def velocity_alignment(
     universe: Universe,
     neigh_list_per_frame: list[list[AtomGroup]],
+    trajslice: slice | None = None,
 ) -> NDArray[np.float64]:
     """Compute average velocity alignment phi.
 
@@ -147,6 +180,10 @@ def velocity_alignment(
 
         neigh_list_per_frame: A frame-by-frame list of the neighbors of each
             atom, output of :func:`listNeighboursAlongTrajectory`.
+
+        trajslice: the slice of frames the neighbor list was computed on. Must
+            match the slice used to build ``neigh_list_per_frame``; if None,
+            the whole trajectory is used.
 
     Returns:
         If the Universe inclused velocities, the output has shape
@@ -181,7 +218,9 @@ def velocity_alignment(
 
     """
     n_atoms = universe.atoms.n_atoms
-    n_frames = len(universe.trajectory)
+    n_frames = _sliced_n_frames(universe, trajslice)
+    _check_neigh_list(neigh_list_per_frame, n_frames)
+    frames = slice(None) if trajslice is None else trajslice
 
     def cosine_distance(
         a: NDArray[np.float64],
@@ -194,7 +233,7 @@ def velocity_alignment(
         and universe.atoms.velocities is not None
     ):  # If the Universe has velocities, use them
         phi = np.zeros((n_frames, n_atoms))
-        for t, _ in enumerate(universe.trajectory):
+        for t, _ in enumerate(universe.trajectory[frames]):
             phi[t] = compute_mean_alignment(
                 neigh_list_per_frame[t],
                 vectors=universe.atoms.velocities,
@@ -205,7 +244,7 @@ def velocity_alignment(
     # If the Universe does not has velocities, use the displacements
     r_0 = None
     phi = np.zeros((n_frames - 1, n_atoms))
-    for t, _ in enumerate(universe.trajectory):
+    for t, _ in enumerate(universe.trajectory[frames]):
         r_1 = universe.atoms.positions.copy()
         if t == 0:
             r_0 = r_1

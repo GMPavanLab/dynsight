@@ -271,7 +271,10 @@ def compute_lens(
             coords = universe.atoms.positions
             mins = coords.min(axis=0)
             maxs = coords.max(axis=0)
-            box = (maxs - mins) * 1.01
+            # Pad every side by r_cut: a flat system (e.g. 2D data coming
+            # from dynsight.vision) has zero extent along one axis, and a
+            # zero-length box side breaks the cell-list construction.
+            box = (maxs - mins) + 2 * r_cut
         indptr_t1, indices_t1 = neighbor_list_celllist_centers(
             positions_env=pos_env1,
             positions_cent=pos_cent1,
@@ -290,7 +293,10 @@ def compute_lens(
             coords = universe.atoms.positions
             mins = coords.min(axis=0)
             maxs = coords.max(axis=0)
-            box = (maxs - mins) * 1.01
+            # Pad every side by r_cut: a flat system (e.g. 2D data coming
+            # from dynsight.vision) has zero extent along one axis, and a
+            # zero-length box side breaks the cell-list construction.
+            box = (maxs - mins) + 2 * r_cut
         indptr_t2, indices_t2 = neighbor_list_celllist_centers(
             positions_env=pos_env2,
             positions_cent=pos_cent2,

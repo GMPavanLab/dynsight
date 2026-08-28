@@ -353,6 +353,7 @@ class Trj:
             self.universe,
             neigh_list_per_frame=neigcounts,
             order=order,
+            trajslice=self.trajslice,
         )
 
         attr_dict = {
@@ -404,6 +405,7 @@ class Trj:
         phi = dynsight.descriptors.velocity_alignment(
             self.universe,
             neigh_list_per_frame=neigcounts,
+            trajslice=self.trajslice,
         )
 
         attr_dict = {
