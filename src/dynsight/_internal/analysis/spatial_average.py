@@ -193,7 +193,7 @@ def spatialaverage(
             f"the trajectory (after slicing) has {len(frame_indices)}. "
             "Some descriptors (such as LENS) are defined on pairs of "
             "frames and are one frame shorter than the starting trajectory: slice "
-            "the `Trj` to match before averaging."
+            "the Trj to match before averaging."
         )
         raise ValueError(msg)
 
