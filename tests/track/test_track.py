@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
+from dynsight._internal.track.track import _DEFAULT_NAME
 from dynsight.track import track_xyz
 from dynsight.utilities import read_xyz
 
@@ -67,7 +68,7 @@ def test_track_xyz_without_names(tmp_path: Path) -> None:
     assert np.array_equal(
         tracked[compared].to_numpy(), expected[compared].to_numpy()
     )
-    assert set(tracked["name"]) == {"C"}
+    assert set(tracked["name"]) == {_DEFAULT_NAME}
 
 
 def test_track_xyz_invalid_format(tmp_path: Path) -> None:

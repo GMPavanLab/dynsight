@@ -7,8 +7,9 @@
    bare ``IndexError`` from inside a worker process.
 3. ``track_xyz`` returned a ``Trj`` built on a file whose frames may hold
    different numbers of objects, which raises ``EOFError`` as soon as any
-   descriptor is computed on it. Planar tracked data also made
-   ``compute_lens`` infer a zero-thickness box and divide by zero.
+   descriptor is computed on it. It now only writes the tracked file.
+   Planar tracked data also made ``compute_lens`` infer a zero-thickness
+   box and divide by zero.
 """
 
 from __future__ import annotations
@@ -76,7 +77,7 @@ def test_spatial_average_frame_mismatch_raises_clearly() -> None:
     trj = _trj_2d()
     descriptor = np.zeros((trj.n_atoms, trj.n_frames - 1))
 
-    with pytest.raises(ValueError, match="descriptor_array covers"):
+    with pytest.raises(ValueError, match="Descriptor covers"):
         spatialaverage(
             universe=trj.universe,
             descriptor_array=descriptor,
@@ -112,20 +113,21 @@ def test_lens_on_planar_data_without_a_box(tmp_path: Path) -> None:
     assert np.all(np.isfinite(lens.dataset))
 
 
-def test_track_xyz_returns_a_trj_when_the_count_is_constant(
-    tmp_path: Path,
-) -> None:
-    trj = track_xyz(
+def test_track_xyz_only_writes_the_tracked_file(tmp_path: Path) -> None:
+    """No Trj is built: a tracked file is not necessarily a trajectory."""
+    output = tmp_path / "tracked.xyz"
+    track_xyz(
         input_xyz=SYSTEMS / "lj_noid.xyz",
-        output_xyz=tmp_path / "tracked.xyz",
+        output_xyz=output,
         search_range=10,
     )
-    assert trj is not None
+    # A clean file can still be turned into a Trj by the caller.
+    trj = Trj.init_from_xyz(traj_file=output, dt=1)
     assert trj.n_atoms == _LJ_N_PARTICLES
 
 
-def test_track_xyz_returns_none_on_a_ragged_file(tmp_path: Path) -> None:
-    """A variable object count cannot make a trajectory: return None."""
+def test_track_xyz_writes_a_ragged_file(tmp_path: Path) -> None:
+    """A variable object count is written out as it is, without raising."""
     ragged = tmp_path / "ragged.xyz"
     ragged.write_text(
         "3\nf0\n1.0 1.0 0.0\n5.0 1.0 0.0\n9.0 1.0 0.0\n"
@@ -134,14 +136,11 @@ def test_track_xyz_returns_none_on_a_ragged_file(tmp_path: Path) -> None:
     )
     output = tmp_path / "tracked.xyz"
 
-    assert (
-        track_xyz(
-            input_xyz=ragged,
-            output_xyz=output,
-            search_range=3,
-            memory=0,
-        )
-        is None
+    track_xyz(
+        input_xyz=ragged,
+        output_xyz=output,
+        search_range=3,
+        memory=0,
     )
-    # The file is still written: it is a faithful record of the detections.
+    # The file is written: it is a faithful record of the detections.
     assert output.exists()
