@@ -189,11 +189,11 @@ def spatialaverage(
     )
     if descriptor_array.shape[1] != len(frame_indices):
         msg = (
-            f"descriptor_array covers {descriptor_array.shape[1]} frames, but "
+            f"Descriptor covers {descriptor_array.shape[1]} frames, but "
             f"the trajectory (after slicing) has {len(frame_indices)}. "
-            "Descriptors such as LENS and timeSOAP are defined on pairs of "
-            "frames and are one frame shorter than the trajectory they come "
-            "from: slice the Trj to match before averaging."
+            "Some descriptors (such as LENS) are defined on pairs of "
+            "frames and are one frame shorter than the starting trajectory: slice "
+            "the `Trj` to match before averaging."
         )
         raise ValueError(msg)
 
