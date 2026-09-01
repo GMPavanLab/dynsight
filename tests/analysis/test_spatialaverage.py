@@ -11,6 +11,7 @@ import pytest
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+from dynsight.analysis import spatialaverage
 from dynsight.trajectory import Insight, Trj
 
 # ---------------- Fixtures ----------------
@@ -47,6 +48,16 @@ def insight(trj: Trj) -> Insight:
     return Insight(coords)
 
 
+@pytest.fixture
+def trj_2d(base_dir: Path) -> Trj:
+    """A 2D trajectory, whose LENS is one frame shorter than itself."""
+    return Trj.init_from_xyz(
+        traj_file=base_dir / "../../docs/source/_static/ex_test_files"
+        "/trajectory.xyz",
+        dt=1.0,
+    )
+
+
 # ---------------- Test ----------------
 
 
@@ -61,3 +72,16 @@ def test_spavg(trj: Trj, insight: Insight, files: dict[str, Path]) -> None:
 
     expected: NDArray[np.float64] = np.load(files["ref"])
     assert np.allclose(out.dataset, expected)
+
+
+def test_spatial_average_frame_mismatch_raises_clearly(trj_2d: Trj) -> None:
+    """LENS is one frame shorter than its trajectory: say so, don't crash."""
+    descriptor = np.zeros((trj_2d.n_atoms, trj_2d.n_frames - 1))
+
+    with pytest.raises(ValueError, match="Descriptor covers"):
+        spatialaverage(
+            universe=trj_2d.universe,
+            descriptor_array=descriptor,
+            selection="all",
+            r_cut=3.0,
+        )

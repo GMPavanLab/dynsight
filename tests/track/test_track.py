@@ -8,6 +8,7 @@ import pytest
 
 from dynsight._internal.track.track import _DEFAULT_NAME
 from dynsight.track import track_xyz
+from dynsight.trajectory import Trj
 from dynsight.utilities import read_xyz
 
 if TYPE_CHECKING:
@@ -80,3 +81,38 @@ def test_track_xyz_invalid_format(tmp_path: Path) -> None:
             output_xyz=tmp_path / "out.xyz",
             search_range=10,
         )
+
+
+def test_track_xyz_only_writes_the_tracked_file(tmp_path: Path) -> None:
+    """No Trj is built: a tracked file is not necessarily a trajectory."""
+    original_dir = Path(__file__).resolve().parent
+    output = tmp_path / "tracked.xyz"
+    track_xyz(
+        input_xyz=original_dir / "../systems/lj_noid.xyz",
+        output_xyz=output,
+        search_range=10,
+    )
+    # A clean file can still be turned into a Trj by the caller.
+    n_particles = 5
+    trj = Trj.init_from_xyz(traj_file=output, dt=1)
+    assert trj.n_atoms == n_particles
+
+
+def test_track_xyz_writes_a_ragged_file(tmp_path: Path) -> None:
+    """A variable object count is written out as it is, without raising."""
+    ragged = tmp_path / "ragged.xyz"
+    ragged.write_text(
+        "3\nf0\n1.0 1.0 0.0\n5.0 1.0 0.0\n9.0 1.0 0.0\n"
+        "2\nf1\n1.2 1.0 0.0\n5.2 1.0 0.0\n"
+        "3\nf2\n1.4 1.0 0.0\n5.4 1.0 0.0\n9.4 1.0 0.0\n"
+    )
+    output = tmp_path / "tracked.xyz"
+
+    track_xyz(
+        input_xyz=ragged,
+        output_xyz=output,
+        search_range=3,
+        memory=0,
+    )
+    # The file is written: it is a faithful record of the detections.
+    assert output.exists()
