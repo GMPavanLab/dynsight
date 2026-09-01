@@ -106,3 +106,30 @@ def test_lens_2d(trj_2d: Trj) -> None:
         )
     exp_lens = np.load(fbc_path)
     assert np.allclose(exp_lens, test_lens_fbc.dataset)
+
+
+def test_lens_on_planar_data_without_a_box(tmp_path: Path) -> None:
+    """A flat system has zero extent along z; the box must still be usable.
+
+    This is exactly the shape of the data ``dynsight.vision`` produces:
+    pixel coordinates in a plane, with no simulation box.
+    """
+    rng = np.random.default_rng(42)
+    n_atoms, n_frames = 30, 6
+    xy = rng.uniform(0.0, 40.0, size=(n_frames, n_atoms, 2))
+
+    planar = tmp_path / "planar.xyz"
+    with planar.open("w") as file:
+        for frame in range(n_frames):
+            file.write(f"{n_atoms}\nFrame {frame}\n")
+            for x, y in xy[frame]:
+                file.write(f"P {x:.5f} {y:.5f} 0.00000\n")
+
+    trj = Trj.init_from_xyz(traj_file=planar, dt=1.0)
+    assert trj.universe.trajectory[0].dimensions is None
+    assert np.allclose(trj.get_coordinates("all")[:, :, 2], 0.0)
+
+    lens = trj.get_lens(r_cut=10.0)
+
+    assert lens.dataset.shape == (n_atoms, n_frames - 1)
+    assert np.all(np.isfinite(lens.dataset))

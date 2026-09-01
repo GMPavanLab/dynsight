@@ -39,6 +39,16 @@ def file_paths(here: Path) -> dict[str, Path]:
     }
 
 
+@pytest.fixture
+def trj_2d(here: Path) -> Trj:
+    """A 2D trajectory of moving particles, used for the slicing tests."""
+    return Trj.init_from_xyz(
+        traj_file=here / "../../docs/source/_static/ex_test_files"
+        "/trajectory.xyz",
+        dt=1.0,
+    )
+
+
 @pytest.fixture(scope="module")
 def universe(file_paths: dict[str, Path]) -> MDAnalysis.Universe:
     return MDAnalysis.Universe(file_paths["xyz"], dt=1)
@@ -215,3 +225,38 @@ def test_dump_xyz_functions(
         file_paths["files_dir"] / "insight.xyz",
         shallow=False,
     )
+
+
+def test_orientational_op_on_a_sliced_trj(trj_2d: Trj) -> None:
+    """The descriptor must follow the slice, not the whole trajectory."""
+    _, psi_full = trj_2d.get_orientational_op(r_cut=3.0, order=6)
+
+    n_frames = 10
+    sliced = trj_2d.with_slice(slice(0, n_frames, 1))
+    neigcounts, _ = sliced.get_coord_number(r_cut=3.0)
+    _, psi = sliced.get_orientational_op(
+        r_cut=3.0, order=6, neigcounts=neigcounts
+    )
+
+    assert psi.dataset.shape == (trj_2d.n_atoms, n_frames)
+    assert np.allclose(psi.dataset, psi_full.dataset[:, :n_frames])
+
+
+def test_velocity_alignment_on_a_sliced_trj(trj_2d: Trj) -> None:
+    """The descriptor must follow the slice, not the whole trajectory."""
+    n_frames = 10
+    sliced = trj_2d.with_slice(slice(0, n_frames, 1))
+    neigcounts, _ = sliced.get_coord_number(r_cut=3.0)
+    _, phi = sliced.get_velocity_alignment(r_cut=3.0, neigcounts=neigcounts)
+
+    # No velocities in an .xyz: displacements are used, hence n_frames - 1.
+    assert phi.dataset.shape == (trj_2d.n_atoms, n_frames - 1)
+
+
+def test_mismatched_neighbour_list_raises_clearly(trj_2d: Trj) -> None:
+    """A neighbor list from another slice must fail loudly, not silently."""
+    neigcounts, _ = trj_2d.get_coord_number(r_cut=3.0)
+    sliced = trj_2d.with_slice(slice(0, 10, 1))
+
+    with pytest.raises(ValueError, match="neigh_list_per_frame covers"):
+        sliced.get_orientational_op(r_cut=3.0, order=6, neigcounts=neigcounts)
