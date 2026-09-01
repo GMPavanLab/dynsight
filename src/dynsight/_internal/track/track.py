@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 # Number of columns of an atom line without the atom name.
 _COORDS_ONLY = 3
 # Name given to objects read from a file without the name column.
-_DEFAULT_NAME = "C"
+_DEFAULT_NAME = "X"
 
 
 def track_xyz(
@@ -60,7 +60,7 @@ def track_xyz(
 
     The output file lists the tracked particle ID at the end of each
     line. Objects read from a file without the name column are written
-    with the placeholder name ``C``, so that the output is always a
+    with the placeholder name ``X``, so that the output is always a
     valid ``.xyz`` file::
 
         <number of objects>
