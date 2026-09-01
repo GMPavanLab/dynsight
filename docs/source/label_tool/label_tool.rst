@@ -83,9 +83,6 @@ Annotating is done directly on the canvas:
 * **Navigate**: mouse wheel to zoom, space (or middle mouse) drag to pan,
   arrow keys to switch image.
 
-Every long operation (image and video uploads, frame extraction, dataset
-export and synthesis) shows a progress bar at the bottom of the canvas.
-
 Two export options are available in the top bar. Both write the dataset
 folder directly to disk (inside the workspace by default) together with a
 ready-to-use ``dataset.yaml``:
