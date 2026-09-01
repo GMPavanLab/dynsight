@@ -1,13 +1,6 @@
-"use strict";
+/* dynsight label tool - frontend */
 
-/* =========================================================
- * dynsight label tool - frontend
- *
- * All annotation coordinates are stored in natural image
- * pixels: {label, x, y, w, h} with (x, y) = top-left corner.
- * The session lives in memory (mirrored to the server) and is
- * written to disk only via the explicit Save session dialog.
- * ========================================================= */
+"use strict";
 
 /* ---------- constants ---------- */
 
