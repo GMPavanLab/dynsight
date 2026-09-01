@@ -122,7 +122,7 @@ disallow_untyped_decorators = true
 warn_unreachable = true
 disallow_any_generics = true
 # Directories starting with a dot (such as .venv) are skipped already.
-exclude = ['docs/build/html/_static', '^venv/']
+exclude = ['docs/build/html/_static', '^venv/', '^build/']
 
 [[tool.mypy.overrides]]
 module = [
