@@ -7,7 +7,7 @@ computer vision tasks, such as the creation of the initial dataset used to
 train Convolutional Neural Networks (CNNs). The current version of
 `dynsight vision <../_autosummary/dynsight.vision.VisionInstance.html>`_
 exploits the power of the `YOLO models <https://docs.ultralytics.com/models/yolo12/>`_
-for computer vision tasks. Thus, the ``label_tool`` writes datasets directly
+for computer vision tasks. The ``label_tool`` writes datasets directly
 in the YOLO format expected by
 `set_training_dataset <../_autosummary/dynsight.vision.VisionInstance.html#dynsight.vision.VisionInstance.set_training_dataset>`_,
 so they can be used for training without any manual editing.
@@ -61,19 +61,19 @@ The GUI
 
 The Graphical User Interface is divided in three main panels:
 
-* **The labels panel** (top left): create the object classes. Each label
+* **The Labels panel** (top left): create the object classes. Each label
   shows its YOLO class ID, its color and the number of boxes drawn with it.
   Class IDs follow the order of this list and are stable across exports.
 
-* **The images panel** (bottom left): add content with ``+ Images`` or
+* **The Images panel** (bottom left): add content with ``+ Images`` or
   ``+ Video`` (frames are extracted at a chosen interval), or by dragging
   and dropping files onto the canvas. Each entry shows a thumbnail and its
   number of annotations.
 
-* **The canvas** (right): displays the current image and the bounding
+* **The Canvas** (right): displays the current image and the bounding
   boxes.
 
-Annotating is done directly on the canvas:
+Annotations are done directly on the canvas:
 
 * **Draw**: select a label, then click and drag.
 * **Select**: click a box.
