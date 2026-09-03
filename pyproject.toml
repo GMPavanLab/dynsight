@@ -57,7 +57,19 @@ line-length = 79
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["ANN401", "COM812", "ISC001", "FBT001", "FBT002", "PLR0913", "G004"]
+# CPY001: the licence lives in LICENSE, not in a header of every file.
+# PLR0917: counterpart of PLR0913 for positional arguments.
+ignore = [
+    "ANN401",
+    "COM812",
+    "CPY001",
+    "ISC001",
+    "FBT001",
+    "FBT002",
+    "PLR0913",
+    "PLR0917",
+    "G004",
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -109,7 +121,8 @@ check_untyped_defs = true
 disallow_untyped_decorators = true
 warn_unreachable = true
 disallow_any_generics = true
-exclude = 'docs/build/html/_static'
+# Directories starting with a dot (such as .venv) are skipped already.
+exclude = ['docs/build/html/_static', '^venv/', '^build/']
 
 [[tool.mypy.overrides]]
 module = [

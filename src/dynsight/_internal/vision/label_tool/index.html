@@ -3,55 +3,281 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>dynsight labeling tool</title>
+        <title>dynsight · label tool</title>
+        <link rel="icon" href="data:," />
         <link rel="stylesheet" href="styles.css" />
     </head>
     <body>
-        <div class="sidebar">
-            <h2>Labels</h2>
-            <input type="text" id="newLabelInput" placeholder="New label..." />
-            <button class="upload-btn" id="addLabelBtn">Add</button>
-            <div class="label-list" id="labelList"></div>
-        </div>
+        <header id="topbar">
+            <img
+                id="logo"
+                src="/logo.png"
+                alt="dynsight label tool"
+                title="dynsight label tool"
+            />
 
-        <div class="main">
-            <div class="top-bar">
-                <input type="file" id="imageInput" accept="image/*" multiple />
-                <button class="nav-btn" id="prevImage">&larr; Prev</button>
-                <button class="nav-btn" id="nextImage">Next &rarr;</button>
-                <button id="clearLast" class="nav-btn">Clear Previous</button>
-                <button id="clearAll" class="nav-btn">Clear All</button>
-                <button id="exportYolo" class="nav-btn">
-                    Export label (YOLO)
-                </button>
-                <button id="exportAll" class="nav-btn">
-                    Export dataset (YOLO)
-                </button>
-                <button id="synthesize" class="nav-btn">
-                    Synthesize dataset
-                </button>
-                <label for="zoomSlider">Zoom</label>
-                <input
-                    type="range"
-                    id="zoomSlider"
-                    min="10"
-                    max="200"
-                    value="100"
-                />
+            <div class="group">
+                <button id="prevBtn" class="icon-btn" title="Previous image">&#8592;</button>
+                <span id="imageCounter" class="counter">0 / 0</span>
+                <button id="nextBtn" class="icon-btn" title="Next image">&#8594;</button>
             </div>
-            <div class="image-container" id="imageContainer" oncontextmenu="return false;">
-                <div id="imageWrapper">
-                    <img id="imageDisplay" src="" alt="" />
-                    <div id="overlay"></div>
+
+            <div class="group">
+                <button id="zoomOutBtn" class="icon-btn" title="Zoom out">&minus;</button>
+                <span id="zoomText" class="counter">100%</span>
+                <button id="zoomInBtn" class="icon-btn" title="Zoom in">+</button>
+                <button id="fitBtn" class="ghost-btn" title="Fit image to view">Fit</button>
+            </div>
+
+            <div class="spacer"></div>
+
+            <button id="loadSessionBtn" class="ghost-btn" title="Load a session file">Load</button>
+            <button id="saveSessionBtn" class="ghost-btn" title="Save the session to a file">Save session</button>
+            <button id="synthBtn" class="ghost-btn">Synthesize</button>
+            <button id="exportBtn" class="primary-btn">Export dataset</button>
+            <button id="quitBtn" class="danger-btn" title="Stop the server">Quit</button>
+        </header>
+
+        <div id="layout">
+            <aside id="sidebar">
+                <section class="panel">
+                    <h2>Labels</h2>
+                    <form id="labelForm" autocomplete="off">
+                        <input
+                            id="labelInput"
+                            type="text"
+                            placeholder="New label name&hellip;"
+                            maxlength="40"
+                        />
+                        <button type="submit" class="ghost-btn">Add</button>
+                    </form>
+                    <ul id="labelList" class="item-list"></ul>
+                    <p id="labelHint" class="muted">
+                        Add a label, then drag on the image to draw boxes.
+                    </p>
+                </section>
+
+                <section class="panel grow">
+                    <h2>Images</h2>
+                    <div class="btn-row">
+                        <button id="addImagesBtn" class="ghost-btn">+ Images</button>
+                        <button id="addVideoBtn" class="ghost-btn">+ Video</button>
+                    </div>
+                    <ul id="imageList" class="item-list grow-list"></ul>
+                </section>
+            </aside>
+
+            <main id="stage">
+                <canvas id="canvas"></canvas>
+                <div id="emptyState">
+                    <p><strong>No images yet</strong></p>
+                    <p>
+                        Use <em>+ Images</em> / <em>+ Video</em> or drop files
+                        anywhere on this area.
+                    </p>
                 </div>
-                <div id="verticalLine" class="crosshair-line"></div>
-                <div id="horizontalLine" class="crosshair-line"></div>
-            </div>
-
-            </div>
+                <div id="dropHint" class="hidden">Drop images or a video</div>
+                <div id="progress" class="hidden">
+                    <div class="progress-header">
+                        <span id="progressLabel"></span>
+                        <span id="progressPct"></span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="progressFill"></div>
+                    </div>
+                </div>
+            </main>
         </div>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-        <script src="script.js"></script>
+        <footer id="statusbar">
+            <span id="workspacePath" class="mono"></span>
+            <span id="saveStatus"></span>
+            <span class="spacer"></span>
+            <span class="muted">
+                draw: drag &middot; select: click &middot; move/resize: drag
+                box &middot; delete: &#9003; or right-click &middot; pan:
+                space/middle drag &middot; zoom: wheel
+            </span>
+        </footer>
+
+        <dialog id="exportDialog">
+            <form method="dialog" id="exportForm">
+                <h3>Export YOLO dataset</h3>
+                <label>
+                    Dataset name
+                    <input type="text" name="name" value="yolo_dataset" required />
+                </label>
+                <div class="field-row">
+                    <label>
+                        Train split (%)
+                        <input type="number" name="train" value="80" min="1" max="99" required />
+                    </label>
+                    <label>
+                        Seed (optional)
+                        <input type="number" name="seed" placeholder="random" />
+                    </label>
+                </div>
+                <label class="check">
+                    <input type="checkbox" name="shuffle" checked />
+                    Shuffle images before splitting
+                </label>
+                <label>
+                    Output directory (optional, defaults to workspace)
+                    <input type="text" name="output" placeholder="/path/to/output" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="button" class="ghost-btn" data-close>Cancel</button>
+                    <button type="submit" class="primary-btn">Export</button>
+                </div>
+            </form>
+        </dialog>
+
+        <dialog id="synthDialog">
+            <form method="dialog" id="synthForm">
+                <h3>Synthesize dataset</h3>
+                <p class="muted">
+                    Annotated crops are pasted at random positions onto uniform
+                    backgrounds.
+                </p>
+                <label>
+                    Dataset name
+                    <input type="text" name="name" value="synt_dataset" required />
+                </label>
+                <div class="field-row">
+                    <label>
+                        Images
+                        <input type="number" name="num" value="10" min="1" required />
+                    </label>
+                    <label>
+                        Objects / image
+                        <input type="number" name="per" value="10" min="1" required />
+                    </label>
+                </div>
+                <div class="field-row">
+                    <label>
+                        Width (px)
+                        <input type="number" name="width" value="640" min="32" required />
+                    </label>
+                    <label>
+                        Height (px)
+                        <input type="number" name="height" value="640" min="32" required />
+                    </label>
+                </div>
+                <div class="field-row">
+                    <label>
+                        Crop scale min
+                        <input type="number" name="smin" value="1.0" min="0.05" step="0.05" required />
+                    </label>
+                    <label>
+                        Crop scale max
+                        <input type="number" name="smax" value="1.0" min="0.05" step="0.05" required />
+                    </label>
+                </div>
+                <div class="field-row">
+                    <label>
+                        Train split (%)
+                        <input type="number" name="train" value="80" min="1" max="99" required />
+                    </label>
+                    <label>
+                        Background
+                        <input type="color" name="background" value="#ffffff" />
+                    </label>
+                </div>
+                <label>
+                    Output directory (optional, defaults to workspace)
+                    <input type="text" name="output" placeholder="/path/to/output" />
+                </label>
+                <div class="dialog-actions">
+                    <button type="button" class="ghost-btn" data-close>Cancel</button>
+                    <button type="submit" class="primary-btn">Generate</button>
+                </div>
+            </form>
+        </dialog>
+
+        <dialog id="saveDialog">
+            <form method="dialog" id="saveForm">
+                <h3>Save session</h3>
+                <p class="muted">
+                    Labels and boxes are written to a JSON file that can be
+                    loaded back later.
+                </p>
+                <label>
+                    Session file path
+                    <input
+                        type="text"
+                        name="path"
+                        placeholder="/path/to/session.json"
+                        required
+                    />
+                </label>
+                <div class="dialog-actions">
+                    <button type="button" class="ghost-btn" data-close>Cancel</button>
+                    <button type="submit" class="primary-btn">Save</button>
+                </div>
+            </form>
+        </dialog>
+
+        <dialog id="loadDialog">
+            <form method="dialog" id="loadForm">
+                <h3>Load session</h3>
+                <p class="muted">
+                    Loading a session replaces the current labels and boxes.
+                </p>
+                <label>
+                    Session file path
+                    <input
+                        type="text"
+                        name="path"
+                        placeholder="/path/to/session.json"
+                        required
+                    />
+                </label>
+                <div class="dialog-actions">
+                    <button type="button" class="ghost-btn" data-close>Cancel</button>
+                    <button type="submit" class="primary-btn">Load</button>
+                </div>
+            </form>
+        </dialog>
+
+        <dialog id="quitDialog">
+            <form method="dialog">
+                <h3>Unsaved session</h3>
+                <p class="muted">
+                    The current session has not been saved to a file. Do you
+                    want to save it before quitting?
+                </p>
+                <div class="dialog-actions">
+                    <button type="button" class="ghost-btn" data-close>Cancel</button>
+                    <button type="button" class="danger-btn" id="quitDiscardBtn">
+                        Quit without saving
+                    </button>
+                    <button type="button" class="primary-btn" id="quitSaveBtn">
+                        Save session&hellip;
+                    </button>
+                </div>
+            </form>
+        </dialog>
+
+        <dialog id="videoDialog">
+            <form method="dialog" id="videoForm">
+                <h3>Import video frames</h3>
+                <p id="videoFileName" class="mono muted"></p>
+                <label>
+                    Keep one frame every
+                    <input type="number" name="stride" value="10" min="1" required />
+                </label>
+                <div class="dialog-actions">
+                    <button type="button" class="ghost-btn" data-close>Cancel</button>
+                    <button type="submit" class="primary-btn">Extract frames</button>
+                </div>
+            </form>
+        </dialog>
+
+        <div id="toasts"></div>
+
+        <input type="file" id="imageFiles" accept="image/*" multiple hidden />
+        <input type="file" id="videoFile" accept="video/*" hidden />
+
+        <script src="app.js"></script>
     </body>
 </html>

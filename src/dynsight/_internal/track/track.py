@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import trackpy as tp
 
-from dynsight.trajectory import Trj
 from dynsight.utilities import read_xyz
+
+if TYPE_CHECKING:
+    from dynsight._internal.utilities.utilities import Col
 
 logging.basicConfig(
     level=logging.INFO,
@@ -17,15 +20,20 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Number of columns of an atom line without the atom name.
+_COORDS_ONLY = 3
+# Name given to objects read from a file without the name column.
+_DEFAULT_NAME = "X"
+
 
 def track_xyz(
     input_xyz: Path,
     output_xyz: Path,
     search_range: float,
     memory: int = 1,
-    adaptive_stop: None | float = 0.95,
-    adaptive_step: None | float = 0.5,
-) -> Trj:
+    adaptive_stop: float | None = 0.95,
+    adaptive_step: float | None = 0.5,
+) -> None:
     """Track particles from an ``.xyz`` file and write a new file with IDs.
 
     The input ``.xyz`` is assumed to contain only raw 3D coordinates
@@ -49,8 +57,27 @@ def track_xyz(
         ...
         <name> <x> <y> <z>
 
-    The output file will have the same structure, but each line will start
-    with the tracked particle ID.
+    The output file lists the tracked particle ID at the end of each
+    line. Objects read from a file without the name column are written
+    with the placeholder name ``X``, so that the output is always a
+    valid ``.xyz`` file::
+
+        <number of objects>
+        comment line
+        <name> <x> <y> <z> <ID>
+        ...
+
+    .. note::
+
+        The output file holds **one line per detection**, so its frames
+        contain different numbers of objects whenever the detector missed
+        an object or found a spurious one. Such a file records faithfully
+        what was detected, but trajectory readers require a constant
+        number of particles: to build a :class:`.trajectory.Trj` out of
+        it with :meth:`.trajectory.Trj.init_from_xyz`, first make sure
+        every frame holds the same objects, for example by increasing
+        ``memory`` so that briefly-lost objects keep their ID, or by
+        keeping only the particle IDs present in every frame.
 
     Parameters:
         input_xyz:
@@ -101,7 +128,7 @@ def track_xyz(
         raise FileNotFoundError(msg)
 
     positions = read_xyz(
-        input_xyz=input_xyz, cols_order=["name", "x", "y", "z"]
+        input_xyz=input_xyz, cols_order=_detect_cols_order(input_xyz)
     )
 
     if not {"frame", "x", "y", "z"}.issubset(positions.columns):
@@ -130,57 +157,48 @@ def track_xyz(
                 pid = int(row["particle"])
                 x, y, z = row["x"], row["y"], row["z"]
                 name = row.get("name")
-                if name is not None and pd.notna(name):
-                    f.write(f"{name} {x:.6f} {y:.6f} {z:.6f} {pid}\n")
-                else:
-                    f.write(f"{x:.6f} {y:.6f} {z:.6f} {pid}\n")
+                if name is None or pd.isna(name):
+                    # The name column is always written, so that the
+                    # output stays a readable .xyz file.
+                    name = _DEFAULT_NAME
+                f.write(f"{name} {x:.6f} {y:.6f} {z:.6f} {pid}\n")
 
     logger.info(f"Linked .xyz file written to: {output_xyz}")
-    return Trj.init_from_xyz(traj_file=output_xyz, dt=1)
+
+    counts = linked.groupby("frame").size()
+    n_min, n_max = int(counts.min()), int(counts.max())
+    if n_min != n_max:
+        logger.warning(
+            "The tracked frames hold between %d and %d objects: the output "
+            "file cannot be read as a trajectory as it is. Improve the "
+            "detections, increase 'memory', or keep only the particle IDs "
+            "present in every frame.",
+            n_min,
+            n_max,
+        )
 
 
-def _collect_positions(input_xyz: Path) -> pd.DataFrame:
-    """Read the xyz file and return the positions dataset at each frame."""
+def _detect_cols_order(input_xyz: Path) -> list[Col]:
+    """Return the column layout of the atom lines of an ``.xyz`` file.
+
+    Both the ``<x> <y> <z>`` and the ``<name> <x> <y> <z>`` layouts are
+    supported: the first atom line of the file decides which one is read.
+    """
     lines = input_xyz.read_text().splitlines()
-
-    data: list[dict[str, object]] = []
-    frame = -1
-    row = 0
-    dimensions = 3
-    for _ in range(len(lines)):
-        if row >= len(lines):
+    for row, line in enumerate(lines):
+        # A frame starts with the number of objects and a comment line.
+        if not line.strip().isdigit():
+            continue
+        if row + 2 >= len(lines):
             break
-        if lines[row].strip().isdigit():
-            num_atoms = int(lines[row])
-            frame += 1
-            row += 2  # skip comment line.
-            for a in range(num_atoms):
-                if row + a >= len(lines):
-                    break
-                parts = lines[row + a].strip().split()
-                if len(parts) == dimensions:
-                    x, y, z = map(float, parts[0:3])
-                    data.append({"frame": frame, "x": x, "y": y, "z": z})
-                elif len(parts) > dimensions:
-                    name = parts[0]
-                    x, y, z = map(float, parts[1:4])
-                    data.append(
-                        {
-                            "frame": frame,
-                            "name": name,
-                            "x": x,
-                            "y": y,
-                            "z": z,
-                        }
-                    )
-                else:
-                    msg = (
-                        "Invalid line format, expected 3 or 4 columns, "
-                        f"found {len(parts)}"
-                    )
-                    raise ValueError(msg)
-            row += num_atoms
-        else:
-            row += 1
-
-    return pd.DataFrame(data)
+        n_cols = len(lines[row + 2].split())
+        if n_cols == _COORDS_ONLY:
+            return ["x", "y", "z"]
+        if n_cols > _COORDS_ONLY:
+            return ["name", "x", "y", "z"]
+        break
+    msg = (
+        "Error in the .xyz format. Each line must be "
+        "<x> <y> <z> or <name> <x> <y> <z>."
+    )
+    raise ValueError(msg)

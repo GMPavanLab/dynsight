@@ -132,8 +132,8 @@ def spatialaverage(
 
     Raises:
         ValueError:
-            If the input descriptor array does not have 2 or 3 dimensions,
-            an error is raised.
+            If the input descriptor array does not have 2 or 3 dimensions, or
+            if its number of frames does not match the (sliced) trajectory.
 
     Example:
 
@@ -184,14 +184,23 @@ def spatialaverage(
         msg = "descriptor_array must have ndim == 2 or ndim == 3."
         raise ValueError(msg)
 
+    frame_indices = list(
+        range(*trajslice.indices(universe.trajectory.n_frames))
+    )
+    if descriptor_array.shape[1] != len(frame_indices):
+        msg = (
+            f"Descriptor covers {descriptor_array.shape[1]} frames, but "
+            f"the trajectory (after slicing) has {len(frame_indices)}. "
+            "Some descriptors (such as LENS) are defined on pairs of "
+            "frames and are one frame shorter than the starting "
+            "trajectory: slice the Trj to match before averaging."
+        )
+        raise ValueError(msg)
+
     pool = Pool(
         processes=n_jobs,
         initializer=initworker,
         initargs=(shared_array, shape, dtype),
-    )
-
-    frame_indices = list(
-        range(*trajslice.indices(universe.trajectory.n_frames))
     )
     args = [
         (universe, selection, r_cut, traj_frame, i, is_vector)
